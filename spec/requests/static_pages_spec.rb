@@ -11,6 +11,11 @@ describe "StaticPages" do
       expect(page).to have_content('Sample App')
     end
 
+    it "shoud habe the content 'Sample Mpp'" do
+      visit '/static_pages/home'
+      expect(page).to have_content('Sample Mpp')
+    end
+
     it "should have the right title 'Home' " do
       visit '/static_pages/home'
       expect(page).to have_title("#{base_title} | Home")
