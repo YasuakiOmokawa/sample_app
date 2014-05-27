@@ -5,6 +5,9 @@
       <h1>
         <%= gravatar_for @user %>
         <%= @user.name %>
+        <% @data.each do |r| %>
+          <%= r.date %><p><%= r.pageviews %></p>
+        <% end %>
       </h1>
     </section>
   </aside>

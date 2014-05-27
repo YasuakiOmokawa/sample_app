@@ -3,12 +3,20 @@ class UsersController < ApplicationController
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
 
+
   def index
     @users = User.paginate(page: params[:page])
   end
 
   def show
     @user = User.find(params[:id])
+    ga_profile = AnalyticsService.load_profile
+    cond = {
+        :start_date => Time.parse("2012-12-05"),
+        :end_date   => Time.parse('2013-01-05'),
+        # :filters    => { :page_path.contains => '^/items/' }
+    }
+      @data = AnalyticsServiceClass::PageTitle.results(ga_profile, cond)
   end
 
   def new
