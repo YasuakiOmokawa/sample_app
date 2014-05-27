@@ -7,7 +7,8 @@ require 'yaml'
 class AnalyticsService
   def self.load_profile
     #設定読み込み
-    f = File.open(File.join(Rails.root, 'app','services','conf.yml'))
+    # f = File.open(File.join(Rails.root, 'app','services','conf.yml'))
+    f = File.open(File.join('app','services','conf.yml'))
     conf_str = f.read
     myconf = YAML.load(conf_str)
 
