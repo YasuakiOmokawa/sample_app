@@ -10,7 +10,8 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
-    ga_profile = AnalyticsService.load_profile
+    analytics = AnalyticsService.new
+    ga_profile = analytics.load_profile(@user)
     cond = {
         :start_date => Time.parse("2012-12-05"),
         :end_date   => Time.parse('2013-01-05'),

@@ -1,0 +1,6 @@
+=== sample-senk-app Config Vars
+DATABASE_URL:                postgres://odhybszcazuixi:CJ4yko_qUwLkRm8cA4zRJk4lJf@ec2-174-129-197-200.compute-1.amazonaws.com:5432/d7gfcufktksoet
+HEROKU_POSTGRESQL_IVORY_URL: postgres://odhybszcazuixi:CJ4yko_qUwLkRm8cA4zRJk4lJf@ec2-174-129-197-200.compute-1.amazonaws.com:5432/d7gfcufktksoet
+LANG:                        en_US.UTF-8
+RACK_ENV:                    production
+RAILS_ENV:                   production

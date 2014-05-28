@@ -5,12 +5,11 @@ require 'active_support/time'
 require 'yaml'
 
 class AnalyticsService
-  def self.load_profile
-    #設定読み込み
+  def load_profile(user_data)
     # f = File.open(File.join(Rails.root, 'app','services','conf.yml'))
-    f = File.open(File.join('app','services','conf.yml'))
-    conf_str = f.read
-    myconf = YAML.load(conf_str)
+    # f = File.open(File.join('app','services','conf.yml'))
+    # conf_str = f.read
+    # myconf = YAML.load(conf_str)
 
     #先月の初め
     # start_date = (1.month.ago Time.now).beginning_of_month
@@ -19,13 +18,12 @@ class AnalyticsService
 
     # セッションログイン
     Garb::Session.login(
-        myconf['ga']['google_id'],
-        myconf['ga']['google_pw']
+        user_data.email,
     )
 
     # プロファイル情報の取得
       profile = Garb::Management::Profile.all.detect { |p|
-        p.web_property_id == myconf['ga']['property_id']
+        p.user_data.property_id
         p.id == myconf['ga']['profile_id']
       }
   end
