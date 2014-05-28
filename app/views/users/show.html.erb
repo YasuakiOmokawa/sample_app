@@ -1,4 +1,125 @@
 <% provide(:title, @user.name) %>
+<!-- header_st -->
+<div id="header">
+  <h1>TAS for Google Analytics ver.</h1><select><option>data1-CV1</option><option>data1-CV2</option><option>data2-CV1</option></select><a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：kurotani@senk-inc.co.jp</div><br>
+</div>
+<ul>
+  <li><a href="">キャンペーン</a></li>
+  <li><a href="">ソーシャル</a></li>
+  <li><a href="" class="db">その他<br>ウェブサイト</a></li>
+  <li><a href="" class="db">直接入力<br>ブックマーク</a></li>
+  <li><a href="">検索</a></li>
+  <li><div>全体</div></li>
+  <li id="condition"><p>対象期間：<input type="text" value="2014年1月1日" class="day">&nbsp;-&nbsp;<input type="text" value="2014年12月31日" class="day"><br>デバイス：<input type="checkbox" class="device">&nbsp;All（&nbsp;<input type="checkbox" class="device">&nbsp;PC&nbsp;&nbsp;<input type="checkbox" class="device">&nbsp;Smart Phone&nbsp;&nbsp;<input type="checkbox" class="device">&nbsp;Mobile&nbsp;）<br>ユーザー：<input type="checkbox" class="device">&nbsp;All（&nbsp;<input type="checkbox" class="device">&nbsp;New&nbsp;&nbsp;<input type="checkbox" class="device">&nbsp;Visiter&nbsp;）</p></li>
+  <li id="setting"><a href="" id="btn">設<br>定</a></li>
+</ul>
+<!-- header_end -->
+
+<!-- left_st -->
+<div id="fm_lft">
+  <table id="summary">
+    <tr id="hl">
+      <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
+    </tr>
+    <tr>
+      <td><a href="">1,088,038</a></td><td><a href="">223,425</a></td><td><a href="">1,819</a></td><td><a href="">0.18%</a></td>
+    </tr>
+  </table>
+  <p id="summary">CVまでの訪問回数：4.5回&nbsp;&nbsp;&nbsp;&nbsp;CVまでの期間：3.1日</p>
+  
+  <table id="ta">
+    <tr id="hl">
+      <td>目標値</td><td>項目名</td><td>現状値</td><td>GAP</td>
+    </tr>
+    <tr>
+      <td><a href="">10.5</a></td><td class="bc">平均PV数</td><td><a href="">4.8</a></td><td>-5.7</td>
+    </tr>
+    <tr>
+      <td><a href="">8.30</a></td><td class="bc">平均滞在時間</td><td><a href="">3.15</a></td><td>-5.15</td>
+    </tr>
+    <tr>
+      <td><a href="">33.9%</a></td><td class="bc">新規訪問率</td><td><a href="">40.1%</a></td><td>6.2%</td>
+    </tr>
+    <tr>
+      <td><a href="">66.1%</a></td><td class="bc">再訪問率</td><td><a href="">59.9%</a></td><td>-6.2%</td>
+    </tr>
+  </table>
+  
+  <table id="bounce">
+    <tr>
+      <td id="bc">直帰率</td><td><a href="">0.81%</a></td>
+    </tr>
+  </table>
+  
+  <div id="user">
+    <h2>最も目標値に近いユーザー</h2>
+    <p>東京からdesktopで閲覧している25-34歳のTechnophiles男性で、Technophilesに興味を持っている。</p>
+    <a href="">ユーザー属性（詳細）</a>
+  </div>
+</div>
+<!-- left_end -->
+
+<!-- right_st -->
+<div id="fm_rgt">
+  <select><option>平均PV数</option><option>平均滞在時間</option><option>新規訪問率</option><option>再訪問率</option></select>
+  <div id="grapha_t"><span id="bar">■</span>&nbsp;平均PV数（GAP）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="line">―</span>&nbsp;CV数</div>
+  <div id="grapha"></div>
+  <div id="tbl">
+    <table>
+      <tr id="bc">
+        <td class="hl"></td><td>12/1</td><td>12/2</td><td>12/3</td><td>12/4</td><td>12/5</td><td>12/6</td><td>12/7</td><td>12/8</td><td>12/9</td><td>12/10</td><td>12/11</td><td>12/12</td><td>12/13</td><td>12/14</td><td>12/15</td><td>12/16</td><td>12/17</td><td>12/18</td><td>12/19</td><td>12/20</td><td>12/21</td><td>12/22</td><td>12/23</td><td>12/24</td><td>12/25</td><td>12/26</td><td>12/27</td><td>12/28</td><td>12/29</td><td>12/30</td><td>12/31</td>
+      </tr>
+      <tr>
+        <td class="hl">理想値</td><td>10</td><td>7</td><td>5</td><td>3</td><td>5</td><td>11</td><td>14</td><td>10</td><td>9</td><td>10</td><td>11</td><td>3</td><td>6</td><td>4</td><td>8</td><td>5</td><td>7</td><td>5</td><td>3</td><td>10</td><td>8</td><td>6</td><td>4</td><td>7</td><td>9</td><td>4</td><td>14</td><td>15</td><td>12</td><td>8</td><td>11</td>
+      </tr>
+      <tr>
+        <td class="hl">現状値</td><td>5</td><td>5</td><td>5</td><td>7</td><td>5</td><td>6</td><td>2</td><td>8</td><td>5</td><td>1</td><td>12</td><td>3</td><td>5</td><td>5</td><td>4</td><td>6</td><td>3</td><td>5</td><td>5</td><td>8</td><td>5</td><td>6</td><td>7</td><td>4</td><td>10</td><td>5</td><td>12</td><td>12</td><td>14</td><td>10</td><td>10</td>
+      </tr>
+      <tr>
+        <td class="hl">GAP</td><td>-5</td><td>-2</td><td>0</td><td>4</td><td>0</td><td>-5</td><td>-12</td><td>-2</td><td>-4</td><td>-9</td><td>1</td><td>0</td><td>-1</td><td>1</td><td>-4</td><td>1</td><td>-4</td><td>0</td><td>2</td><td>-2</td><td>-3</td><td>0</td><td>3</td><td>-3</td><td>1</td><td>1</td><td>-2</td><td>-3</td><td>2</td><td>2</td><td>-1</td>
+      </tr>
+    </table>
+  </div>
+  <table id="week">
+    <tr id="hl">
+      <td>目標値</td><td>曜日別</td><td>現状値</td><td>GAP</td>
+    </tr>
+    <tr>
+      <td>10.5</td><td class="bc">平日</td><td>4.8</td><td>-5.7</td>
+    </tr>
+    <tr>
+      <td>10.0</td><td class="bc">土・日・祝</td><td>4.9</td><td>-5.1</td>
+    </tr>
+  </table>
+  
+  <h2 id="allgap">流入別GAP値一覧</h2>
+  <table id="all">
+    <tr id="hl">
+      <td class="1st"></td><td>全体</td><td>検索</td><td>直接入力<br>ブックマーク</td><td>その他<br>ウェブサイト</td><td>ソーシャル</td><td>キャンペーン1</td><td>キャンペーン2</td><td>キャンペーン3</td>
+    </tr>
+    <tr>
+      <td class="bc">平均PV数</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td>
+    </tr>
+    <tr>
+      <td class="bc">平均滞在時間</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td>
+    </tr>
+    <tr>
+      <td class="bc">新規訪問率</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td>
+    </tr>
+    <tr>
+      <td class="bc">再訪問率</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td>
+    </tr>
+  </table>
+  <table id="all_bounce">
+    <tr>
+      <td id="bc">直帰率</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td><td>5.0%</td>
+    </tr>
+  </table>
+  <div id="footer">Copyright (C) 2014 senk Inc. All Rights Reserved.</div>
+</div>
+<!-- right_end -->
+
+<!-- もともとのサンプル start -->
 <div class="row">
   <aside class="span4">
     <section>
@@ -12,3 +133,4 @@
     </section>
   </aside>
 </div>
+<!-- もともとのサンプル end -->

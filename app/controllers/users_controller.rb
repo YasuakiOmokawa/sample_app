@@ -17,7 +17,8 @@ class UsersController < ApplicationController
         :end_date   => Time.parse('2013-01-05'),
         # :filters    => { :page_path.contains => '^/items/' }
     }
-      @data = AnalyticsServiceClass::PageTitle.results(ga_profile, cond)
+    @data = AnalyticsServiceClass::PageTitle.results(ga_profile, cond)
+    render :layout => 'ganalytics'
   end
 
   def new
