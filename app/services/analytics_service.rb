@@ -18,13 +18,14 @@ class AnalyticsService
 
     # セッションログイン
     Garb::Session.login(
-        user_data.email,
+        user_data.analytics_email,
+        user_data.analytics_password
     )
 
     # プロファイル情報の取得
       profile = Garb::Management::Profile.all.detect { |p|
-        p.user_data.property_id
-        p.id == myconf['ga']['profile_id']
+        p.web_property_id == user_data.property_id
+        p.id == user_data.profile_id
       }
   end
 
