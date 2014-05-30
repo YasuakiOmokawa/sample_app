@@ -1,26 +1,4 @@
 <% provide(:title, @user.name) %>
-<!-- header_st -->
-<div id="entrance">
-  <h1>TAS for GA ver.</h1><select><option>CV1</option><option>CV2</option><option>CV3</option></select><a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：kurotani@senk-inc.co.jp</div><br>
-</div>
-<ul>
-  <li id="first"><a href="">ホーム</a></li>
-  <li><div>全体</div></li>
-  <li><a href="">検索</a></li>
-  <li><a href="" class="db">直接入力<br>ブックマーク</a></li>
-  <li><a href="" class="db">その他<br>ウェブサイト</a></li>
-  <li><a href="">ソーシャル</a></li>
-  <li><a href="">キャンペーン</a></li>
-  <li id="last"><a href="">カスタマイズ</a></li><br>
-</ul>
-<div id="hallway">
-    <a href=""><%= image_tag 'calender.png' %>14/01/01-14/12/31</a>
-    <%= image_tag 'device.png', :class => "icon" %><input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;<input type="checkbox" class="ic">パソコン&nbsp;&nbsp;<input type="checkbox" class="ic">スマートフォン&nbsp;&nbsp;<input type="checkbox" class="ic">モバイル
-    <%= image_tag 'user.png' %><input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;<input type="checkbox" class="ic">新規&nbsp;&nbsp;<input type="checkbox" class="ic">リピーター
-    <%= image_tag 'plus.png' %><select><option>条件を設定</option><optgroup label="人気ページ"><option>株式会社先駈ホームページ</option><option>製品情報</option><option>アクセス</option></select>
-    <a href="" id="set">絞り込み</a>
-</div>
-<!-- header_end -->
 
 <div id="childroom">
   <!-- grapha_st -->
@@ -69,7 +47,9 @@
         <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
       </tr>
       <tr>
-        <td>10,000</td><td>5,000</td><td>100</td><td>0.2%</td>
+        <% @not_gap_data_for_kitchen.each do |t|  %>
+          <td><%= t.pageviews %></td><td><%= t.sessions %></td><td><%= t.goal1_completions %></td><td><%= t.goal1_conversion_rate.to_f.round(1).to_s %>%</td>
+        <% end %>
       </tr>
     </table>
     <p>CVまでに必要な訪問回数：4.1回&nbsp;&nbsp;&nbsp;&nbsp;CVまでに要する期間：10.3日</p>
@@ -93,7 +73,10 @@
     <div id="knife">
       <table>
         <tr>
-          <td class="row">直帰率</td><td>43.1%</td>
+          <td class="row">直帰率</td>
+          <% @not_gap_data_for_kitchen.each do |t|  %>
+            <td><%= t.bounce_rate.to_f.round(1).to_s %>%</td>
+          <% end %>
         </tr>
       </table>
     </div>
@@ -158,10 +141,10 @@
   <aside class="span4">
     <section>
       <h1>
-        <%= gravatar_for @user %>
-        <%= @user.name %>
-        <% @data.each do |r| %>
-          <%= r.date %><p><%= r.pageviews %></p>
+        <!-- <%= gravatar_for @user %> -->
+        <!-- <%= @user.name %> -->
+        <% @not_gap_data_for_kitchen.each do |t| %>
+          <%= p t %><br>
         <% end %>
       </h1>
     </section>

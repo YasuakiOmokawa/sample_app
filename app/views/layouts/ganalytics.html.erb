@@ -10,6 +10,7 @@
     <%= render 'layouts/shim' %>
   </head>
   <body>
+    <%= render 'layouts/gaheader' %>
     <% flash.each do |key, value| %>
       <%= content_tag(:div, value, class: "alert alert-#{key}") %>
     <% end %>

@@ -6,9 +6,13 @@ require 'yaml'
 
 class AnalyticsServiceClass
 
-  class PageTitle
+  class NotGapDataForKitchen
       extend Garb::Model
-      metrics :pageviews
-      dimensions :date
+      metrics :pageviews,
+                    :sessions,
+                    :goal1Completions,
+                    :goal1ConversionRate,
+                    :bounceRate
+      # dimensions :date
   end
 end
