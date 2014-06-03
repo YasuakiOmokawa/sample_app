@@ -3,19 +3,39 @@ class UsersController < ApplicationController
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
 
+  def search
+    @title = '検索'
+    @user = User.find(params[:id])
+    @narrow_action = search_user_path
+    # 絞り込み条件が「人気ページ」以外だった場合、部分テンプレートを変更する
+    @render_action = 'search'
+    analytics = AnalyticsService.new
+    ga_profile = analytics.load_profile(@user)
+    cond = {
+        :start_date => Time.parse("2012-12-05"),
+        :end_date   => Time.parse('2013-01-05'),
+        :filters    => { :medium.matches => 'organic' }
+    }
+    @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
+    render :layout => 'ganalytics', :action => "show"
+  end
 
   def index
     @users = User.paginate(page: params[:page])
   end
 
   def show
+    @title = '全体'
     @user = User.find(params[:id])
+    @narrow_action = user_path
+    # 部分テンプレートを変更しないので、空テンプレートを記載
+    @render_action = 'norender'
     analytics = AnalyticsService.new
     ga_profile = analytics.load_profile(@user)
     cond = {
         :start_date => Time.parse("2012-12-05"),
         :end_date   => Time.parse('2013-01-05'),
-        # :filters    => { :page_path.contains => '^/items/' }
+        # :filters    => { :medium.matches => 'organic' }
     }
     @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
     render :layout => 'ganalytics'

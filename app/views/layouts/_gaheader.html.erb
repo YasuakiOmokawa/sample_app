@@ -1,3 +1,4 @@
+<% @user ||= current_user %>
 <!-- header_st -->
 <div id="entrance">
   <h1>TAS for GA ver.</h1><select><option>CV1</option><option>CV2</option><option>CV3</option></select><a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：kurotani@senk-inc.co.jp</div><br>
@@ -5,18 +6,28 @@
 <ul>
   <li id="first"><a href="">ホーム</a></li>
   <li><div>全体</div></li>
-  <li><a href="">検索</a></li>
-  <li><a href="" class="db">直接入力<br>ブックマーク</a></li>
-  <li><a href="" class="db">その他<br>ウェブサイト</a></li>
-  <li><a href="">ソーシャル</a></li>
-  <li><a href="">キャンペーン</a></li>
-  <li id="last"><a href="">カスタマイズ</a></li><br>
+  <li><a href="<%= search_user_path %>">検索</a></li>
+  <li><a href="direct.html" class="db">直接入力<br>ブックマーク</a></li>
+  <li><a href="referral.html" class="db">その他<br>ウェブサイト</a></li>
+  <li><a href="social.html">ソーシャル</a></li>
+  <li><a href="campaign.html">キャンペーン</a></li>
+  <li id="last"><a href="custom.html">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
-    <a href=""><%= image_tag 'calender.png' %>14/01/01-14/12/31</a>
+  <form action="<%= @narrow_action %>" method="get" name="narrowForm">
+    <span id="calendar">
+      <p class="arrow_box">クリックして期間を指定できます</p>
+        <%= image_tag 'calender.png' %>
+        <!-- 14/01/01-14/12/31 -->
+        <!-- datepicker用のinput -->
+        <input type="text" id="from" name="from" size="15" style="width:100px;"/>-
+        <input type="text" id="to" name="to"  size="15" style="width:100px;"/>
+    </span>
     <%= image_tag 'device.png', :class => "icon" %><input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;<input type="checkbox" class="ic">パソコン&nbsp;&nbsp;<input type="checkbox" class="ic">スマートフォン&nbsp;&nbsp;<input type="checkbox" class="ic">モバイル
     <%= image_tag 'user.png' %><input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;<input type="checkbox" class="ic">新規&nbsp;&nbsp;<input type="checkbox" class="ic">リピーター
+    <!-- ここはページによって挙動を変える -->
     <%= image_tag 'plus.png' %><select><option>条件を設定</option><optgroup label="人気ページ"><option>株式会社先駈ホームページ</option><option>製品情報</option><option>アクセス</option></select>
-    <a href="" id="set">絞り込み</a>
+    <a href="#" onclick="document.narrowForm.submit()" id="set">絞り込み</a>
+  </form>
 </div>
 <!-- header_end -->

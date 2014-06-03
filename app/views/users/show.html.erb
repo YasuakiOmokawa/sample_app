@@ -1,9 +1,9 @@
-<% provide(:title, @user.name) %>
+<!-- <% provide(:title, '全体') %> -->
 
 <div id="childroom">
   <!-- grapha_st -->
   <div id="brick">
-    <div id="circle"><span id="yellow">■</span>PV数<span id="blue">―</span>CV数</div><div id="triangle"><select><option selected>PV数</option><option>訪問回数</option><option>平均PV数</option><option>平均滞在時間</option><option>新規訪問率</option><option>再訪問率</option><option>直帰率</option></select></div>
+    <div id="circle"><span id="yellow">■</span>PV数<span id="blue">―</span>CV数</div><div id="triangle"><select><option selected>PV数</option><option>セッション</option><option>平均PV数</option><option>平均滞在時間</option><option>新規訪問率</option><option>リピート率</option><option>直帰率</option></select></div>
     <div id="square"></div>
   </div>
   <!-- grapha_end -->
@@ -67,7 +67,7 @@
         <td>34.1%</td><td class="row">新規訪問率</td><td>44.1%</td><td>10.0%</td>
       </tr>
       <tr>
-        <td>65.9%</td><td class="row">再訪問率</td><td>55.9%</td><td>-10.0%</td>
+        <td>65.9%</td><td class="row">リピート率</td><td>55.9%</td><td>-10.0%</td>
       </tr>
     </table>
     <div id="knife">
@@ -79,6 +79,7 @@
           <% end %>
         </tr>
       </table>
+      <%= render @render_action %>
     </div>
   </div>
   <div id="bedroom">
