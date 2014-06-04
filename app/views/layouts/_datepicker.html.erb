@@ -2,20 +2,24 @@
 
 $(function() {
   $( "#from" ).datepicker({
-    defaultDate: "+1w",
+    defaultDate: '',
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
+    dateFormat:"yy-mm-dd",
     onClose: function( selectedDate ) {
       $( "#to" ).datepicker( "option", "minDate", selectedDate );
+      $( "#to" ).datepicker( "option", "maxDate", "selectedDate +31d" );
     }
   });
   $( "#to" ).datepicker({
-    defaultDate: "+1w",
+    defaultDate: '',
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
+    dateFormat:"yy-mm-dd",
     onClose: function( selectedDate ) {
+      $( "#from" ).datepicker( "option", "minDate", "selectedDate -31d" );
       $( "#from" ).datepicker( "option", "maxDate", selectedDate );
     }
   });

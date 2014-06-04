@@ -15,4 +15,19 @@ class AnalyticsServiceClass
                     :bounceRate
       # dimensions :date
   end
+
+  class FetchKeywordForSearch
+      extend Garb::Model
+      metrics :sessions,
+                    :adsenseCTR,
+                    :adsenseAdsClicks
+      dimensions :keyword
+  end
+
+  class FetchKeywordForPages
+      extend Garb::Model
+      metrics :pageviews
+      dimensions :pageTitle,
+                          :pagePath
+  end
 end

@@ -40,7 +40,7 @@
     </table>
   </div>
   <hr>
-  
+
   <div id="kitchen">
     <table>
       <tr id="line">
@@ -87,39 +87,18 @@
       <tr id="line">
         <td>目標値</td><td class="row">人気ページ</td><td>現状値</td><td>差</td>
       </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr>
-        <td>11.5%</td><td class="row">株式会社先駈ホームページ<p>http://senk-inc.co.jp</p></td><td>15.5%</td><td>4.0%</td>
-      </tr>
-      <tr id="other">
-        <td>34.1%</td><td class="row">その他</td><td>24.1%</td><td>10.0%</td>
-      </tr>
+      <% @favorite_pages.sort_by{ |k, v| v[:index].to_i}.each do |k, v| %>
+        <% if k == "その他" then %>
+          <tr id="other">
+            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= k %></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td><%= v[:gap].to_f.round(1).to_s %>%</td>
+          </tr>
+        <% else %>
+          <% title,page = k.split(";;") %>
+          <tr>
+            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= title %><p><%= page %></p></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td><%= v[:gap].to_f.round(1).to_s %>%</td>
+          </tr>
+        <% end  %>
+      <% end %>
     </table>
   </div><br>
 </div>
@@ -137,7 +116,7 @@
 
 
 
-<!-- もともとのサンプル start -->
+<!-- デバッグ用 start -->
 <div class="row">
   <aside class="span4">
     <section>
@@ -147,8 +126,11 @@
         <% @not_gap_data_for_kitchen.each do |t| %>
           <%= p t %><br>
         <% end %>
+        <% @favorite_pages.each do |t| %>
+          <%= p t %><br>
+        <% end %>
       </h1>
     </section>
   </aside>
 </div>
-<!-- もともとのサンプル end -->
+<!-- デバッグ用 end -->

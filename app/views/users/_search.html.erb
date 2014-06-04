@@ -3,20 +3,17 @@
     <tr id="line">
       <td>検索ワード</td><td>セッション</td><td>クリック数</td><td>CTR</td>
     </tr>
+    <% @select_word_for_board.each do |t| %>
     <tr>
-      <td class="row">先駈 会社</td><td>10,000</td><td>100</td><td>1.0%</td>
+       <td class="row"><%= t.keyword %></td><td><%= t.sessions %></td><td><%= t.adsense_ads_clicks %></td><td><%= t.adsense_ctr.to_f.round(1).to_s %>%</td>
     </tr>
-    <tr>
-      <td class="row">ウェブ コンサルティング 会社</td><td>10,000</td><td>100</td><td>1.0%</td>
-    </tr>
-    <tr>
-      <td class="row">サイト 分析 ツール</td><td>10,000</td><td>100</td><td>1.0%</td>
-    </tr>
-    <tr>
-      <td class="row">解析 サイト</td><td>10,000</td><td>100</td><td>1.0%</td>
-    </tr>
-    <tr>
-      <td class="row">TAS 解析</td><td>10,000</td><td>100</td><td>1.0%</td>
-    </tr>
+    <% end %>
   </table>
 </div>
+
+<!-- デバッグ用 start -->
+<!-- <% @select_word_for_board.each do |t| %>
+  <%= p t %><br>
+<% end %>
+<%= @narrow_word %>
+ --><!-- デバッグ用 end -->
