@@ -6,22 +6,22 @@ $(function() {
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
-    dateFormat:"yy-mm-dd",
-    onClose: function( selectedDate ) {
-      $( "#to" ).datepicker( "option", "minDate", selectedDate );
-      $( "#to" ).datepicker( "option", "maxDate", "selectedDate +31d" );
-    }
+    dateFormat:"yy-mm-dd"
+    // onClose: function( selectedDate ) {
+    //   $( "#to" ).datepicker( "option", "minDate", selectedDate );
+    //   $( "#to" ).datepicker( "option", "maxDate", "selectedDate +31d" );
+    // }
   });
   // $( "#from" ).datepicker("setDate", "<%= @from %>");
   $( "#to" ).datepicker({
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
-    dateFormat:"yy-mm-dd",
-    onClose: function( selectedDate ) {
-      $( "#from" ).datepicker( "option", "minDate", "selectedDate -31d" );
-      $( "#from" ).datepicker( "option", "maxDate", selectedDate );
-    }
+    dateFormat:"yy-mm-dd"
+    // onClose: function( selectedDate ) {
+    //   $( "#from" ).datepicker( "option", "minDate", "selectedDate -31d" );
+    //   $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+    // }
   });
   // $( "#to" ).datepicker("setDate", "<%= @to %>");
 });

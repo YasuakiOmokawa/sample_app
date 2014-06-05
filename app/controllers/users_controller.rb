@@ -4,21 +4,29 @@ class UsersController < ApplicationController
   before_action :admin_user,      only: :destroy
 
   def search
-    @title = '検索'
     @user = User.find(params[:id])
+    @from = Date.today.to_s
+    @to = Date.today.next_month.to_s
+    if params[:from].present?
+      @from = params[:from]
+    end
+    if params[:to].present?
+      @to = params[:to]
+    end
+    cond = {
+        :start_date => Time.parse(@from),
+        :end_date   => Time.parse(@to),
+        :filters    => { :medium.matches => 'organic' }
+    }
+    analytics = AnalyticsService.new
+    ga_profile = analytics.load_profile(@user)
+
+    # ページ固有設定
+    @title = '検索'
     @narrow_action = search_user_path
     # 絞り込み条件が「人気ページ」以外だった場合、部分テンプレートを変更する
     @narrow_word = params[:narrow_select]
     @render_action = 'search'
-    analytics = AnalyticsService.new
-    # アナリティクス認証
-    ga_profile = analytics.load_profile(@user)
-    # アナリティクス条件のハッシュ
-    cond = {
-        :start_date => Time.parse("2012-12-05"),
-        :end_date   => Time.parse('2013-01-05'),
-        :filters    => { :medium.matches => 'organic' }
-    }
 
     # ページ共通の項目を生成
     @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
@@ -40,6 +48,78 @@ class UsersController < ApplicationController
       @select_word_arr.push([ w.page_title, w.page_title ])
     end
     @categories["人気ページ"] = @select_word_arr
+
+    ## ページ共通のテーブルを生成
+    @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
+    @nogap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_nogap_table(@nogap_tables)
+    @not_gap_data_for_kitchen.each do |t|
+      @nogap_tables[:pv] = t.pageviews
+      @nogap_tables[:session] = t.sessions
+      @nogap_tables[:cv] = t.goal1_completions
+      @nogap_tables[:cvr] = t.goal1_conversion_rate
+      @nogap_tables[:bounce_rate] = t.bounce_rate
+    end
+    ## 平均PV数 ~ リピート率テーブルを生成
+    @gap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_gap_table(@gap_tables)
+    # 総PV数の取得（リピート率計算用
+    all_pv = 0
+    @not_gap_data_for_kitchen.each do |t|
+      all_pv = t.pageviews
+    end
+    cond[:filters] = {
+      :goal1_completions.gte => 1,
+      :medium.matches => 'organic'
+    }
+    @gap_data_for_kitchen_good = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
+    cond[:filters] = {
+      :goal1_completions.gte => 1,
+      :user_type.matches => 'Returning Visitor',
+      :medium.matches => 'organic'
+    }
+    @gap_repeat_data_for_kitchen_good = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
+    if @gap_data_for_kitchen_good.total_results != 0 then
+      @gap_data_for_kitchen_good.each do |t|
+        @gap_tables[:avg_pv][:good] = t.pageviews_per_session
+        @gap_tables[:avg_duration][:good] = t.avg_session_duration
+        @gap_tables[:new_percent][:good] = t.percent_new_sessions
+      end
+    end
+    if @gap_repeat_data_for_kitchen_good.total_results != 0 then
+      @gap_repeat_data_for_kitchen_good.each do |t|
+        @gap_tables[:repeat_rate][:good] = ( t.sessions.to_f / all_pv.to_f ) * 100
+      end
+    end
+    # 現状値
+    cond[:filters] = {
+      :goal1_completions.lt => 1,
+      :medium.matches => 'organic'
+    }
+    @gap_data_for_kitchen_bad = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
+    cond[:filters] = {
+      :goal1_completions.lt => 1,
+      :user_type.matches => 'Returning Visitor',
+      :medium.matches => 'organic'
+    }
+    @gap_repeat_data_for_kitchen_bad = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
+    if @gap_data_for_kitchen_bad.total_results != 0 then
+      @gap_data_for_kitchen_bad.each do |t|
+        @gap_tables[:avg_pv][:bad] = t.pageviews_per_session
+        @gap_tables[:avg_duration][:bad] = t.avg_session_duration
+        @gap_tables[:new_percent][:bad] = t.percent_new_sessions
+      end
+    end
+    if @gap_repeat_data_for_kitchen_bad.total_results != 0 then
+      @gap_repeat_data_for_kitchen_bad.each do |t|
+        @gap_tables[:repeat_rate][:bad] = ( t.sessions.to_f / all_pv.to_f ) * 100
+      end
+    end
+    # GAP値
+    @gap_tables[:avg_pv][:gap] = @gap_tables[:avg_pv][:bad].to_f - @gap_tables[:avg_pv][:good].to_f
+    @gap_tables[:avg_duration][:gap] = @gap_tables[:avg_duration][:bad].to_f - @gap_tables[:avg_duration][:good].to_f
+    @gap_tables[:new_percent][:gap] = @gap_tables[:new_percent][:bad].to_f - @gap_tables[:new_percent][:good].to_f
+    @gap_tables[:repeat_rate][:gap] = @gap_tables[:repeat_rate][:bad].to_f - @gap_tables[:repeat_rate][:good].to_f
 
     ## 人気ページテーブルを生成
     @favorite_pages = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -65,6 +145,8 @@ class UsersController < ApplicationController
     total_top_view = 0
     counter = 0
     # GAP値
+    analytics = AnalyticsService.new
+    ga_profile = analytics.load_profile(@user)
     @favorite_pages.each do |k, v|
       v[:gap] = (v[:bad].to_f - v[:good].to_f)
     end
@@ -95,7 +177,8 @@ class UsersController < ApplicationController
         # :start_date => Time.parse("2012-12-05"),
         # :end_date   => Time.parse('2013-01-05')
     }
-
+    analytics = AnalyticsService.new
+    ga_profile = analytics.load_profile(@user)
     narrow_word = params[:narrow_select]
 
     case params[:device]
@@ -126,8 +209,16 @@ class UsersController < ApplicationController
 
     # 部分テンプレートを変更しないので、空テンプレートを記載
     @render_action = 'norender'
-    analytics = AnalyticsService.new
-    ga_profile = analytics.load_profile(@user)
+
+    ## 絞り込みセレクトボックス項目を生成
+    @categories = {}
+    # ページ共通セレクトボックス
+    @select_word_for_bedroom= AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
+    @select_word_arr = []
+    @select_word_for_bedroom.each do |w|
+      @select_word_arr.push([ w.page_title, w.page_title ])
+    end
+    @categories["人気ページ"] = @select_word_arr
 
     ## ページ共通のテーブルを生成
     @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
@@ -140,17 +231,6 @@ class UsersController < ApplicationController
       @nogap_tables[:cvr] = t.goal1_conversion_rate
       @nogap_tables[:bounce_rate] = t.bounce_rate
     end
-
-    ## 絞り込みセレクトボックス項目を生成
-    @categories = {}
-    # ページ共通セレクトボックス
-    @select_word_for_bedroom= AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    @select_word_arr = []
-    @select_word_for_bedroom.each do |w|
-      @select_word_arr.push([ w.page_title, w.page_title ])
-    end
-    @categories["人気ページ"] = @select_word_arr
-
     ## 平均PV数 ~ リピート率テーブルを生成
     @gap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
     create_skeleton_gap_table(@gap_tables)
