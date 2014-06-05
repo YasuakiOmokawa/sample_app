@@ -16,6 +16,20 @@ class AnalyticsServiceClass
       # dimensions :date
   end
 
+  class GapDataForKitchen
+      extend Garb::Model
+      metrics :pageviewsPerSession,
+                    :avgSessionDuration,
+                    :percentNewSessions
+      # dimensions :date
+  end
+
+  class GapRepeatDataForKitchen
+      extend Garb::Model
+      metrics :sessions
+      # dimensions :date
+  end
+
   class FetchKeywordForSearch
       extend Garb::Model
       metrics :sessions,

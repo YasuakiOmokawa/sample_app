@@ -1,11 +1,11 @@
 <% @user ||= current_user %>
 <!-- header_st -->
 <div id="entrance">
-  <h1>TAS for GA ver.</h1><select><option>CV1</option><option>CV2</option><option>CV3</option></select><a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：kurotani@senk-inc.co.jp</div><br>
+  <h1>TAS for GA ver.</h1><select><option>CV1</option><option>CV2</option><option>CV3</option></select><a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：<%= @user.name %></div><br>
 </div>
 <ul>
   <li id="first"><a href="">ホーム</a></li>
-  <li><div>全体</div></li>
+  <li><a href="<%= user_path %>">全体</a></li>
   <li><a href="<%= search_user_path %>">検索</a></li>
   <li><a href="direct.html" class="db">直接入力<br>ブックマーク</a></li>
   <li><a href="referral.html" class="db">その他<br>ウェブサイト</a></li>
@@ -20,18 +20,20 @@
         <%= image_tag 'calender.png' %>
         <!-- 14/01/01-14/12/31 -->
         <!-- datepicker用のinput -->
-        <input type="text" id="from" name="from" size="15" style="width:100px;" readonly="readonly"/>-
-        <input type="text" id="to" name="to"  size="15" style="width:100px;" readonly="readonly"/>
+        <input type="text" id="from" name="from" size="10" style="width:100px;" readonly="readonly"  />-
+        <input type="text" id="to" name="to"  size="10" style="width:100px;" readonly="readonly"  />
     </span>
     <%= image_tag 'device.png', :class => "icon" %>
-    <input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;
-    <input type="checkbox" class="ic">パソコン&nbsp;&nbsp;
-    <input type="checkbox" class="ic">スマートフォン&nbsp;&nbsp;
-    <input type="checkbox" class="ic">モバイル
-    <%= image_tag 'user.png' %><input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;<input type="checkbox" class="ic">新規&nbsp;&nbsp;<input type="checkbox" class="ic">リピーター
+    <input type="radio" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
+    <input type="radio" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;
+    <input type="radio" name="device" class="ic" value="sphone">スマートフォン&nbsp;&nbsp;
+    <input type="radio" name="device" class="ic" value="mobile">モバイル
+    <%= image_tag 'user.png' %>
+    <input type="radio" name="visitor"class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
+    <input type="radio" name="visitor"class="ic" value="new">新規&nbsp;&nbsp;
+    <input type="radio" name="visitor"class="ic" value="repeat">リピーター
     <!-- ここはページによって挙動を変える -->
     <%= image_tag 'plus.png' %>
-    <!-- <select><option>条件を設定</option><optgroup label="人気ページ"><option>株式会社先駈ホームページ</option><option>製品情報</option><option>アクセス</option></select> -->
     <%= select_tag 'narrow_select', grouped_options_for_select(@categories, "", "選択してください") %>
     <a href="#" onclick="document.narrowForm.submit()" id="set">絞り込み</a>
   </form>

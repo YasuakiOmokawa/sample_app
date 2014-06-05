@@ -47,9 +47,10 @@
         <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
       </tr>
       <tr>
-        <% @not_gap_data_for_kitchen.each do |t|  %>
-          <td><%= t.pageviews %></td><td><%= t.sessions %></td><td><%= t.goal1_completions %></td><td><%= t.goal1_conversion_rate.to_f.round(1).to_s %>%</td>
-        <% end %>
+          <td><%= @nogap_tables[:pv].to_f.round(1).to_s %></td>
+          <td><%= @nogap_tables[:session].to_f.round(1).to_s %></td>
+          <td><%= @nogap_tables[:cv].to_f.round(1).to_s %></td>
+          <td><%= @nogap_tables[:cvr].to_f.round(1).to_s %>%</td>
       </tr>
     </table>
     <p>CVまでに必要な訪問回数：4.1回&nbsp;&nbsp;&nbsp;&nbsp;CVまでに要する期間：10.3日</p>
@@ -58,25 +59,26 @@
         <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
       </tr>
       <tr>
-        <td>5.1</td><td class="row">平均PV数</td><td>3.1</td><td>-2.0</td>
+        <td><%= @gap_tables[:avg_pv][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_tables[:avg_pv][:bad].to_f.round(1).to_s %></td><td><%= @gap_tables[:avg_pv][:gap].to_f.round(1).to_s %></td>
       </tr>
       <tr>
-        <td>05:11</td><td class="row">平均滞在時間</td><td>03:11</td><td>-02:00</td>
+        <td><%= ( @gap_tables[:avg_duration][:good].to_i / 60 ) %> : <%=( @gap_tables[:avg_duration][:good].to_i % 60 ) %></td>
+        <td class="row">平均滞在時間</td>
+        <td><%= ( @gap_tables[:avg_duration][:bad].to_i / 60 ) %> : <%=( @gap_tables[:avg_duration][:bad].to_i % 60 ) %></td>
+        <td><%= ( @gap_tables[:avg_duration][:gap].to_i / 60 ) %> : <%=( @gap_tables[:avg_duration][:gap].to_i % 60 ) %></td>
       </tr>
       <tr>
-        <td>34.1%</td><td class="row">新規訪問率</td><td>44.1%</td><td>10.0%</td>
+           <td><%= @gap_tables[:new_percent][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_tables[:new_percent][:bad] .to_f.round(1).to_s%>%</td><td><%= @gap_tables[:new_percent][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
-        <td>65.9%</td><td class="row">リピート率</td><td>55.9%</td><td>-10.0%</td>
+          <td><%= @gap_tables[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピート率</td><td><%= @gap_tables[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td><%= @gap_tables[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
     </table>
     <div id="knife">
       <table>
         <tr>
           <td class="row">直帰率</td>
-          <% @not_gap_data_for_kitchen.each do |t|  %>
-            <td><%= t.bounce_rate.to_f.round(1).to_s %>%</td>
-          <% end %>
+            <td><%= @nogap_tables[:bounce_rate].to_f.round(1).to_s %>%</td>
         </tr>
       </table>
       <%= render @render_action %>
@@ -127,6 +129,9 @@
           <%= p t %><br>
         <% end %>
         <% @favorite_pages.each do |t| %>
+          <%= p t %><br>
+        <% end %>
+        <% @gap_tables.each do |t| %>
           <%= p t %><br>
         <% end %>
       </h1>

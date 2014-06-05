@@ -1,8 +1,8 @@
 <script type="text/javascript">
 
 $(function() {
+
   $( "#from" ).datepicker({
-    defaultDate: '',
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
@@ -12,8 +12,8 @@ $(function() {
       $( "#to" ).datepicker( "option", "maxDate", "selectedDate +31d" );
     }
   });
+  // $( "#from" ).datepicker("setDate", "<%= @from %>");
   $( "#to" ).datepicker({
-    defaultDate: '',
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
@@ -23,5 +23,6 @@ $(function() {
       $( "#from" ).datepicker( "option", "maxDate", selectedDate );
     }
   });
+  // $( "#to" ).datepicker("setDate", "<%= @to %>");
 });
 </script>
