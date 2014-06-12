@@ -12,6 +12,8 @@ gem 'will_paginate', '3.0.4'
 gem 'bootstrap-will_paginate', '0.0.9'
 gem 'garb'
 gem 'json', '1.8.0'
+gem 'holiday_japan'
+gem 'gon'
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

@@ -6,6 +6,30 @@ require 'yaml'
 
 class AnalyticsServiceClass
 
+  class GapDataForGraph
+      extend Garb::Model
+      metrics :pageviews,
+                    :sessions,
+                    :pageviewsPerSession,
+                    :avgSessionDuration,
+                    :percentNewSessions,
+                    :bounceRate
+      dimensions :date
+  end
+
+  class CVForGraphSkeleton
+      extend Garb::Model
+      metrics :goal1Completions
+      dimensions :date
+  end
+
+
+  class GapRepeatDataForGraph
+      extend Garb::Model
+      metrics :sessions
+      dimensions :date
+  end
+
   class NotGapDataForKitchen
       extend Garb::Model
       metrics :pageviews,

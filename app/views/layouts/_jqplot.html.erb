@@ -1,0 +1,46 @@
+<script type="text/javascript">
+var arr_gap = [];
+var arr_cv = [];
+var arr = [];
+var dts;
+for (var i in gon.hash_for_graph) {
+  dts = i.toString();
+  dts = String(Number(dts.substr(4, 2))) + "/" + String(Number(dts.substr(6, 2)))
+  arr_gap.push( [ dts, gon.hash_for_graph[i][0] ]);
+  arr_cv.push( [ dts, gon.hash_for_graph[i][1] ]);
+};
+arr.push(arr_gap, arr_cv);
+
+
+jQuery( function() {
+    jQuery . jqplot(
+        'square',
+        arr,
+        {
+            series:[
+                {
+                    renderer: jQuery . jqplot . BarRenderer
+                },
+                {
+                    xaxis: 'x2axis',
+                    yaxis: 'y2axis'
+                }
+            ],
+            axes: {
+                xaxis: {
+                    renderer: jQuery . jqplot . CategoryAxisRenderer,
+                },
+                x2axis: {
+                    renderer: jQuery . jqplot . CategoryAxisRenderer,
+                },
+                yaxis: {
+                    autoscale: true,
+                },
+                y2axis: {
+                    autoscale: true,
+                }
+            }
+        }
+    );
+} );
+</script>
