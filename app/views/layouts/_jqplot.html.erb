@@ -11,6 +11,20 @@ var setArr = function(hash) {
     arr.push(arr_gap, arr_cv);
 }
 
+var tickFormatter = function (format, val) {
+    switch(format) {
+        case 'percent': return val.toFixed(1) + '%';
+        case 'number': return val.toFixed(1);
+        case 'time': {
+            var s = ("0" + String(Math.ceil(val / 60))).slice(-2) + ':' + ("0" + String(val % 60)).slice(-2);
+            if(val - 0 < 0) {
+                s = "-" + s;
+            }
+            return s;
+        }
+        default: return val;
+    }
+}
 
 // マイナスデータを表示させたい場合
 gon.hash_for_graph[20121205][0] = -10;
@@ -19,77 +33,88 @@ gon.hash_for_graph[20121205][1] = -10;
 
 setArr(gon.hash_for_graph);
 
+// グラフのオプション
+var options = {
+    seriesColors: ["yellow", "blue"],
+    seriesDefaults: {
+      shadow: false,
+    },
+    axesDefaults: {
+        tickRenderer: jQuery . jqplot . CanvasAxisTickRenderer ,
+        tickOptions: {
+          fontSize: '10pt',
+          fontFamily: 'ヒラギノ角ゴ Pro W3'
+        },
+    },
+    series:[
+          // １つ目の項目（棒グラフにする）の設定
+        {
+            renderer: jQuery . jqplot . BarRenderer,
+            fillToZero: true,
+            negativeSeriesColors: ["yellow"],
+            rendererOptions: {
+              // barWidth: 20,
+            },
+        },
+          // ２つ目の項目（折れ線グラフにする）の設定
+        {
+            xaxis: 'x2axis',
+            yaxis: 'y2axis',
+            // fillToZero: true,
+        }
+    ],
+    axes: {
+        xaxis: {
+            renderer: jQuery . jqplot . CategoryAxisRenderer,
+            rendererOptions: {
+                borderWidth: 1,
+            },
+        },
+        x2axis: {
+            renderer: jQuery . jqplot . CategoryAxisRenderer,
+            tickOptions: {
+              show: false,
+              showLabel: false,
+              showMark: false,
+            }
+        },
+        yaxis: {
+            autoscale: true,
+            // ticks: ,
+            // renderer: jQuery . jqplot . DateAxisRenderer,
+            tickOptions: {
+              textColor: "yellow",
+              // GAP値は自作関数でフォーマットする
+              formatter: tickFormatter,
+              // formatString: "time",
+            },
+        },
+        y2axis: {
+            autoscale: true,
+            tickOptions: {
+              textColor: "blue",
+            },
+        },
+    },
+    // マウスオーバー時の数値表示
+    highlighter: {
+        show: true,
+        // formatString: '%R',
+    },
+    // 背景色に関する設定
+    grid: {
+      background: "white",
+      gridLineColor: "black",
+      shadow: false,
+      drawGridlines: true,
+      drawBorder: false,
+    }
+};
+
+// グラフのオプションを変更
+options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
 jQuery( function() {
-    jQuery . jqplot(
-        'square',
-        arr,
-        {
-            seriesColors: ["yellow", "blue"],
-            seriesDefaults: {
-              shadow: false,
-            },
-            axesDefaults: {
-                tickRenderer: jQuery . jqplot . CanvasAxisTickRenderer ,
-                tickOptions: {
-                  fontSize: '10pt',
-                  fontFamily: 'ヒラギノ角ゴ Pro W3'
-                },
-            },
-            series:[
-                  // １つ目の項目（棒グラフにする）の設定
-                {
-                    renderer: jQuery . jqplot . BarRenderer,
-                    fillToZero: true,
-                    negativeSeriesColors: ["yellow"],
-                    rendererOptions: {
-                      // barWidth: 20,
-                    },
-                },
-                  // ２つ目の項目（折れ線グラフにする）の設定
-                {
-                    xaxis: 'x2axis',
-                    yaxis: 'y2axis',
-                    // fillToZero: true,
-                }
-            ],
-            axes: {
-                xaxis: {
-                    renderer: jQuery . jqplot . CategoryAxisRenderer,
-                    rendererOptions: {
-                        borderWidth: 1,
-                    },
-                },
-                x2axis: {
-                    renderer: jQuery . jqplot . CategoryAxisRenderer,
-                    tickOptions: {
-                      show: false,
-                      showLabel: false,
-                      showMark: false,
-                    }
-                },
-                yaxis: {
-                    autoscale: true,
-                    tickOptions: {
-                      textColor: "yellow",
-                    },
-                },
-                y2axis: {
-                    autoscale: true,
-                    tickOptions: {
-                      textColor: "blue",
-                    },
-                },
-            },
-            // 背景色に関する設定
-            grid: {
-              background: "white",
-              gridLineColor: "black",
-              shadow: false,
-              drawGridlines: true,
-              drawBorder: false,
-            }
-        }
-    );
+    jQuery . jqplot( 'square', arr, options);
 } );
 </script>

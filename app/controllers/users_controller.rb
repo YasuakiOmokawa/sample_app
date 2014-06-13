@@ -253,11 +253,11 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     # GAP値
     calc_gap_for_graph(@gap_tables_for_graph, columns_for_graph)
 
-    # ◆グラフ表示プログラム用に配列を作成
-    @arr_for_graph = []
+    # ◆グラフ表示プログラムへ渡すハッシュを作成
     @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
     create_array_for_graph(@hash_for_graph, @gap_tables_for_graph)
     gon.hash_for_graph = @hash_for_graph
+    gon.format_string = "time"
 
 
     # ◆曜日別の値を出すテーブルを作成
