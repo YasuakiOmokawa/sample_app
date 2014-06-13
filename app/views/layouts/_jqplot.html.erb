@@ -1,15 +1,23 @@
 <script type="text/javascript">
-var arr_gap = [];
-var arr_cv = [];
 var arr = [];
-var dts;
-for (var i in gon.hash_for_graph) {
-  dts = i.toString();
-  dts = String(Number(dts.substr(4, 2))) + "/" + String(Number(dts.substr(6, 2)))
-  arr_gap.push( [ dts, gon.hash_for_graph[i][0] ]);
-  arr_cv.push( [ dts, gon.hash_for_graph[i][1] ]);
-};
-arr.push(arr_gap, arr_cv);
+var setArr = function(hash) {
+    var arr_gap = [], arr_cv = [], dts;
+    for (var i in hash) {
+      dts = i.toString();
+      dts = String(Number(dts.substr(4, 2))) + "/" + String(Number(dts.substr(6, 2)))
+      arr_gap.push( [ dts, gon.hash_for_graph[i][0] ]);
+      arr_cv.push( [ dts, gon.hash_for_graph[i][1] ]);
+    };
+    arr.push(arr_gap, arr_cv);
+}
+
+
+// マイナスデータを表示させたい場合
+// gon.hash_for_graph[20121205][0] = -10;
+// gon.hash_for_graph[20121205][1] = -10;
+
+
+setArr(gon.hash_for_graph);
 
 
 jQuery( function() {
@@ -17,13 +25,32 @@ jQuery( function() {
         'square',
         arr,
         {
-            series:[
-                {
-                    renderer: jQuery . jqplot . BarRenderer
+            seriesColors: ["yellow", "blue"],
+            seriesDefaults: {
+              shadow: false,
+            },
+            axesDefaults: {
+                tickRenderer: jQuery . jqplot . CanvasAxisTickRenderer ,
+                tickOptions: {
+                  fontSize: '10pt',
+                  fontFamily: 'ヒラギノ角ゴ Pro W3'
                 },
+            },
+            series:[
+                  // １つ目の項目（棒グラフにする）の設定
+                {
+                    renderer: jQuery . jqplot . BarRenderer,
+                    fillToZero: true,
+                     negativeSeriesColors: ["yellow"],
+                     rendererOptions: {
+                      // barWidth: 20,
+                     },
+                },
+                  // ２つ目の項目（折れ線グラフにする）の設定
                 {
                     xaxis: 'x2axis',
-                    yaxis: 'y2axis'
+                    yaxis: 'y2axis',
+                    // fillToZero: true,
                 }
             ],
             axes: {
@@ -32,13 +59,31 @@ jQuery( function() {
                 },
                 x2axis: {
                     renderer: jQuery . jqplot . CategoryAxisRenderer,
+                    tickOptions: {
+                      show: false,
+                      showLabel: false,
+                      showMark: false,
+                    }
                 },
                 yaxis: {
                     autoscale: true,
+                    tickOptions: {
+                      textColor: "#FFD700",
+                    },
                 },
                 y2axis: {
                     autoscale: true,
-                }
+                    tickOptions: {
+                      textColor: "blue",
+                    },
+                },
+            },
+            grid: {
+              background: "white",
+              gridLineColor: "black",
+              shadow: false,
+              // drawGridlines: false,
+              drawBorder: false,
             }
         }
     );

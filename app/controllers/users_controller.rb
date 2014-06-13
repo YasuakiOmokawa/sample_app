@@ -258,8 +258,6 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
     create_array_for_graph(@hash_for_graph, @gap_tables_for_graph)
     gon.hash_for_graph = @hash_for_graph
-    @arr_for_graph = @hash_for_graph.to_a
-    gon.arr_for_graph = @arr_for_graph
 
 
     # ◆曜日別の値を出すテーブルを作成
