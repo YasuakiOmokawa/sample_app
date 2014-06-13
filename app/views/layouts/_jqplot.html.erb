@@ -13,8 +13,8 @@ var setArr = function(hash) {
 
 
 // マイナスデータを表示させたい場合
-// gon.hash_for_graph[20121205][0] = -10;
-// gon.hash_for_graph[20121205][1] = -10;
+gon.hash_for_graph[20121205][0] = -10;
+gon.hash_for_graph[20121205][1] = -10;
 
 
 setArr(gon.hash_for_graph);
@@ -41,10 +41,10 @@ jQuery( function() {
                 {
                     renderer: jQuery . jqplot . BarRenderer,
                     fillToZero: true,
-                     negativeSeriesColors: ["yellow"],
-                     rendererOptions: {
+                    negativeSeriesColors: ["yellow"],
+                    rendererOptions: {
                       // barWidth: 20,
-                     },
+                    },
                 },
                   // ２つ目の項目（折れ線グラフにする）の設定
                 {
@@ -56,6 +56,9 @@ jQuery( function() {
             axes: {
                 xaxis: {
                     renderer: jQuery . jqplot . CategoryAxisRenderer,
+                    rendererOptions: {
+                        borderWidth: 1,
+                    },
                 },
                 x2axis: {
                     renderer: jQuery . jqplot . CategoryAxisRenderer,
@@ -68,7 +71,7 @@ jQuery( function() {
                 yaxis: {
                     autoscale: true,
                     tickOptions: {
-                      textColor: "#FFD700",
+                      textColor: "yellow",
                     },
                 },
                 y2axis: {
@@ -78,11 +81,12 @@ jQuery( function() {
                     },
                 },
             },
+            // 背景色に関する設定
             grid: {
               background: "white",
               gridLineColor: "black",
               shadow: false,
-              // drawGridlines: false,
+              drawGridlines: true,
               drawBorder: false,
             }
         }
