@@ -1,0 +1,12 @@
+<script type="text/javascript">
+$(function() {
+    $('select#cvselect').change(function() {
+        $('input[name="cv_num"]').val($(this).val());
+    });
+
+    $('select#graphicselect').change(function() {
+      $('input[name="graphic_item"').val($(this).val());
+      $('a#set').trigger('click');
+    });
+});
+</script>

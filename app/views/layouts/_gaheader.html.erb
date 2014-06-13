@@ -3,11 +3,13 @@
 <div id="entrance">
   <h1>TAS for GA ver.</h1>
   <% cv_hash = {} %>
-  <% (1..20).each do |t| %>
-    <% key = "CV" + t.to_s  %>
-    <% cv_hash[key] = t %>
-  <% end %>
-  <%= select_tag 'cv-select', options_for_select( cv_hash ) %>
+  <%
+    (1..20).each do |t|
+      key = "CV" + t.to_s
+      cv_hash[key] = t
+    end
+  %>
+  <%= select_tag 'cvselect', options_for_select( cv_hash ) %>
   <a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：<%= @user.name %></div><br>
 </div>
 <ul>
@@ -30,7 +32,8 @@
         <input type="text" id="from" name="from" size="10" style="width:100px;" readonly="readonly"  />-
         <input type="text" id="to" name="to"  size="10" style="width:100px;" readonly="readonly"  />
     </span>
-        <input type="hidden" value="1" name="cv-num" />
+        <input type="hidden" value="1" name="cv_num" />
+        <input type="hidden" value="" name="graphic_item" />
     <%= image_tag 'device.png', :class => "icon" %>
     <input type="radio" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
     <input type="radio" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;

@@ -3,7 +3,21 @@
 <div id="childroom">
   <!-- grapha_st -->
   <div id="brick">
-    <div id="circle"><span id="yellow">■</span>PV数<span id="blue">―</span>CV数</div><div id="triangle"><select><option selected>PV数</option><option>セッション</option><option>平均PV数</option><option>平均滞在時間</option><option>新規訪問率</option><option>リピート率</option><option>直帰率</option></select></div>
+    <div id="circle"><span id="yellow">■</span>PV数<span id="blue">―</span>CV数</div>
+    <div id="triangle">
+    <%
+      graphic_hash = {
+        "PV数" => :pageviews,
+        "セッション数" => :sessions,
+        "平均PV数" => :pageviews_per_session,
+        "新規訪問率" => :percent_new_sessions,
+        "平均滞在時間" => :avg_session_duration,
+        "リピート率" => :repeat_rate,
+        "直帰率" => :bounce_rate,
+      }
+    %>
+    <%= select_tag('graphicselect', options_for_select( graphic_hash)) %>
+    </div>
     <div id="square" style="z-index: -1;"></div>
   </div>
   <!-- grapha_end -->

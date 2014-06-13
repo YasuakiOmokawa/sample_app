@@ -214,6 +214,14 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
       }
     end
 
+    # グラフ表示項目パラメータ
+    @graphic_item  = params[:graphic_item].presence || 'pageviews'
+    gon.format_string = check_format_graph(@graphic_item)
+
+
+    # CV種類パラメータ
+      @cv_num = params[:cv_num].presence || 1
+
     # 部分テンプレートを変更しないので、空テンプレートを記載
     @render_action = 'norender'
 
@@ -255,9 +263,8 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
 
     # ◆グラフ表示プログラムへ渡すハッシュを作成
     @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
-    create_array_for_graph(@hash_for_graph, @gap_tables_for_graph)
+    create_array_for_graph(@hash_for_graph, @gap_tables_for_graph, @graphic_item)
     gon.hash_for_graph = @hash_for_graph
-    gon.format_string = "time"
 
 
     # ◆曜日別の値を出すテーブルを作成
@@ -416,6 +423,18 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
       redirect_to(root_path) unless current_user.admin?
     end
 
+    # グラフフォーマット判別関数
+    def check_format_graph(item)
+      if /(bounce_rate|repeat_rate)/ =~ item then
+        p = "percent"
+      elsif /avg_session_duration/ =~ item then
+        p = "time"
+      else
+        p = "number"
+      end
+      return p
+    end
+
     # ビュー用にグラフ値テーブルスケルトンを作成
 
     def create_skeleton_for_graph(result_hash, from_date, to_date, columns)
@@ -504,10 +523,11 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     end
 
     # グラフテーブルからグラフ表示プログラム用の配列を出力
-    def create_array_for_graph(hash, table)
+    def create_array_for_graph(hash, table, param)
       table.sort_by{ |a, b| b[:idx].to_i }.each do |k, v|
         date =  k.to_i
-        hash[date] = [ v[:pageviews][2], v[:cv].to_i ]
+        param = param.to_sym
+        hash[date] = [ v[param][2], v[:cv].to_i ]
       end
       return hash
     end
