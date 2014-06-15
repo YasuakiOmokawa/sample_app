@@ -74,12 +74,12 @@ class UsersController < ApplicationController
       all_sessions = t.sessions
     end
     cond[:filters] = {
-      :goal1_completions.gte => 1,
+      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
       :medium.matches => 'organic'
     }
     @gap_data_for_kitchen_good = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
     cond[:filters] = {
-      :goal1_completions.gte => 1,
+      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
       :user_type.matches => 'Returning Visitor',
       :medium.matches => 'organic'
     }
@@ -98,12 +98,12 @@ class UsersController < ApplicationController
     end
     # 現状値
     cond[:filters] = {
-      :goal1_completions.lt => 1,
+      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
       :medium.matches => 'organic'
     }
     @gap_data_for_kitchen_bad = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
     cond[:filters] = {
-      :goal1_completions.lt => 1,
+      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
       :user_type.matches => 'Returning Visitor',
       :medium.matches => 'organic'
     }
@@ -131,7 +131,7 @@ class UsersController < ApplicationController
     create_skeleton_favorite_page_table_for(@select_word_for_bedroom, @favorite_pages)
     # 理想値
     cond[:filters] = {
-      :goal1_completions.gte => 1,
+      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
       :medium.matches => 'organic'
      }
     @select_word_for_bedroom_good = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
@@ -141,7 +141,7 @@ class UsersController < ApplicationController
     counter = 0
     # 現状値
     cond[:filters] = {
-      :goal1_completions.lt => 1,
+      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
       :medium.matches => 'organic'
     }
     @select_word_for_bedroom_bad = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
@@ -221,6 +221,7 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
 
     # CV種類パラメータ
       @cv_num = params[:cv_num].presence || 1
+      @cv_num = @cv_num.to_s
 
     # 部分テンプレートを変更しないので、空テンプレートを記載
     @render_action = 'norender'
@@ -248,14 +249,20 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     @gap_tables_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
     create_skeleton_for_graph(@gap_tables_for_graph, @from, @to, columns_for_graph)
     # CV値を挿入
-    @cv_for_graph = AnalyticsServiceClass::CVForGraphSkeleton.results(ga_profile, cond)
-    put_cv_for_graph(@cv_for_graph, @gap_tables_for_graph)
+    @cv_for_graph = AnalyticsServiceClass.create_class('CVForGraphSkeleton', [
+                                    ('goal' + @cv_num.to_s + 'Completions').to_sym
+                                ],
+                                [
+                                  :date
+                                ]
+                              ).results(ga_profile, cond)
+    put_cv_for_graph(@cv_for_graph, @gap_tables_for_graph, @cv_num)
     # 理想値
-    cond[:filters] = { :goal1_completions.gte => 1 }
+    cond[:filters] = { ('goal' + @cv_num.to_s + '_completions').to_sym.gte => 1 }
     @gap_data_for_graph_good = AnalyticsServiceClass::GapDataForGraph.results(ga_profile, cond)
     put_table_for_graph(@gap_data_for_graph_good, @gap_tables_for_graph)
     # 現実値
-    cond[:filters] = { :goal1_completions.lt => 1 }
+    cond[:filters] = { ('goal' + @cv_num.to_s + '_completions').to_sym.lt => 1 }
     @gap_data_for_graph_bad = AnalyticsServiceClass::GapDataForGraph.results(ga_profile, cond)
     put_table_for_graph(@gap_data_for_graph_bad, @gap_tables_for_graph)
     # GAP値
@@ -273,14 +280,23 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
 
 
     #　◆ページ共通のテーブルを生成
-    @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
+    @not_gap_data_for_kitchen = AnalyticsServiceClass.create_class('CVForGraphSkeleton', [
+                                                          ('goal' + @cv_num.to_s + 'Completions').to_sym,
+                                                          ('goal' + @cv_num.to_s + 'ConversionRate').to_sym,
+                                                          :sessions,
+                                                          :pageviews,
+                                                          :bounceRate
+                                                      ]
+                                                    ).results(ga_profile, cond)
     @nogap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
     create_skeleton_nogap_table(@nogap_tables)
+    cv_txt = ('goal' + @cv_num + '_completions').to_sym
+    cvr_txt = ('goal' + @cv_num + '_conversion_rate').to_sym
     @not_gap_data_for_kitchen.each do |t|
       @nogap_tables[:pv] = t.pageviews
       @nogap_tables[:session] = t.sessions
-      @nogap_tables[:cv] = t.goal1_completions
-      @nogap_tables[:cvr] = t.goal1_conversion_rate
+      @nogap_tables[:cv] = t[cv_txt]
+      @nogap_tables[:cvr] = t[cvr_txt]
       @nogap_tables[:bounce_rate] = t.bounce_rate
     end
     ## 平均PV数 ~ リピート率テーブルを生成
@@ -291,10 +307,10 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     @not_gap_data_for_kitchen.each do |t|
       all_sessions = t.sessions
     end
-    cond[:filters] = { :goal1_completions.gte => 1 }
+    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.gte => 1 }
     @gap_data_for_kitchen_good = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
     cond[:filters] = {
-      :goal1_completions.gte => 1,
+      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
       :user_type.matches => 'Returning Visitor'
     }
     @gap_repeat_data_for_kitchen_good = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
@@ -311,10 +327,10 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
       end
     end
     # 現状値
-    cond[:filters] = { :goal1_completions.lt => 1 }
+    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.lt => 1 }
     @gap_data_for_kitchen_bad = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
     cond[:filters] = {
-      :goal1_completions.lt => 1,
+      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
       :user_type.matches => 'Returning Visitor'
     }
     @gap_repeat_data_for_kitchen_bad = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
@@ -344,14 +360,14 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     @favorite_pages = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
     create_skeleton_favorite_page_table_for(@select_word_for_bedroom, @favorite_pages)
     # 理想値
-    cond[:filters] = { :goal1_completions.gte => 1 }
+    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.gte => 1 }
     @select_word_for_bedroom_good = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
     put_skeleton_favorite_page_table_for(@select_word_for_bedroom_good, @favorite_pages, :good)
     total_view = 0
     total_top_view = 0
     counter = 0
     # 現状値
-    cond[:filters] = { :goal1_completions.lt => 1 }
+    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.lt => 1 }
     @select_word_for_bedroom_bad = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
     put_skeleton_favorite_page_table_for(@select_word_for_bedroom_bad, @favorite_pages, :bad)
     total_view = 0
@@ -491,11 +507,11 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
     end
 
     # グラフ値テーブルへcv値を代入
-    def put_cv_for_graph(data, table)
+    def put_cv_for_graph(data, table, cv_num)
       if data.total_results != 0 then
         data.each do |d|
           date = d.date
-          table[date][:cv] = d.goal1_completions
+          table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
         end
       end
       return table

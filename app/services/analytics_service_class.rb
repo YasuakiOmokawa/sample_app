@@ -6,6 +6,15 @@ require 'yaml'
 
 class AnalyticsServiceClass
 
+  def self.create_class(name, met, dim = [])
+    name = name.to_s
+    self.class.const_set(name, Class.new do |klass|
+      extend Garb::Model
+      metrics met
+      dimensions dim
+    end)
+  end
+
   class GapDataForGraph
       extend Garb::Model
       metrics :pageviews,
@@ -17,28 +26,28 @@ class AnalyticsServiceClass
       dimensions :date
   end
 
-  class CVForGraphSkeleton
-      extend Garb::Model
-      metrics :goal1Completions
-      dimensions :date
-  end
+  # class CVForGraphSkeleton
+  #     extend Garb::Model
+  #     metrics @goal_completions
+  #     dimensions :date
+  # end
 
 
-  class GapRepeatDataForGraph
+  def GapRepeatDataForGraph
       extend Garb::Model
       metrics :sessions
       dimensions :date
   end
 
-  class NotGapDataForKitchen
-      extend Garb::Model
-      metrics :pageviews,
-                    :sessions,
-                    :goal1Completions,
-                    :goal1ConversionRate,
-                    :bounceRate
-      # dimensions :date
-  end
+  # class NotGapDataForKitchen
+  #     extend Garb::Model
+  #     metrics :pageviews,
+  #                   :sessions,
+  #                   @goal_completions,
+  #                   @goal_conversion_rate,
+  #                   :bounceRate
+  #     # dimensions :date
+  # end
 
   class GapDataForKitchen
       extend Garb::Model
