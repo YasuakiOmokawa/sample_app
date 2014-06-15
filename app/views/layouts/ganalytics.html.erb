@@ -20,6 +20,23 @@
       <%= content_tag(:div, value, class: "alert alert-#{key}") %>
     <% end %>
     <%= yield %>
-    <%= debug(params) if Rails.env.development? %>
+    <%
+      if Rails.env.development? then
+        [
+          params,
+          @not_gap_data_for_kitchen,
+          @favorite_pages,
+          @gap_tables,
+          @gap_tables_for_graph,
+          @value_table_by_days,
+          @select_word_for_board,
+          @narrow_word
+          ].each do |t|
+    %>
+     <%= debug t.inspect %>
+    <%
+          end
+      end
+    %>
   </body>
 </html>
