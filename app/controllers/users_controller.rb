@@ -48,7 +48,7 @@ class UsersController < ApplicationController
     # グラフ表示項目
     @graphic_item  = (params[:graphic_item].presence || 'pageviews').to_sym
     gon.format_string = check_format_graph(@graphic_item)
-    @cv_num = (params[:cv_num].presence || 1).to_sym                                       # CV種類
+    @cv_num = (params[:cv_num].presence || 1)                                                     # CV種類
     @render_action = 'norender'                                                                                # ページ毎の部分テンプレート
     # 絞り込みキーワード
     @narrow_word = params[:narrow_select].presence
