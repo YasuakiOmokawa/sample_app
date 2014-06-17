@@ -3,9 +3,8 @@
 <div id="childroom">
   <!-- grapha_st -->
   <div id="brick">
-    <div id="circle"><span id="yellow">■</span>PV数<span id="blue">―</span>CV数</div>
-    <div id="triangle">
     <%
+      option = @graphic_item.to_sym
       graphic_hash = {
         "PV数" => :pageviews,
         "セッション数" => :sessions,
@@ -16,7 +15,9 @@
         "直帰率" => :bounce_rate,
       }
     %>
-    <%= select_tag('graphicselect', options_for_select( graphic_hash)) %>
+    <div id="circle"><span id="yellow">■</span><%= graphic_hash.key(option) %><span id="blue">―</span>CV数</div>
+    <div id="triangle">
+    <%= select_tag('graphicselect', options_for_select( graphic_hash, option)) %>
     </div>
     <div id="square" style="z-index: -1;"></div>
   </div>
@@ -25,31 +26,31 @@
     <table>
       <tr id="line">
         <td class="row"></td>
-        <% @gap_tables_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
           <td><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">目標値</td>
-        <% @gap_tables_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[:pageviews][0].to_f.round(1).to_s %></td>
+        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+          <td><%= v[@graphic_item][0] %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">現状値</td>
-        <% @gap_tables_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[:pageviews][1].to_f.round(1).to_s %></td>
+        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+          <td><%= v[@graphic_item][1] %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">GAP</td>
-        <% @gap_tables_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[:pageviews][2].to_f.round(1).to_s %></td>
+        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+          <td class="gap"><%= v[@graphic_item][2] %></td>
         <% end %>
       </tr>
       <tr id="cv">
         <td class="row">CV</td>
-        <% @gap_tables_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
           <td><%= v[:cv].to_i %></td>
         <% end %>
       </tr>
@@ -64,13 +65,13 @@
           <td><%= @value_table_by_days[:day_on][:good] %></td>
           <td class="row">平日</td>
           <td><%= @value_table_by_days[:day_on][:bad] %></td>
-          <td><%= @value_table_by_days[:day_on][:gap] %></td>
+          <td class="gap"><%= @value_table_by_days[:day_on][:gap] %></td>
       </tr>
       <tr>
           <td><%= @value_table_by_days[:day_off][:good] %></td>
           <td class="row">土日祝</td>
           <td><%= @value_table_by_days[:day_off][:bad] %></td>
-          <td><%= @value_table_by_days[:day_off][:gap] %></td>
+          <td class="gap"><%= @value_table_by_days[:day_off][:gap] %></td>
       </tr>
     </table>
   </div>
@@ -82,10 +83,10 @@
         <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
       </tr>
       <tr>
-          <td><%= @nogap_tables[:pv].to_f.round(1).to_s %></td>
-          <td><%= @nogap_tables[:session].to_f.round(1).to_s %></td>
-          <td><%= @nogap_tables[:cv].to_f.round(1).to_s %></td>
-          <td><%= @nogap_tables[:cvr].to_f.round(1).to_s %>%</td>
+          <td><%= @common_table[:pageviews].to_f.round(1).to_s %></td>
+          <td><%= @common_table[:sessions].to_f.round(1).to_s %></td>
+          <td><%= @common_table[@cv_txt.to_sym].to_f.round(1).to_s %></td>
+          <td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
       </tr>
     </table>
     <p>CVまでに必要な訪問回数：4.1回&nbsp;&nbsp;&nbsp;&nbsp;CVまでに要する期間：10.3日</p>
@@ -94,26 +95,28 @@
         <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
       </tr>
       <tr>
-        <td><%= @gap_tables[:avg_pv][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_tables[:avg_pv][:bad].to_f.round(1).to_s %></td><td><%= @gap_tables[:avg_pv][:gap].to_f.round(1).to_s %></td>
+        <td><%= @gap_table[:avg_pv][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:avg_pv][:bad].to_f.round(1).to_s %></td>
+        <td class="gap"><%= @gap_table[:avg_pv][:gap].to_f.round(1).to_s %></td>
       </tr>
       <tr>
-        <td><%= sprintf("%02d", ( @gap_tables[:avg_duration][:good].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_tables[:avg_duration][:good].to_i % 60 ) ) %></td>
+        <td><%= sprintf("%02d", ( @gap_table[:avg_duration][:good].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:good].to_i % 60 ) ) %></td>
         <td class="row">平均滞在時間</td>
-        <td><%= sprintf("%02d", ( @gap_tables[:avg_duration][:bad].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_tables[:avg_duration][:bad].to_i % 60 ) ) %></td>
-        <td><%= sprintf("%02d", ( @gap_tables[:avg_duration][:gap].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_tables[:avg_duration][:gap].to_i % 60 ) ) %></td>
+        <td><%= sprintf("%02d", ( @gap_table[:avg_duration][:bad].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:bad].to_i % 60 ) ) %></td>
+        <td class="gap"><%= sprintf("%02d", ( @gap_table[:avg_duration][:gap].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:gap].to_i % 60 ) ) %></td>
       </tr>
       <tr>
-           <td><%= @gap_tables[:new_percent][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_tables[:new_percent][:bad] .to_f.round(1).to_s%>%</td><td><%= @gap_tables[:new_percent][:gap] .to_f.round(1).to_s%>%</td>
+           <td><%= @gap_table[:new_percent][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:new_percent][:bad] .to_f.round(1).to_s%>%</td>
+           <td class="gap"><%= @gap_table[:new_percent][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
-          <td><%= @gap_tables[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピート率</td><td><%= @gap_tables[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td><%= @gap_tables[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
+          <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピート率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
     </table>
     <div id="knife">
       <table>
         <tr>
           <td class="row">直帰率</td>
-            <td><%= @nogap_tables[:bounce_rate].to_f.round(1).to_s %>%</td>
+            <td><%= @common_table[:bounce_rate].to_f.round(1).to_s %>%</td>
         </tr>
       </table>
       <%= render @render_action %>
@@ -124,15 +127,15 @@
       <tr id="line">
         <td>目標値</td><td class="row">人気ページ</td><td>現状値</td><td>差</td>
       </tr>
-      <% @favorite_pages.sort_by{ |k, v| v[:index].to_i}.each do |k, v| %>
+      <% @favorite_table.sort_by{ |k, v| v[:index].to_i}.each do |k, v| %>
         <% if k == "その他" then %>
           <tr id="other">
-            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= k %></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td><%= v[:gap].to_f.round(1).to_s %>%</td>
+            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= k %></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
           </tr>
         <% else %>
           <% title,page = k.split(";;") %>
           <tr>
-            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= title %><p><%= page %></p></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td><%= v[:gap].to_f.round(1).to_s %>%</td>
+            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= title %><p><%= page %></p></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
           </tr>
         <% end  %>
       <% end %>

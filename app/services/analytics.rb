@@ -4,7 +4,7 @@ require 'uri'
 require 'active_support/time'
 require 'yaml'
 
-class AnalyticsServiceClass
+class Analytics
 
   def self.create_class(name, met, dim = [])
     name = name.to_s
@@ -26,41 +26,22 @@ class AnalyticsServiceClass
       dimensions :date
   end
 
-  # class CVForGraphSkeleton
-  #     extend Garb::Model
-  #     metrics @goal_completions
-  #     dimensions :date
-  # end
-
-
   def GapRepeatDataForGraph
       extend Garb::Model
       metrics :sessions
       dimensions :date
   end
 
-  # class NotGapDataForKitchen
-  #     extend Garb::Model
-  #     metrics :pageviews,
-  #                   :sessions,
-  #                   @goal_completions,
-  #                   @goal_conversion_rate,
-  #                   :bounceRate
-  #     # dimensions :date
-  # end
-
-  class GapDataForKitchen
+  class CommonForGap
       extend Garb::Model
       metrics :pageviewsPerSession,
                     :avgSessionDuration,
                     :percentNewSessions
-      # dimensions :date
   end
 
-  class GapRepeatDataForKitchen
+  class CommonRepeatForGap
       extend Garb::Model
       metrics :sessions
-      # dimensions :date
   end
 
   class FetchKeywordForSearch

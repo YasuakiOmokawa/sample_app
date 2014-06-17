@@ -35,7 +35,7 @@ setArr(gon.hash_for_graph);
 
 // グラフのオプション
 var options = {
-    seriesColors: ["yellow", "blue"],
+    seriesColors: ["#e6b422", "#1e50a2"],
     seriesDefaults: {
       shadow: false,
     },
@@ -51,7 +51,7 @@ var options = {
         {
             renderer: jQuery . jqplot . BarRenderer,
             fillToZero: true,
-            negativeSeriesColors: ["yellow"],
+            negativeSeriesColors: ["#e6b422"],
             rendererOptions: {
               // barWidth: 20,
             },
@@ -83,7 +83,7 @@ var options = {
             // ticks: ,
             // renderer: jQuery . jqplot . DateAxisRenderer,
             tickOptions: {
-              textColor: "yellow",
+              textColor: "#e6b422",
               // GAP値は自作関数でフォーマットする
               formatter: tickFormatter,
               // formatString: "time",
@@ -92,7 +92,7 @@ var options = {
         y2axis: {
             autoscale: true,
             tickOptions: {
-              textColor: "blue",
+              textColor: "#1e50a2",
             },
         },
     },

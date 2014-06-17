@@ -7,7 +7,7 @@
     <%= stylesheet_link_tag "analytics", media: "all" %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
     <%= include_gon %>
-    <!-- <%= javascript_include_tag "https://www.google.com/jsapi" %> -->
+    <%= render 'layouts/fncommon' %>
     <%= render 'layouts/datepicker' %>
     <%= render 'layouts/merger' %>
     <%= render 'layouts/jqplot' %>
@@ -24,10 +24,11 @@
       if Rails.env.development? then
         [
           params,
-          @not_gap_data_for_kitchen,
-          @favorite_pages,
-          @gap_tables,
-          @gap_tables_for_graph,
+          @cond,
+          @common,
+          @favorite_table,
+          @gap_table,
+          @gap_table_for_graph,
           @value_table_by_days,
           @select_word_for_board,
           @narrow_word

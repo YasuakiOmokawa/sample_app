@@ -1,28 +1,16 @@
-require 'holiday_japan'
-
 class UsersController < ApplicationController
+  require 'holiday_japan'
+  require 'user_func'
+  require 'create_table'
+  require 'insert_table'
+  require 'update_table'
+  include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
+
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
 
   def search
-    @user = User.find(params[:id])
-    @from = Date.today.to_s
-    @to = Date.today.next_month.to_s
-    if params[:from].present?
-      @from = params[:from]
-    end
-    if params[:to].present?
-      @to = params[:to]
-    end
-    cond = {
-        :start_date => Time.parse(@from),
-        :end_date   => Time.parse(@to),
-        :filters    => { :medium.matches => 'organic' }
-    }
-    analytics = AnalyticsService.new
-    ga_profile = analytics.load_profile(@user)
-
     # ページ固有設定
     @title = '検索'
     @narrow_action = search_user_path
@@ -30,133 +18,14 @@ class UsersController < ApplicationController
     @narrow_word = params[:narrow_select]
     @render_action = 'search'
 
-    # ページ共通の項目を生成
-    @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
-
-    # 絞り込みセレクトボックス項目を生成
-    @categories = {}
     # ページ特有
-    @select_word_for_board= AnalyticsServiceClass::FetchKeywordForSearch.results(ga_profile, cond)
-    @select_word_arr = []
+    @select_word_for_board= Analytics::FetchKeywordForSearch.results(ga_profile, cond)
+    select_word_arr = []
     @select_word_for_board.each do |w|
-      @select_word_arr.push([ w.keyword, w.keyword ])
+      select_word_arr.push([ w.keyword, w.keyword ])
     end
-    @categories["検索ワード"] = @select_word_arr
+    @categories["検索ワード"] = select_word_arr
 
-    # ページ共通セレクトボックス
-    @select_word_for_bedroom= AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    @select_word_arr = []
-    @select_word_for_bedroom.each do |w|
-      @select_word_arr.push([ w.page_title, w.page_title ])
-    end
-    @categories["人気ページ"] = @select_word_arr
-
-
-
-
-    # ◆ ページ共通のテーブルを生成
-    @not_gap_data_for_kitchen = AnalyticsServiceClass::NotGapDataForKitchen.results(ga_profile, cond)
-    @nogap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_nogap_table(@nogap_tables)
-    @not_gap_data_for_kitchen.each do |t|
-      @nogap_tables[:pv] = t.pageviews
-      @nogap_tables[:session] = t.sessions
-      @nogap_tables[:cv] = t.goal1_completions
-      @nogap_tables[:cvr] = t.goal1_conversion_rate
-      @nogap_tables[:bounce_rate] = t.bounce_rate
-    end
-    ## 平均PV数 ~ リピート率テーブルを生成
-    @gap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_gap_table(@gap_tables)
-    # 総セッション数の取得（リピート率計算用
-    all_sessions = 0
-    @not_gap_data_for_kitchen.each do |t|
-      all_sessions = t.sessions
-    end
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
-      :medium.matches => 'organic'
-    }
-    @gap_data_for_kitchen_good = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
-      :user_type.matches => 'Returning Visitor',
-      :medium.matches => 'organic'
-    }
-    @gap_repeat_data_for_kitchen_good = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
-    if @gap_data_for_kitchen_good.total_results != 0 then
-      @gap_data_for_kitchen_good.each do |t|
-        @gap_tables[:avg_pv][:good] = t.pageviews_per_session
-        @gap_tables[:avg_duration][:good] = t.avg_session_duration
-        @gap_tables[:new_percent][:good] = t.percent_new_sessions
-      end
-    end
-    if @gap_repeat_data_for_kitchen_good.total_results != 0 then
-      @gap_repeat_data_for_kitchen_good.each do |t|
-        @gap_tables[:repeat_rate][:good] = ( t.sessions.to_f / all_sessions.to_f ) * 100
-      end
-    end
-    # 現状値
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
-      :medium.matches => 'organic'
-    }
-    @gap_data_for_kitchen_bad = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
-      :user_type.matches => 'Returning Visitor',
-      :medium.matches => 'organic'
-    }
-    @gap_repeat_data_for_kitchen_bad = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
-    if @gap_data_for_kitchen_bad.total_results != 0 then
-      @gap_data_for_kitchen_bad.each do |t|
-        @gap_tables[:avg_pv][:bad] = t.pageviews_per_session
-        @gap_tables[:avg_duration][:bad] = t.avg_session_duration
-        @gap_tables[:new_percent][:bad] = t.percent_new_sessions
-      end
-    end
-    if @gap_repeat_data_for_kitchen_bad.total_results != 0 then
-      @gap_repeat_data_for_kitchen_bad.each do |t|
-        @gap_tables[:repeat_rate][:bad] = ( t.sessions.to_f / all_sessions.to_f ) * 100
-      end
-    end
-    # GAP値
-    @gap_tables[:avg_pv][:gap] = @gap_tables[:avg_pv][:bad].to_f - @gap_tables[:avg_pv][:good].to_f
-    @gap_tables[:avg_duration][:gap] = @gap_tables[:avg_duration][:bad].to_f - @gap_tables[:avg_duration][:good].to_f
-    @gap_tables[:new_percent][:gap] = @gap_tables[:new_percent][:bad].to_f - @gap_tables[:new_percent][:good].to_f
-    @gap_tables[:repeat_rate][:gap] = @gap_tables[:repeat_rate][:bad].to_f - @gap_tables[:repeat_rate][:good].to_f
-
-    ## 人気ページテーブルを生成
-    @favorite_pages = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_favorite_page_table_for(@select_word_for_bedroom, @favorite_pages)
-    # 理想値
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
-      :medium.matches => 'organic'
-     }
-    @select_word_for_bedroom_good = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    put_skeleton_favorite_page_table_for(@select_word_for_bedroom_good, @favorite_pages, :good)
-    total_view = 0
-    total_top_view = 0
-    counter = 0
-    # 現状値
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
-      :medium.matches => 'organic'
-    }
-    @select_word_for_bedroom_bad = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    put_skeleton_favorite_page_table_for(@select_word_for_bedroom_bad, @favorite_pages, :bad)
-    total_view = 0
-    total_top_view = 0
-    counter = 0
-    # GAP値
-    analytics = AnalyticsService.new
-    ga_profile = analytics.load_profile(@user)
-    @favorite_pages.each do |k, v|
-d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
-    end
-
-    render :layout => 'ganalytics', :action => "show"
   end
 
   def index
@@ -164,219 +33,102 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
   end
 
   def show
+    # ------- パラメータ設定セクション start ------- #
     @title = '全体'
     @user = User.find(params[:id])
     @narrow_action = user_path
-    @from = Date.today
-    @to = Date.today.next_month
-    if params[:from].present?
-      from_y, from_m, from_d = params[:from].split("-")
-      @from = Date.new(from_y.to_i, from_m.to_i, from_d.to_i)
-    end
-    if params[:to].present?
-      to_y, to_m, to_d = params[:to].split("-")
-      @to = Date.new(to_y.to_i, to_m.to_i, to_d.to_i)
-    end
-
-    cond = {
-        :start_date => @from,
-        :end_date   => @to
-        # :start_date => Time.parse("2012-12-05"),
-        # :end_date   => Time.parse('2013-01-05')
-    }
-    analytics = AnalyticsService.new
-    ga_profile = analytics.load_profile(@user)
-    narrow_word = params[:narrow_select]
-
-    case params[:device]
-    when "pc"
-      device = { :device_caategory.matches => 'desktop' }
-      cond[:filters]
-        # cond2 = {:filters    => { :medium.matches => 'organic' }}
-    when "sphone"
-      cond[:filters] = {
-        :device_category.matches => 'mobile',
-        :mobile_input_selector.matches => 'touchscreen'
-      }
-    when "mobile"
-      cond[:filters] = {
-        :device_category.matches => 'mobile',
-        :mobile_input_selector.does_not_match => 'touchscreen'
-      }
-    end
-
-    case params[:visitor]
-    when "new"
-      visitor_type = {:user_type.matches => 'New Visitor'}
-    when "repeat"
-      visitor_type = {
-        :user_type.matches => 'Returning Visitor'
-      }
-    end
-
-    # グラフ表示項目パラメータ
-    @graphic_item  = params[:graphic_item].presence || 'pageviews'
+    @from = params[:from].presence || Date.today
+    if params[:from].present? then @from = set_date_format(@from) end
+    @to = params[:to].presence || Date.today.next_month
+    if params[:to].present? then @to = set_date_format(@to) end
+    ga_profile = AnalyticsService.new.load_profile(@user)                                     # アナリティクスAPI認証パラメータ
+    cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
+    set_device_type( (params[:device].presence || "all"), cond)                               # 使用端末
+    set_visitor_type( (params[:visitor].presence || "all"), cond)                                 # 来訪者
+    # グラフ表示項目
+    @graphic_item  = (params[:graphic_item].presence || 'pageviews').to_sym
     gon.format_string = check_format_graph(@graphic_item)
-
-
-    # CV種類パラメータ
-      @cv_num = params[:cv_num].presence || 1
-      @cv_num = @cv_num.to_s
-
-    # 部分テンプレートを変更しないので、空テンプレートを記載
-    @render_action = 'norender'
-
-    ## 絞り込みセレクトボックス項目を生成
-    @categories = {}
-    # ページ共通セレクトボックス
-    @select_word_for_bedroom= AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    @select_word_arr = []
-    @select_word_for_bedroom.each do |w|
-      @select_word_arr.push([ w.page_title, w.page_title ])
+    @cv_num = (params[:cv_num].presence || 1).to_sym                                       # CV種類
+    @render_action = 'norender'                                                                                # ページ毎の部分テンプレート
+    # 絞り込みキーワード
+    @narrow_word = params[:narrow_select].presence
+    if params[:narrow_select].present?
+      set_narrow_word(@narrow_word, cond)
     end
-    @categories["人気ページ"] = @select_word_arr
+    # 絞り込みセレクトボックス項目を生成
+    @categories = {}
+    # ページ共通セレクトボックス(人気ページ)
+    @favorites = []
+    @favorite = Analytics::FetchKeywordForPages.results(ga_profile, cond)
+    @categories["人気ページ"] = set_select_box(@favorites, @favorite)
+    # ------- パラメータ設定セクション end ------- #
 
-    # ◆グラフ生成用のテーブルを作成
-    # テーブル項目の配列
-    columns_for_graph = [
-      :pageviews,
-      :sessions,
-      :pageviews_per_session,
-      :avg_session_duration,
-      :percent_new_sessions,
-      :bounce_rate
-    ]
-    @gap_tables_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_for_graph(@gap_tables_for_graph, @from, @to, columns_for_graph)
-    # CV値を挿入
-    @cv_for_graph = AnalyticsServiceClass.create_class('CVForGraphSkeleton', [
-                                    ('goal' + @cv_num.to_s + 'Completions').to_sym
-                                ],
-                                [
-                                  :date
-                                ]
-                              ).results(ga_profile, cond)
-    put_cv_for_graph(@cv_for_graph, @gap_tables_for_graph, @cv_num)
-    # 理想値
-    cond[:filters] = { ('goal' + @cv_num.to_s + '_completions').to_sym.gte => 1 }
-    @gap_data_for_graph_good = AnalyticsServiceClass::GapDataForGraph.results(ga_profile, cond)
-    put_table_for_graph(@gap_data_for_graph_good, @gap_tables_for_graph)
-    # 現実値
-    cond[:filters] = { ('goal' + @cv_num.to_s + '_completions').to_sym.lt => 1 }
-    @gap_data_for_graph_bad = AnalyticsServiceClass::GapDataForGraph.results(ga_profile, cond)
-    put_table_for_graph(@gap_data_for_graph_bad, @gap_tables_for_graph)
-    # GAP値
-    calc_gap_for_graph(@gap_tables_for_graph, columns_for_graph)
-
-    # ◆グラフ表示プログラムへ渡すハッシュを作成
-    @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
-    create_array_for_graph(@hash_for_graph, @gap_tables_for_graph, @graphic_item)
-    gon.hash_for_graph = @hash_for_graph
-
-
-    # ◆曜日別の値を出すテーブルを作成
-    @value_table_by_days = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_table_by_days(@value_table_by_days, @gap_tables_for_graph)
-
+    # ------- テーブルデータ生成セクション start ------- #
 
     #　◆ページ共通のテーブルを生成
-    @not_gap_data_for_kitchen = AnalyticsServiceClass.create_class('CVForGraphSkeleton', [
-                                                          ('goal' + @cv_num.to_s + 'Completions').to_sym,
-                                                          ('goal' + @cv_num.to_s + 'ConversionRate').to_sym,
-                                                          :sessions,
-                                                          :pageviews,
-                                                          :bounceRate
-                                                      ]
-                                                    ).results(ga_profile, cond)
-    @nogap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_nogap_table(@nogap_tables)
-    cv_txt = ('goal' + @cv_num + '_completions').to_sym
-    cvr_txt = ('goal' + @cv_num + '_conversion_rate').to_sym
-    @not_gap_data_for_kitchen.each do |t|
-      @nogap_tables[:pv] = t.pageviews
-      @nogap_tables[:session] = t.sessions
-      @nogap_tables[:cv] = t[cv_txt]
-      @nogap_tables[:cvr] = t[cvr_txt]
-      @nogap_tables[:bounce_rate] = t.bounce_rate
-    end
-    ## 平均PV数 ~ リピート率テーブルを生成
-    @gap_tables = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_gap_table(@gap_tables)
-    # 総PV数の取得（リピート率計算用
-    all_sessions = 0
-    @not_gap_data_for_kitchen.each do |t|
-      all_sessions = t.sessions
-    end
-    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.gte => 1 }
-    @gap_data_for_kitchen_good = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.gte => 1,
-      :user_type.matches => 'Returning Visitor'
-    }
-    @gap_repeat_data_for_kitchen_good = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
-    if @gap_data_for_kitchen_good.total_results != 0 then
-      @gap_data_for_kitchen_good.each do |t|
-        @gap_tables[:avg_pv][:good] = t.pageviews_per_session
-        @gap_tables[:avg_duration][:good] = t.avg_session_duration
-        @gap_tables[:new_percent][:good] = t.percent_new_sessions
-      end
-    end
-    if @gap_repeat_data_for_kitchen_good.total_results != 0 then
-      @gap_repeat_data_for_kitchen_good.each do |t|
-        @gap_tables[:repeat_rate][:good] = ( t.sessions.to_f / all_sessions.to_f ) * 100
-      end
-    end
-    # 現状値
-    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.lt => 1 }
-    @gap_data_for_kitchen_bad = AnalyticsServiceClass::GapDataForKitchen.results(ga_profile, cond)
-    cond[:filters] = {
-      ('goal' + @cv_num + '_completions').to_sym.lt => 1,
-      :user_type.matches => 'Returning Visitor'
-    }
-    @gap_repeat_data_for_kitchen_bad = AnalyticsServiceClass::GapRepeatDataForKitchen.results(ga_profile, cond)
-    if @gap_data_for_kitchen_bad.total_results != 0 then
-      @gap_data_for_kitchen_bad.each do |t|
-        @gap_tables[:avg_pv][:bad] = t.pageviews_per_session
-        @gap_tables[:avg_duration][:bad] = t.avg_session_duration
-        @gap_tables[:new_percent][:bad] = t.percent_new_sessions
-      end
-    end
-    if @gap_repeat_data_for_kitchen_bad.total_results != 0 then
-      @gap_repeat_data_for_kitchen_bad.each do |t|
-        @gap_tables[:repeat_rate][:bad] = ( t.sessions.to_f / all_sessions.to_f ) * 100
-      end
-    end
-    # GAP値
-    @gap_tables[:avg_pv][:gap] = @gap_tables[:avg_pv][:bad].to_f - @gap_tables[:avg_pv][:good].to_f
-    @gap_tables[:avg_duration][:gap] = @gap_tables[:avg_duration][:bad].to_f - @gap_tables[:avg_duration][:good].to_f
-    @gap_tables[:new_percent][:gap] = @gap_tables[:new_percent][:bad].to_f - @gap_tables[:new_percent][:good].to_f
-    @gap_tables[:repeat_rate][:gap] = @gap_tables[:repeat_rate][:bad].to_f - @gap_tables[:repeat_rate][:good].to_f
 
-    #平均滞在時間の書式を変更
-    # (@gap_tables[:avg_duration][:gap].to_i / 60)
-    # (@gap_tables[:avg_session_duration][:gap].to_i % 60)
+    # pv数 ~ 直帰率（ギャップなしデータ）
+    @common_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+    @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
+    create_skeleton(@common_table, @cv_txt, @cvr_txt)
+    @common = Analytics.create_class('Common',
+      [
+        (@cv_txt.classify + 's').to_sym,
+        @cvr_txt.classify.to_sym,
+        :sessions,
+        :pageviews,
+        :bounceRate
+      ] ).results(ga_profile, cond)
+    put_common(@common_table, @common)
+    all_sessions = @common_table[:sessions] # 総セッション数の取得（リピート率計算用)
 
-    ## 人気ページテーブルを生成
-    @favorite_pages = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_favorite_page_table_for(@select_word_for_bedroom, @favorite_pages)
-    # 理想値
-    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.gte => 1 }
-    @select_word_for_bedroom_good = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    put_skeleton_favorite_page_table_for(@select_word_for_bedroom_good, @favorite_pages, :good)
-    total_view = 0
-    total_top_view = 0
-    counter = 0
-    # 現状値
-    cond[:filters] = { ('goal' + @cv_num + '_completions').to_sym.lt => 1 }
-    @select_word_for_bedroom_bad = AnalyticsServiceClass::FetchKeywordForPages.results(ga_profile, cond)
-    put_skeleton_favorite_page_table_for(@select_word_for_bedroom_bad, @favorite_pages, :bad)
-    total_view = 0
-    total_top_view = 0
-    counter = 0
-    # GAP値
-    @favorite_pages.each do |k, v|
-      v[:gap] = (v[:bad].to_f - v[:good].to_f)
-    end
+    # グラフテーブル
+    @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    columns_for_graph = [@graphic_item] # セレクトボックスの値
+    create_skeleton_for_graph(@gap_table_for_graph, @from, @to, columns_for_graph)
+    @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
+      [ (@cv_txt.classify + 's').to_sym ], [:date] ).results(ga_profile, cond) # CV値挿入
+    put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
+    gap = fetch_analytics_data('GapDataForGraph', ga_profile, cond, @cv_txt, {}, @graphic_item)
+    put_table_for_graph(gap, @gap_table_for_graph, @graphic_item, all_sessions)
+    calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
+    # グラフ表示プログラムへ渡すハッシュを作成
+    @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
+    create_array_for_graph(@hash_for_graph, @gap_table_for_graph, @graphic_item)
+    gon.hash_for_graph = @hash_for_graph
+
+    # 曜日別値テーブル
+    @value_table_by_days = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_table_by_days(@value_table_by_days, @gap_table_for_graph, @graphic_item)
+
+    # グラフ値フォーマット設定(グラフテーブル生成の最後にやんないと表示が崩れる)
+    format = check_format_graph(@graphic_item)
+    change_format(@gap_table_for_graph, @graphic_item, format)
+
+    # 平均PV数 ~ リピート率テーブル（ギャップありデータ）
+    @gap_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_gap_table(@gap_table)
+    gap = fetch_analytics_data('CommonForGap', ga_profile, cond, @cv_txt)
+    gap_for_repeat = fetch_analytics_data('CommonRepeatForGap', ga_profile, cond, @cv_txt,
+      {:user_type.matches => 'Returning Visitor'} )
+    put_common_for_gap(@gap_table, gap)
+    put_common_for_gap(@gap_table, gap_for_repeat, all_sessions)
+    calc_gap_for_common(@gap_table)
+
+    # 人気ページテーブル
+    @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_favorite_table(@favorite, @favorite_table)
+    gap = fetch_analytics_data('FetchKeywordForPages', ga_profile, cond, @cv_txt)
+    put_favorite_table(gap, @favorite_table)
+    calc_gap_for_favorite(@favorite_table)
+
+    #　◆ページ固有のテーブルを生成
+
+
+    # ------- テーブルデータ生成セクション end ------- #
+
+    @cond = cond.dup
 
     render :layout => 'ganalytics'
   end
@@ -439,186 +191,4 @@ d      v[:gap] = (v[:bad].to_f - v[:good].to_f)
       redirect_to(root_path) unless current_user.admin?
     end
 
-    # グラフフォーマット判別関数
-    def check_format_graph(item)
-      if /(bounce_rate|repeat_rate)/ =~ item then
-        p = "percent"
-      elsif /avg_session_duration/ =~ item then
-        p = "time"
-      else
-        p = "number"
-      end
-      return p
-    end
-
-    # ビュー用にグラフ値テーブルスケルトンを作成
-
-    def create_skeleton_for_graph(result_hash, from_date, to_date, columns)
-      idx = 1
-      (from_date..to_date).each do |t|
-      columns.each do |u|
-          dts = t.to_s.gsub( /-/, "" )
-          if (t.wday == 0 or t.wday == 6) or HolidayJapan.check(t) then
-            result_hash[dts][u] = [0, 0, 0, 'day_off']
-          else
-            result_hash[dts][u] = [0, 0, 0, 'day_on']
-          end
-          result_hash[dts][:cv] = 0
-          result_hash[dts]["idx"] = idx
-      end
-      idx += 1
-      end
-      return result_hash
-    end
-
-    # ビュー用にグラフ値テーブルへ値を代入
-
-    def put_table_for_graph(data, table)
-      if data.total_results != 0 then
-        good_or_bad = 0
-        data.each do |d|
-          date = d.date
-          if data =~ /good/ then
-            good_or_bad = 0
-          else
-            good_or_bad = 1
-          end
-          table[date][:pageviews][good_or_bad] = d.pageviews
-          table[date][:sessions][good_or_bad] = d.sessions
-          table[date][:pageviews_per_session][good_or_bad] = d.pageviews_per_session
-          table[date][:avg_session_duration][good_or_bad] = d.avg_session_duration
-          table[date][:percent_new_sessions][good_or_bad] = d.percent_new_sessions
-          table[date][:bounce_rate][good_or_bad] = d.bounce_rate
-        end
-      end
-      return table
-    end
-
-    # グラフ値テーブルのGAP値を計算
-
-    def calc_gap_for_graph(table, columns)
-      table.each do |k, v|
-        date = k.to_s # きちんと変換してやんないとnilClass エラーになるので注意
-        columns.each do |u|
-          table[date][u][2] = table[date][u][1].to_f - table[date][u][0].to_f
-        end
-      end
-      return table
-    end
-
-    # グラフ値テーブルへcv値を代入
-    def put_cv_for_graph(data, table, cv_num)
-      if data.total_results != 0 then
-        data.each do |d|
-          date = d.date
-          table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
-        end
-      end
-      return table
-    end
-
-    # 曜日別の値を出すテーブルを作成
-    def create_table_by_days(table, data)
-      [:day_on, :day_off].each do |t|
-        [:good, :bad, :gap].each do |u|
-          table[t][u] = 0
-        end
-      end
-      data.each do |k, v|
-        if v[:pageviews][3] == 'day_on' then
-          table[:day_on][:good] += v[:pageviews][0].to_i
-          table[:day_on][:bad] += v[:pageviews][1].to_i
-          table[:day_on][:gap] += v[:pageviews][2].to_i
-        else
-          table[:day_off][:good] += v[:pageviews][0].to_i
-          table[:day_off][:bad] += v[:pageviews][1].to_i
-          table[:day_off][:gap] += v[:pageviews][2].to_i
-        end
-      end
-      return table
-    end
-
-    # グラフテーブルからグラフ表示プログラム用の配列を出力
-    def create_array_for_graph(hash, table, param)
-      table.sort_by{ |a, b| b[:idx].to_i }.each do |k, v|
-        date =  k.to_i
-        param = param.to_sym
-        hash[date] = [ v[param][2], v[:cv].to_i ]
-      end
-      return hash
-    end
-
-
-
-
-    # ビュー用に共通ギャップ値なしテーブルスケルトンを作成
-
-    def create_skeleton_nogap_table(result_hash)
-      result_hash[:pv] = 0
-      result_hash[:session] = 0
-      result_hash[:cv] = 0
-      result_hash[:cvr] = 0
-      result_hash[:bounce_rate] = 0
-      return result_hash
-    end
-
-    # ビュー用に共通ギャップ値テーブルスケルトンを作成
-
-    def create_skeleton_gap_table(result_hash)
-      [:good, :bad, :gap].each do |t|
-        result_hash[:avg_pv][t] = 0
-        result_hash[:avg_duration][t] = 0
-        result_hash[:new_percent][t] = 0
-        result_hash[:repeat_rate][t] = 0
-      end
-      return result_hash
-    end
-
-    # ビュー用に人気ページテーブルの生成
-
-    def create_skeleton_favorite_page_table_for(input_hash, result_hash)
-      counter = 0
-      # @favorite_pages = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      input_hash.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-        counter += 1
-        result_hash[t.page_title + ";;" + t.page_path][:good] = 0
-        result_hash[t.page_title + ";;" + t.page_path][:bad] = 0
-        result_hash[t.page_title + ";;" + t.page_path][:gap] = 0
-        result_hash[t.page_title + ";;" + t.page_path][:index] = counter
-        if counter >= 10 then
-          break
-        end
-      end
-      result_hash["その他"][:good] = 0
-      result_hash["その他"][:bad] = 0
-      result_hash["その他"][:gap] = 0
-      result_hash["その他"][:index] = counter + 1
-      return result_hash
-    end
-
-
-    def put_skeleton_favorite_page_table_for(gaapi_results, result_hash, good_or_bad)
-      total_view = 0
-      total_top_view = 0
-      counter = 0
-
-      if gaapi_results.total_results != 0
-        gaapi_results.each do |t|
-          total_view += t.pageviews.to_i
-        end
-        gaapi_results.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-          counter += 1
-          result_hash[t.page_title + ";;" + t.page_path][good_or_bad] = t.pageviews.to_i
-          if counter >= 10 then
-            break
-          end
-        end
-        result_hash.each do |k,v|
-          total_top_view += v[good_or_bad].to_i
-          v[good_or_bad] = ( v[good_or_bad].to_f / total_view.to_f ) * 100 # 人気ページ毎のPV（パーセント）
-        end
-        result_hash["その他"][good_or_bad] = ( ( total_view.to_i - total_top_view.to_i ).to_f / total_view.to_f ) * 100 # その他のパーセント
-      end
-      return result_hash
-    end
 end

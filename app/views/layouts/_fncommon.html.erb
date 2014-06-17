@@ -1,0 +1,14 @@
+<script type="text/javascript">
+// GAP値がマイナスなら赤色にする
+$(document).ready(function() {
+  $('td.gap').each(function() {
+    var str = $(this).text();
+    if( str.substr(0,1) == "-" ) {
+      $(this).css("color", "red");
+    // } else {
+    //   $(this).css("color", "black");
+    }
+  });
+});
+
+</script>
