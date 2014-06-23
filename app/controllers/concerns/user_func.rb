@@ -1,13 +1,13 @@
 module UserFunc
 
   # 理想値、現状値を取得
-  def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil)
+  def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil, dimensions = nil)
     hash = {}
     o = opt.dup
     o[:filters] = o[:filters].merge( filter )
     {'good' => :gte, 'bad' => :lt}.each do |k, v|
       c = o.dup
-      c[:filters] = o[:filters].merge( { @cv_txt.to_sym.send(v) => 1 } )
+      c[:filters] = o[:filters].merge( { cv.to_sym.send(v) => 1 } )
       if metrics.nil?
         hash[k] = Analytics.const_get(name).results(prof, c)
       elsif metrics == :repeat_rate then
@@ -16,6 +16,10 @@ module UserFunc
         hash[k] = Analytics.create_class(name,
           [ :sessions ],
           [:date]).results(prof, c)
+      elsif dimensions == :source or dimensions == :socialNetwork then
+        hash[k] = Analytics.create_class(name,
+          [ metrics ],
+          [ dimensions ]).results(prof, c)
       else
         hash[k] = Analytics.create_class(name,
           [ metrics ],
@@ -83,9 +87,8 @@ module ParamUtils
         :device_category.matches => 'mobile',
         :mobile_input_selector.does_not_match => 'touchscreen'
       })
-    else
-      return
     end
+    return dvc
   end
 
   # 来訪者の設定
@@ -95,20 +98,51 @@ module ParamUtils
       opt[:filters].merge!( {:user_type.matches => 'New Visitor'} )
     when "repeat"
       opt[:filters].merge!( { :user_type.matches => 'Returning Visitor' } )
-    else
-      return
     end
+    return vst
   end
 
   # 絞り込みキーワードの設定
-  def set_narrow_word(wd, opt)
-    opt[:filters].merge!( {:page_title.matches => wd } )
+  def set_narrow_word(wd, opt, tag)
+    case tag
+    when 'f'
+      opt[:filters].merge!( {:page_title.matches => wd } )
+    when 's'
+      opt[:filters].merge!( {:keyword.matches => wd } )
+    when 'r'
+      opt[:filters].merge!( {:source.matches => wd } )
+    when 'l'
+      opt[:filters].merge!( {:social_network.matches => wd } )
+    when 'c'
+      opt[:filters].merge!( {:campaign.matches => wd } )
+    end
   end
 
   # セレクトボックスの生成
-  def set_select_box(arr, data)
-    data.each do |w|
-      arr.push([ w.page_title, w.page_title ])
+  def set_select_box(data, tag)
+    tg = tag.to_s
+    arr = []
+    case tg
+    when 'f'
+      data.each do |w|
+        arr.push([ w.page_title, w.page_title.to_s + tg ])
+      end
+    when 's'
+      data.each do |w|
+        arr.push([ w.keyword, w.keyword.to_s + tg ])
+      end
+    when 'r'
+      data.each do |w|
+        arr.push([ w.source, w.source.to_s + tg ])
+      end
+    when 'l'
+      data.each do |w|
+        arr.push([ w.social_network, w.social_network.to_s + tg ])
+      end
+    when 'c'
+      data.each do |w|
+        arr.push([ w.campaign, w.campaign.to_s + tg ])
+      end
     end
     return arr
   end

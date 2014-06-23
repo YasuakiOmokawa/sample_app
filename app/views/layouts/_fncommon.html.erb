@@ -9,6 +9,38 @@ $(document).ready(function() {
     //   $(this).css("color", "black");
     }
   });
-});
 
+  // 選択したページタブのタグをdiv へ変える
+  tab = gon.div_page_tab
+  tag = 'li#' + tab + ' a'
+  $(tag).replaceWith("<div>" + $(tag).text() + "</div>");
+
+  // タブクリックイベントをフォーム送信へ紐付け
+  $("li.tab a").click(function() {
+    $('#hallway > form').attr("action", $(this).attr("name"))
+    $('a#set').trigger('click');
+  });
+
+  // ラジオボタンの選択値を保持
+  rdo_dev = gon.radio_device
+  rdo_vst = gon.radio_visitor
+  $('input[name="device"]').val([rdo_dev]);
+  $('input[name="visitor"]').val([rdo_vst]);
+
+  // セレクトボックスの選択値を保持
+  nrw_wd = gon.narrow_word
+  $('select[name="narrow_select"]').val(nrw_wd);
+
+  // グラフ表示項目の選択値を保持
+  grh_fmt = gon.graphic_item
+  $('select[name="graphicselect"]').val(grh_fmt);
+  $('input[name="graphic_item"').val(grh_fmt);
+
+  // CV種類の選択値を保持
+  cv = gon.cv_num
+  $('select[name="cvselect"]').val(cv);
+  $('input[name="cv_num"]').val(cv);
+
+
+});
 </script>

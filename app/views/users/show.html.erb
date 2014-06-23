@@ -95,18 +95,18 @@
         <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
       </tr>
       <tr>
-        <td><%= @gap_table[:avg_pv][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:avg_pv][:bad].to_f.round(1).to_s %></td>
-        <td class="gap"><%= @gap_table[:avg_pv][:gap].to_f.round(1).to_s %></td>
+        <td><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
+        <td class="gap"><%= @gap_table[:pageviews_per_session][:gap].to_f.round(1).to_s %></td>
       </tr>
       <tr>
-        <td><%= sprintf("%02d", ( @gap_table[:avg_duration][:good].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:good].to_i % 60 ) ) %></td>
+        <td><%= sprintf("%02d", ( @gap_table[:avg_session_duration][:good].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_session_duration][:good].to_i % 60 ) ) %></td>
         <td class="row">平均滞在時間</td>
-        <td><%= sprintf("%02d", ( @gap_table[:avg_duration][:bad].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:bad].to_i % 60 ) ) %></td>
-        <td class="gap"><%= sprintf("%02d", ( @gap_table[:avg_duration][:gap].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_duration][:gap].to_i % 60 ) ) %></td>
+        <td><%= sprintf("%02d", ( @gap_table[:avg_session_duration][:bad].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_session_duration][:bad].to_i % 60 ) ) %></td>
+        <td class="gap"><%= sprintf("%02d", ( @gap_table[:avg_session_duration][:gap].to_i / 60 ) ) %> : <%= sprintf("%02d", ( @gap_table[:avg_session_duration][:gap].to_i % 60 ) ) %></td>
       </tr>
       <tr>
-           <td><%= @gap_table[:new_percent][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:new_percent][:bad] .to_f.round(1).to_s%>%</td>
-           <td class="gap"><%= @gap_table[:new_percent][:gap] .to_f.round(1).to_s%>%</td>
+           <td><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
+           <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
           <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピート率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
@@ -119,7 +119,7 @@
             <td><%= @common_table[:bounce_rate].to_f.round(1).to_s %>%</td>
         </tr>
       </table>
-      <%= render @render_action %>
+      <%= render @partial %>
     </div>
   </div>
   <div id="bedroom">
@@ -142,4 +142,3 @@
     </table>
   </div><br>
 </div>
-<div id="footer">Copyright (C) 2014 senk Inc. All Rights Reserved.</div>

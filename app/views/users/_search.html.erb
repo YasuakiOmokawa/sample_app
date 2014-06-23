@@ -3,9 +3,12 @@
     <tr id="line">
       <td>検索ワード</td><td>セッション</td><td>クリック数</td><td>CTR</td>
     </tr>
-    <% @select_word_for_board.each do |t| %>
+    <% @search.each do |t| %>
     <tr>
-       <td class="row"><%= t.keyword %></td><td><%= t.sessions %></td><td><%= t.adsense_ads_clicks %></td><td><%= t.adsense_ctr.to_f.round(1).to_s %>%</td>
+       <td class="row"><%= t.keyword %></td>
+       <td><%= t.sessions %></td>
+       <td><%= t.adsense_ads_clicks %></td>
+       <td><%= t.adsense_ctr.to_f.round(1).to_s %>%</td>
     </tr>
     <% end %>
   </table>

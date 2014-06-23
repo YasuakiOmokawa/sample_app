@@ -52,6 +52,14 @@ class Analytics
       dimensions :keyword
   end
 
+  class FetchKeywordForDetail
+    extend Garb::Model
+    metrics :bounceRate,
+                  :sessions
+    dimensions :landingPagePath,
+                      :pageTitle
+  end
+
   class FetchKeywordForPages
       extend Garb::Model
       metrics :pageviews

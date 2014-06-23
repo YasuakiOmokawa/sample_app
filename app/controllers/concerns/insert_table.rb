@@ -22,7 +22,9 @@ module InsertTable
             else
               # アナリティクスに無い項目を算出する
               al = all.to_i
-              if al > 0 then al = 1 end
+              p al
+              if al < 1 then al = 1 end # ゼロ除算例外の防止
+              p al
               table[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
             end
           end
@@ -91,4 +93,18 @@ module InsertTable
     end
     return tbl
   end
+
+  # referral, social, campaign 個別テーブルへデータ代入
+  def put_rsc_table(tbl, data, cv, key)
+    ['good', 'bad'].each do |t|
+      if data[t].total_results != 0 then
+        data[t].each do |s|
+          tbl[s.send(key)][t.to_sym] = s.send(cv)
+        end
+      end
+    end
+    return tbl
+  end
+
+
 end

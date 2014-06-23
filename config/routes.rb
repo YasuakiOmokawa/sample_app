@@ -1,7 +1,7 @@
 SampleApp::Application.routes.draw do
   resources :users do
     member do
-      get :search, :direct
+      get :search, :direct, :referral, :social, :campaign, :last
     end
   end
   resources :sessions, only: [:new, :create, :destroy]

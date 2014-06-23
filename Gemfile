@@ -14,6 +14,7 @@ gem 'garb'
 gem 'json', '1.8.0'
 gem 'holiday_japan'
 gem 'gon'
+gem 'jquery-turbolinks'
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

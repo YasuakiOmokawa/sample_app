@@ -1,0 +1,22 @@
+<div id="fork">
+      <table>
+        <tbody><tr id="line">
+        <%
+          if @title == 'ソーシャル' or @title == 'その他ウェブサイト' then
+            head = '参照元'
+          else
+            head = 'キャンペーン'
+          end
+        %>
+          <td>目標値</td><td><%= head %></td><td>現状値</td><td>差</td>
+        </tr>
+        <% @rsc_table.each do |k, v| %>
+        <tr>
+          <td><%= v[:good] %></td>
+          <td class="row"><%= k %></td>
+          <td><%= v[:bad] %></td>
+          <td class="gap"><%= v[:gap] %></td>
+        </tr>
+        <% end %>
+      </tbody></table>
+    </div>

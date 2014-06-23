@@ -12,14 +12,14 @@
   <a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：<%= @user.name %></div><br>
 </div>
 <ul>
-  <li id="first"><a href="">ホーム</a></li>
-  <li><a href="<%= user_path %>">全体</a></li>
-  <li><a href="<%= search_user_path %>">検索</a></li>
-  <li><a href="direct.html" class="db">直接入力<br>ブックマーク</a></li>
-  <li><a href="referral.html" class="db">その他<br>ウェブサイト</a></li>
-  <li><a href="social.html">ソーシャル</a></li>
-  <li><a href="campaign.html">キャンペーン</a></li>
-  <li id="last"><a href="custom.html">カスタマイズ</a></li><br>
+  <li class="tab" id="first"><a href="">ホーム</a></li>
+  <li class="tab" id="show"><a href="#" name="<%= user_path %>">全体</a></li>
+  <li class="tab" id="search"><a href="#" name="<%= search_user_path %>">検索</a></li>
+  <li class="tab" id="direct"><a href="#" name="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
+  <li class="tab" id="referral"><a href="#" name="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
+  <li class="tab" id="social"><a href="#" name="<%= social_user_path %>">ソーシャル</a></li>
+  <li class="tab" id="campaign"><a href="#" name="<%= campaign_user_path %>">キャンペーン</a></li>
+  <li class="tab" id="last"><a href="#" name="<%= last_user_path %>">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="get" name="narrowForm">

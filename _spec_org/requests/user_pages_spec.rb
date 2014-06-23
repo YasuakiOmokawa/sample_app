@@ -1,4 +1,4 @@
-# require 'spec_helper'
+require 'spec_helper'
 
 describe "User pages" do
 
@@ -67,7 +67,7 @@ describe "User pages" do
   #   it { should have_title(full_title('Sign up')) }
   # end
 
-  # describe "signup" do
+  describe "signup" do
 
     # before { visit signup_path }
 
@@ -100,16 +100,16 @@ describe "User pages" do
     #     it { should have_selector('div.alert.alert-success', text: 'Welcome') }
     #   end
     # end
-  # end
+  end
 
-  # describe "edit" do
-  #   let(:user) { FactoryGirl.create(:user) }
-  #   before do
-  #     sign_in user
-  #     visit edit_user_path(user)
-  #   end
+  describe "edit" do
+    let(:user) { FactoryGirl.create(:user) }
+    before do
+      sign_in user
+      visit edit_user_path(user)
+    end
 
-  #   before { visit edit_user_path(user) }
+    before { visit edit_user_path(user) }
 
     # describe "page" do
     #   it { should have_content("Update your profile") }
@@ -140,5 +140,5 @@ describe "User pages" do
       # specify { expect(user.reload.name).to  eq new_name }
       # specify { expect(user.reload.email).to eq new_email }
     # end
-  # end
+  end
 end

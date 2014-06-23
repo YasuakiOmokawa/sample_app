@@ -20,6 +20,7 @@
       <%= content_tag(:div, value, class: "alert alert-#{key}") %>
     <% end %>
     <%= yield %>
+    <%= render 'layouts/gafooter' %>
     <%
       if Rails.env.development? then
         [
@@ -31,7 +32,10 @@
           @gap_table_for_graph,
           @value_table_by_days,
           @select_word_for_board,
-          @narrow_word
+          @narrow_word,
+          @search,
+          @in_table,
+          @rsc_table
           ].each do |t|
     %>
      <%= debug t.inspect %>

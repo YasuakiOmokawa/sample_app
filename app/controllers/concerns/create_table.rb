@@ -78,4 +78,18 @@ module CreateTable
     end
     return table
   end
+
+  # referral, social, campaign 個別テーブルを生成
+  def create_skeleton_for_rsc(data, key)
+    result_hash = Hash.new{ |h, k| h[k] = {} }
+    if data.total_results != 0 then
+      data.each do|t|
+        [:good, :bad, :gap].each do |s|
+          result_hash[t.send(key)][s] = 1
+        end
+      end
+    end
+    return result_hash
+  end
+
 end
