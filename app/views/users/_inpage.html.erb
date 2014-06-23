@@ -3,7 +3,7 @@
     <tbody><tr id="line">
       <td>ランディングページ</td><td>セッション</td><td>直帰率</td>
     </tr>
-    <% @in_table.each do |t| %>
+    <% @in_table.sort_by{|a| -(a.sessions.to_f) -(a.bounce_rate.to_f) }.each do |t| %>
     <tr>
       <td class="row"><%= t.page_title %></td>
       <td><%= t.sessions.to_f.round(1) %></td>

@@ -3,7 +3,7 @@
     <tr id="line">
       <td>検索ワード</td><td>セッション</td><td>クリック数</td><td>CTR</td>
     </tr>
-    <% @search.each do |t| %>
+    <% @search.sort_by{ |a| -(a.sessions.to_i) -(a.adsense_ads_clicks.to_i) -(a.adsense_ctr.to_f) }.each do |t| %>
     <tr>
        <td class="row"><%= t.keyword %></td>
        <td><%= t.sessions %></td>

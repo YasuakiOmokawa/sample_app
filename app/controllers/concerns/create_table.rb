@@ -85,7 +85,7 @@ module CreateTable
     if data.total_results != 0 then
       data.each do|t|
         [:good, :bad, :gap].each do |s|
-          result_hash[t.send(key)][s] = 1
+          result_hash[t.send(key)][s] = 0
         end
       end
     end
