@@ -70,7 +70,9 @@ module UpdateTable
           e = e2 - e1
           p "d is #{d}, and f is #{f}, and e is #{e} d1, d2, f1, f2, e1, e2 is #{d1} #{d2} #{f1} #{f2} #{e1} #{e2}"
           pt = calc_soukan(t, d, e, f)
+        Pry.rescue do
           r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
+        end
          end
       end
       d2 = d1
