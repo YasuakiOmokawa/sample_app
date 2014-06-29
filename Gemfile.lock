@@ -28,11 +28,19 @@ GEM
     arel (4.0.2)
     bcrypt-ruby (3.1.2)
     bcrypt-ruby (3.1.2-x64-mingw32)
+    better_errors (1.1.0)
+      coderay (>= 1.0.0)
+      erubis (>= 2.6.6)
+    binding_of_caller (0.7.2)
+      debug_inspector (>= 0.0.1)
     bootstrap-sass (2.3.2.0)
       sass (~> 3.2)
     bootstrap-will_paginate (0.0.9)
       will_paginate
     builder (3.1.4)
+    byebug (2.7.0)
+      columnize (~> 0.3)
+      debugger-linecache (~> 1.2)
     capybara (2.1.0)
       mime-types (>= 1.16)
       nokogiri (>= 1.3.3)
@@ -51,6 +59,9 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.7.0)
+    columnize (0.8.9)
+    debug_inspector (0.0.2)
+    debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.1.0)
@@ -84,8 +95,13 @@ GEM
       guard (>= 1.1)
       spork (>= 0.8.4)
     hike (1.2.3)
+    hirb (0.7.2)
+    hirb-unicode (0.0.5)
+      hirb (~> 0.5)
+      unicode-display_width (~> 0.1.1)
     holiday_japan (1.1.0)
     i18n (0.6.9)
+    interception (0.5)
     jbuilder (1.0.2)
       activesupport (>= 3.0.0)
     jquery-rails (3.0.4)
@@ -121,6 +137,20 @@ GEM
       coderay (~> 1.0)
       method_source (~> 0.8)
       slop (~> 3.4)
+    pry-byebug (1.3.2)
+      byebug (~> 2.7)
+      pry (~> 0.9.12)
+    pry-doc (0.6.0)
+      pry (~> 0.9)
+      yard (~> 0.8)
+    pry-rails (0.3.2)
+      pry (>= 0.9.10)
+    pry-rescue (1.4.1)
+      interception (>= 0.5)
+      pry
+    pry-stack_explorer (0.4.9.1)
+      binding_of_caller (>= 0.7)
+      pry (>= 0.9.11)
     rack (1.5.2)
     rack-test (0.6.2)
       rack (>= 1.0)
@@ -205,16 +235,20 @@ GEM
     uglifier (2.1.1)
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
+    unicode-display_width (0.1.1)
     websocket (1.0.7)
     will_paginate (3.0.4)
     xpath (2.0.0)
       nokogiri (~> 1.3)
+    yard (0.8.7.4)
 
 PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
   bcrypt-ruby (= 3.1.2)
+  better_errors
+  binding_of_caller
   bootstrap-sass (= 2.3.2.0)
   bootstrap-will_paginate (= 0.0.9)
   capybara (= 2.1.0)
@@ -226,6 +260,7 @@ DEPENDENCIES
   gon
   guard-rspec (= 2.5.0)
   guard-spork (= 1.5.0)
+  hirb-unicode
   holiday_japan
   jbuilder (= 1.0.2)
   jquery-rails (= 3.0.4)
@@ -233,6 +268,11 @@ DEPENDENCIES
   jquery-ui-rails
   json (= 1.8.0)
   pg (= 0.15.1)
+  pry-byebug
+  pry-doc
+  pry-rails
+  pry-rescue
+  pry-stack_explorer
   rails (= 4.0.5)
   rails_12factor (= 0.0.2)
   rspec-rails (= 2.13.1)

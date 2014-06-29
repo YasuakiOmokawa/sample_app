@@ -9,8 +9,9 @@ class UsersController < ApplicationController
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
-  before_action :chk_param, :create_common_table, only: [:show, :search, :direct, :referral, :social, :campaign, :last]
-
+  before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign, :last]
+  before_action :create_home, only: [:show]
+  prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign, :last]
 
   def last
     # パラメータ個別設定
@@ -154,12 +155,22 @@ class UsersController < ApplicationController
 
   def show
     # パラメータ個別設定
-    @title = '全体'
+    @title = 'ホーム'
     @narrow_action = user_path
     @partial = 'norender'   # ページ毎の部分テンプレート
-    gon.div_page_tab = 'show'
+    gon.div_page_tab = 'first'
 
-    render :layout => 'ganalytics'
+    render :layout => 'ganalytics', :file => '/app/views/users/first'
+  end
+
+  def all
+    # パラメータ個別設定
+    @title = '全体'
+    @narrow_action = all_user_path
+    @partial = 'norender'   # ページ毎の部分テンプレート
+    gon.div_page_tab = 'all'
+
+    render :layout => 'ganalytics', :action => 'show'
   end
 
   def new
@@ -238,19 +249,19 @@ class UsersController < ApplicationController
      gon.format_string = check_format_graph(@graphic_item)
      @cv_num = (params[:cv_num].presence || 1)                                                     # CV種類
      gon.cv_num = @cv_num
-    # 絞り込みキーワード
-    @narrow_word = params[:narrow_select].presence
-    if params[:narrow_select].present?
-      gon.narrow_word = params[:narrow_select].dup
-      @narrow_tag = params[:narrow_select][-1]
-      @narrow_word.slice!(-1)
-      set_narrow_word(@narrow_word, @cond, @narrow_tag) # 絞り込んだキーワード
-    end
-    # 絞り込みセレクトボックス項目を生成
-    # ページ共通セレクトボックス(人気ページ)
-    @categories = {}
-    @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
-    @categories["人気ページ"] = set_select_box(@favorite, 'f')
+      # 絞り込みキーワード
+      @narrow_word = params[:narrow_select].presence
+      if params[:narrow_select].present?
+        gon.narrow_word = params[:narrow_select].dup
+        @narrow_tag = params[:narrow_select][-1]
+        @narrow_word.slice!(-1)
+        set_narrow_word(@narrow_word, @cond, @narrow_tag) # 絞り込んだキーワード
+      end
+      # 絞り込みセレクトボックス項目を生成
+      # ページ共通セレクトボックス(人気ページ)
+      @categories = {}
+      @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
+      @categories["人気ページ"] = set_select_box(@favorite, 'f')
     end
 
     def create_common_table
@@ -298,8 +309,8 @@ class UsersController < ApplicationController
       # 平均PV数 ~ リピート率テーブル（ギャップありデータ）
       @gap_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       create_skeleton_gap_table(@gap_table)
-      gap = fetch_analytics_data('CommonForGap', @ga_profile,@cond, @cv_txt)
-      gap_for_repeat = fetch_analytics_data('CommonRepeatForGap', @ga_profile,@cond, @cv_txt,
+      gap = fetch_analytics_data('CommonForGap', @ga_profile, @cond, @cv_txt)
+      gap_for_repeat = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
         {:user_type.matches => 'Returning Visitor'} )
       put_common_for_gap(@gap_table, gap)
       put_common_for_gap(@gap_table, gap_for_repeat, all_sessions)
@@ -312,4 +323,98 @@ class UsersController < ApplicationController
       put_favorite_table(gap, @favorite_table)
       calc_gap_for_favorite(@favorite_table)
     end
+
+    def create_home
+      @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
+      @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+
+      # ページ項目
+      page = [
+        '全体',
+        '検索',
+        '直接入力 ブックマーク',
+        'その他ウェブサイト',
+        'ソーシャル',
+        'キャンペーン',
+      ]
+      
+      # データ項目
+      mets = {
+        @cvr_txt.classify.to_sym => 'CVR',
+        :pageviews => 'PV数',
+        :pageviewsPerSession => '平均PV数',
+        :sessions => '訪問回数',
+        :avgSessionDuration => '平均滞在時間',
+        :bounceRate => '直帰率',
+        :percentNewSessions => '新規訪問率',
+      }
+      mets_ca = [] # アナリティクスAPIデータ取得用
+      mets_sa = [] # データ構造構築用
+      mets_sh = {} # jqplot用データ構築用
+      mets.each do |k, v|
+        mets_sh[k.to_s.to_snake_case.to_sym] = v
+        mets_ca.push(k)
+        mets_sa.push(k.to_s.to_snake_case.to_sym)
+      end
+      {
+        :fav_page => '人気ページ',
+        :repeat_rate => '再訪問率',
+        :day => '曜日別',
+      }.each do |k, v|
+        mets_sh[k] = v
+        mets_sa.push(k)
+      end
+
+      # リピート率計算用のセッション総数
+      @common = Analytics.create_class('Common',
+        [
+          :sessions
+        ] ).results(@ga_profile,@cond)
+      # 総セッション数の取得（リピート率計算用)
+      if @common.total_results == 0 then
+        all_sessions = 1
+      else
+        all_sessions = @common[0][:sessions]
+      end
+
+      # スケルトン作成
+      @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      create_bubble_corr(@gap_table_for_graph, @from, @to, mets_sh)
+
+      # CV代入
+      @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
+        [ (@cv_txt.classify + 's').to_sym ], [:date] ).results(@ga_profile,@cond)
+      put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
+
+      # GAP算出
+      gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+      put_table_for_graph(gap, @gap_table_for_graph, mets_sa, all_sessions)
+      gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
+      put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_rate], all_sessions)
+      calc_gap_for_graph(@gap_table_for_graph, mets_sa)
+
+      # 相関算出
+      corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
+
+      # GAP総数算出
+
+      # スケルトン作成
+      skel = create_skeleton_bubble(mets_sa)
+      # GAP算出
+      gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca)
+      put_common_for_gap(skel, gap)
+      gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
+        {:user_type.matches => 'Returning Visitor'} )
+      put_common_for_gap(skel, gap_rep, all_sessions) #リピート率
+      skel = calc_gap_for_common(skel)
+      # パーセンテージを数値へ再計算
+      skel = calc_pct_to_num(skel)
+
+      # jqplot用データ構築
+      mets_sh.delete(@cvr_txt.to_sym) #CVRは必要ない
+      skel[:avg_session_duration][:gap] = skel[:avg_session_duration][:gap] / 10
+      gon.homearr = concat(skel, corr, mets_sh)
+
+    end
+
 end

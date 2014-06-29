@@ -12,26 +12,26 @@ module InsertTable
   end
 
   # 共通ギャップ値テーブルへ値を代入
-  def put_common_for_gap(table, data, all = nil)
+  def put_common_for_gap(tbl, data, all = nil)
     ['good', 'bad'].each do |t|
       if data[t].total_results != 0 then
         data[t].each do |s|
           s.to_h.each do |k, v|
             if all.nil? then
-              table[k][t.to_sym] = v
+              tbl[k][t.to_sym] = v
             else
               # アナリティクスに無い項目を算出する
               al = all.to_i
               p al
               if al < 1 then al = 1 end # ゼロ除算例外の防止
               p al
-              table[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
+              tbl[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
             end
           end
         end
       end
     end
-    return table
+    return tbl
   end
 
   # グラフ値テーブルへ値を代入
@@ -40,14 +40,16 @@ module InsertTable
       if data[k].total_results != 0 then
         data[k].each do |d|
           date = d.date
-            if item == :repeat_rate then
+          item.each do |t|
+            if t == :repeat_rate then
               if all.to_f <= 0 then all = 1 end
               if d[:sessions].to_f > 0 then
-                tbl[date][item][v] = (d[:sessions].to_f / all.to_f) * 100
+                tbl[date][t][v] = (d[:sessions].to_f / all.to_f) * 100
               end
             else
-              tbl[date][item][v] = d[item]
+              tbl[date][t][v] = d[t]
             end
+          end
         end
       end
     end

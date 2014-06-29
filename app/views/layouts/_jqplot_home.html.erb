@@ -1,0 +1,82 @@
+<script type="text/javascript">
+var arr = [], arr2 = [], arr1 = [];
+gon.homearr.forEach(
+    function(value){
+    arr1.push( [ value[0], value[1], value[2] ] )
+  }
+);
+arr.push(arr1);
+
+var arr_org = [
+    [
+      [ 0, 65, 10, 'PV数 全体' ],
+      [ 30, 22, 10, '平均PV数' ],
+      [ 300, 91, 10, '訪問回数' ],
+      [ 78, 79, 10, '曜日別' ],
+      [ 600, 79, 10, '平均滞在時間' ],
+      [ 100.0, 79, 10, '人気ページ' ],
+      [ 50.0, 63, 10, '直帰率' ],
+      [ 21.0, 91, 10, '再訪問率' ],
+      [ 15.0, 54, 10, '新規訪問率' ],
+    ]
+];
+
+
+jQuery( function() {
+
+
+   // バブル（散布図）チャート相関グラフ
+   // x軸, y軸, 大きさ, 項目名　の順に表示
+   // 今回は x ... GAP y ... 相関　で現す。
+  // GAP値は数値、時間、パーセンテージでばらつきがあるため、
+  // パーセンテージを実数へ変換する。
+
+  var options = {
+    seriesDefaults: {
+      color: 'gray',
+        showLine: false,
+        markerOptions: {
+            size: 20
+        },
+        pointLabels: {
+            show: true,
+            location: 'n',
+            ypadding: -12,
+        }
+    },
+    highlighter: {
+      show: true,
+      showMarker: false,
+      tooltipLocation: 'n',
+      tooltipAxes: 'xy',
+      formatString: 'x:%s, y:%s'
+    },
+    axesDefaults: {
+      showTicks: false,
+      numberTicks: 3,
+      tickOptions: {
+        fontSize: '10pt',
+        fontFamily: 'ヒラギノ角ゴ Pro W3',
+      },
+    },
+    axes: {
+      xaxis: {
+        label: 'GAP',
+        tickOptions: {
+        },
+      },
+      yaxis: {
+        label: '相関',
+        min: 0,
+        max: 100,
+        tickOptions: {
+        },
+      },
+    },
+  };
+
+jQuery . jqplot('square', arr, options);
+
+} );
+
+</script>

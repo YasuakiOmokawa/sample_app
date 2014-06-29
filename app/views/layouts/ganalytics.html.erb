@@ -10,7 +10,11 @@
     <%= render 'layouts/fncommon' %>
     <%= render 'layouts/datepicker' %>
     <%= render 'layouts/merger' %>
-    <%= render 'layouts/jqplot' %>
+    <% if @title == 'ホーム' %>
+      <%= render 'layouts/jqplot_home' %>
+    <% else %>
+      <%= render 'layouts/jqplot' %>
+    <% end %>
     <%= csrf_meta_tags %>
     <%= render 'layouts/shim' %>
   </head>

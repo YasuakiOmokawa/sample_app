@@ -4,6 +4,22 @@ describe "User pages" do
 
   subject { page }
 
+  describe "show" do
+    before do
+      # sign_in user
+      # visit users_path
+    end
+
+    # 連絡先のフルネームを文字列として返すこと
+    it "データフェッチに成功すること" do
+
+      res = fetch_analytics_data('Fetch', @ga_profile,
+        @cond, @cv_txt, {}, mets)
+      expect(res).to be_true
+    end
+  end
+
+
   # describe "index" do
 
   #   let(:user) { FactoryGirl.create(:user) }

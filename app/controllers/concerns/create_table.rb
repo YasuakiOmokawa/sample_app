@@ -20,6 +20,20 @@ module CreateTable
     return result_hash
   end
 
+  # バブル（散布図）チャート用算出データを作成
+  def create_skeleton_bubble(a)
+    rhsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    a.each do |t|
+      [:good, :bad, :gap].each do |s|
+        rhsh[t][s] = 0
+      end
+    end
+    return rhsh
+  end
+
+
+
+
   # グラフ値テーブルスケルトンを作成
   def create_skeleton_for_graph(hsh, from, to, clm)
     idx = 1
@@ -38,6 +52,26 @@ module CreateTable
     end
     return hsh
   end
+
+  # バブル（散布図）相関スケルトンを作成
+  def create_bubble_corr(hsh, from, to, clm)
+    idx = 1
+    (from..to).each do |t|
+    clm.each do |u,i|
+        dts = t.to_s.gsub( /-/, "" )
+        if (t.wday == 0 or t.wday == 6) or HolidayJapan.check(t) then
+          hsh[dts][u] = [0, 0, 0, 'day_off']
+        else
+          hsh[dts][u] = [0, 0, 0, 'day_on']
+        end
+        hsh[dts][:cv] = 0
+        hsh[dts]["idx"] = idx
+    end
+    idx += 1
+    end
+    return hsh
+  end
+
 
   # 曜日別の値を出すテーブルを作成
   def create_table_by_days(table, data, item)

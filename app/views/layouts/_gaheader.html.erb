@@ -12,8 +12,8 @@
   <a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：<%= @user.name %></div><br>
 </div>
 <ul>
-  <li class="tab" id="first"><a href="">ホーム</a></li>
-  <li class="tab" id="show"><a href="#" name="<%= user_path %>">全体</a></li>
+  <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>
+  <li class="tab" id="all"><a href="#" name="<%= all_user_path %>">全体</a></li>
   <li class="tab" id="search"><a href="#" name="<%= search_user_path %>">検索</a></li>
   <li class="tab" id="direct"><a href="#" name="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
   <li class="tab" id="referral"><a href="#" name="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>

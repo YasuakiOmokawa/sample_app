@@ -22,6 +22,14 @@ group :development, :test do
   gem 'spork-rails', '4.0.0'
   gem 'guard-spork', '1.5.0'
   gem 'childprocess', '0.3.6'
+  gem 'pry-rails'
+  gem 'pry-doc'
+  gem 'pry-stack_explorer'
+  gem 'pry-byebug'
+  gem 'better_errors'
+  gem 'pry-rescue'              # exception event handler
+  gem 'hirb-unicode'            # hirb
+  gem 'binding_of_caller'
 end
 
 group :test do

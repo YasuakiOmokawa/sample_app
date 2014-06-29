@@ -8,6 +8,7 @@ module UserFunc
     {'good' => :gte, 'bad' => :lt}.each do |k, v|
       c = o.dup
       c[:filters] = o[:filters].merge( { cv.to_sym.send(v) => 1 } )
+
       if metrics.nil?
         hash[k] = Analytics.const_get(name).results(prof, c)
       elsif metrics == :repeat_rate then
@@ -16,7 +17,7 @@ module UserFunc
         hash[k] = Analytics.create_class(name,
           [ :sessions ],
           [:date]).results(prof, c)
-      elsif dimensions == :source or dimensions == :socialNetwork then
+      elsif dimensions.nil?
         hash[k] = Analytics.create_class(name,
           [ metrics ],
           [ dimensions ]).results(prof, c)
