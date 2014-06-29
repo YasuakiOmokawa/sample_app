@@ -9,7 +9,9 @@
     end
   %>
   <%= select_tag 'cvselect', options_for_select( cv_hash ) %>
-  <a href="">ログアウト</a><a href="">パスワード変更</a><div>ID：<%= @user.name %></div><br>
+  <%= link_to "ログアウト", signout_path, method: "delete" %>
+  <%= link_to "パスワード変更", edit_user_path(current_user) %>
+  <div>ID：<%= @user.name %></div><br>
 </div>
 <ul>
   <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>

@@ -1,13 +1,14 @@
 <div class="center hero-unit">
-  <h1>Welcome to the Sample App</h1>
+  <h1>TAS for GA ver.</h1>
 
   <h2>
-    This is the home page for the
-    <a href="http://railstutorial.jp/">Ruby on Rails Tutorial</a>
-    sample application.
+  TAS for GA ver. へようこそ
   </h2>
+  <% if signed_in? %>
+    <%= link_to "プロファイルページへ", current_user, class: "btn btn-large btn-primary" %>
+  <% else %>
+    <%= link_to "ログイン", signin_path, class: "btn btn-large btn-primary"%>
+  <% end %>
 
-  <%= link_to "Sign up now!", signup_path, class: "btn btn-large btn-primary" %>
+  <!-- <%= link_to "Sign up now!", signup_path, class: "btn btn-large btn-primary" %> -->
 </div>
-
-<%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>

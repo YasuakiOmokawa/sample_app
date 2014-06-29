@@ -1,0 +1,5 @@
+ja:
+  attributes:
+    name: "名前"
+    email: "メールアドレス"
+    password_digest: "パスワード"
