@@ -24,14 +24,13 @@
   <li class="tab" id="last"><a href="#" name="<%= last_user_path %>">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
-  <form action="<%= @narrow_action %>" method="get" name="narrowForm">
+  <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
     <span id="calendar">
-      <p class="arrow_box">クリックして期間を指定できます</p>
         <%= image_tag 'calender.png' %>
         <!-- 14/01/01-14/12/31 -->
-        <!-- datepicker用のinput -->
         <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />-
         <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+        <!-- datepicker用のinput -->
         <input type="hidden" id="from" name="from" value="<%= @from %>"/>
         <input type="hidden" id="to" name="to" value="<%= @to %>" />
     </span>

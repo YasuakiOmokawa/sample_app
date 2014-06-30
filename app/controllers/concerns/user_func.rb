@@ -20,11 +20,11 @@ module UserFunc
       elsif dimensions.nil?
         hash[k] = Analytics.create_class(name,
           [ metrics ],
-          [ dimensions ]).results(prof, c)
+          [:date]).results(prof, c)
       else
         hash[k] = Analytics.create_class(name,
           [ metrics ],
-          [:date]).results(prof, c)
+          [ dimensions ]).results(prof, c)
       end
     end
     return hash

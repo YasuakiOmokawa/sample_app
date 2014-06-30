@@ -1,23 +1,6 @@
 <script type="text/javascript">
 
 
-var clearDate = function(my, your) {
-    var target = [ my, your ];
-    var minst = $.datepicker._getInst(target[0][0]);
-    var yinst = $.datepicker._getInst(target[1][0]);
-    var mlast = minst.lastVal;
-    var ylast = yinst.lastVal;
-    console.log(minst);
-    console.log(yinst);
-    console.log(mlast);
-    console.log(ylast);
-    if( mlast || ylast ) {
-      console.log('fromとtoを初期化します');
-      $( "#fromd" ).datepicker( "option", "minDate", null);
-      $( "#fromd" ).datepicker( "option", "maxDate", null);
-    }
-};
-
 var calc = function(datestr, p, day) {
   var dt = new Date(datestr);
   switch(p) {
@@ -46,8 +29,6 @@ var fmt = function(dt) {
   return str;
 }
 
-
-
 $(function() {
 
   $( "#fromd" ).datepicker({
@@ -60,13 +41,10 @@ $(function() {
       var dte = calc(selectedDate, '+', 31);
       var opt = fmt(dte);
       console.log(opt);
+      $( "#from" ).val(selectedDate);
       $( "#tod" ).datepicker( "option", "minDate", selectedDate );
       $( "#tod" ).datepicker( "option", "maxDate", opt );
-      $("#from").datepicker('setDate', selectedDate);
     }
-    // beforeShow: function() {
-    //   clearDate( $("#fromd"), $("#tod") );
-    // }
   });
   $( "#tod" ).datepicker({
     changeMonth: true,
@@ -78,13 +56,10 @@ $(function() {
       var dte = calc(selectedDate, '-', 31);
       var opt = fmt(dte);
       console.log(opt);
+      $( "#to" ).val(selectedDate);
       $( "#fromd" ).datepicker( "option", "minDate", opt );
       $( "#fromd" ).datepicker( "option", "maxDate", selectedDate );
-      $("#to").datepicker('setDate', selectedDate);
     }
-    // beforeShow: function() {
-    //   clearDate( $("#tod"), $("#fromd") );
-    // }
   });
 });
 </script>

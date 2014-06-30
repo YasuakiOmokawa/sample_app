@@ -291,7 +291,7 @@ class UsersController < ApplicationController
         [ (@cv_txt.classify + 's').to_sym ], [:date] ).results(@ga_profile,@cond) # CV値挿入
       put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
       gap = fetch_analytics_data('GapDataForGraph', @ga_profile,@cond, @cv_txt, {}, @graphic_item)
-      put_table_for_graph(gap, @gap_table_for_graph, @graphic_item, all_sessions)
+      put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ], all_sessions)
       calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
       # グラフ表示プログラムへ渡すハッシュを作成
       @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
@@ -401,7 +401,7 @@ class UsersController < ApplicationController
       # スケルトン作成
       skel = create_skeleton_bubble(mets_sa)
       # GAP算出
-      gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca)
+      gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
       put_common_for_gap(skel, gap)
       gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
         {:user_type.matches => 'Returning Visitor'} )
@@ -412,7 +412,6 @@ class UsersController < ApplicationController
 
       # jqplot用データ構築
       mets_sh.delete(@cvr_txt.to_sym) #CVRは必要ない
-      skel[:avg_session_duration][:gap] = skel[:avg_session_duration][:gap] / 10
       gon.homearr = concat(skel, corr, mets_sh)
 
     end
