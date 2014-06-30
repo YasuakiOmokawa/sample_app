@@ -397,7 +397,6 @@ class UsersController < ApplicationController
       corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
       # GAP総数算出
-
       # スケルトン作成
       skel = create_skeleton_bubble(mets_sa)
       # GAP算出
