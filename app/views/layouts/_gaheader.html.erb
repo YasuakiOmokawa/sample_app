@@ -11,7 +11,7 @@
   <%= select_tag 'cvselect', options_for_select( cv_hash ) %>
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
-  <div>ID：<%= @user.name %></div><br>
+  <div>ID：<%= @user.name %></div><div><%= @from %>&nbsp;～&nbsp;<%= @to %></div><br>
 </div>
 <ul>
   <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>
@@ -30,8 +30,10 @@
         <%= image_tag 'calender.png' %>
         <!-- 14/01/01-14/12/31 -->
         <!-- datepicker用のinput -->
-        <input type="text" id="from" name="from" size="10" style="width:100px;" readonly="readonly"  />-
-        <input type="text" id="to" name="to"  size="10" style="width:100px;" readonly="readonly"  />
+        <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />-
+        <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+        <input type="hidden" id="from" name="from" value="<%= @from %>"/>
+        <input type="hidden" id="to" name="to" value="<%= @to %>" />
     </span>
         <input type="hidden" value="1" name="cv_num" />
         <input type="hidden" value="" name="graphic_item" />

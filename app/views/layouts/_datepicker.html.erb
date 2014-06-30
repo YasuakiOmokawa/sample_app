@@ -1,28 +1,90 @@
 <script type="text/javascript">
 
+
+var clearDate = function(my, your) {
+    var target = [ my, your ];
+    var minst = $.datepicker._getInst(target[0][0]);
+    var yinst = $.datepicker._getInst(target[1][0]);
+    var mlast = minst.lastVal;
+    var ylast = yinst.lastVal;
+    console.log(minst);
+    console.log(yinst);
+    console.log(mlast);
+    console.log(ylast);
+    if( mlast || ylast ) {
+      console.log('fromとtoを初期化します');
+      $( "#fromd" ).datepicker( "option", "minDate", null);
+      $( "#fromd" ).datepicker( "option", "maxDate", null);
+    }
+};
+
+var calc = function(datestr, p, day) {
+  var dt = new Date(datestr);
+  switch(p) {
+    case '+' :
+    dt.setDate(dt.getDate() + day);
+    break;
+    case '-' :
+    dt.setDate(dt.getDate() - day);
+    break;
+  }
+  return dt;
+}
+
+var fmt = function(dt) {
+  var year = dt.getFullYear();
+  var month = dt.getMonth() + 1;
+  var day = dt.getDate();
+
+  if ( month < 10 ) {
+  　　month = '0' + month;
+  }
+  if ( day < 10 ) {
+  　　day = '0' + day;
+  }
+  var str = year + '-' + month + '-' + day;
+  return str;
+}
+
+
+
 $(function() {
 
-  $( "#from" ).datepicker({
+  $( "#fromd" ).datepicker({
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
-    dateFormat:"yy-mm-dd"
-    // onClose: function( selectedDate ) {
-    //   $( "#to" ).datepicker( "option", "minDate", selectedDate );
-    //   $( "#to" ).datepicker( "option", "maxDate", "selectedDate +31d" );
+    dateFormat:"yy-mm-dd",
+    onSelect: function( selectedDate ) {
+      console.log(selectedDate);
+      var dte = calc(selectedDate, '+', 31);
+      var opt = fmt(dte);
+      console.log(opt);
+      $( "#tod" ).datepicker( "option", "minDate", selectedDate );
+      $( "#tod" ).datepicker( "option", "maxDate", opt );
+      $("#from").datepicker('setDate', selectedDate);
+    }
+    // beforeShow: function() {
+    //   clearDate( $("#fromd"), $("#tod") );
     // }
   });
-  $( "#from" ).datepicker("setDate", "<%= @from %>");
-  $( "#to" ).datepicker({
+  $( "#tod" ).datepicker({
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 3,
-    dateFormat:"yy-mm-dd"
-    // onClose: function( selectedDate ) {
-    //   $( "#from" ).datepicker( "option", "minDate", "selectedDate -31d" );
-    //   $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+    dateFormat:"yy-mm-dd",
+    onSelect: function( selectedDate ) {
+      console.log(selectedDate);
+      var dte = calc(selectedDate, '-', 31);
+      var opt = fmt(dte);
+      console.log(opt);
+      $( "#fromd" ).datepicker( "option", "minDate", opt );
+      $( "#fromd" ).datepicker( "option", "maxDate", selectedDate );
+      $("#to").datepicker('setDate', selectedDate);
+    }
+    // beforeShow: function() {
+    //   clearDate( $("#tod"), $("#fromd") );
     // }
   });
-  $( "#to" ).datepicker("setDate", "<%= @to %>");
 });
 </script>
