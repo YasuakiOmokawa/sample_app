@@ -63,6 +63,12 @@ var options = {
             // fillToZero: true,
         }
     ],
+    axesDefaults: {
+      tickOptions: {
+        fontSize: '10pt',
+        fontFamily: 'ヒラギノ角ゴ Pro W3',
+      },
+    },
     axes: {
         xaxis: {
             renderer: jQuery . jqplot . CategoryAxisRenderer,
@@ -72,11 +78,6 @@ var options = {
         },
         x2axis: {
             renderer: jQuery . jqplot . CategoryAxisRenderer,
-            tickOptions: {
-              show: false,
-              showLabel: false,
-              showMark: false,
-            }
         },
         yaxis: {
             autoscale: true,
@@ -115,7 +116,12 @@ var options = {
 options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
 jQuery( function() {
-    jQuery . jqplot( 'square', arr, options);
+
+  $.jqplot.postDrawHooks.push(function() {
+      $('.jqplot-axis.jqplot-x2axis').hide();
+  });
+
+  jQuery . jqplot( 'square', arr, options);
 } );
 
 </script>

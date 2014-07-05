@@ -31,8 +31,6 @@ jQuery( function() {
   // GAP値は数値、時間、パーセンテージでばらつきがあるため、
   // パーセンテージを実数へ変換する。
 
-// $.jqplot.config.enablePlugins = true;
-
   var options = {
     seriesDefaults: {
       color: 'gray',
@@ -54,7 +52,7 @@ jQuery( function() {
       formatString: 'x:%s, y:%s'
     },
     axesDefaults: {
-      showTicks: false,
+      // showTicks: false,
       numberTicks: 3,
       tickOptions: {
         fontSize: '10pt',
@@ -63,11 +61,14 @@ jQuery( function() {
     },
     axes: {
       xaxis: {
+        // ticks: ticks,
         label: 'GAP',
+        min: 0,
         tickOptions: {
         },
       },
       yaxis: {
+        // ticks: ticks,
         label: '相関',
         min: 0,
         max: 100,
@@ -77,12 +78,31 @@ jQuery( function() {
     },
   };
 
-// $.jqplot.postDrawHooks.push(function() {
-//     var overlayCanvas = $($('.jqplot-overlayCanvas-canvas')[0])
-//     var seriesCanvas = $($('.jqplot-series-canvas')[0])
-//     seriesCanvas.detach();
-//     overlayCanvas.after(seriesCanvas);
-// });
+$('#square').bind('jqplotDataClick',
+  function() {
+    console.log("hello ");
+  });
+
+$.jqplot.postDrawHooks.push(function() {
+  var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
+  for (var i=0; i<selcts.length; i++){
+    $(selcts[i][0]).text('小');
+    $(selcts[i][1]).text('');
+    $(selcts[i][2]).text('大');
+  }
+
+
+
+  // //send overlay canvas to back
+  // $(".jqplot-overlayCanvas-canvas").css('z-index', '0');
+  // //send series canvas to front
+  // $(".jqplot-series-canvas").css('z-index', '1');
+  // //make sure the tooltip is over the series
+  // $(".jqplot-highlighter-tooltip").css('z-index', '2');
+  // //must be on the very top since it is responsible for event catching and propagation
+  // $(".jqplot-event-canvas").css('z-index', '5');
+
+});
 
 jQuery . jqplot('square', arr, options);
 
