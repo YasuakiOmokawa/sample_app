@@ -31,6 +31,8 @@ jQuery( function() {
   // GAP値は数値、時間、パーセンテージでばらつきがあるため、
   // パーセンテージを実数へ変換する。
 
+// $.jqplot.config.enablePlugins = true;
+
   var options = {
     seriesDefaults: {
       color: 'gray',
@@ -47,7 +49,7 @@ jQuery( function() {
     highlighter: {
       show: true,
       showMarker: false,
-      tooltipLocation: 'n',
+      tooltipLocation: 'e',
       tooltipAxes: 'xy',
       formatString: 'x:%s, y:%s'
     },
@@ -74,6 +76,13 @@ jQuery( function() {
       },
     },
   };
+
+// $.jqplot.postDrawHooks.push(function() {
+//     var overlayCanvas = $($('.jqplot-overlayCanvas-canvas')[0])
+//     var seriesCanvas = $($('.jqplot-series-canvas')[0])
+//     seriesCanvas.detach();
+//     overlayCanvas.after(seriesCanvas);
+// });
 
 jQuery . jqplot('square', arr, options);
 

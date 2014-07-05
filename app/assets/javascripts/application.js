@@ -16,4 +16,5 @@
 //= require jquery.ui.datepicker-ja
 //= require jquery_ujs
 //= require bootstrap
-//= require_tree .
+//= require ./jqplot/jquery.jqplot
+// require_tree .

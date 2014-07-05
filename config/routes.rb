@@ -1,5 +1,5 @@
 SampleApp::Application.routes.draw do
-  resources :users do
+  resources :users ,:except => [:index] do
     member do
       get :search, :direct, :referral, :social, :campaign, :last, :all
     end

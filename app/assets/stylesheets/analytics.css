@@ -10,5 +10,6 @@
  *
  *= require_self
  *= require_tree ./analytics
+ *= require_tree ./jqplot
  *= require jquery.ui.all
  */
