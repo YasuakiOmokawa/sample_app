@@ -17,4 +17,9 @@
 //= require jquery_ujs
 //= require bootstrap
 //= require ./jqplot/jquery.jqplot
+//= require ./jqplot/plugins/barRenderer
+//= require ./jqplot/plugins/categoryAxisRenderer
+//= require ./jqplot/plugins/highlighter
+//= require ./jqplot/plugins/pointLabels
+
 // require_tree .
