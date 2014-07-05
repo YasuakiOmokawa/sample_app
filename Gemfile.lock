@@ -26,7 +26,6 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     arel (4.0.2)
-    bcrypt-ruby (3.1.2)
     bcrypt-ruby (3.1.2-x64-mingw32)
     better_errors (1.1.0)
       coderay (>= 1.0.0)
@@ -72,7 +71,6 @@ GEM
       railties (>= 3.0.0)
     faker (1.1.2)
       i18n (~> 0.5)
-    ffi (1.9.3)
     ffi (1.9.3-x64-mingw32)
     formatador (0.2.5)
     garb (0.9.8)
@@ -126,11 +124,8 @@ GEM
     mini_portile (0.6.0)
     minitest (4.7.5)
     multi_json (1.10.1)
-    nokogiri (1.6.2.1)
-      mini_portile (= 0.6.0)
     nokogiri (1.6.2.1-x64-mingw32)
       mini_portile (= 0.6.0)
-    pg (0.15.1)
     pg (0.15.1-x64-mingw32)
     polyglot (0.3.5)
     pry (0.9.12.6)
@@ -263,7 +258,7 @@ DEPENDENCIES
   hirb-unicode
   holiday_japan
   jbuilder (= 1.0.2)
-  jquery-rails (= 3.0.4)
+  jquery-rails
   jquery-turbolinks
   jquery-ui-rails
   json (= 1.8.0)
