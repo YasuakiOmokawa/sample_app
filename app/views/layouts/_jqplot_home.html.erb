@@ -2,7 +2,7 @@
 var arr = [], arr2 = [], arr1 = [];
 gon.homearr.forEach(
     function(value){
-    arr1.push( [ value[0], value[1], value[2] ] )
+    arr1.push( [ value[0], value[1], value[2], value[3] ] )
   }
 );
 arr.push(arr1);
@@ -24,33 +24,44 @@ var arr_org = [
 
 jQuery( function() {
 
-
    // バブル（散布図）チャート相関グラフ
-   // x軸, y軸, 大きさ, 項目名　の順に表示
+   // x軸, y軸, 大きさ(radius), 項目名　の順に表示
    // 今回は x ... GAP y ... 相関　で現す。
   // GAP値は数値、時間、パーセンテージでばらつきがあるため、
   // パーセンテージを実数へ変換する。
 
+  // jqplot描画後に実行する操作（jqplot描画前に書くこと）
+  $.jqplot.postDrawHooks.push(function(square) {
+    var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
+    for (var i=0; i<selcts.length; i++) {
+      $(selcts[i][0]).text('小');
+      $(selcts[i][1]).text('');
+      $(selcts[i][2]).text('大');
+    }
+  });
+
+  // グラフ描画オプション
   var options = {
     seriesDefaults: {
-      color: 'gray',
-        showLine: false,
-        markerOptions: {
-            size: 20
+      renderer: jQuery.jqplot.BubbleRenderer,
+      rendererOptions: {
+        bubbleAlpha: 0.6,
+        highlightAlpha: 0.8,
+        showLabels: false,
+        varyBubbleColors: false,
+        autoscaleMultiplier: 0.3,
+      },
+    },
+    series:[
+          // １つ目の項目の設定
+        {
+            color: 'gray',
         },
-        pointLabels: {
-            show: true,
-            location: 'n',
-            ypadding: -12,
-        }
-    },
-    highlighter: {
-      show: true,
-      showMarker: false,
-      tooltipLocation: 'e',
-      tooltipAxes: 'xy',
-      formatString: 'x:%s, y:%s'
-    },
+          // ２つ目の項目の設定
+        {
+            color: 'blue',
+        },
+    ],
     axesDefaults: {
       // showTicks: false,
       numberTicks: 3,
@@ -61,14 +72,12 @@ jQuery( function() {
     },
     axes: {
       xaxis: {
-        // ticks: ticks,
         label: 'GAP',
         min: 0,
         tickOptions: {
         },
       },
       yaxis: {
-        // ticks: ticks,
         label: '相関',
         min: 0,
         max: 100,
@@ -78,34 +87,56 @@ jQuery( function() {
     },
   };
 
-$('#square').bind('jqplotDataClick',
-  function() {
-    console.log("hello ");
+  // jqplot描画
+  var square = jQuery . jqplot('square', arr, options);
+
+  // 凡例の描画
+  $.each(arr, function(index, val) {
+    $('#legend1b').append('<tr><td>'+val[3]+'</td><td>'+val[2]+'</td></tr>');
   });
 
-$.jqplot.postDrawHooks.push(function() {
-  var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
-  for (var i=0; i<selcts.length; i++){
-    $(selcts[i][0]).text('小');
-    $(selcts[i][1]).text('');
-    $(selcts[i][2]).text('大');
-  }
+  // ハイライトツールチップを表示
+  $('#square').bind('jqplotDataHighlight',
+    function (ev, seriesIndex, pointIndex, data, radius) {
+      var
+        chart_left = $('#square').offset().left,
+        chart_top = $('#square').offset().top,
+        x = square.axes.xaxis.u2p(data[0]),  // convert x axis unita to pixels
+        y = square.axes.yaxis.u2p(data[1]);  // convert y axis units to pixels
+      var color = 'black';
+      var tab = '全体';
+      var page = 'li.tab > a:contains(' + tab + ')';
+      var name = $(page)[0].name;
+      $('#tooltip1s').css({left:chart_left+x+radius + -5, top:chart_top+y});
+      $('#tooltip1s').html(
+          '<a href="#" id="abtn" name=' + name
+          + ' style="font-size:14px;' +
+          'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
+          + tab + '&nbsp;'
+          + data[3] + '<br>'
+          + '</a>'
+          // 'x: ' + data[0] +'<br />' +
+          // 'y: ' + data[1] + '<br />'
+        );
+      $('#tooltip1s').show();
+      // ハイライトツールチップへリンク付与
+      $('#abtn').click(function() {
+        evtset($(this));
+      });
+      // $('#legend1b tr').css('background-color', '#ffffff');
+      // $('#legend1b tr').eq(pointIndex+1).css('background-color', color);
+    }
+  );
 
-
-
-  // //send overlay canvas to back
-  // $(".jqplot-overlayCanvas-canvas").css('z-index', '0');
-  // //send series canvas to front
-  // $(".jqplot-series-canvas").css('z-index', '1');
-  // //make sure the tooltip is over the series
-  // $(".jqplot-highlighter-tooltip").css('z-index', '2');
-  // //must be on the very top since it is responsible for event catching and propagation
-  // $(".jqplot-event-canvas").css('z-index', '5');
-
+  // ハイライトツールチップを隠す
+  $('#square').bind('jqplotDataUnhighlight',
+      function (ev, seriesIndex, pointIndex, data) {
+          $('#tooltip1s').empty();
+          $('#tooltip1s').hide();
+          // $('#legend1b tr').css('background-color', '#ffffff');
+      }
+  );
 });
 
-jQuery . jqplot('square', arr, options);
-
-} );
 
 </script>

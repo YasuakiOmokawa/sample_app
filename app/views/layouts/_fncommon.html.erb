@@ -1,6 +1,15 @@
 <script type="text/javascript">
-// GAP値がマイナスなら赤色にする
+
+// 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
+var evtset = function evtSet(at) {
+  console.log(at);
+  $('#hallway > form').attr("action", at.attr("name"));
+  $('a#set').trigger('click');
+}
+
 $(document).ready(function() {
+
+  // GAP値がマイナスなら赤色にする
   $('td.gap').each(function() {
     var str = $(this).text();
     if( str.substr(0,1) == "-" ) {
@@ -15,10 +24,9 @@ $(document).ready(function() {
   tag = 'li#' + tab + ' a'
   $(tag).replaceWith("<div>" + $(tag).text() + "</div>");
 
-  // タブクリックイベントをフォーム送信へ紐付け
+  // 各ページのタブへリンク付与
   $("li.tab a").click(function() {
-    $('#hallway > form').attr("action", $(this).attr("name"))
-    $('a#set').trigger('click');
+    evtset($(this));
   });
 
   // ラジオボタンの選択値を保持

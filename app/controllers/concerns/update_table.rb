@@ -133,10 +133,11 @@ module UpdateTable
   end
 
   # バブル（散布図）チャートの総ギャップ値と相関を合わせた配列（jqplotへ渡す）
+  # バブルにする場合は、push時に３番目にradiusを設定
   def concat(tb, b, hsh)
     arr = []
     hsh.each do |k, v|
-      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, v ] )
+      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 5, v ] )
     end
     return arr
   end

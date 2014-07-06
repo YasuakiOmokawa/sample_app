@@ -21,5 +21,7 @@
 //= require ./jqplot/plugins/categoryAxisRenderer
 //= require ./jqplot/plugins/highlighter
 //= require ./jqplot/plugins/pointLabels
+//= require ./jqplot/plugins/bubbleRenderer
+
 
 // require_tree .
