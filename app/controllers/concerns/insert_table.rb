@@ -57,11 +57,21 @@ module InsertTable
   end
 
   # グラフ値テーブルへcv値を代入
-  def put_cv_for_graph(data, table, cv_num)
+  def put_cv_for_graph(data, table, cv_num, flg = 'none')
     if data.total_results != 0 then
       data.each do |d|
         date = d.date
-        table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
+        case flg
+        when 'fvt' then # 人気ページ相関テーブルの場合
+          key = d.page_title + ";;" + d.page_path
+          # puts " date is #{date} key is  #{key}"
+          unless table[date][key].nil?
+            table[date][key][4] = d[('goal' + cv_num.to_s + '_completions').to_sym]
+            # puts "value is setted. " + table[date][key][4].to_s
+          end
+        else
+          table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
+        end
       end
     end
     return table

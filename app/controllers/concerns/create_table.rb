@@ -38,40 +38,26 @@ module CreateTable
   def create_skeleton_for_graph(hsh, from, to, clm)
     idx = 1
     (from..to).each do |t|
-    clm.each do |u|
-        dts = t.to_s.gsub( /-/, "" )
-        if (t.wday == 0 or t.wday == 6) or HolidayJapan.check(t) then
-          hsh[dts][u] = [0, 0, 0, 'day_off']
-        else
-          hsh[dts][u] = [0, 0, 0, 'day_on']
-        end
+      dts = t.to_s.gsub( /-/, "" )
+      clm.each do |u, i|
+        chk_day(hsh, t, u, dts)
         hsh[dts][:cv] = 0
         hsh[dts]["idx"] = idx
-    end
-    idx += 1
+      end
+      idx += 1
     end
     return hsh
   end
 
-  # バブル（散布図）相関スケルトンを作成
-  def create_bubble_corr(hsh, from, to, clm)
-    idx = 1
-    (from..to).each do |t|
-    clm.each do |u,i|
-        dts = t.to_s.gsub( /-/, "" )
-        if (t.wday == 0 or t.wday == 6) or HolidayJapan.check(t) then
-          hsh[dts][u] = [0, 0, 0, 'day_off']
-        else
-          hsh[dts][u] = [0, 0, 0, 'day_on']
-        end
-        hsh[dts][:cv] = 0
-        hsh[dts]["idx"] = idx
+  # 土日祝日判定
+  def chk_day(h, a, b, d)
+    if (a.wday == 0 or a.wday == 6) or HolidayJapan.check(a) then
+      h[d][b] = [0, 0, 0, 'day_off', 0]
+    else
+      h[d][b] = [0, 0, 0, 'day_on', 0]
     end
-    idx += 1
-    end
-    return hsh
+    return h
   end
-
 
   # 曜日別の値を出すテーブルを作成
   def create_table_by_days(table, data, item)
@@ -96,21 +82,32 @@ module CreateTable
 
   # 人気ページテーブルを生成
   def create_skeleton_favorite_table(data, table)
-    cntr = 0
-    data.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-      cntr += 1
-      key = t.page_title + ";;" + t.page_path
-      table[key][:index] = cntr
+    cnt = 0
+    data.sort_by{ |a, b| a.to_i}.each do |k, v|
+      key = v[0] + ";;" + v[1]
+      table[key][:index] = k
       [:good, :bad, :gap].each do |s|
         table[key][s] = 0
       end
-      if cntr >= 10 then break end
+      cnt = k
     end
-    table["その他"][:index] = cntr + 1
+    table["その他"][:index] = cnt + 1
     [:good, :bad, :gap].each do |s|
       table["その他"][s] = 0
     end
     return table
+  end
+
+  # 人気ページテーブル用にtop10 生成
+  def top10(dt)
+    r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    cntr = 0
+    dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
+      cntr += 1
+      r_hsh[cntr] = [t.page_title, t.page_path]
+      if cntr >= 10 then break end
+    end
+    return r_hsh
   end
 
   # referral, social, campaign 個別テーブルを生成
