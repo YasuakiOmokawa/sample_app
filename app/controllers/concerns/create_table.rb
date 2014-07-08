@@ -60,7 +60,9 @@ module CreateTable
   end
 
   # 曜日別の値を出すテーブルを作成
+  # パーセンテージ、平均PV数、平均滞在時間、だったら平均値。それ以外は総数（にしないと値がへんになる）
   def create_table_by_days(table, data, item)
+    cntr_on = cntr_off = 0
     [:day_on, :day_off].each do |t|
       [:good, :bad, :gap].each do |u|
         table[t][u] = 0
@@ -68,13 +70,25 @@ module CreateTable
     end
     data.each do |k, v|
       if v[item][3] == 'day_on' then
+        cntr_on = cntr_on + 1
         table[:day_on][:good] += v[item][0].to_i
         table[:day_on][:bad] += v[item][1].to_i
         table[:day_on][:gap] += v[item][2].to_i
       else
+        cntr_off = cntr_off + 1
         table[:day_off][:good] += v[item][0].to_i
         table[:day_off][:bad] += v[item][1].to_i
         table[:day_off][:gap] += v[item][2].to_i
+      end
+    end
+    if item =~ /(rate|percent|avg_|_per_)/ then
+      puts "calc average because of item is #{item}"
+      {:day_on => cntr_on , :day_off => cntr_off }.each do |k, v|
+        [:good, :bad, :gap].each do |u|
+          avg = table[k][u].to_i / v
+          table[k][u] = avg
+          puts "calc avg ok! cntr_info is #{k}, cntr_value is #{v}, avg value is #{avg}"
+        end
       end
     end
     return table
@@ -83,13 +97,13 @@ module CreateTable
   # 人気ページテーブルを生成
   def create_skeleton_favorite_table(data, table)
     cnt = 0
-    data.sort_by{ |a, b| a.to_i}.each do |k, v|
-      key = v[0] + ";;" + v[1]
-      table[key][:index] = k
+    data.sort_by{ |a, b| a.pageviews.to_i}.reverse.each do |k|
+      cnt = cnt + 1
+      key = k.page_title + ";;" + k.page_path
+      table[key][:index] = cnt
       [:good, :bad, :gap].each do |s|
         table[key][s] = 0
       end
-      cnt = k
     end
     table["その他"][:index] = cnt + 1
     [:good, :bad, :gap].each do |s|
@@ -107,6 +121,8 @@ module CreateTable
       r_hsh[cntr] = [t.page_title, t.page_path]
       if cntr >= 10 then break end
     end
+    cntr = cntr + 1
+    r_hsh[cntr] = ['その他', '']
     return r_hsh
   end
 

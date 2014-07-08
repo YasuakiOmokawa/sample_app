@@ -64,8 +64,8 @@ module InsertTable
         case flg
         when 'fvt' then # 人気ページ相関テーブルの場合
           key = d.page_title + ";;" + d.page_path
-          # puts " date is #{date} key is  #{key}"
           unless table[date][key].nil?
+            # table[date][key][4] = '1'
             table[date][key][4] = d[('goal' + cv_num.to_s + '_completions').to_sym]
             # puts "value is setted. " + table[date][key][4].to_s
           end
@@ -78,32 +78,77 @@ module InsertTable
   end
 
   # 人気ページテーブルにデータ代入
-  def put_favorite_table(data, tbl)
+  def put_favorite_table(data, tbl, flg = 'none')
     total = 0 # total_pv数
     top_ten = 0 # 人気ページtop10のpv数
     cntr = 0
+    table = '' # データ構造（フラグ識別）
+    gd_bd = '' # 理想現実フラグ
+    date = '' # 日時
+    pv_val = 0 # pvパーセンテージ
 
     ['good', 'bad'].each do |t|
       if data[t].total_results != 0
-        data[t].each do |s|
-          total += s.pageviews.to_i # トータルのPV数を取得
-        end
+        total = c_total(data[t])
         data[t].sort_by{ |a| a.pageviews.to_i}.reverse.each do |s|
           cntr += 1
           key = s.page_title + ";;" + s.page_path
-          tbl[key][t.to_sym] = s.pageviews.to_i
-          if cntr >= 10 then
-            break
+
+          begin
+            shori = '全体PVからのパーセンテージを取得'
+            pv_val = ( s.pageviews.to_f / total.to_f ) * 100
+            case flg
+            when 'date' then # 相関テーブルの場合
+              date = s.date
+              if t == 'good' then
+                gd_bd = 0
+              else
+                gd_bd = 1
+              end
+              tbl[date][key][gd_bd] = pv_val unless tbl[date][key][gd_bd].nil?
+            else # 相関テーブルではない（日時がない）場合
+              tbl[key][t.to_sym] = pv_val unless tbl[key][t.to_sym].nil?
+            end
+            top_ten += s.pageviews.to_i
+            puts "data insert successed! date is #{date} key is #{key} pv_val is #{pv_val} top_ten is now #{top_ten}"
+            if cntr >= 10 then
+              puts "calc top_ten successed!"
+              break
+            end
+          rescue => e
+            puts "エラー：　#{shori}"
+            puts e.message
           end
         end
-        tbl.each do |k,v|
-          top_ten += v[t.to_sym].to_i
-          v[t.to_sym] = ( v[t.to_sym].to_f / total.to_f ) * 100 # 人気ページのPVパーセンテージを取得
+        begin
+          shori = 'top10以下のパーセンテージを取得'
+          # その他の計算は独立で行うため、再度case文を実施
+          pv_val = ( ( total.to_i - top_ten.to_i ).to_f / total.to_f ) * 100
+          case flg
+          when 'date' then
+            # 相関ページではその他ページを表示させないので何もしない
+          else
+            puts "sonota table is #{table}"
+            tbl['その他'][t.to_sym] = pv_val unless tbl['その他'][t.to_sym].nil?
+            puts "sonota data insert successed! value is #{pv_val}"
+          end
+        rescue => e
+          puts "エラー：　#{shori}"
+          puts e.message
         end
-        tbl["その他"][t.to_sym] = ( ( total.to_i - top_ten.to_i ).to_f / total.to_f ) * 100 # top10以下のパーセンテージを取得
       end
     end
     return tbl
+  end
+
+  # 人気ページ_トータルのPV数を取得
+  def c_total(dt)
+    total = 0
+    dt.each do |s|
+      total += s.pageviews.to_i
+    end
+    puts "total pv is #{total}"
+    return total
   end
 
   # referral, social, campaign 個別テーブルへデータ代入
