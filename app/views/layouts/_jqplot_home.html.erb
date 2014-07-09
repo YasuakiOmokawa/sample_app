@@ -1,11 +1,140 @@
 <script type="text/javascript">
-var arr = [], arr2 = [], arr1 = [];
-gon.homearr.forEach(
-    function(value){
-    arr1.push( [ value[0], value[1], value[2], value[3] ] )
+
+// グラフ項目の色を決定
+function setGraphcolor(wd, opt) {
+  var p_wd = wd
+  switch (p_wd) {
+    case '全体':
+      opt.series.push( { color: 'gray'} );
+      break;
+    case '検索':
+      opt.series.push( { color: '#e6b422'} );
+      break;
+    case '直接入力ブックマーク':
+      opt.series.push( { color: 'blue'} );
+      break;
+    case 'その他ウェブサイト':
+      opt.series.push( { color: 'green'} );
+      break;
+    case 'ソーシャル':
+      opt.series.push( { color: 'red'} );
+      break;
+    case 'キャンペーン':
+      opt.series.push( { color: 'pink'} );
+      break;
   }
-);
-arr.push(arr1);
+}
+
+
+// グラフ項目のinputパラメータを設定
+function setItem(data,  graph, narrow) {
+  var option; // 項目名（オプション）
+  var tips = ''; // ツールチップの テキスト
+
+  var tab = data[0]; // 各ページ名
+  var a;
+  var item = data[1]; // 項目名
+  tips = tab + '<br>' + item;
+  switch (item) {
+    case 'PV数':
+      tips = chk_days(tips, data);
+      graph.val('pageviews');
+      break;
+    case '平均PV数':
+      tips = chk_days(tips, data);
+      graph.val('pageviews_per_session');
+      break;
+    case '訪問回数':
+      tips = chk_days(tips, data);
+      graph.val('sessions');
+      break;
+    case '直帰率':
+      tips = chk_days(tips, data);
+      graph.val('bounce_rate');
+      break;
+    case '新規訪問率':
+      tips = chk_days(tips, data);
+      graph.val('percent_new_sessions');
+      break;
+    case '平均滞在時間':
+      tips = chk_days(tips, data);
+      graph.val('avg_session_duration');
+      break;
+    case '再訪問率':
+      tips = chk_days(tips, data);
+      graph.val('repeat_rate');
+      break;
+    case '人気ページ':
+      option = data[2];
+      tips = tips + '<br>' + option;
+      $('#narrow_select').val(option + 'f');
+      break;
+  }
+  return tips;
+}
+
+// 曜日別の判定
+function chk_days(tips, data) {
+  if (data.length == 3) {
+    tips = tips + '<br>' + data[2];
+  }
+  return tips;
+}
+
+// グラフ描画オプション
+var options = {
+  seriesDefaults: {
+    renderer: jQuery.jqplot.BubbleRenderer,
+    rendererOptions: {
+      bubbleAlpha: 0.2,
+      highlightAlpha: 1.0,
+      showLabels: false,
+      varyBubbleColors: false,
+      autoscaleMultiplier: 0.2,
+    },
+  },
+  series: [
+  ],
+  axesDefaults: {
+    // showTicks: false,
+    numberTicks: 3,
+    tickOptions: {
+      fontSize: '10pt',
+      fontFamily: 'ヒラギノ角ゴ Pro W3',
+    },
+  },
+  axes: {
+    xaxis: {
+      label: 'GAP',
+      min: 0,
+      tickOptions: {
+      },
+    },
+    yaxis: {
+      label: '相関',
+      min: 0,
+      max: 100,
+      tickOptions: {
+      },
+    },
+  },
+};
+
+// グラフデータ
+var homearr = gon.homearr;
+var arr = [];
+var cnt = 0;
+for (var i in homearr) {
+  console.log( i );
+  // console.log( homearr[i] );
+  arr.push( homearr[i] );
+  arr[cnt].forEach( function(value) {
+    value[3] = String(i) + ';;' + value[3];
+  });
+  setGraphcolor( i, options );
+  cnt += 1
+}
+
 
 var arr_org = [
     [
@@ -18,6 +147,10 @@ var arr_org = [
       [ 50.0, 63, 10, '直帰率' ],
       [ 21.0, 91, 10, '再訪問率' ],
       [ 15.0, 54, 10, '新規訪問率' ],
+    ],
+    [
+          [ 21.0, 91, 10, '再訪問率' ],
+      [ 15.0, 54, 10, '新規訪問率' ]
     ]
 ];
 
@@ -40,80 +173,46 @@ jQuery( function() {
     }
   });
 
-  // グラフ描画オプション
-  var options = {
-    seriesDefaults: {
-      renderer: jQuery.jqplot.BubbleRenderer,
-      rendererOptions: {
-        bubbleAlpha: 0.6,
-        highlightAlpha: 0.8,
-        showLabels: false,
-        varyBubbleColors: false,
-        autoscaleMultiplier: 0.3,
-      },
-    },
-    series:[
-          // １つ目の項目の設定
-        {
-            color: 'gray',
-        },
-          // ２つ目の項目の設定
-        {
-            color: 'blue',
-        },
-    ],
-    axesDefaults: {
-      // showTicks: false,
-      numberTicks: 3,
-      tickOptions: {
-        fontSize: '10pt',
-        fontFamily: 'ヒラギノ角ゴ Pro W3',
-      },
-    },
-    axes: {
-      xaxis: {
-        label: 'GAP',
-        min: 0,
-        tickOptions: {
-        },
-      },
-      yaxis: {
-        label: '相関',
-        min: 0,
-        max: 100,
-        tickOptions: {
-        },
-      },
-    },
-  };
 
   // jqplot描画
   var square = jQuery . jqplot('square', arr, options);
 
   // 凡例の描画
-  $.each(arr, function(index, val) {
-    $('#legend1b').append('<tr><td>'+val[3]+'</td><td>'+val[2]+'</td></tr>');
-  });
+  // $.each(arr, function(index, val) {
+  //   $('#legend1b').append('<tr><td>'+val[3]+'</td><td>'+val[2]+'</td></tr>');
+  // });
 
   // ハイライトツールチップを表示
   $('#square').bind('jqplotDataHighlight',
     function (ev, seriesIndex, pointIndex, data, radius) {
       var
+        dt = data[3].split(';;'),
+        color = 'black',
         chart_left = $('#square').offset().left,
         chart_top = $('#square').offset().top,
-        x = square.axes.xaxis.u2p(data[0]),  // convert x axis unita to pixels
-        y = square.axes.yaxis.u2p(data[1]);  // convert y axis units to pixels
-      var color = 'black';
-      var tab = '全体';
-      var page = 'li.tab > a:contains(' + tab + ')';
+        // convert x axis unita to pixels
+        x = square.axes.xaxis.u2p(data[0]),
+        // convert y axis units to pixels
+        y = square.axes.yaxis.u2p(data[1]);
+      console.log( "full data is " + dt );
+
+      var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
       var name = $(page)[0].name;
-      $('#tooltip1s').css({left:chart_left+x+radius + -5, top:chart_top+y});
+      console.log( "href action is " + name );
+
+      var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
+      console.log( "tooptip is  " + tips );
+      $('#tooltip1s').css(
+        {
+          left: chart_left+x+radius + -5,
+          top: chart_top+y,
+          'text-align': 'center'
+        });
       $('#tooltip1s').html(
           '<a href="#" id="abtn" name=' + name
           + ' style="font-size:14px;' +
           'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
-          + tab + '&nbsp;'
-          + data[3] + '<br>'
+          + tips
           + '</a>'
           // 'x: ' + data[0] +'<br />' +
           // 'y: ' + data[1] + '<br />'
@@ -131,6 +230,10 @@ jQuery( function() {
   // ハイライトツールチップを隠す
   $('#square').bind('jqplotDataUnhighlight',
       function (ev, seriesIndex, pointIndex, data) {
+          // 絞り込み選択を解除
+          $('#narrow_select').each(function() {
+            this.selectedIndex = 0;
+          });
           $('#tooltip1s').empty();
           $('#tooltip1s').hide();
           // $('#legend1b tr').css('background-color', '#ffffff');

@@ -283,7 +283,7 @@ class UsersController < ApplicationController
           :bounceRate
         ] ).results(@ga_profile,@cond)
       put_common(@common_table, @common)
-      all_sessions = @common_table[:sessions] # 総セッション数の取得（リピート率計算用)
+      all_sessions = @common_table[:sessions] # 総セッション数の取得（再訪問率計算用)
 
       # グラフテーブル
       @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -308,7 +308,7 @@ class UsersController < ApplicationController
       format = check_format_graph(@graphic_item)
       change_format(@gap_table_for_graph, @graphic_item, format)
 
-      # 平均PV数 ~ リピート率テーブル（ギャップありデータ）
+      # 平均PV数 ~ 再訪問率テーブル（ギャップありデータ）
       @gap_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       create_skeleton_gap_table(@gap_table)
       gap = fetch_analytics_data('CommonForGap', @ga_profile, @cond, @cv_txt)
@@ -329,6 +329,8 @@ class UsersController < ApplicationController
     end
 
     def create_home
+       #　◆ページ先頭のバブルチャートを生成
+
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
 
@@ -336,12 +338,11 @@ class UsersController < ApplicationController
       page = {
         '全体' => {},
         '検索' => {:medium.matches => 'organic'},
-        '直接入力 ブックマーク' => {:medium.matches => '(none)'},
+        '直接入力ブックマーク' => {:medium.matches => '(none)'},
         'その他ウェブサイト' => {:medium.matches => 'referral'},
         'ソーシャル' => {:has_social_source_referral.matches => 'Yes'},
         'キャンペーン' => {:campaign.does_not_match => '(not set)'},
       }
-
       # ページ項目ごとにデータ集計
       p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       page.each do |x, z|
@@ -367,6 +368,7 @@ class UsersController < ApplicationController
           mets_ca.push(k)
           mets_sa.push(k.to_s.to_snake_case.to_sym)
         end
+        # アナリティクスAPIに用意されていないもの
         {
           :repeat_rate => '再訪問率',
         }.each do |k, v|
@@ -374,13 +376,13 @@ class UsersController < ApplicationController
           mets_sa.push(k)
         end
 
-        # リピート率計算用のセッション総数
+        # 再訪問率計算用のセッション総数
         @common = Analytics.create_class('Common',
           [
             :sessions,
             :pageviews
           ] ).results(@ga_profile,@cond)
-        # 総セッション数の取得（リピート率計算用)
+        # 総セッション数の取得（再訪問率計算用)
         if @common.total_results == 0 then
           all_sessions = 1
         else
@@ -459,7 +461,7 @@ class UsersController < ApplicationController
         put_common_for_gap(skel, gap)
         gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
           {:user_type.matches => 'Returning Visitor'} )
-        put_common_for_gap(skel, gap_rep, all_sessions) #リピート率
+        put_common_for_gap(skel, gap_rep, all_sessions) #再訪問率
         skel = calc_gap_for_common(skel)
 
 
@@ -477,17 +479,18 @@ class UsersController < ApplicationController
 
         # jqplot用データ構築
         # mets_sh の キーが、実際にグラフに渡される値
+        # mets_sh の値は、グラフの表示項目を示す
         mets_sh.delete(@cvr_txt.to_sym) #CVRは不要
         hsh = {}
         mets_sh.each do |k, v|
           {:day_off => '土日祝', :day_on => '平日'}.each do |c,d|
             key = k.to_s + ' ' + c.to_s
-            val = v.to_s + ' ' + d.to_s
+            val = v.to_s + ';;' + d.to_s
             hsh[key] = val
           end
         end
         mets_sh.merge!(hsh)
-        mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, k] } ])
+        mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
         mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
 
         homearr = concat(skel, corr, mets_sh)
@@ -498,6 +501,9 @@ class UsersController < ApplicationController
         # フィルタオプションのリセット
         @cond[:filters] = {}
         puts "option reset! now is #{@cond}"
+        # puts "sleep for next query"
+        @ga_profile = AnalyticsService.new.load_profile(@user)                                     # アナリティクスAPI認証パラメータ
+        # sleep(1)
       end
       # jqplot へデータ渡す
       gon.homearr = p_hash

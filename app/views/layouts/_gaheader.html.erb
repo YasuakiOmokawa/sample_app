@@ -11,7 +11,8 @@
   <%= select_tag 'cvselect', options_for_select( cv_hash ) %>
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
-  <div>ID：<%= @user.name %></div><div><%= @from %>&nbsp;～&nbsp;<%= @to %></div><br>
+  <div>ID：<%= @user.name %></div>
+  <div>期間：<%= @from %>&nbsp;～&nbsp;<%= @to %></div><br>
 </div>
 <ul>
   <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>
