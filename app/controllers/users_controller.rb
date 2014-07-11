@@ -502,7 +502,6 @@ class UsersController < ApplicationController
         @cond[:filters] = {}
         puts "option reset! now is #{@cond}"
         # puts "sleep for next query"
-        @ga_profile = AnalyticsService.new.load_profile(@user)                                     # アナリティクスAPI認証パラメータ
         # sleep(1)
       end
       # jqplot へデータ渡す

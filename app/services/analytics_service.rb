@@ -1,13 +1,11 @@
 require 'rubygems'
 require 'garb'
-require 'uri'
-require 'active_support/time'
-require 'yaml'
 
 class AnalyticsService
   def load_profile(user_data)
 
     # セッションログイン
+    Garb::Session.api_key = user_data.apikey
     Garb::Session.login(
         user_data.analytics_email,
         user_data.analytics_password
