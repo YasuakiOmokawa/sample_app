@@ -25,7 +25,6 @@ function setGraphcolor(wd, opt) {
   }
 }
 
-
 // グラフ項目のinputパラメータを設定
 function setItem(data,  graph, narrow) {
   var option; // 項目名（オプション）
@@ -93,10 +92,8 @@ var options = {
       autoscaleMultiplier: 0.2,
     },
   },
-  series: [
-  ],
+  series: [], // ここに関数でカラーセットを行う
   axesDefaults: {
-    // showTicks: false,
     numberTicks: 3,
     tickOptions: {
       fontSize: '10pt',
@@ -107,15 +104,11 @@ var options = {
     xaxis: {
       label: 'GAP',
       min: 0,
-      tickOptions: {
-      },
     },
     yaxis: {
       label: '相関',
       min: 0,
       max: 100,
-      tickOptions: {
-      },
     },
   },
 };
@@ -135,25 +128,13 @@ for (var i in homearr) {
   cnt += 1
 }
 
-
-var arr_org = [
-    [
-      [ 0, 65, 10, 'PV数 全体' ],
-      [ 30, 22, 10, '平均PV数' ],
-      [ 300, 91, 10, '訪問回数' ],
-      [ 78, 79, 10, '曜日別' ],
-      [ 600, 79, 10, '平均滞在時間' ],
-      [ 100.0, 79, 10, '人気ページ' ],
-      [ 50.0, 63, 10, '直帰率' ],
-      [ 21.0, 91, 10, '再訪問率' ],
-      [ 15.0, 54, 10, '新規訪問率' ],
-    ],
-    [
-          [ 21.0, 91, 10, '再訪問率' ],
-      [ 15.0, 54, 10, '新規訪問率' ]
-    ]
-];
-
+  // 凡例の描画
+    $('#circle').append('<span style="color:'''
+      + options.series[cnt].color
+      + '">'
+      + '/span>'
+      + i + '&nbsp;'
+    );
 
 jQuery( function() {
 
@@ -173,14 +154,8 @@ jQuery( function() {
     }
   });
 
-
   // jqplot描画
   var square = jQuery . jqplot('square', arr, options);
-
-  // 凡例の描画
-  // $.each(arr, function(index, val) {
-  //   $('#legend1b').append('<tr><td>'+val[3]+'</td><td>'+val[2]+'</td></tr>');
-  // });
 
   // ハイライトツールチップを表示
   $('#square').bind('jqplotDataHighlight',
@@ -202,12 +177,14 @@ jQuery( function() {
 
       var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
       console.log( "tooptip is  " + tips );
+      // ツールチップのCSS
       $('#tooltip1s').css(
         {
           left: chart_left+x+radius + -5,
           top: chart_top+y,
           'text-align': 'center'
         });
+      // ツールチップHTML
       $('#tooltip1s').html(
           '<a href="#" id="abtn" name=' + name
           + ' style="font-size:14px;' +
@@ -218,7 +195,7 @@ jQuery( function() {
           // 'y: ' + data[1] + '<br />'
         );
       $('#tooltip1s').show();
-      // ハイライトツールチップへリンク付与
+      // ツールチップへリンク付与
       $('#abtn').click(function() {
         evtset($(this));
       });
@@ -234,6 +211,8 @@ jQuery( function() {
           $('#narrow_select').each(function() {
             this.selectedIndex = 0;
           });
+          // グラフ描画オプションをpageview(初期値)に戻す
+          $('input[name="graphic_item"]').val('pageviews');
           $('#tooltip1s').empty();
           $('#tooltip1s').hide();
           // $('#legend1b tr').css('background-color', '#ffffff');

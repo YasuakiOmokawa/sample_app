@@ -1,6 +1,7 @@
 <script type="text/javascript">
 
 
+// 日付計算
 var calc = function(datestr, p, day) {
   var dt = new Date(datestr);
   switch(p) {
@@ -14,6 +15,7 @@ var calc = function(datestr, p, day) {
   return dt;
 }
 
+// 日付フォーマット
 var fmt = function(dt) {
   var year = dt.getFullYear();
   var month = dt.getMonth() + 1;
