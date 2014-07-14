@@ -5,7 +5,7 @@
     </tr>
     <% @in_table.sort_by{|a| -(a.sessions.to_f) -(a.bounce_rate.to_f) }.each do |t| %>
     <tr>
-      <td class="row"><%= t.page_title %></td>
+      <td class="row"><%= truncate(t.page_title, :length => 19) %></td>
       <td><%= t.sessions.to_f.round(1) %></td>
       <td><%= t.bounce_rate.to_f.round(1) %></td>
     </tr>

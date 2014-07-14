@@ -26,4 +26,24 @@ SampleApp::Application.configure do
   # This option may cause significant delays in view rendering with a large
   # number of complex assets.
   config.assets.debug = true
+
+
+
+  # メーラ設定
+  # mailer内でURLを機能させる
+  config.action_mailer.default_url_options = { :host => "localhost:3000" }
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    :address => 'smtp.gmail.com',
+    :port => 587,
+    :domain => 'example.com',
+    :user_name => 'orikasa@senk-inc.co.jp',
+    :password => 'orikasaorikasa',
+    :authentication => :plain,
+    :enable_starttls_auto => true
+  }
+
+
+
 end

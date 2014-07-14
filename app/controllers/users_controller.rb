@@ -29,9 +29,6 @@ class UsersController < ApplicationController
     @narrow_action = campaign_user_path
     @partial = 'rsc'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'campaign'
-    @cond[:filters].merge!( {
-      :campaign.does_not_match => '(not set)'
-      })
 
     # ページ個別設定
     # gap値の分処理が複雑
@@ -59,9 +56,6 @@ class UsersController < ApplicationController
     @narrow_action = social_user_path
     @partial = 'rsc'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'social'
-    @cond[:filters].merge!( {
-      :has_social_source_referral.matches => 'Yes'
-      })
 
     # ページ個別設定
     # gap値の分処理が複雑
@@ -89,9 +83,6 @@ class UsersController < ApplicationController
     @narrow_action = referral_user_path
     @partial = 'rsc'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'referral'
-    @cond[:filters].merge!( {
-      :medium.matches => 'referral'
-      })
 
     # ページ個別設定
     # gap値の分処理が複雑
@@ -118,9 +109,6 @@ class UsersController < ApplicationController
     @title = '直接入力/ブックマーク'
     @narrow_action = direct_user_path
     gon.div_page_tab = 'direct'
-    @cond[:filters].merge!( {
-      :medium.matches => '(none)'
-      })
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
     @partial = 'inpage'
@@ -134,9 +122,6 @@ class UsersController < ApplicationController
     @narrow_action = search_user_path
     @partial = 'search'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'search'
-    @cond[:filters].merge!( {
-      :medium.matches => 'organic'
-      })
     @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
     @categories["検索ワード"] = set_select_box(@search, 's')
 
@@ -181,7 +166,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       sign_in @user
-      flash[:success] = "Welcome to the Sample App!"
+      flash[:success] = "アプリケーションへようこそ"
       redirect_to @user
     else
       render 'new'
@@ -241,6 +226,7 @@ class UsersController < ApplicationController
       @to = params[:to].presence || Date.today.next_month
       if params[:to].present? then @to = set_date_format(@to) end
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
+     set_action(params[:action], @cond)
       gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末
       gon.radio_visitor = set_visitor_type( (params[:visitor].presence || "all"),@cond)                                 # 来訪者
       #　グラフ表示項目

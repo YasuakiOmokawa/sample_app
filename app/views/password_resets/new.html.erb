@@ -1,0 +1,10 @@
+<h1>パスワードの再設定</h1>
+<h2>登録済みのメールアドレスを入力してください</h2>
+
+<%= form_tag password_resets_path, :method => :post do %>
+  <div class="field">
+    <%= label_tag :email, 'メールアドレス' %>
+    <%= text_field_tag :email, params[:email] %>
+  </div>
+  <div class="actions"><%= submit_tag "パスワードを再設定" %></div>
+<% end %>

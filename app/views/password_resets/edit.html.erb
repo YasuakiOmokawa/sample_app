@@ -1,0 +1,14 @@
+<h1>パスワードを再設定</h1>
+
+<%= form_for @user, :url => password_reset_path(params[:id]) do |f| %>
+  <%= render 'shared/error_messages' %>
+  <div class="field">
+    <%= f.label :password, '新しいパスワード' %>
+    <%= f.password_field :password %>
+  </div>
+  <div class="field">
+    <%= f.label :password_confirmation, '新しいパスワードの再入力' %>
+    <%= f.password_field :password_confirmation %>
+  </div>
+  <div class="actions"><%= f.submit "パスワード再設定" %></div>
+<% end %>

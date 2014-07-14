@@ -103,6 +103,22 @@ module ParamUtils
     return vst
   end
 
+  # アクションに応じた@condの設定
+  def set_action(wd, opt)
+    case wd
+    when 'search'
+      opt[:filters].merge!( {:medium.matches => 'organic'} )
+    when 'direct'
+      opt[:filters].merge!( {:medium.matches => '(none)'} )
+    when 'referral'
+      opt[:filters].merge!( {:medium.matches => 'referral'} )
+    when 'social'
+      opt[:filters].merge!( {:has_social_source_referral.matches => 'Yes'} )
+    when 'campaign'
+      opt[:filters].merge!( {:campaign.does_not_match => '(not set)'} )
+    end
+  end
+
   # 絞り込みキーワードの設定
   def set_narrow_word(wd, opt, tag)
     case tag

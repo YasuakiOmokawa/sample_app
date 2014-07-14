@@ -1,10 +1,12 @@
 SampleApp::Application.routes.draw do
+  # get "password_resets/new"
   resources :users ,:except => [:index] do
     member do
       get :search, :direct, :referral, :social, :campaign, :last, :all
     end
   end
   resources :sessions, only: [:new, :create, :destroy]
+  resources :password_resets
   root  'static_pages#home'
   match '/signup',  to: 'users#new', via: 'get'
   match '/signin',  to: 'sessions#new', via: 'get'

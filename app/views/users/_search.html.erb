@@ -5,7 +5,7 @@
     </tr>
     <% @search.sort_by{ |a| -(a.sessions.to_i) -(a.adsense_ads_clicks.to_i) -(a.adsense_ctr.to_f) }.each do |t| %>
     <tr>
-       <td class="row"><%= t.keyword %></td>
+       <td class="row"><%= truncate(t.keyword, :length => 20) %></td>
        <td><%= t.sessions %></td>
        <td><%= t.adsense_ads_clicks %></td>
        <td><%= t.adsense_ctr.to_f.round(1).to_s %>%</td>

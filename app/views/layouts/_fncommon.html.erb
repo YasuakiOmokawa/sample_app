@@ -2,7 +2,7 @@
 
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function evtSet(at) {
-  console.log(at);
+  // console.log(at);
   $('#hallway > form').attr("action", at.attr("name"));
   $('a#set').trigger('click');
 }
@@ -52,7 +52,6 @@ $(document).ready(function() {
   cv = gon.cv_num
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
-
 
 });
 </script>
