@@ -1,18 +1,5 @@
 <script>
 
-$.datepicker._defaults.onAfterUpdate = null;
-
-var datepicker__updateDatepicker = $.datepicker._updateDatepicker;
-
-$.datepicker._updateDatepicker = function (inst) {
-  datepicker__updateDatepicker.call(this, inst);
-
-  var onAfterUpdate = this._get(inst, 'onAfterUpdate');
-  if (onAfterUpdate)
-    onAfterUpdate.apply((inst.input ? inst.input[0] : null),
-      [(inst.input ? inst.input.val() : ''), inst]);
-}
-
 // 日付計算
 var calc = function(datestr, p, day) {
   var dt = new Date(datestr);
@@ -43,108 +30,109 @@ var fmt = function(dt) {
   return str;
 }
 
+// カレンダーの位置を調整
+var chgPos = function(input, inst, elm) {
+  var cal = inst.dpDiv;
+  var top  = elm.offset().top + elm.outerHeight();
+  var left = elm.offset().left;
+  setTimeout(function() {
+    cal.css({
+      'top' : top,
+      'left': left
+    });
+   }, 10);
+}
+
+
 $(function() {
 
-  // global variables to track the date range
-  var cur = -1, prv = -1;
-
-  // カレンダーの位置を指定
-  var pos = $('#jrange input').position();
-
-  // Create the picker and align it to the bottom of the input field
-  // Hide it for later
-  $('#jrange span')
-    .datepicker({
-      changeMonth: true,
-      changeYear: true,
-      // numberOfMonths: 2,
-      showButtonPanel: true,
-
-      beforeShowDay: function (date) {
-        return [
-          true,
-          ( (date.getDate() >= Math.min(prv, cur) && date.getDate() <= Math.max(prv, cur) ) ? 'date-range-selected' : '')
-          ];
+  // 期間設定ダイアログ
+  $('#dialog-form').dialog({
+    closeOnEscape: false,
+    autoOpen: false,
+    draggable: false,
+    open:function(event, ui){
+      $(".ui-dialog-titlebar-close").hide();
+      // datepickerを自動表示させない
+      $('#dummy').hide();
+    },
+    width: 400,
+    height: 200,
+    title: '期間設定',
+    modal: true,
+    position: {
+      my: "left top",
+      at: "left top+20",
+      of: '#jrange input'
+    },
+    buttons: {
+      "設定": function(){
+        $(this).dialog('close');
+        // 入力値を期間設定ボックスへ設定
+        setRange();
+      // datepickerを自動表示させない
+      $('#dummy').show();
       },
-
-      onSelect: function ( dateText, inst) {
-        var d1, d2;
-
-        prv = cur;
-        cur = (new Date(inst.selectedYear, inst.selectedMonth, inst.selectedDay)).getTime();
-        if (prv == -1 || prv == cur) {
-          prv = cur;
-          $('#jrange input').val( dateText );
-        } else {
-          d1 = $.datepicker.formatDate( 'yy-mm-dd', new Date(Math.min(prv, cur) ), {} );
-          d2 = $.datepicker.formatDate( 'yy-mm-dd', new Date(Math.max(prv, cur) ), {} );
-          $('#jrange input').val( d1+' - '+d2 );
-        }
-      },
-
-      onAfterUpdate: function ( inst ) {
-        $('<button type="button" class="ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all" data-handler="hide" data-event="click">完了</button>')
-          .appendTo( $('#jrange span .ui-datepicker-buttonpane') )
-          .on( 'click', function () { $('#jrange span').hide(); } );
+      "クリア": function(){
+        $.datepicker._clearDate( '#fromd' );
+        $.datepicker._clearDate( '#tod' );
+        ['#tod', '#fromd'].forEach(function(i) {
+          $( i ).datepicker( "option", {
+            minDate: null,
+            maxDate: null } );
+        });
       }
-    })
-    // .css( { left: pos.left, top: pos.top + 22 } )
-    // .hide();
-
-  // Listen for focus on the input field and show the picker
-  $('#jrange input').on('focus', function (e) {
-
-    var v = this.value, d;
-
-    try {
-      if (v.indexOf(' - ') > -1) {
-        d = v.split(' - ');
-
-        prv = $.datepicker.parseDate( 'yy-mm-dd', d[0] ).getTime();
-        cur = $.datepicker.parseDate( 'yy-mm-dd', d[1] ).getTime();
-
-      } else if ( v.length > 0) {
-        prv = cur = $.datepicker.parseDate( 'yy-mm-dd', v ).getTime();
-      }
-    } catch (e) {
-      cur = prv = -1;
     }
-
-    if ( cur > -1 )
-      $('#jrange span').datepicker('setDate', new Date(cur));
-
-    $('#jrange span').datepicker('refresh').show();
   });
 
-  $( "#fromd" ).datepicker({
+  $( "#jrange input" )
+    .click( function() {
+      var v = $(this).val(), d;
+      console.log(v);
+
+      d = v.split(' ~ ');
+
+      $('#fromd').datepicker('setDate', new Date(d[0]));
+      $('#tod').datepicker('setDate', new Date(d[1]));
+
+      $( "#dialog-form" ).dialog('open');
+  });
+
+  // ダイアログ内のdatepicker
+  $("#fromd").datepicker({
     changeMonth: true,
     changeYear: true,
-    numberOfMonths: 3,
+    numberOfMonths: 2,
     dateFormat:"yy-mm-dd",
+    beforeShow: function(input, inst) {
+      chgPos(input, inst, $(this));
+    },
     onSelect: function( selectedDate ) {
-      console.log(selectedDate);
       var dte = calc(selectedDate, '+', 31);
       var opt = fmt(dte);
-      console.log(opt);
       $( "#from" ).val(selectedDate);
-      $( "#tod" ).datepicker( "option", "minDate", selectedDate );
-      $( "#tod" ).datepicker( "option", "maxDate", opt );
+      $( "#tod" ).datepicker( "option", {
+        minDate: selectedDate,
+        maxDate: opt });
     }
   });
-  $( "#tod" ).datepicker({
+  $("#tod").datepicker({
     changeMonth: true,
     changeYear: true,
-    numberOfMonths: 3,
+    numberOfMonths: 2,
     dateFormat:"yy-mm-dd",
+    beforeShow: function(input, inst) {
+      chgPos(input, inst, $(this));
+    },
     onSelect: function( selectedDate ) {
-      console.log(selectedDate);
       var dte = calc(selectedDate, '-', 31);
       var opt = fmt(dte);
-      console.log(opt);
       $( "#to" ).val(selectedDate);
-      $( "#fromd" ).datepicker( "option", "minDate", opt );
-      $( "#fromd" ).datepicker( "option", "maxDate", selectedDate );
+      $( "#fromd" ).datepicker( "option", {
+        minDate: opt,
+        maxDate: selectedDate });
     }
   });
+
 });
 </script>

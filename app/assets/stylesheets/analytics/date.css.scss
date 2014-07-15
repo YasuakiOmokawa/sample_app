@@ -1,13 +1,10 @@
-// .date-range-selected > .ui-state-active,
-// .date-range-selected > .ui-state-default {
-//   background: none;
-//   background-color: lightsteelblue;
-// }
+// モーダルダイアログに移したdatepickerが背面表示されてしまうバグを解消
+.ui-datepicker { width: 17em; padding: .2em .2em 0; z-index: 2000;}
 
-// #jrange input {
-//    width: 200px;
-// }
-
-// #jrange span {
-//    font-size: 9pt;
-// }
+// 期間設定ダイアログのcss
+#jrange input {
+  width: 200px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+}

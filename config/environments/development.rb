@@ -31,7 +31,7 @@ SampleApp::Application.configure do
 
   # メーラ設定
   # mailer内でURLを機能させる
-  data = YAML.load_file(RAILS_ROOT + "/tmp/mail.yml")
+  data = YAML.load_file("#{Rails.root}/tmp/mail.yml")
 
   config.action_mailer.default_url_options = { :host => "localhost:3000" }
   config.action_mailer.raise_delivery_errors = true

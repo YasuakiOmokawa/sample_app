@@ -221,9 +221,9 @@ class UsersController < ApplicationController
 
       @user = User.find(params[:id])
       @ga_profile = AnalyticsService.new.load_profile(@user)                                     # アナリティクスAPI認証パラメータ
-      @from = params[:from].presence || Date.today
+      @from = params[:from].presence || Date.today.prev_month
       if params[:from].present? then @from = set_date_format(@from) end
-      @to = params[:to].presence || Date.today.next_month
+      @to = params[:to].presence || Date.today
       if params[:to].present? then @to = set_date_format(@to) end
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      set_action(params[:action], @cond)

@@ -12,7 +12,6 @@
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
   <div>ID：<%= @user.name %></div>
-  <div>期間：<%= @from %>&nbsp;～&nbsp;<%= @to %></div><br>
 </div>
 <ul>
   <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>
@@ -26,16 +25,11 @@
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
-          <!-- Datepicker カスタマイズ -->
-<!--         <span id="jrange" class="dates">
-           <input readonly="readonly"/>
-           <span style="position: absolute;"></span>
-        </span> -->
-
         <%= image_tag 'calender.png' %>
-        <!-- 14/01/01-14/12/31 -->
-        <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />-
-        <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+          <!-- Datepicker  -->
+        <span id="jrange" >
+           <input readonly="readonly"/>
+        </span>
         <!-- datepicker用のinput -->
         <input type="hidden" id="from" name="from" value="<%= @from %>"/>
         <input type="hidden" id="to" name="to" value="<%= @to %>" />
@@ -56,4 +50,15 @@
     <a href="#" onclick="document.narrowForm.submit()" id="set">絞り込み</a>
   </form>
 </div>
+<!-- datepicker form dialog start -->
+<div id="dialog-form">
+  <p>最大範囲は1ヶ月です</p>
+  <input id="dummy" readonly="readonly"/>
+  <br/>
+    <label for="fromd">開始</label>
+    <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />
+    <label for="tod">終了</label>
+    <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+</div>
+<!-- datepicker form dialog end -->
 <!-- header_end -->

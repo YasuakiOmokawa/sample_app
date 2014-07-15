@@ -7,6 +7,12 @@ var evtset = function evtSet(at) {
   $('a#set').trigger('click');
 }
 
+// 期間設定ボックスの初期値を設定
+var setRange = function setRange() {
+  var range = $('#from').val() + ' ~ ' + $('#to').val();
+  $('#jrange input').val(range);
+}
+
 $(document).ready(function() {
 
   // GAP値がマイナスなら赤色にする
@@ -52,6 +58,9 @@ $(document).ready(function() {
   cv = gon.cv_num
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
+
+  // ページ読み込み時の期間設定ボックス設定
+  setRange();
 
 });
 </script>
