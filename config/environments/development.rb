@@ -31,6 +31,8 @@ SampleApp::Application.configure do
 
   # メーラ設定
   # mailer内でURLを機能させる
+  data = YAML.load_file(RAILS_ROOT + "/tmp/mail.yml")
+
   config.action_mailer.default_url_options = { :host => "localhost:3000" }
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
@@ -39,7 +41,7 @@ SampleApp::Application.configure do
     :port => 587,
     :domain => 'example.com',
     :user_name => 'orikasa@senk-inc.co.jp',
-    :password => 'orikasaorikasa',
+    :password => data["password"],
     :authentication => :plain,
     :enable_starttls_auto => true
   }
