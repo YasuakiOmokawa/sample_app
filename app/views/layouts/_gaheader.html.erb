@@ -26,7 +26,12 @@
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
-    <span id="calendar">
+          <!-- Datepicker カスタマイズ -->
+<!--         <span id="jrange" class="dates">
+           <input readonly="readonly"/>
+           <span style="position: absolute;"></span>
+        </span> -->
+
         <%= image_tag 'calender.png' %>
         <!-- 14/01/01-14/12/31 -->
         <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />-
@@ -34,7 +39,6 @@
         <!-- datepicker用のinput -->
         <input type="hidden" id="from" name="from" value="<%= @from %>"/>
         <input type="hidden" id="to" name="to" value="<%= @to %>" />
-    </span>
         <input type="hidden" value="1" name="cv_num" />
         <input type="hidden" value="" name="graphic_item" />
     <%= image_tag 'device.png', :class => "icon" %>
