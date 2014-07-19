@@ -1,7 +1,7 @@
 <script type="text/javascript">
 
 // 進捗バーを表示
-$(document).on('page:before-change',   function() { NProgress.start(); });
+$('a#set').on('click',   function() { NProgress.start(); });
 
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function evtSet(at) {
