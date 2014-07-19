@@ -181,8 +181,8 @@ jQuery( function() {
       console.log( "full data is " + dt );
 
       var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
-      var name = $(page)[0].name;
-      console.log( "href action is " + name );
+      var id = $(page)[0].id;
+      console.log( "href action is " + id );
 
       var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
       console.log( "tooptip is  " + tips );
@@ -195,7 +195,7 @@ jQuery( function() {
         });
       // ツールチップHTML
       $('#tooltip1s').html(
-          '<a href="#" id="abtn" name=' + name
+          '<a href="javascript:void(0)" id=' + id +' class="abtn" '
           + ' style="font-size:14px;' +
           'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
           + tips
@@ -205,7 +205,7 @@ jQuery( function() {
         );
       $('#tooltip1s').show();
       // ツールチップへリンク付与
-      $('#abtn').click(function() {
+      $('.abtn').click(function() {
         evtset($(this));
       });
       // $('#legend1b tr').css('background-color', '#ffffff');

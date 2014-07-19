@@ -1,12 +1,9 @@
 <script type="text/javascript">
 
-// 進捗バーを表示
-$('a#set').on('click',   function() { NProgress.start(); });
-
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function evtSet(at) {
-  // console.log(at);
-  $('#hallway > form').attr("action", at.attr("name"));
+  $('#hallway > form').attr("action", at.attr("id"));
+  console.log(at);
   $('a#set').trigger('click');
 }
 
@@ -16,7 +13,21 @@ var setRange = function setRange() {
   $('#jrange input').val(range);
 }
 
+  // 進捗バーを止める
+$(window).on('load', function(){
+   NProgress.done();
+});
+
 $(document).ready(function() {
+
+  // 進捗バーを進める
+  $('a#set').click(function(){
+    NProgress.start();
+  });
+  // 進捗バーを止める(ESCキーが押された場合)
+  $(window).keyup(function(e){
+    if(e.keyCode == 27){NProgress.done();}
+  });
 
   // GAP値がマイナスなら赤色にする
   $('td.gap').each(function() {

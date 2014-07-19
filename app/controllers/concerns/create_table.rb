@@ -85,6 +85,9 @@ module CreateTable
       puts "calc average because of item is #{item}"
       {:day_on => cntr_on , :day_off => cntr_off }.each do |k, v|
         [:good, :bad, :gap].each do |u|
+          if v == 0 then
+            v = 1
+          end
           avg = table[k][u].to_i / v
           table[k][u] = avg
           puts "calc avg ok! cntr_info is #{k}, cntr_value is #{v}, avg value is #{avg}"

@@ -115,6 +115,9 @@ module UpdateTable
       d_hsh.each do |c, d|
         if c =~ /(rate|percent|avg_|_per_)/ then
           puts "calc average because of item is #{c}"
+          if d_hsh[c] == 0 then
+            d_hsh[c] = 1
+          end
           avg = r_hsh[c][:gap] / d_hsh[c]
           r_hsh[c][:gap] = avg
           puts "calc avg ok! cntr_info is #{ky}, cntr is #{d_hsh[ky]}, value is #{avg}"

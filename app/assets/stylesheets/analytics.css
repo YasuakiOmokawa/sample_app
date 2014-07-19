@@ -13,4 +13,5 @@
  *= require_tree ./jqplot
  *= require_tree ./analytics
  *= require nprogress
+ *= require nprogress-bootstrap
 */

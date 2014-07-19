@@ -14,14 +14,14 @@
   <div>ID：<%= @user.name %></div>
 </div>
 <ul>
-  <li class="tab" id="first"><a href="#" name="<%= user_path %>">ホーム</a></li>
-  <li class="tab" id="all"><a href="#" name="<%= all_user_path %>">全体</a></li>
-  <li class="tab" id="search"><a href="#" name="<%= search_user_path %>">検索</a></li>
-  <li class="tab" id="direct"><a href="#" name="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
-  <li class="tab" id="referral"><a href="#" name="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
-  <li class="tab" id="social"><a href="#" name="<%= social_user_path %>">ソーシャル</a></li>
-  <li class="tab" id="campaign"><a href="#" name="<%= campaign_user_path %>">キャンペーン</a></li>
-  <li class="tab" id="last"><a href="#" name="<%= last_user_path %>">カスタマイズ</a></li><br>
+  <li class="tab" id="first"><a href="javascript:void(0)" id="<%= user_path %>">ホーム</a></li>
+  <li class="tab" id="all"><a href="javascript:void(0)" id="<%= all_user_path %>">全体</a></li>
+  <li class="tab" id="search"><a href="javascript:void(0)" id="<%= search_user_path %>">検索</a></li>
+  <li class="tab" id="direct"><a href="javascript:void(0)" id="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
+  <li class="tab" id="referral"><a href="javascript:void(0)" id="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
+  <li class="tab" id="social"><a href="javascript:void(0)" id="<%= social_user_path %>">ソーシャル</a></li>
+  <li class="tab" id="campaign"><a href="javascript:void(0)" id="<%= campaign_user_path %>">キャンペーン</a></li>
+  <li class="tab" id="last"><a href="javascript:void(0)" id="<%= last_user_path %>">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
@@ -48,7 +48,7 @@
     <!-- ここはページによって挙動を変える -->
     <%= image_tag 'plus.png' %>
     <%= select_tag 'narrow_select', grouped_options_for_select(@categories, "", "選択してください") %>
-    <a href="#" onclick="document.narrowForm.submit()" id="set">絞り込み</a>
+    <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
   </form>
 </div>
 <!-- datepicker form dialog start -->
