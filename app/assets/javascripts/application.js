@@ -24,5 +24,5 @@
 //= require ./jqplot/plugins/bubbleRenderer
 //= require nprogress
 //= require nprogress-turbolinks
-
+//= require turbolinks
 // require_tree .
