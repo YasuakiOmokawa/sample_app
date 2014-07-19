@@ -9,5 +9,11 @@ $(function() {
       $('input[name="graphic_item"]').val($(this).val());
       $('a#set').trigger('click');
     });
+
+    // ホーム画面のグラフ絞り込み
+    $('button#all').on('click', function() {
+      $('input[name="shori"]').val(1);
+      $('a#set').trigger('click');
+    });
 });
 </script>

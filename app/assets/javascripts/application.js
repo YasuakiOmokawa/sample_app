@@ -22,6 +22,7 @@
 //= require ./jqplot/plugins/highlighter
 //= require ./jqplot/plugins/pointLabels
 //= require ./jqplot/plugins/bubbleRenderer
-
+//= require nprogress
+//= require nprogress-turbolinks
 
 // require_tree .

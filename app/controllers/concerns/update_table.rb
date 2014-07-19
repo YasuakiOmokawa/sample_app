@@ -181,6 +181,33 @@ module UpdateTable
     return tbl
   end
 
+  # GAP値の数値をパーセンテージへ変換
+  def calc_num_to_pct(tbl)
+
+    max = tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.max_by {|k,v| v[:gap] }[1][:gap]
+    min = tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.min_by {|k,v| v[:gap] }[1][:gap]
+
+    # 変換の基準となる値を算出
+    basis = ((max - min) / 100)
+    logger.info( " max is #{max}, min is #{min}, base value is #{basis}")
+
+    tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.each do |k,v|
+      if v[:gap] == max and v[:gap] > 0 then
+        value = 100
+      elsif v[:gap] == min and v[:gap] == 0 then
+        value = 0
+      else
+        value = (v[:gap] / basis).to_i
+      end
+
+      logger.info( "Convert num to pct success! key is #{k}, row value is #{v[:gap]}, converted value is #{value}" )
+
+      v[:gap] = value
+    end
+    return tbl
+  end
+
+
   # バブル（散布図）チャートの総ギャップ値と相関を合わせた配列（jqplotへ渡す）
   # バブルにする場合は、push時に３番目にradiusを設定
   def concat(tb, b, hsh)

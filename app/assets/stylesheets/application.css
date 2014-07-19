@@ -11,4 +11,6 @@
  *= require_self
  *= require_tree ./sample
  *= require jquery.ui.all
- */
+*= require nprogress
+*= require nprogress-bootstrap
+*/
