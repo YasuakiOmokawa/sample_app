@@ -72,6 +72,8 @@ $(function() {
         setRange();
       // datepickerを自動表示させない
       $('#dummy').show();
+      // ページ遷移を行う
+      $('a#set').trigger('click');
       },
       "クリア": function(){
         $.datepicker._clearDate( '#fromd' );

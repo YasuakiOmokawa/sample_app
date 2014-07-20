@@ -1,8 +1,25 @@
 <script type="text/javascript">
 
+// 再描画用にデータを集める
+var replotdata = function(allarr, arr, wd) {
+  arr.push( allarr[wd] );
+  arr.forEach( function(value) {
+    value[3] = wd + ';;' + value[3];
+  })
+  return arr;
+}
+
+//降順ソート
+Array.prototype.arsort = function(key) {
+    this.sort(function(a, b) {
+        return (a[key] < b[key]) ? 1 : -1;
+    });
+}
+
 // グラフ項目の色を決定
 function setGraphcolor(wd, opt) {
   var p_wd = wd
+
   switch (p_wd) {
     case '全体':
       opt.series.push( { color: 'gray'} );
@@ -29,6 +46,7 @@ function setGraphcolor(wd, opt) {
 function setItem(data,  graph, narrow) {
   var option; // 項目名（オプション）
   var tips = ''; // ツールチップの テキスト
+  var supl = ''; // 項目一覧のテキスト
 
   var tab = data[0]; // 各ページ名
   var a;
@@ -36,48 +54,59 @@ function setItem(data,  graph, narrow) {
   tips = tab + '<br>' + item;
   switch (item) {
     case 'PV数':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('pageviews');
       break;
     case '平均PV数':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('pageviews_per_session');
       break;
     case '訪問回数':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('sessions');
       break;
     case '直帰率':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('bounce_rate');
       break;
     case '新規訪問率':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('percent_new_sessions');
       break;
     case '平均滞在時間':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('avg_session_duration');
       break;
     case '再訪問率':
-      tips = chk_days(tips, data);
+      tips = tips + '<br>' + chk_days(data);
+      supl = chk_days(data);
       graph.val('repeat_rate');
       break;
     case '人気ページ':
-      option = data[2];
-      tips = tips + '<br>' + option;
-      $('#narrow_select').val(option + 'f');
+      tips = tips + '<br>' + data[2];
+      supl = data[2] + '<p>' + data[3] + '</p>'
+      $('#narrow_select').val( data[2] + 'f');
       break;
   }
-  return tips;
+  return [ tips, supl ];
 }
 
 // 曜日別の判定
-function chk_days(tips, data) {
+function chk_days(data) {
+  var d;
   if (data.length == 3) {
-    tips = tips + '<br>' + data[2];
+    d = data[2];
+    // tips = tips + '<br>' + data[2];
+  }else{
+    d = ' ';
   }
-  return tips;
+  return d;
 }
 
 // グラフ描画オプション
@@ -122,36 +151,116 @@ var options = {
   }
 };
 
-// グラフデータを設定
-if (typeof(gon.homearr) == "undefined") {
-  var arr = [
-    [ 1, 1, 1, 'tst' ]
-  ];
-} else {
-
-  var homearr = gon.homearr;
-  var arr = [];
-  var cnt = 0;
-
-  for (var i in homearr) {
-    console.log( i );
-    // console.log( homearr[i] );
-    arr.push( homearr[i] );
-    arr[cnt].forEach( function(value) {
-      value[3] = String(i) + ';;' + value[3];
-    });
-    setGraphcolor( i, options );
-    cnt += 1
-  }
-}
-
 jQuery( function() {
 
-   // バブル（散布図）チャート相関グラフ
-   // x軸, y軸, 大きさ(radius), 項目名　の順に表示
-   // 今回は x ... GAP y ... 相関　で現す。
-  // GAP値は数値、時間、パーセンテージでばらつきがあるため、
-  // パーセンテージを実数へ変換する。
+  // バブル（散布図）チャート相関グラフ
+  // x軸, y軸, 大きさ(radius), 項目名　の順に表示
+  // x ... GAP y ... 相関　で現す。
+
+
+  // グラフデータを設定
+  if (typeof(gon.homearr) == "undefined") {
+    var arr = [
+      [ 1, 1, 1, 'tst' ]
+    ];
+  } else {
+
+    var homearr = gon.homearr;
+    var arr = []; // グラフデータ配列
+    var idxarr = []; // 項目一覧配列
+    var cnt = 0;
+
+    for (var i in homearr) {
+      // console.log( homearr[i] );
+      arr.push( homearr[i] );
+      arr[cnt].forEach( function(value) {
+
+        value[3] = String(i) + ';;' + value[3];
+
+        // 項目一覧の追加
+        // GAPと相関の合計値が高いものほど優先度を高くする。
+        var ar = new Array();
+        var pri = value[0] + value[1];
+        ar['pri'] = pri;
+        ar['arr'] = value;
+        idxarr.push(ar);
+      });
+
+      setGraphcolor( i, options );
+      cnt += 1
+    }
+
+    // 項目一覧配列を降順ソート
+    idxarr.arsort('pri');
+
+    // 凡例をつける
+
+    //ヘッダ
+    $('#legend1b').append(
+      $('<tr>')
+      .attr({id: 'line'}).append(
+        $('<td>').text('ページ')
+      ).append(
+        $('<td>').text('項目')
+      ).append(
+        $('<td>').text('GAP')
+      ).append(
+        $('<td>').text('相関')
+      ).append(
+        $('<td>').text('補足情報')
+      )
+  );
+
+    // 項目一覧テーブルを追加
+    idxarr.forEach(function(value){
+      var text = value['arr'][3].split(';;');
+      var page = 'li.tab > a:contains(' + String(text[0]) + ')';
+      var name = $(page)[0].name;
+      var tips = setItem( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+      $('#legend1b').append(
+        $('<tr>')
+          .attr( {name: name, 'data-page': value['arr'][3] }
+        ).append(
+          $('<td>').text(String(text[0]))
+        ).append(
+          $('<td>').text(String(text[1]))
+        ).append(
+          $('<td>').text(String(value['arr'][0]))
+        ).append(
+          $('<td>').text(String(value['arr'][1]))
+        ).append(
+          $('<td>')
+            .attr({class: 'row'})
+            .html(tips[1])
+        )
+      );
+    });
+
+    // 項目一覧にクリックイベントを追加
+    //classにclickableを付加
+    $('tr[data-page]').addClass('clickable')
+
+      //クリックイベント
+      .click(function(e) {
+
+        //e.targetはクリックした要素自体、それがa要素以外であれば
+        if(!$(e.target).is('a')){
+
+          //その要素の先祖要素で一番近いtrの
+          //data-page属性の値を加工する
+          var item = $(e.target).closest('tr').data('page').split(';;');
+          console.log(item);
+
+          // グラフ項目と人気ページパラメータを設定
+          setItem( item, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+          // ページ遷移
+          evtsend($(e.target).closest('tr'));
+        };
+    });
+
+  }
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   $.jqplot.postDrawHooks.push(function(square) {
@@ -195,21 +304,18 @@ jQuery( function() {
         });
       // ツールチップHTML
       $('#tooltip1s').html(
-          '<a href="javascript:void(0)" id=' + id +' class="abtn" '
+          '<a href="javascript:void(0)" name=' + id +' class="abtn" '
           + ' style="font-size:14px;' +
           'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
-          + tips
+          + tips[0]
           + '</a>'
-          // 'x: ' + data[0] +'<br />' +
-          // 'y: ' + data[1] + '<br />'
         );
       $('#tooltip1s').show();
       // ツールチップへリンク付与
-      $('.abtn').click(function() {
-        evtset($(this));
+      $("li.tab a").click(function(){
+        evtsend($(this));
       });
-      // $('#legend1b tr').css('background-color', '#ffffff');
-      // $('#legend1b tr').eq(pointIndex+1).css('background-color', color);
+
     }
   );
 
@@ -224,8 +330,26 @@ jQuery( function() {
           $('input[name="graphic_item"]').val('pageviews');
           $('#tooltip1s').empty();
           $('#tooltip1s').hide();
-          // $('#legend1b tr').css('background-color', '#ffffff');
       }
   );
+
+  // 再描画ボタンがクリックされたらグラフをリプロットする
+  $('#circle .replot').click(function() {
+    var wd = $(this).text();
+    console.log("replot " + wd);
+    var src = gon.homearr;
+    var arr2 = [];
+    var rdata = replotdata(src, arr2, wd);
+
+    // データセットの色を再設定
+    // options.series = [];
+    // setGraphcolor( wd, options );
+
+    // 再描画
+    $('#square').html('');
+    var square = jQuery . jqplot('square', rdata, options);
+    // square.replot(options);
+  });
+
 });
 </script>

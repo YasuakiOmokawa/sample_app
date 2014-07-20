@@ -453,7 +453,6 @@ class UsersController < ApplicationController
           put_common_for_gap(skel, gap_rep, all_sessions) #再訪問率
           skel = calc_gap_for_common(skel)
 
-
           # 数値をパーセンテージへ再計算
           skel.merge!(fav_gap)
           gap_day = Hash.new{ |h, k| h[k] = {} }
@@ -487,9 +486,9 @@ class UsersController < ApplicationController
           # ページ項目へ追加
           p_hash[x] = homearr
           puts "pages data set success!"
-          File.open(Rails.root.join('app', 'services', 'data', 'test.json'), "a") do |f|
-            f.write(p_hash.to_json)
-          end
+          # File.open(Rails.root.join('app', 'services', 'data', 'test.json'), "a") do |f|
+          #   f.write(p_hash.to_json)
+          # end
           # フィルタオプションのリセット
           @cond[:filters] = {}
           puts "option reset! now is #{@cond}"

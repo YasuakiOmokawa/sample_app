@@ -1,9 +1,12 @@
 <script type="text/javascript">
 
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
-var evtset = function evtSet(at) {
-  $('#hallway > form').attr("action", at.attr("id"));
+var evtset = function (at) {
+  $('#hallway > form').attr("action", at.attr("name"));
   console.log(at);
+}
+var evtsend = function (at) {
+  $('#hallway > form').attr("action", at.attr("name"));
   $('a#set').trigger('click');
 }
 
@@ -49,9 +52,19 @@ $(document).ready(function() {
   $(tag).replaceWith(id + $(tag).html() + '</div>');
 
   // 各ページのタブへリンク付与
-  $("li.tab a").click(function() {
-    evtset($(this));
+  // $("li.tab a").hover(
+  //   function() {
+  //     evtset($(this));
+  //   },
+  //   function() {
+
+  //   }
+  // );
+  $("li.tab a").click(function(){
+    evtsend($(this));
   });
+
+
 
   // ラジオボタンの選択値を保持
   rdo_dev = gon.radio_device

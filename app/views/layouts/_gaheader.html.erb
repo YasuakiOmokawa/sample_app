@@ -14,14 +14,14 @@
   <div>ID：<%= @user.name %></div>
 </div>
 <ul>
-  <li class="tab" id="first"><a href="javascript:void(0)" id="<%= user_path %>">ホーム</a></li>
-  <li class="tab" id="all"><a href="javascript:void(0)" id="<%= all_user_path %>">全体</a></li>
-  <li class="tab" id="search"><a href="javascript:void(0)" id="<%= search_user_path %>">検索</a></li>
-  <li class="tab" id="direct"><a href="javascript:void(0)" id="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
-  <li class="tab" id="referral"><a href="javascript:void(0)" id="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
-  <li class="tab" id="social"><a href="javascript:void(0)" id="<%= social_user_path %>">ソーシャル</a></li>
-  <li class="tab" id="campaign"><a href="javascript:void(0)" id="<%= campaign_user_path %>">キャンペーン</a></li>
-  <li class="tab" id="last"><a href="javascript:void(0)" id="<%= last_user_path %>">カスタマイズ</a></li><br>
+  <li class="tab" id="first"><a href="javascript:void(0)" name="<%= user_path %>">ホーム</a></li>
+  <li class="tab" id="all"><a href="javascript:void(0)" name="<%= all_user_path %>">全体</a></li>
+  <li class="tab" id="search"><a href="javascript:void(0)" name="<%= search_user_path %>">検索</a></li>
+  <li class="tab" id="direct"><a href="javascript:void(0)" name="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
+  <li class="tab" id="referral"><a href="javascript:void(0)" name="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
+  <li class="tab" id="social"><a href="javascript:void(0)" name="<%= social_user_path %>">ソーシャル</a></li>
+  <li class="tab" id="campaign"><a href="javascript:void(0)" name="<%= campaign_user_path %>">キャンペーン</a></li>
+  <li class="tab" id="last"><a href="javascript:void(0)" name="<%= last_user_path %>">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">

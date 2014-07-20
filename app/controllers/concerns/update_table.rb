@@ -216,11 +216,6 @@ module UpdateTable
   def concat(tb, b, hsh)
     arr = []
     hsh.each do |k, v|
-      # if k =~ /fav_page/ then # 人気ページの場合はメッセージを変える
-        # msg = '人気ページ' + ';;' + v
-      #   arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 5, msg ] )
-      # else
-      # end
       arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 5, v ] )
       puts "array push success! hash_key is #{k}, corr_name is #{v} "
     end
