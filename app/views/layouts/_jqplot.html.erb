@@ -65,7 +65,7 @@ var options = {
     ],
     axesDefaults: {
       tickOptions: {
-        fontSize: '10pt',
+        fontSize: '9.5pt',
         fontFamily: 'ヒラギノ角ゴ Pro W3',
       },
     },
@@ -75,9 +75,15 @@ var options = {
             rendererOptions: {
                 borderWidth: 1,
             },
+            tickOptions: {
+              showGridline: false
+            }
         },
         x2axis: {
             renderer: jQuery . jqplot . CategoryAxisRenderer,
+            tickOptions: {
+              showGridline: false
+            }
         },
         yaxis: {
             autoscale: true,
@@ -107,10 +113,18 @@ var options = {
     // 背景色に関する設定
     grid: {
       background: "transparent",
-      gridLineColor: "black",
+      gridLineColor: "gray",
       shadow: false,
       drawGridlines: true,
       drawBorder: false,
+    },
+    canvasOverlay: {
+      show: true,
+      objects: [
+        {dashedHorizontalLine: { lineWitdh: 1, y: 20 } },
+        {dashedHorizontalLine: { y: 40 } },
+        {dashedHorizontalLine: { y: 60 } }
+      ]
     }
 };
 
@@ -119,10 +133,33 @@ options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
 jQuery( function() {
 
+  // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   $.jqplot.postDrawHooks.push(function() {
       $('.jqplot-axis.jqplot-x2axis').hide();
+      $('.jqplot-xaxis-tick').css({"background-color": "paleturquoise"});
+
+      // 32日以上データがあるならマンスリー表示にする
+      if ( $('.jqplot-xaxis-tick').length >= 32 ) {
+        var text2 = 0;
+        var text = 0;
+        for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
+          text = $( $('.jqplot-xaxis-tick')[i] ).text().split('/');
+
+          // 前日と月が違う場合は表示を変更
+          if ( (text2 != text[0]) ) {
+            $( $('.jqplot-xaxis-tick')[i] ).text(text[0] + "月");
+          } else {
+            $( $('.jqplot-xaxis-tick')[i] ).text('');
+          }
+          text2 = text[0];
+        }
+      }
+
+      // グラフの下部マージンを変更
+      $('#square.jqplot-target').css("margin-bottom", "20px");
   });
 
+  // jqplot描画
   jQuery . jqplot( 'square', arr, options);
 } );
 

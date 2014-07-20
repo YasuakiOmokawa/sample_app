@@ -1,0 +1,21 @@
+// 項目一覧へカーソル付与
+tbody tr.clickable:hover td {
+  background-color: #ffddff;
+  cursor: pointer;
+}
+
+// 凡例へカーソル付与
+#circle span.replot:hover {
+  background-color: #ffddff;
+  cursor: pointer;
+}
+
+#bedroom.homehead { /* 全体の枠。ここにヘッダを格納 */
+  padding-top: 26px;  /*  #in_Div の開始位置 */
+  width: 480px; /* 列幅の合計＋セル間の幅(2px)の合計＋20px 程度 */
+   }
+
+#bedroom.home  { /* tbodyが入っている。ここがスクロール対象*/
+  overflow-y: scroll; /* スクロールバー*/
+  height: 133px; /* tbodyを表示する高さ */
+}
