@@ -369,23 +369,29 @@ jQuery( function() {
   // 再描画ボタンがクリックされたらグラフをリプロットする
   $('#circle .replot').click(function() {
     var wd = $(this).text();
-    console.log("replot " + wd);
     var addopt = { series: [] };
 
-    if (wd == '全データを再表示') {
-      var arr = setData(addopt);
-      addopt.data = arr;
+    if (typeof(gon.homearr) != "undefined" ) {
+
+      if (wd == '全データを再表示') {
+        var arr = setData(addopt);
+        addopt.data = arr;
+      } else {
+        var src = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+        var rdata = replotdata(src, wd);
+        addopt.data = rdata;
+        setGraphcolor(wd, addopt);
+      }
+      console.log("replot " + wd);
+      // 再描画を実行
+      // jqplot の replot関数は、追加のオプションを設定すると
+      // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
+      square.replot(addopt);
+
     } else {
-      var src = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
-      var rdata = replotdata(src, wd);
-      addopt.data = rdata;
-      setGraphcolor( wd, addopt );
+      console.log('描画対象のデータがないため、再描画は実行されません');
     }
 
-    // 再描画を実行
-    // jqplot の replot関数は、追加のオプションを設定すると
-    // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
-    square.replot(addopt);
   });
 
 });
