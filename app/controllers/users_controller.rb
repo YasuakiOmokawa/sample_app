@@ -286,7 +286,7 @@ class UsersController < ApplicationController
       create_array_for_graph(@hash_for_graph, @gap_table_for_graph, @graphic_item)
       gon.hash_for_graph = @hash_for_graph
 
-      # 曜日別値テーブル
+      # 曜日別テーブル
       @value_table_by_days = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       create_table_by_days(@value_table_by_days, @gap_table_for_graph, @graphic_item)
 
@@ -303,6 +303,20 @@ class UsersController < ApplicationController
       put_common_for_gap(@gap_table, gap)
       put_common_for_gap(@gap_table, gap_for_repeat, all_sessions)
       calc_gap_for_common(@gap_table)
+
+      # 時間のフォーマットを変更
+      [:good, :bad, :gap].each do |t|
+
+        # ギャップテーブル
+        @gap_table[:avg_session_duration][t] = chg_time(@gap_table[:avg_session_duration][t])
+
+        # 曜日別テーブル
+        if @graphic_item == :avg_session_duration
+          [:day_on, :day_off].each do |s|
+            @value_table_by_days[s][t] = chg_time(@value_table_by_days[s][t])
+          end
+        end
+      end
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言

@@ -26,6 +26,26 @@ module UpdateTable
     end
   end
 
+  # 秒を指定フォーマットへ変換
+  # 時間の書式は、 hh:mm:ss
+  def chg_time(v)
+
+    v_org = v
+    v = v.to_i.abs
+
+    h = (v / 36000 | 0).to_s + (v / 3600 % 10 | 0).to_s
+    m = (v % 3600 / 600 | 0).to_s + (v % 3600 / 60 % 10 | 0).to_s
+    s = (v % 60 / 10 | 0).to_s + (v % 60 % 10).to_s
+    str = h + ':' + m + ':' + s
+
+    if v_org.to_i  < 0 then
+      str = "-" + str
+    end
+
+    logger.info("converted time is " + str)
+    return str
+  end
+
   # グラフ値テーブルのフォーマットを変更
   def change_format(table, item, format)
     table.each do |k, v|
@@ -33,10 +53,7 @@ module UpdateTable
         value = v[item][t]
         case format
         when "time" then
-          str = sprintf("%02d", ( value.to_i.abs / 60 ) ) + ':' + sprintf("%02d", ( value.to_i.abs % 60 ))
-          if value.to_i  < 0 then
-            str = "-" + str
-          end
+          str = chg_time(value)
         when "percent" then
           str = value.to_f.round(1).to_s + '%'
         when "number" then
