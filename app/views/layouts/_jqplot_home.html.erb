@@ -1,12 +1,58 @@
 <script type="text/javascript">
 
-// 再描画用にデータを集める
-var replotdata = function(allarr, arr, wd) {
-  arr.push( allarr[wd] );
-  arr.forEach( function(value) {
-    value[3] = wd + ';;' + value[3];
-  })
+// データ項目一覧の設定
+var setDataidx = function() {
+
+  var homearr = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+  var idxarr = [];
+  var arr = [];
+  var cnt = 0;
+
+  for (var i in homearr) {
+    arr.push( homearr[i] );
+    arr[cnt].forEach( function(value) {
+      value[3] = String(i) + ';;' + value[3];
+      var ar = new Array();
+
+      // GAPと相関の合計値が高いものほど優先度を高くする。
+      var pri = value[0] + value[1];
+      ar['pri'] = pri;
+      ar['arr'] = value;
+      idxarr.push(ar);
+    });
+    cnt += 1
+  }
+  return idxarr;
+}
+
+// グラフデータ全設定
+var setData = function(opt) {
+
+  var homearr = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+  var arr = [];
+  var cnt = 0;
+
+  for (var i in homearr) {
+    arr.push( homearr[i] );
+    arr[cnt].forEach( function(value) {
+      value[3] = String(i) + ';;' + value[3];
+    });
+
+    // グラフ描画オプション追加
+    setGraphcolor( i, opt );
+    cnt += 1
+  }
   return arr;
+}
+
+// 再描画用にデータを集める
+var replotdata = function(allarr, wd) {
+  var a = [];
+  for(i=0; i < allarr[wd].length; i++) {
+    allarr[wd][i][3] = String(wd) + ';;' + allarr[wd][i][3];
+  }
+  a.push( allarr[wd] );
+  return a;
 }
 
 //降順ソート
@@ -109,93 +155,75 @@ function chk_days(data) {
   return d;
 }
 
-// グラフ描画オプション
-var options = {
-  seriesDefaults: {
-    renderer: jQuery.jqplot.BubbleRenderer,
-    rendererOptions: {
-      bubbleAlpha: 0.2,
-      highlightAlpha: 1.0,
-      showLabels: false,
-      varyBubbleColors: false,
-      autoscaleMultiplier: 0.2,
-    },
-  },
-  series: [], // ここに関数でカラーセットを行う
-  axesDefaults: {
-    numberTicks: 3,
-    tickOptions: {
-      fontSize: '10pt',
-      fontFamily: 'ヒラギノ角ゴ Pro W3',
-    },
-  },
-  axes: {
-    xaxis: {
-      label: 'GAP',
-      min: 0,
-      max: 100,
-    },
-    yaxis: {
-      label: '相関',
-      min: 0,
-      max: 100,
-    },
-  },
-  // 背景色に関する設定
-  grid: {
-    background: "transparent",
-    gridLineColor: "black",
-    shadow: false,
-    drawGridlines: true,
-    drawBorder: false,
-  }
-};
-
 jQuery( function() {
 
   // バブル（散布図）チャート相関グラフ
   // x軸, y軸, 大きさ(radius), 項目名　の順に表示
   // x ... GAP y ... 相関　で現す。
 
+  // グラフ描画オプション
+  var options = {
+    seriesDefaults: {
+      renderer: jQuery.jqplot.BubbleRenderer,
+      rendererOptions: {
+        bubbleAlpha: 0.2,
+        highlightAlpha: 1.0,
+        showLabels: false,
+        varyBubbleColors: false,
+        autoscaleMultiplier: 0.2,
+      },
+    },
+    series: [], // ここに関数でカラーセットを行う
+    axesDefaults: {
+      numberTicks: 3,
+      tickOptions: {
+        fontSize: '10pt',
+        fontFamily: 'ヒラギノ角ゴ Pro W3',
+      },
+    },
+    axes: {
+      // 見栄えの問題で、max は101, min は -1 で調整
+      xaxis: {
+        label: 'GAP',
+        min: -1,
+        max: 101,
+      },
+      yaxis: {
+        label: '相関',
+        min: -1,
+        max: 101,
+      },
+    },
+    // 背景色に関する設定
+    grid: {
+      background: "transparent",
+      gridLineColor: "black",
+      shadow: false,
+      drawGridlines: true,
+      drawBorder: false,
+    }
+  };
 
   // グラフデータを設定
   if (typeof(gon.homearr) == "undefined") {
+
+    // コントローラからデータが渡されない場合
     var arr = [
       [ 1, 1, 1, 'tst' ]
     ];
+
   } else {
 
-    var homearr = gon.homearr;
-    var arr = []; // グラフデータ配列
-    var idxarr = []; // 項目一覧配列
-    var cnt = 0;
+    // データセット
+    var arr = setData(options);
 
-    for (var i in homearr) {
-      // console.log( homearr[i] );
-      arr.push( homearr[i] );
-      arr[cnt].forEach( function(value) {
+    // データ項目一覧セット
+    var idxarr = setDataidx();
 
-        value[3] = String(i) + ';;' + value[3];
-
-        // 項目一覧の追加
-        // GAPと相関の合計値が高いものほど優先度を高くする。
-        var ar = new Array();
-        var pri = value[0] + value[1];
-        ar['pri'] = pri;
-        ar['arr'] = value;
-        idxarr.push(ar);
-      });
-
-      setGraphcolor( i, options );
-      cnt += 1
-    }
-
-    // 項目一覧配列を降順ソート
+    // データ項目一覧を降順ソート
     idxarr.arsort('pri');
 
-    // 凡例をつける
-
-    //ヘッダ
+    // データ項目一覧ヘッダを追記
     $('#legend1b').append(
       $('<tr>')
       .attr({id: 'line'}).append(
@@ -209,13 +237,20 @@ jQuery( function() {
       ).append(
         $('<td>').text('補足情報')
       )
-  );
+    );
 
-    // 項目一覧テーブルを追加
+    // 項目一覧データを追記
     idxarr.forEach(function(value){
+
       var text = value['arr'][3].split(';;');
+
+      // ページ名（全体、検索、など）
       var page = 'li.tab > a:contains(' + String(text[0]) + ')';
+
+      // ページへのリンク
       var name = $(page)[0].name;
+
+      // 補足情報
       var tips = setItem( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       $('#legend1b').append(
@@ -237,11 +272,9 @@ jQuery( function() {
       );
     });
 
-    // 項目一覧にクリックイベントを追加
+    // 項目一覧データにクリックイベントを追加
     //classにclickableを付加
     $('tr[data-page]').addClass('clickable')
-
-      //クリックイベント
       .click(function(e) {
 
         //e.targetはクリックした要素自体、それがa要素以外であれば
@@ -337,18 +370,22 @@ jQuery( function() {
   $('#circle .replot').click(function() {
     var wd = $(this).text();
     console.log("replot " + wd);
-    var src = gon.homearr;
-    var arr2 = [];
-    var rdata = replotdata(src, arr2, wd);
+    var addopt = { series: [] };
 
-    // データセットの色を再設定
-    // options.series = [];
-    // setGraphcolor( wd, options );
+    if (wd == '全データを再表示') {
+      var arr = setData(addopt);
+      addopt.data = arr;
+    } else {
+      var src = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+      var rdata = replotdata(src, wd);
+      addopt.data = rdata;
+      setGraphcolor( wd, addopt );
+    }
 
-    // 再描画
-    $('#square').html('');
-    var square = jQuery . jqplot('square', rdata, options);
-    // square.replot(options);
+    // 再描画を実行
+    // jqplot の replot関数は、追加のオプションを設定すると
+    // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
+    square.replot(addopt);
   });
 
 });
