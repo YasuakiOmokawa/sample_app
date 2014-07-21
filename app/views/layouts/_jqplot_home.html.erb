@@ -323,7 +323,7 @@ jQuery( function() {
       console.log( "full data is " + dt );
 
       var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
-      var id = $(page)[0].id;
+      var id = $(page)[0].name;
       console.log( "href action is " + id );
 
       var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
