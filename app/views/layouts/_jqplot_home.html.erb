@@ -1,5 +1,6 @@
 <script type="text/javascript">
 
+
 // データ項目一覧の設定
 var setDataidx = function() {
 
@@ -366,9 +367,42 @@ jQuery( function() {
       }
   );
 
+  // 項目一覧データをクリックしたら該当データのみリプロットする
+  $('tbody tr.clickable').hover(
+    function() {
+      var $kids = $(this).children();
+      // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
+      var text = $kids.eq(0).text() + ';;' + $kids.eq(1).text() + ';;' + $kids.eq(4).text();
+      var rearr = [
+        [
+          [parseInt($kids.eq(2).text()), parseInt($kids.eq(3).text()), 10, text ]
+        ]
+      ];
+      // console.log(rearr);
+      var addopt = { series: [] };
+      addopt.data = rearr;
+      setGraphcolor($kids.eq(0).text(), addopt);
+      console.log("replot strong " + $kids.eq(0).text());
+      square.replot(addopt);
+    },
+    function() {
+      // 最後にフィルタしたグラフへ戻す
+      if (typeof(replotHomeflg) == "undefined") {
+        replotHomeflg = '全データを再表示';
+      }
+      replotHome(replotHomeflg);
+    }
+  );
+
   // 再描画ボタンがクリックされたらグラフをリプロットする
   $('#circle .replot').click(function() {
     var wd = $(this).text();
+    replotHome(wd);
+  })
+
+  // ホームグラフをリプロットする
+  var replotHome = function(wd) {
+
     var addopt = { series: [] };
 
     if (typeof(gon.homearr) != "undefined" ) {
@@ -388,11 +422,12 @@ jQuery( function() {
       // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
       square.replot(addopt);
 
+      // フィルタした処理の内容を記録(グローバル)
+      replotHomeflg = wd;
+
     } else {
       console.log('描画対象のデータがないため、再描画は実行されません');
     }
-
-  });
-
+  }
 });
 </script>
