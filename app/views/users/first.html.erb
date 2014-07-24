@@ -22,7 +22,22 @@
     <div id="knife"></div>
   </div>
   <div id="bedroom" class="home">
-    <table id="legend1b">
+    <div id="pager" class="pager">
+      <form>
+        <%= image_tag 'table_sorter/pager/first.png', :class => "first" %>
+        <%= image_tag 'table_sorter/pager/prev.png', :class => "prev" %>
+        <input type="text" class="pagedisplay">
+        <%= image_tag 'table_sorter/pager/next.png', :class => "next" %>
+        <%= image_tag 'table_sorter/pager/last.png', :class => "last" %>
+        <select class="pagesize">
+          <option selected="selected" value="10">10</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+        </select>
+      </form>
+    </div>
+    <table id="legend1b" class="tablesorter">
     </table>
   </div><br>
 </div>

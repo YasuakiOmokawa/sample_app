@@ -22,6 +22,8 @@
 //= require ./jqplot/plugins/highlighter
 //= require ./jqplot/plugins/pointLabels
 //= require ./jqplot/plugins/bubbleRenderer
+//= require jquery-tablesorter
+//= require jquery-tablesorter/addons/pager/jquery.tablesorter.pager
 //= require nprogress
 //= require nprogress-turbolinks
 NProgress.configure( {showSpinner: false });

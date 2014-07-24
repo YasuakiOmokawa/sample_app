@@ -12,6 +12,7 @@ var setDataidx = function() {
   for (var i in homearr) {
     arr.push( homearr[i] );
     arr[cnt].forEach( function(value) {
+      var nm = value[3].split(';;');
       value[3] = String(i) + ';;' + value[3];
       var ar = new Array();
 
@@ -19,6 +20,8 @@ var setDataidx = function() {
       var pri = value[0] + value[1];
       ar['pri'] = pri;
       ar['arr'] = value;
+      ar['page'] = String(i);
+      ar['name'] = nm[0];
       idxarr.push(ar);
     });
     cnt += 1
@@ -54,13 +57,6 @@ var replotdata = function(allarr, wd) {
   }
   a.push( allarr[wd] );
   return a;
-}
-
-//降順ソート
-Array.prototype.arsort = function(key) {
-    this.sort(function(a, b) {
-        return (a[key] < b[key]) ? 1 : -1;
-    });
 }
 
 // グラフ項目の色を決定
@@ -221,22 +217,22 @@ jQuery( function() {
     // データ項目一覧セット
     var idxarr = setDataidx();
 
-    // データ項目一覧を降順ソート
-    idxarr.arsort('pri');
-
     // データ項目一覧ヘッダを追記
     $('#legend1b').append(
-      $('<tr>')
-      .attr({id: 'line'}).append(
-        $('<td>').text('ページ')
-      ).append(
-        $('<td>').text('項目')
-      ).append(
-        $('<td>').text('GAP')
-      ).append(
-        $('<td>').text('相関')
-      ).append(
-        $('<td>').text('補足情報')
+      $('<thead>').append(
+        $('<tr>')
+        .attr({id: 'line'})
+        .append(
+          $('<td>').text('ページ')
+        ).append(
+          $('<td>').text('項目')
+        ).append(
+          $('<td>').text('GAP')
+        ).append(
+          $('<td>').text('相関')
+        ).append(
+          $('<td>').text('補足情報')
+        )
       )
     );
 

@@ -28,6 +28,7 @@ gem "delayed_job_active_record"
 # デプロイ先でデーモンとして動かすのに必要
 gem "daemons"
 gem 'nprogress-rails'
+gem 'jquery-tablesorter'
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
