@@ -9,6 +9,10 @@ $(document).ready(function() {
     })
     .tablesorterPager({container: $('#pager')});
 
+  if (typeof(gon.homearr) == "undefined") {
+    $('#pager').hide();
+  }
+
 
 });
 </script>

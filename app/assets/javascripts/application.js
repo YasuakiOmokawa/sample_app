@@ -24,8 +24,6 @@
 //= require ./jqplot/plugins/bubbleRenderer
 //= require jquery-tablesorter
 //= require jquery-tablesorter/addons/pager/jquery.tablesorter.pager
-//= require nprogress
-//= require nprogress-turbolinks
-NProgress.configure( {showSpinner: false });
+//= require pace/pace
 //= require turbolinks
 // require_tree .

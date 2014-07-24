@@ -11,9 +11,8 @@
  *= require_self
  *= require jquery.ui.all
  *= require_tree ./jqplot
- *= require nprogress
- *= require nprogress-bootstrap
  *= require jquery-tablesorter/theme.default
  *= require jquery-tablesorter/addons/pager/jquery.tablesorter.pager
+ *= require pace/pace-theme-corner-indicator
  *= require_tree ./analytics
 */

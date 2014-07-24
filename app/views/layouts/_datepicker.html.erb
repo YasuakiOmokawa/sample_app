@@ -75,15 +75,19 @@ $(function() {
       // ページ遷移を行う
       $('a#set').trigger('click');
       },
-      "クリア": function(){
-        $.datepicker._clearDate( '#fromd' );
-        $.datepicker._clearDate( '#tod' );
-        ['#tod', '#fromd'].forEach(function(i) {
-          $( i ).datepicker( "option", {
-            minDate: null,
-            maxDate: null } );
-        });
+      "キャンセル": function(){
+        $(this).dialog('close');
+        // datepickerを自動表示させない
+        $('#dummy').show();
       }
+      // "クリア": function(){
+      //   $.datepicker._clearDate( '#fromd' );
+      //   $.datepicker._clearDate( '#tod' );
+      //   ['#tod', '#fromd'].forEach(function(i) {
+      //     $( i ).datepicker( "option", {
+      //       minDate: null,
+      //       maxDate: null } );
+      //   });
     }
   });
 
@@ -115,7 +119,10 @@ $(function() {
       $( "#from" ).val(selectedDate);
       $( "#tod" ).datepicker( "option", {
         minDate: selectedDate,
-        maxDate: opt });
+        maxDate: opt }
+      );
+      console.log( "to val change, " + $("#tod").val() );
+      $("#to").val( $("#tod").val() );
     }
   });
   $("#tod").datepicker({
@@ -132,7 +139,10 @@ $(function() {
       $( "#to" ).val(selectedDate);
       $( "#fromd" ).datepicker( "option", {
         minDate: opt,
-        maxDate: selectedDate });
+        maxDate: selectedDate }
+      );
+      console.log( "fromd val change, " + $("#fromd").val() );
+      $("#from").val( $("#fromd").val() );
     }
   });
 
