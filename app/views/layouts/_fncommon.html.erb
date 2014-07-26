@@ -18,6 +18,10 @@ var setRange = function setRange() {
 
 $(document).ready(function() {
 
+    var progress = $( "#progressbar" ).progressbar({
+      value: false
+    });
+
   // 絞り込みボタンを押したとき、進捗バーを進める
   $('a#set').click(function(){
 
