@@ -1,13 +1,4 @@
-// Paceの設定を再定義
-<!-- <script data-pace-options = '{
- startOnPageLoad: false,
- restartOnPushState: false
-
-  }'
- ></script>
- -->
 <script type="text/javascript">
-
 
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function (at) {
@@ -25,29 +16,25 @@ var setRange = function setRange() {
   $('#jrange input').val(range);
 }
 
-  // 進捗バーを止める
-// $(window).on('load', function(){
-//    NProgress.done();
-// });
-
 $(document).ready(function() {
 
-  // 進捗バーを進める
+  // 絞り込みボタンを押したとき、進捗バーを進める
   $('a#set').click(function(){
-    Pace.restart();
+
+    var progress = $( "#progressbar" ).progressbar({
+      value: false
+    });
+
+    $('#dialog-progressbar').dialog({
+      draggable: false,
+      open: function(event, ui){
+        $(".ui-dialog-titlebar-close").hide();
+      },
+      height: 100,
+      title: 'データロード中 ...',
+      modal: true,
+    });
   });
-
-  // 進捗バーを止める(ESCキーが押された場合)
-  // $(window).keyup(function(e){
-  //   if (e.keyCode == 27) {
-
-  //     $('form[name="narrowForm"]').bind("submit", function() {
-  //       return false;
-  //     })
-
-  //     NProgress.done();
-  //   }
-  // });
 
   // GAP値がマイナスなら赤色にする
   $('td.gap').each(function() {
@@ -69,14 +56,6 @@ $(document).ready(function() {
   $(tag).replaceWith(id + $(tag).html() + '</div>');
 
   // 各ページのタブへリンク付与
-  // $("li.tab a").hover(
-  //   function() {
-  //     evtset($(this));
-  //   },
-  //   function() {
-
-  //   }
-  // );
   $("li.tab a").click(function(){
     evtsend($(this));
   });

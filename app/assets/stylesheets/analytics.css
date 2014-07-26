@@ -13,6 +13,5 @@
  *= require_tree ./jqplot
  *= require jquery-tablesorter/theme.default
  *= require jquery-tablesorter/addons/pager/jquery.tablesorter.pager
- *= require pace/pace-theme-corner-indicator
  *= require_tree ./analytics
 */
