@@ -18,21 +18,20 @@ var setRange = function setRange() {
 
 $(document).ready(function() {
 
+    // プログレスバー実装
     var progress = $( "#progressbar" ).progressbar({
       value: false
     });
+    progress.progressbar("disable");
 
   // 絞り込みボタンを押したとき、進捗バーを進める
   $('a#set').click(function(){
-
-    var progress = $( "#progressbar" ).progressbar({
-      value: false
-    });
 
     $('#dialog-progressbar').dialog({
       draggable: false,
       open: function(event, ui){
         $(".ui-dialog-titlebar-close").hide();
+        progress.progressbar("enable");
       },
       height: 100,
       title: 'データロード中 ...',
