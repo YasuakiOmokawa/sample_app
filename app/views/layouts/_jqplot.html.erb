@@ -29,7 +29,7 @@ var tickFormatter = function (format, val) {
             var m=""+(val%3600/600|0)+(val%3600/60%10|0);
             var s=""+(val%60/10|0)+(val%60%10);
             var s = h +':' + m + ':' + s;
-            console.log('converted time is ' + s);
+            // console.log('converted time is ' + s);
             if(val_org - 0 < 0) {
                 s = "-" + s;
             }
@@ -79,13 +79,39 @@ var resetYtick = function(val) {
   data[line] = {
     y: tick,
     shadow: false,
-    // lineWidth: 1,
+    shadowAlpha: 0,
+    shadowAngle: 0,
     color: 'gray',
+    dashPattern: [4,4],
+    lineCap: 'square',
+    lineWidth: 0.8
   };
 
   return data;
 }
 
+// x軸（日付）の値に合わせてグラフ背景色を変更
+var resetXbgc = function(nm, dt) {
+
+  var data = {}, bgc, d = dt + 1;
+
+  if ( (nm == 'day_sun') || (nm == 'day_hol') )  {
+    bgc = "#FFEEFF";
+  } else if (nm == 'day_sat') {
+    bgc = "#EEFFFF";
+  }
+
+  data['line'] = {
+    start : [d - 0.5, 100],
+    stop : [d + 0.5, 100],
+    lineWidth: 1000,
+    color: bgc,
+    // color: "blue",
+    shadow: false,
+    lineCap : 'butt'
+  };
+  return data;
+}
 
 // 実験コード：　マイナスデータを表示させたい場合
 // gon.hash_for_graph[20121205][0] = -12;
@@ -179,32 +205,47 @@ options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
 jQuery( function() {
 
+  // 再描画用のオプション
+  tickopt = {
+    canvasOverlay: {
+      show: true,
+      objects: []
+    }
+  };
+
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   $.jqplot.postDrawHooks.push(function() {
       $('.jqplot-axis.jqplot-x2axis').hide();
 
-      // 32日以上データがあるならマンスリー表示にする
-      if ( $('.jqplot-xaxis-tick').length >= 32 ) {
-        var text2 = 0;
-        var text = 0;
-        for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
-          text = $( $('.jqplot-xaxis-tick')[i] ).text().split('/');
+      // x軸（日付）の処理
+      for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
 
-          // 前日と月が違う場合は表示を変更
-          // 開始日付は変換しない
-          // 期間の中間日付は表示する
-          if ( i >= 1 ) {
+        var text = $( $('.jqplot-xaxis-tick')[i] ).text();
+        var date = 'td[data-dflg]:contains(' + String(text) + ')';
+        var name = $(date).attr("data-dflg");
+        var dt;
+        // console.log(name);
 
-            if ( (text2 != text[0]) ) {
-              // $( $('.jqplot-xaxis-tick')[i] ).text(text[0] + "月");
-            } else {
-              if ( i != parseInt($('.jqplot-xaxis-tick').length / 2) ) {
-                $( $('.jqplot-xaxis-tick')[i] ).text('');
-              }
-            }
-          }
-          text2 = text[0];
+        // 土曜日の部分背景を青、日祝なら赤に変更
+        if (name != 'day_on') {
+          dt = resetXbgc(name, i);
+          tickopt.canvasOverlay.objects.push(dt);
         }
+
+        // 土曜日なら文字列を青、日祝なら文字列を赤に変更
+        if (name == 'day_sun' || name == 'day_hol') {
+          $( $('.jqplot-xaxis-tick')[i] ).css("color", "red");
+        } else if (name == 'day_sat') {
+          $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
+        }
+
+        // 32日以上データがあるなら平日は非表示にする
+        if ( $('.jqplot-xaxis-tick').length >= 32 ) {
+          if (name == 'day_on') {
+            $( $('.jqplot-xaxis-tick')[i] ).text('');
+          }
+        }
+
       }
 
       // グラフの下部マージンを変更
@@ -222,12 +263,7 @@ jQuery( function() {
   var yticks = $('.jqplot-yaxis-tick');
   var tick;
   var dt;
-  var tickopt = {
-    canvasOverlay: {
-      show: true,
-      objects: []
-    }
-  };
+
   for(var i=0; i < yticks.length; i++) {
 
     // 目盛りの値を変換

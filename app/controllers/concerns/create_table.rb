@@ -50,9 +50,17 @@ module CreateTable
   end
 
   # 土日祝日判定
+    # wday 0 .. sun, 'day_sun'
+    # wday 6 .. sat, 'day_sat'
+    # 祝日 .. 'day_hol'
+    # 平日 .. 'day_on'
   def chk_day(h, a, b, d)
-    if (a.wday == 0 or a.wday == 6) or HolidayJapan.check(a) then
-      h[d][b] = [0, 0, 0, 'day_off', 0]
+    if a.wday == 0
+      h[d][b] = [0, 0, 0, 'day_sun', 0]
+    elsif a.wday == 6
+      h[d][b] = [0, 0, 0, 'day_sat', 0]
+    elsif HolidayJapan.check(a)
+      h[d][b] = [0, 0, 0, 'day_hol', 0]
     else
       h[d][b] = [0, 0, 0, 'day_on', 0]
     end

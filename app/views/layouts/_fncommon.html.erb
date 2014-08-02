@@ -89,6 +89,19 @@ $(document).ready(function() {
     }
   });
 
+  // 曜日ごとに背景色を変更
+  // 土。。薄い青　日、祝。。　薄い赤
+  $('td[data-day]').each(function() {
+
+    var dtype = $(this).attr("data-day");
+
+    if ( (dtype == 'day_sun') || (dtype == 'day_hol') )  {
+      $(this).css("background-color", "#FFEEFF");
+    } else if (dtype == 'day_sat') {
+      $(this).css("background-color", "#EEFFFF");
+    }
+  });
+
   // 選択したページタブのタグをdiv へ変える
   var tab = gon.div_page_tab;
   var tag = 'li#' + tab + ' a';

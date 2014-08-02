@@ -27,25 +27,25 @@
       <tr id="line">
         <td class="row"></td>
         <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
+          <td data-dflg=<%= v[@graphic_item][3] %>><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">目標値</td>
         <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[@graphic_item][0] %></td>
+          <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][0] %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">現状値</td>
         <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[@graphic_item][1] %></td>
+          <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][1] %></td>
         <% end %>
       </tr>
       <tr>
         <td class="row">GAP</td>
         <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td class="gap"><%= v[@graphic_item][2] %></td>
+          <td class="gap" data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][2] %></td>
         <% end %>
       </tr>
       <tr id="cv">
