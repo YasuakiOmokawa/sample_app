@@ -3,13 +3,20 @@
     <tbody><tr id="line">
       <td>ランディングページ</td><td>セッション</td><td>直帰率</td>
     </tr>
-    <% @in_table.sort_by{|a| -(a.sessions.to_f) -(a.bounce_rate.to_f) }.each do |t| %>
+    <%
+      cnt = 0
+      @in_table.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }.each do |t|
+          cnt += 1
+    %>
     <tr>
       <td class="row"><%= truncate(t.page_title, :length => 19) %></td>
       <td><%= t.sessions.to_f.round(1) %></td>
       <td><%= t.bounce_rate.to_f.round(1) %></td>
     </tr>
-    <% end %>
+    <%
+        if cnt >= 10 then break end
+      end
+    %>
    </tbody>
   </table>
 </div>

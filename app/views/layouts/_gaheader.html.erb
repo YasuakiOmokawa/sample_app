@@ -1,8 +1,9 @@
 <% @user ||= current_user %>
 <!-- header_st -->
 <div id="entrance">
-  <h1>TAS for GA ver.</h1>
-  <% cv_hash = {}
+  <h1>Analytics Support Tool</h1>
+  <%
+    cv_hash = {}
     (1..20).each do |t|
       key = "CV" + t.to_s
       cv_hash[key] = t
@@ -25,35 +26,36 @@
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
-        <%= image_tag 'calender.png' %>
-          <!-- Datepicker  -->
-        <span id="jrange" >
+    <!-- Datepicker  -->
+        <!-- <img src="images/calender.png">14/01/01-14/12/31</a> -->
+        <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>
+<!--         <span id="jrange" >
            <input readonly="readonly"/>
-        </span>
+        </span> -->
         <!-- datepicker用のinput -->
-        <input type="hidden" id="from" name="from" value="<%= @from %>"/>
-        <input type="hidden" id="to" name="to" value="<%= @to %>" />
+        <input type="hidden" id="from" name="from" value="<%= @from.strftime("%Y/%m/%d") %>"/>
+        <input type="hidden" id="to" name="to" value="<%= @to.strftime("%Y/%m/%d")  %>" />
         <input type="hidden" value="1" name="cv_num" />
         <input type="hidden" name="shori" value="1"/>
         <input type="hidden" value="" name="graphic_item" />
     <%= image_tag 'device.png', :class => "icon" %>
-    <input type="radio" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
-    <input type="radio" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;
-    <input type="radio" name="device" class="ic" value="sphone">スマートフォン&nbsp;&nbsp;
-    <input type="radio" name="device" class="ic" value="mobile">モバイル
-    <%= image_tag 'user.png' %>
-    <input type="radio" name="visitor"class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
-    <input type="radio" name="visitor"class="ic" value="new">新規&nbsp;&nbsp;
-    <input type="radio" name="visitor"class="ic" value="repeat">リピーター
+    <input type="checkbox" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
+    <input type="checkbox" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;
+    <input type="checkbox" name="device" class="ic" value="sphone">スマートフォン&nbsp;&nbsp;
+    <input type="checkbox" name="device" class="ic" value="mobile">モバイル
+    <%= image_tag 'user.png' , :class => "icon" %>
+    <input type="checkbox" name="visitor"class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
+    <input type="checkbox" name="visitor"class="ic" value="new">新規&nbsp;&nbsp;
+    <input type="checkbox" name="visitor"class="ic" value="repeat">リピーター
     <!-- ここはページによって挙動を変える -->
-    <%= image_tag 'plus.png' %>
+    <%= image_tag 'plus.png' , :class => "icon" %>
     <%= select_tag 'narrow_select', grouped_options_for_select(@categories, "", "選択してください") %>
     <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
   </form>
 </div>
 <!-- datepicker form dialog start -->
 <div id="dialog-form">
-  <p>最大範囲は1ヶ月です</p>
+  <p>期間を指定してください</p>
   <input id="dummy" readonly="readonly"/>
   <br/>
     <label for="fromd">開始</label>

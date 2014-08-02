@@ -20,5 +20,3 @@ include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
 @graphic_item = :pageviews
 @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
-@top_ten = top10(@favorite)
-@rank_arr = seikei_rank(@top_ten) #人気ページランクtop10

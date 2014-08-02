@@ -80,7 +80,7 @@
   <div id="kitchen">
     <table>
       <tr id="line">
-        <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
+        <td>PV数</td><td>セッション</td><td>CV数</td><td>CV率</td>
       </tr>
       <tr>
           <td><%= @common_table[:pageviews].to_f.round(1).to_s %></td>
@@ -89,7 +89,7 @@
           <td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
       </tr>
     </table>
-    <p></p>
+    <p>　</p>
     <!-- <p>CVまでに必要な訪問回数：4.1回&nbsp;&nbsp;&nbsp;&nbsp;CVまでに要する期間：10.3日</p> -->
     <table>
       <tr id="line">
@@ -110,7 +110,7 @@
            <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
-          <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">再訪問率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
+          <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピート率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
     </table>
     <div id="knife">

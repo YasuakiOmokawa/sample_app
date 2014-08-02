@@ -68,7 +68,7 @@ module ParamUtils
 
   # 日付生成
   def set_date_format(date)
-    y, m, d = date.split("-")
+    y, m, d = date.split("/")
     d = Date.new(y.to_i, m.to_i, d.to_i)
     return d
   end
@@ -163,4 +163,19 @@ module ParamUtils
     end
     return arr
   end
+
+  # 人気ページテーブル用にtop10 生成
+  def top10(dt)
+    r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    cntr = 0
+    dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
+      cntr += 1
+      r_hsh[cntr] = [t.page_title, t.page_path]
+      if cntr >= 10 then break end
+    end
+    cntr = cntr + 1
+    r_hsh[cntr] = ['その他', '']
+    return r_hsh
+  end
+
 end

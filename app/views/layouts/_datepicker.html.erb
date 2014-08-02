@@ -26,7 +26,7 @@ var fmt = function(dt) {
   if ( day < 10 ) {
   　　day = '0' + day;
   }
-  var str = year + '-' + month + '-' + day;
+  var str = year + '/' + month + '/' + day;
   return str;
 }
 
@@ -62,8 +62,8 @@ $(function() {
     modal: true,
     position: {
       my: "left top",
-      at: "left top+20",
-      of: '#jrange input'
+      at: "left top",
+      of: 'a#jrange'
     },
     buttons: {
       "設定": function(){
@@ -91,15 +91,22 @@ $(function() {
     }
   });
 
-  $( "#jrange input" )
+  $( "a#jrange" )
     .click( function() {
-      var v = $(this).val(), d;
+      var v = $(this).text(), d, f, t;
       console.log(v);
 
-      d = v.split(' ~ ');
+      // v = $('a#jrange').text();
 
-      $('#fromd').datepicker('setDate', new Date(d[0]));
-      $('#tod').datepicker('setDate', new Date(d[1]));
+      d = v.split('-');
+
+       f = d[0].split('/');
+       t = d[1].split('/');
+       f[0] = '20' + f[0];
+       t[0] = '20' + t[0];
+
+      $('#fromd').datepicker('setDate', new Date(f));
+      $('#tod').datepicker('setDate', new Date(t));
 
       $( "#dialog-form" ).dialog('open');
   });
@@ -109,7 +116,7 @@ $(function() {
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 2,
-    dateFormat:"yy-mm-dd",
+    dateFormat:"yy/mm/dd",
     beforeShow: function(input, inst) {
       chgPos(input, inst, $(this));
     },
@@ -117,9 +124,11 @@ $(function() {
       var dte = calc(selectedDate, '+', 31);
       var opt = fmt(dte);
       $( "#from" ).val(selectedDate);
-      $( "#tod" ).datepicker( "option", {
-        minDate: selectedDate,
-        maxDate: opt }
+      $( "#tod" ).datepicker( "option",
+        {
+          minDate: selectedDate,
+          // maxDate: opt
+        }
       );
       console.log( "to val change, " + $("#tod").val() );
       $("#to").val( $("#tod").val() );
@@ -129,7 +138,7 @@ $(function() {
     changeMonth: true,
     changeYear: true,
     numberOfMonths: 2,
-    dateFormat:"yy-mm-dd",
+    dateFormat:"yy/mm/dd",
     beforeShow: function(input, inst) {
       chgPos(input, inst, $(this));
     },
@@ -137,9 +146,11 @@ $(function() {
       var dte = calc(selectedDate, '-', 31);
       var opt = fmt(dte);
       $( "#to" ).val(selectedDate);
-      $( "#fromd" ).datepicker( "option", {
-        minDate: opt,
-        maxDate: selectedDate }
+      $( "#fromd" ).datepicker( "option",
+        {
+          // minDate: opt,
+          maxDate: selectedDate
+        }
       );
       console.log( "fromd val change, " + $("#fromd").val() );
       $("#from").val( $("#fromd").val() );

@@ -1,5 +1,21 @@
 <script type="text/javascript">
 
+function likeRadio(obj) {
+  var n = obj.attr("name");
+  var m = '#hallway input[name=' + n + ']';
+  var objs = $(m);
+  var f = objs, cnt = 0;
+  for(var i=0;i<f.length;i++ ){
+    if ( f[i].checked === true ) {
+      cnt = cnt + 1;
+    }
+  }
+  if (cnt >= 2) {
+    obj.attr("checked", false);
+    console.log("oh, no! duplicate check is invalid");
+  }
+}
+
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function (at) {
   $('#hallway > form').attr("action", at.attr("name"));
@@ -17,6 +33,14 @@ var setRange = function setRange() {
 }
 
 $(document).ready(function() {
+
+  // チェックボックスの複数選択を抑止
+  $('form [name=device]').click(function() {
+    likeRadio($(this));
+  });
+  $('form [name=visitor]').click(function() {
+    likeRadio($(this));
+  });
 
   // 絞り込みボタンを押したとき、進捗バーを進める
   $('a#set').click(function(){

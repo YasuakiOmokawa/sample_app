@@ -248,7 +248,8 @@ class UsersController < ApplicationController
       @categories = {}
       @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
       @top_ten = top10(@favorite)
-      @rank_arr = seikei_rank(@top_ten) #人気ページランクtop10
+      @rank_arr = seikei_rank(@top_ten)
+
       @categories["人気ページ"] = set_select_box(@favorite, 'f')
     end
 
