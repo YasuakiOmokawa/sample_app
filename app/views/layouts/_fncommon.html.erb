@@ -11,8 +11,9 @@ function likeRadio(obj) {
     }
   }
   if (cnt >= 2) {
-    obj.attr("checked", false);
-    console.log("oh, no! duplicate check is invalid");
+    f.prop("checked", false); // 属性値の状態を取得するならpropのほうが良いってさ。。
+    obj.prop("checked", true);
+    console.log("hello like Radio!");
   }
 }
 
