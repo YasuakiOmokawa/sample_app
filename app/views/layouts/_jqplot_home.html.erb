@@ -51,6 +51,12 @@ var setData = function(opt) {
 
 // 再描画用にデータを集める
 var replotdata = function(allarr, wd) {
+
+  // wd が直接入力ブックマーク の場合、スラッシュを削除
+  if (wd == '直接入力/ブックマーク') {
+    wd = wd.replace(/\//g, '');
+  }
+
   var a = [];
   for(i=0; i < allarr[wd].length; i++) {
     allarr[wd][i][3] = String(wd) + ';;' + allarr[wd][i][3];
@@ -61,26 +67,33 @@ var replotdata = function(allarr, wd) {
 
 // グラフ項目の色を決定
 function setGraphcolor(wd, opt) {
+
+  // wd が直接入力ブックマーク の場合、スラッシュを削除
+  if (wd == '直接入力/ブックマーク') {
+    wd = wd.replace(/\//g, '');
+  }
+
   var p_wd = wd
 
   switch (p_wd) {
+
     case '全体':
-      opt.series.push( { color: 'gray'} );
+      opt.series.push( { color: '#808080'} );
       break;
     case '検索':
       opt.series.push( { color: '#e6b422'} );
       break;
     case '直接入力ブックマーク':
-      opt.series.push( { color: 'blue'} );
+      opt.series.push( { color: '#008000'} );
       break;
     case 'その他ウェブサイト':
-      opt.series.push( { color: 'green'} );
+      opt.series.push( { color: '#1e50a2'} );
       break;
     case 'ソーシャル':
-      opt.series.push( { color: 'red'} );
+      opt.series.push( { color: '#c9171e'} );
       break;
     case 'キャンペーン':
-      opt.series.push( { color: 'pink'} );
+      opt.series.push( { color: '#800080'} );
       break;
   }
 }
@@ -94,7 +107,7 @@ function setItem(data,  graph, narrow) {
   var tab = data[0]; // 各ページ名
   var a;
   var item = data[1]; // 項目名
-  tips = tab + '<br>' + item;
+  tips = tab + ':' + item;
   switch (item) {
     case 'PV数':
       tips = tips + '<br>' + chk_days(data);
@@ -167,7 +180,7 @@ jQuery( function() {
         highlightAlpha: 1.0,
         showLabels: false,
         varyBubbleColors: false,
-        autoscaleMultiplier: 0.2,
+        autoscaleMultiplier: 0.15,
       },
     },
     series: [], // ここに関数でカラーセットを行う
@@ -214,86 +227,86 @@ jQuery( function() {
     // データセット
     var arr = setData(options);
 
-    // データ項目一覧セット
+   // データ項目一覧セット
     var idxarr = setDataidx();
 
-    // データ項目一覧ヘッダを追記
-    $('#legend1b').append(
-      $('<thead>').append(
-        $('<tr>')
-        .attr({id: 'line'})
-        .append(
-          $('<td>').text('ページ')
-        ).append(
-          $('<td>').text('項目')
-        ).append(
-          $('<td>').text('GAP')
-        ).append(
-          $('<td>').text('相関')
-        ).append(
-          $('<td>').text('補足情報')
-        )
-      )
-    );
+    // 優先順位の降順、ページ名、項目名の昇順でソート
+    // > がマイナスリターン。。降順、< がプラスリターンで昇順
+    idxarr = idxarr.sort(function(a,b) {
+      if (a.pri > b.pri) return  -1;
+      if (a.pri < b.pri) return  1;
+      if (a.page > b.page) return  1;
+      if (a.page < b.page) return  -1;
+      if (a.name > b.name) return  1;
+      if (a.name < b.name) return  -1;
+    });
+
+    // 項目一覧へ表示する項目番号
+    var counter = 0;
+    // 項目一覧へ表示する文字列
+    var caption;
+    var ptxt, pagenm, pagelink;
 
     // 項目一覧データを追記
     idxarr.forEach(function(value){
 
-      var text = value['arr'][3].split(';;');
+      counter = counter + 1;
 
-      // ページ名（全体、検索、など）
-      var page = 'li.tab > a:contains(' + String(text[0]) + ')';
+      // ページ名（全体、検索、など）を取得
+      text = value['arr'][3].split(';;');
+      pagenm = 'li.tab > a:contains(' + String(text[0]) + ')';
 
       // ページへのリンク
-      var name = $(page)[0].name;
+      pagelink = $(pagenm)[0].name;
 
       // 補足情報
-      var tips = setItem( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+      // var tips = setItem( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+      // 項目一覧へ表示する文字列
+      caption = text[0] + ':' + text[1];
 
       $('#legend1b').append(
-        $('<tr>')
-          .attr( {name: name, 'data-page': value['arr'][3] }
-        ).append(
-          $('<td>').text(String(text[0]))
-        ).append(
-          $('<td>').text(String(text[1]))
-        ).append(
-          $('<td>').text(String(value['arr'][0]))
-        ).append(
-          $('<td>').text(String(value['arr'][1]))
-        ).append(
+        $('<tr>').append(
           $('<td>')
-            .attr({class: 'row'})
-            .html(tips[1])
+            .attr("class", "l")
+            .text(counter)
+          ).append(
+            $('<td>')
+            .attr({
+              "name": pagelink,
+              "class": "r",
+              'data-gap': value['arr'][0],
+              'data-sokan': value['arr'][1],
+              'data-page': value['arr'][3] })
+            .append(
+              $('<a>')
+                .attr({
+                  "href": 'javascript:void(0)'})
+                .text(caption)
+              )
         )
       );
     });
 
     // 項目一覧データにクリックイベントを追加
-    //classにclickableを付加
-    $('tr[data-page]').addClass('clickable')
-      .click(function(e) {
+    $('#legend1b tr td a').click(function(e) {
 
-        //e.targetはクリックした要素自体、それがa要素以外であれば
-        if(!$(e.target).is('a')){
+        //要素の先祖要素で一番近いtdの
+        //data-page属性の値を加工する
+        var item = $(e.target).closest('td').data('page').split(';;');
+        // console.log(item);
 
-          //その要素の先祖要素で一番近いtrの
-          //data-page属性の値を加工する
-          var item = $(e.target).closest('tr').data('page').split(';;');
-          console.log(item);
+        // グラフ項目と人気ページパラメータを設定
+        setItem( item, $('input[name="graphic_item"]'), $('#narrow_select') );
 
-          // グラフ項目と人気ページパラメータを設定
-          setItem( item, $('input[name="graphic_item"]'), $('#narrow_select') );
-
-          // ページ遷移
-          evtsend($(e.target).closest('tr'));
-        };
+        // ページ遷移
+        evtsend($(e.target).closest('td'));
     });
 
   }
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  $.jqplot.postDrawHooks.push(function(square) {
+  $.jqplot.postDrawHooks.push(function(graph) {
     var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
     for (var i=0; i<selcts.length; i++) {
       $(selcts[i][0]).text('小');
@@ -303,28 +316,28 @@ jQuery( function() {
   });
 
   // jqplot描画
-  var square = jQuery . jqplot('square', arr, options);
+  var graph = jQuery . jqplot('graph', arr, options);
 
   // ハイライトツールチップを表示
-  $('#square').bind('jqplotDataHighlight',
+  $('#graph').bind('jqplotDataHighlight',
     function (ev, seriesIndex, pointIndex, data, radius) {
       var
         dt = data[3].split(';;'),
         color = 'black',
-        chart_left = $('#square').offset().left,
-        chart_top = $('#square').offset().top,
+        chart_left = $('#graph').offset().left,
+        chart_top = $('#graph').offset().top,
         // convert x axis unita to pixels
-        x = square.axes.xaxis.u2p(data[0]),
+        x = graph.axes.xaxis.u2p(data[0]),
         // convert y axis units to pixels
-        y = square.axes.yaxis.u2p(data[1]);
-      console.log( "full data is " + dt );
+        y = graph.axes.yaxis.u2p(data[1]);
+      // console.log( "full data is " + dt );
 
       var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
       var id = $(page)[0].name;
       console.log( "href action is " + id );
 
       var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
-      console.log( "tooptip is  " + tips );
+      // console.log( "tooptip is  " + tips );
       // ツールチップのCSS
       $('#tooltip1s').css(
         {
@@ -350,7 +363,7 @@ jQuery( function() {
   );
 
   // ハイライトツールチップを隠す
-  $('#square').bind('jqplotDataUnhighlight',
+  $('#graph').bind('jqplotDataUnhighlight',
       function (ev, seriesIndex, pointIndex, data) {
           // 絞り込み選択を解除
           $('#narrow_select').each(function() {
@@ -363,23 +376,24 @@ jQuery( function() {
       }
   );
 
-  // 項目一覧データをクリックしたら該当データのみリプロットする
-  $('tbody tr.clickable').hover(
+  // 項目一覧データをマウスオーバしたら該当データのみリプロットする
+  $('#legend1b tr').hover(
     function() {
-      var $kids = $(this).children();
+      var $kids = $(this).children('td.r');
+      var text = $kids.attr('data-page').split(';;');
+      // var text = $kids.attr('data-gap') + ';;' + $kids.attr('data-sokan') + ';;' + $kids.attr('data-page');
       // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
-      var text = $kids.eq(0).text() + ';;' + $kids.eq(1).text() + ';;' + $kids.eq(4).text();
       var rearr = [
         [
-          [parseInt($kids.eq(2).text()), parseInt($kids.eq(3).text()), 10, text ]
+          [parseInt($kids.attr('data-gap')), parseInt($kids.attr('data-sokan')), 5, $kids.attr('data-page') ]
         ]
       ];
       // console.log(rearr);
       var addopt = { series: [] };
       addopt.data = rearr;
-      setGraphcolor($kids.eq(0).text(), addopt);
-      console.log("replot strong " + $kids.eq(0).text());
-      square.replot(addopt);
+      setGraphcolor(text[0], addopt);
+      // console.log("replot strong " + text[0] );
+      graph.replot(addopt);
     },
     function() {
       // 最後にフィルタしたグラフへ戻す
@@ -416,7 +430,7 @@ jQuery( function() {
       // 再描画を実行
       // jqplot の replot関数は、追加のオプションを設定すると
       // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
-      square.replot(addopt);
+      graph.replot(addopt);
 
       // フィルタした処理の内容を記録(グローバル)
       replotHomeflg = wd;

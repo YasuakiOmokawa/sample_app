@@ -1,8 +1,8 @@
 // 項目一覧へカーソル付与
-tbody tr.clickable:hover td {
-  background-color: #ffddff;
-  cursor: pointer;
-}
+// tbody tr.clickable:hover td {
+//   background-color: #ffddff;
+//   cursor: pointer;
+// }
 
 // 凡例へカーソル付与
 #circle span.replot:hover {
@@ -11,9 +11,9 @@ tbody tr.clickable:hover td {
 }
 
 // tablesorterのcss設定を無効にしてフォント統一
-.tablesorter-default {
-  font: inherit;
-}
+// .tablesorter-default {
+//   font: inherit;
+// }
 
 
 // #bedroom.home  { /* tbodyが入っている。ここがスクロール対象*/
