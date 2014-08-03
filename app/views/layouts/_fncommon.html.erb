@@ -35,6 +35,12 @@ var setRange = function setRange() {
 
 $(document).ready(function() {
 
+  // タイトルがカスタマイズの時の独自処理を追加
+  if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
+    $('div#hallway').hide();
+    $('div#footer').attr("id", 'footer_custom');
+  }
+
   // チェックボックスの複数選択を抑止
   $('form [name=device]').click(function() {
     likeRadio($(this));
