@@ -23,8 +23,6 @@
 //= require ./jqplot/plugins/pointLabels
 //= require ./jqplot/plugins/bubbleRenderer
 //= require ./jqplot/plugins/canvasOverlay
-//= require jquery-tablesorter
-//= require jquery-tablesorter/addons/pager/jquery.tablesorter.pager
 //= require turbolinks
 //= require jquery.spin
 // require_tree .

@@ -127,7 +127,7 @@ $(function() {
       $( "#tod" ).datepicker( "option",
         {
           minDate: selectedDate,
-          // maxDate: opt
+          maxDate: opt
         }
       );
       console.log( "to val change, " + $("#tod").val() );
@@ -148,7 +148,7 @@ $(function() {
       $( "#to" ).val(selectedDate);
       $( "#fromd" ).datepicker( "option",
         {
-          // minDate: opt,
+          minDate: opt,
           maxDate: selectedDate
         }
       );

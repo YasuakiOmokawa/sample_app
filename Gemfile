@@ -25,7 +25,6 @@ gem 'turbolinks', '1.1.1'
 gem 'jbuilder', '1.0.2'
 # デプロイ先でデーモンとして動かすのに必要
 gem "daemons"
-gem 'jquery-tablesorter'
 gem 'spinjs-rails'
 
 group :development, :test do

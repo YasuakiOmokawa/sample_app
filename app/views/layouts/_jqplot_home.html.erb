@@ -181,6 +181,7 @@ jQuery( function() {
         showLabels: false,
         varyBubbleColors: false,
         autoscaleMultiplier: 0.15,
+        shadow: false,
       },
     },
     series: [], // ここに関数でカラーセットを行う
@@ -189,6 +190,7 @@ jQuery( function() {
       tickOptions: {
         fontSize: '10pt',
         fontFamily: 'ヒラギノ角ゴ Pro W3',
+        markSize: 0
       },
     },
     axes: {
@@ -207,7 +209,7 @@ jQuery( function() {
     // 背景色に関する設定
     grid: {
       background: "transparent",
-      gridLineColor: "black",
+      gridLineColor: "#cccccc",
       shadow: false,
       drawGridlines: true,
       drawBorder: false,
@@ -307,11 +309,13 @@ jQuery( function() {
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   $.jqplot.postDrawHooks.push(function(graph) {
+
+    // 目盛り線のみ残して目盛りの値は削除
     var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
     for (var i=0; i<selcts.length; i++) {
-      $(selcts[i][0]).text('小');
+      $(selcts[i][0]).text('');
       $(selcts[i][1]).text('');
-      $(selcts[i][2]).text('大');
+      $(selcts[i][2]).text('');
     }
   });
 
@@ -377,15 +381,14 @@ jQuery( function() {
   );
 
   // 項目一覧データをマウスオーバしたら該当データのみリプロットする
-  $('#legend1b tr').hover(
+  $('#legend1b tr td.r a').hover(
     function() {
-      var $kids = $(this).children('td.r');
-      var text = $kids.attr('data-page').split(';;');
-      // var text = $kids.attr('data-gap') + ';;' + $kids.attr('data-sokan') + ';;' + $kids.attr('data-page');
+      var $parents = $(this).parent('td.r');
+      var text = $parents.attr('data-page').split(';;');
       // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
       var rearr = [
         [
-          [parseInt($kids.attr('data-gap')), parseInt($kids.attr('data-sokan')), 5, $kids.attr('data-page') ]
+          [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, $parents.attr('data-page') ]
         ]
       ];
       // console.log(rearr);
