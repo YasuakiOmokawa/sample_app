@@ -37,26 +37,6 @@ var setRange = function setRange() {
 
 $(document).ready(function() {
 
-  // セレクトボックスの色を変更
-  var dColor = '#999999';
-  var fColor = '#000000';
-  if ( $('#narrow_select').val() == '' ){
-    $('#narrow_select').css('color', fColor);
-  } else {
-    $('#narrow_select').css('color', dColor);
-  }
-  $('#narrow_select')
-    .focus(function() {
-      $('#narrow_select').css('color', fColor);
-    })
-    .blur(function() {
-      if ( $('#narrow_select').val() == '' ){
-        $('#narrow_select').css('color', dColor);
-      } else {
-        $('#narrow_select').css('color', fColor);
-      }
-  });
-
   // タイトルがカスタマイズの時の独自処理を追加
   if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
     $('div#hallway').hide();
@@ -141,30 +121,47 @@ $(document).ready(function() {
     evtsend($(this));
   });
 
-
-
   // ラジオボタンの選択値を保持
-  rdo_dev = gon.radio_device
-  rdo_vst = gon.radio_visitor
+  var rdo_dev = gon.radio_device
+  var rdo_vst = gon.radio_visitor
   $('input[name="device"]').val([rdo_dev]);
   $('input[name="visitor"]').val([rdo_vst]);
 
   // セレクトボックスの選択値を保持
-  nrw_wd = gon.narrow_word
+  var nrw_wd = gon.narrow_word
   $('select[name="narrow_select"]').val(nrw_wd);
 
   // グラフ表示項目の選択値を保持
-  grh_fmt = gon.graphic_item
+  var grh_fmt = gon.graphic_item
   $('select[name="graphicselect"]').val(grh_fmt);
   $('input[name="graphic_item"]').val(grh_fmt);
 
   // CV種類の選択値を保持
-  cv = gon.cv_num
+  var cv = gon.cv_num
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
 
   // ページ読み込み時の期間設定ボックス設定
   setRange();
 
+  // セレクトボックスの色を変更
+  var dColor = '#999999';
+  var fColor = '#000000';
+  if ( $('#narrow_select').val() == "" ){
+    $('#narrow_select').css('color', dColor);
+  } else {
+    $('#narrow_select').css('color', fColor);
+  }
+  $('#narrow_select')
+    .focus(function() {
+      $('#narrow_select').css('color', fColor);
+    })
+    .blur(function() {
+      if ( $('#narrow_select').val() == "" ){
+        $('#narrow_select').css('color', dColor);
+      } else {
+        $('#narrow_select').css('color', fColor);
+      }
+  });
 });
 </script>
