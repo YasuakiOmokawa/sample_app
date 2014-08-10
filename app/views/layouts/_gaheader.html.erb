@@ -27,17 +27,13 @@
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
     <!-- Datepicker  -->
-        <!-- <img src="images/calender.png">14/01/01-14/12/31</a> -->
-        <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>
-<!--         <span id="jrange" >
-           <input readonly="readonly"/>
-        </span> -->
-        <!-- datepicker用のinput -->
-        <input type="hidden" id="from" name="from" value="<%= @from.strftime("%Y/%m/%d") %>"/>
-        <input type="hidden" id="to" name="to" value="<%= @to.strftime("%Y/%m/%d")  %>" />
-        <input type="hidden" value="1" name="cv_num" />
-        <input type="hidden" name="shori" value="1"/>
-        <input type="hidden" value="" name="graphic_item" />
+    <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>
+    <!-- datepicker用のinput -->
+    <input type="hidden" id="from" name="from" value="<%= @from.strftime("%Y/%m/%d") %>"/>
+    <input type="hidden" id="to" name="to" value="<%= @to.strftime("%Y/%m/%d")  %>" />
+    <input type="hidden" value="1" name="cv_num" />
+    <input type="hidden" name="shori" value="1"/>
+    <input type="hidden" value="" name="graphic_item" />
     <%= image_tag 'device.png', :class => "icon" %>
     <input type="checkbox" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
     <input type="checkbox" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;
@@ -63,11 +59,4 @@
     <label for="tod">終了</label>
     <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
 </div>
-<!-- datepicker form dialog end -->
-<!-- progressbar start -->
-<div id="dialog-progressbar">
-  <div id="progress" style="position:fixed;top:50%;left:50%"></div>
-</div>
-<!-- progressbar end -->
-
 <!-- header_end -->

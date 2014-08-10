@@ -49,24 +49,19 @@ $(document).ready(function() {
     likeRadio($(this));
   });
 
-  // 絞り込みボタンを押したとき、進捗バーを進める
+  // 絞り込みボタンを押したとき、プログレススピナーを起動する
   $('a#set').click(function(){
-
-    $('#dialog-progressbar').dialog({
-      draggable: false,
-      open: function(event, ui){
-        $(".ui-dialog-titlebar-close").hide();
 
       // スピナーの実装
       var opts = {
         lines: 13, // The number of lines to draw
-        length: 20, // The length of each line
-        width: 10, // The line thickness
-        radius: 30, // The radius of the inner circle
+        length: 4, // The length of each line
+        width: 2, // The line thickness
+        radius: 3, // The radius of the inner circle
         corners: 1, // Corner roundness (0..1)
         rotate: 0, // The rotation offset
         direction: 1, // 1: clockwise, -1: counterclockwise
-        color: '#000', // #rgb or #rrggbb or array of colors
+        color: 'white', // #rgb or #rrggbb or array of colors
         speed: 1, // Rounds per second
         trail: 60, // Afterglow percentage
         shadow: false, // Whether to render a shadow
@@ -74,15 +69,17 @@ $(document).ready(function() {
         className: 'spinner', // The CSS class to assign to the spinner
         zIndex: 2e9, // The z-index (defaults to 2000000000)
       };
-        var target = $('#progress');
+        var target = $('#entrance');
         var spinner = new Spinner(opts).spin();
         target.append(spinner.el);
-      },
-      width: 200,
-      height: 200,
-      title: '読み込み中 ...',
-      modal: true,
-    });
+        $('.spinner').css('margin-top', 2);
+  });
+
+  // escボタンを押したとき、プログレススピナーをキャンセルする
+  $(window).keydown(function(e){
+    if( e.keyCode == 27 ) {
+      $('.spinner').remove();
+    }
   });
 
   // GAP値がマイナスなら赤色にする
