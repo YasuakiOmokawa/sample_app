@@ -40,10 +40,10 @@ $(document).ready(function() {
   // セレクトボックスの色を変更
   var dColor = '#999999';
   var fColor = '#000000';
-  if ( $('#narrow_select option').html() == '選択してください' ){
-    $('#narrow_select').css('color', dColor);
-  } else {
+  if ( $('#narrow_select').val() == '' ){
     $('#narrow_select').css('color', fColor);
+  } else {
+    $('#narrow_select').css('color', dColor);
   }
   $('#narrow_select')
     .focus(function() {
