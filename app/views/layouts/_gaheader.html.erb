@@ -45,7 +45,7 @@
     <input type="checkbox" name="visitor"class="ic" value="repeat">リピーター
     <!-- ここはページによって挙動を変える -->
     <%= image_tag 'plus.png' , :class => "icon" %>
-    <%= select_tag 'narrow_select', grouped_options_for_select(@categories, "", "選択してください") %>
+    <%= select_tag 'narrow_select', grouped_options_for_select(@categories), :include_blank => true, :prompt => '選択してください' %>
     <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
   </form>
 </div>

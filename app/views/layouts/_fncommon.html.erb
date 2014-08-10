@@ -33,7 +33,29 @@ var setRange = function setRange() {
   $('#jrange input').val(range);
 }
 
+
+
 $(document).ready(function() {
+
+  // セレクトボックスの色を変更
+  var dColor = '#999999';
+  var fColor = '#000000';
+  if ( $('#narrow_select option').html() == '選択してください' ){
+    $('#narrow_select').css('color', dColor);
+  } else {
+    $('#narrow_select').css('color', fColor);
+  }
+  $('#narrow_select')
+    .focus(function() {
+      $('#narrow_select').css('color', fColor);
+    })
+    .blur(function() {
+      if ( $('#narrow_select').val() == '' ){
+        $('#narrow_select').css('color', dColor);
+      } else {
+        $('#narrow_select').css('color', fColor);
+      }
+  });
 
   // タイトルがカスタマイズの時の独自処理を追加
   if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
