@@ -91,22 +91,19 @@ $(function() {
     }
   });
 
+  // 日付のリンクをクリックしたら、現在の期間設定をダイアログへ
+  // 反映させる
   $( "a#jrange" )
     .click( function() {
       var v = $(this).text(), d, f, t;
-      console.log(v);
-
-      // v = $('a#jrange').text();
 
       d = v.split('-');
 
-       f = d[0].split('/');
-       t = d[1].split('/');
-       f[0] = '20' + f[0];
-       t[0] = '20' + t[0];
+       f = '20' + d[0];
+       t = '20' + d[1];
 
-      $('#fromd').datepicker('setDate', new Date(f));
-      $('#tod').datepicker('setDate', new Date(t));
+      $('#fromd').datepicker('setDate', f);
+      $('#tod').datepicker('setDate', t);
 
       $( "#dialog-form" ).dialog('open');
   });
