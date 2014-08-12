@@ -8,9 +8,9 @@
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
     <%= include_gon %>
     <% if @title == 'ホーム' %>
-      <%= javascript_include_tag "analytics/useJqplotHome", "data-turbolinks-track" => true %>
+      <%= javascript_include_tag "usejqplothome", "data-turbolinks-track" => true %>
     <% else %>
-      <%= javascript_include_tag "analytics/useJqplot", "data-turbolinks-track" => true %>
+      <%= javascript_include_tag "usejqplot", "data-turbolinks-track" => true %>
     <% end %>
     <%= csrf_meta_tags %>
     <%= render 'layouts/shim' %>
