@@ -6,15 +6,11 @@
     <title><%= full_title(@title) %></title>
     <%= stylesheet_link_tag "analytics", media: "all" %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
-    <!-- <%= javascript_include_tag "jqplot/jquery.jqplot" %> -->
     <%= include_gon %>
-    <%= render 'layouts/fncommon' %>
-    <%= render 'layouts/datepicker' %>
-    <%= render 'layouts/merger' %>
     <% if @title == 'ホーム' %>
-      <%= render 'layouts/jqplot_home' %>
+      <%= javascript_include_tag "analytics/useJqplotHome", "data-turbolinks-track" => true %>
     <% else %>
-      <%= render 'layouts/jqplot' %>
+      <%= javascript_include_tag "analytics/useJqplot", "data-turbolinks-track" => true %>
     <% end %>
     <%= csrf_meta_tags %>
     <%= render 'layouts/shim' %>

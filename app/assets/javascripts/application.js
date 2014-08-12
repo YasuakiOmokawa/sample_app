@@ -26,4 +26,6 @@
 //= require ./jqplot/plugins/canvasOverlay
 //= require turbolinks
 //= require jquery.spin
+//= require ./analytics/useDatepicker
+//= require ./analytics/fncCommon
 // require_tree .

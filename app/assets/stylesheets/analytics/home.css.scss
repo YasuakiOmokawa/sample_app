@@ -1,27 +1,2 @@
-// 項目一覧へカーソル付与
-// tbody tr.clickable:hover td {
-//   background-color: #ffddff;
-//   cursor: pointer;
-// }
-
 // 凡例へカーソル付与
-#circle span.replot:hover {
-  background-color: #ffddff;
-  cursor: pointer;
-}
-
-// tablesorterのcss設定を無効にしてフォント統一
-// .tablesorter-default {
-//   font: inherit;
-// }
-
-
-// #bedroom.home  { /* tbodyが入っている。ここがスクロール対象*/
-//   overflow-y: scroll; /* スクロールバー*/
-//   height: 133px; /* tbodyを表示する高さ */
-// }
-
-// table.tablesorter thead tr td {
-//   text-align: center;
-//   background: #fff;
-// }
+#circle span.replot:hover{background-color:#ffddff;cursor:pointer}
