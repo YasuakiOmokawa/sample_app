@@ -26,6 +26,7 @@ gem 'jbuilder', '1.0.2'
 # デプロイ先でデーモンとして動かすのに必要
 gem "daemons"
 gem 'spinjs-rails'
+gem 'newrelic_rpm'
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
