@@ -27,6 +27,8 @@ gem 'jbuilder', '1.0.2'
 gem "daemons"
 gem 'spinjs-rails'
 gem 'newrelic_rpm'
+gem 'google-api-client'
+gem 'oauth2'
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

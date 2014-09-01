@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140716022032) do
+ActiveRecord::Schema.define(version: 20140831094524) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,23 @@ ActiveRecord::Schema.define(version: 20140716022032) do
 
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
+  create_table "gaprojects", force: true do |t|
+    t.string   "proj_name"
+    t.text     "svc_acnt_key"
+    t.text     "svc_acnt_email"
+    t.string   "api_key"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "proj_owner_email"
+    t.string   "proj_owner_password"
+  end
+
+  create_table "secrets", force: true do |t|
+    t.text     "secret"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "users", force: true do |t|
     t.string   "name"
     t.string   "email"
@@ -40,13 +57,11 @@ ActiveRecord::Schema.define(version: 20140716022032) do
     t.string   "password_digest"
     t.string   "remember_token"
     t.boolean  "admin",                  default: false
-    t.string   "property_id"
-    t.string   "profile_id"
-    t.string   "analytics_email"
-    t.string   "analytics_password"
-    t.string   "apikey"
+    t.string   "gaproperty_id"
+    t.string   "gaprofile_id"
     t.string   "password_reset_token"
     t.datetime "password_reset_sent_at"
+    t.integer  "gaproject_id"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

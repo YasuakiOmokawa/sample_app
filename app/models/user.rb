@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  belongs_to :gaproject
+  has_many :gaprojects
   before_save { self.email = email.downcase }
   before_create :create_remember_token
   validates :name, presence: true, length: { maximum: 50 }
