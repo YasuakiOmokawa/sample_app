@@ -39,9 +39,10 @@ var setData = function(opt) {
       value[3] = String(i) + ';;' + value[3];
     });
 
-    // グラフ描画オプション追加
+    // グラフ描画オプション（プロットデータのカラー）追加
     setGraphcolor( i, opt );
-    cnt += 1
+
+    cnt += 1;
   }
   return arr;
 }
@@ -247,7 +248,12 @@ jQuery( function() {
     var ptxt, pagenm, pagelink;
 
     // 項目一覧データを追記
-    idxarr.forEach(function(value){
+    idxarr.some(function(value){
+
+      // 表示件数の上限を50件に制限
+      if (counter >= 50) {
+        return false;
+      }
 
       counter = counter + 1;
 

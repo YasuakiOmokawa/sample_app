@@ -12,6 +12,8 @@ var setArr = function(hash) {
 }
 
 // 表示する値の種類によって、グラフのY軸（左側）のフォーマットを変更
+// ロジック変更が発生したら、update_table.rb chg_time()　もチェックすること
+
 var tickFormatter = function (format, val) {
     switch(format) {
         case 'percent': return val.toFixed(1) + '%';
@@ -21,11 +23,18 @@ var tickFormatter = function (format, val) {
             // 時間の書式は、 hh:mm:ss
             val_org = val;
             val = Math.abs(parseInt(val));
-            var h=""+(val/36000|0)+(val/3600%10|0);
-            var m=""+(val%3600/600|0)+(val%3600/60%10|0);
-            var s=""+(val%60/10|0)+(val%60%10);
-            var s = h +':' + m + ':' + s;
+            var h =""+(val/36000|0)+(val/3600%10|0);
+            var m =""+(val%3600/600|0)+(val%3600/60%10|0);
+            var s =""+(val%60/10|0)+(val%60%10);
+            // s = h +':' + m + ':' + s; // 20140901 mm:ss 形式へ変更（分は3桁以上を許容）
+            m = parseInt(m) + parseInt(h) * 60;
+            m = "" + m;
+            if (m.length < 2) {
+              m = "0" + m;
+            }
+            s = m + ':' + s;
             // console.log('converted time is ' + s);
+
             if(val_org - 0 < 0) {
                 s = "-" + s;
             }
@@ -240,12 +249,12 @@ jQuery( function() {
           $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
         }
 
-        // 32日以上データがあるなら平日は非表示にする
-        if ( $('.jqplot-xaxis-tick').length >= 32 ) {
-          if (name == 'day_on') {
-            $( $('.jqplot-xaxis-tick')[i] ).text('');
-          }
-        }
+        // 32日以上データがあるなら平日は非表示にする　← 2014/9/3 指定期間を1か月に限定したのでコメントアウト
+        // if ( $('.jqplot-xaxis-tick').length >= 32 ) {
+        //   if (name == 'day_on') {
+        //     $( $('.jqplot-xaxis-tick')[i] ).text('');
+        //   }
+        // }
 
       }
 

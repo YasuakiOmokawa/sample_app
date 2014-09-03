@@ -17,4 +17,5 @@ doc/
 .DS_Store
 .idea
 .secret
-app/services/*.yml
+/vendor/bundle
+/.rsync_cache

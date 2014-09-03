@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source 'http://rubygems.org'
 ruby '2.0.0'
 #ruby-gemset=railstutorial_rails_4_0
 
@@ -18,17 +18,15 @@ gem 'jquery-turbolinks'
 gem 'sass-rails', '4.0.2'
 gem 'uglifier', '2.1.1'
 gem 'coffee-rails', '4.0.1'
-# gem 'jquery-rails'
 gem 'jquery-rails', '3.0.4'
 gem 'jquery-ui-rails', '4.2.1'
 gem 'turbolinks', '1.1.1'
 gem 'jbuilder', '1.0.2'
-# デプロイ先でデーモンとして動かすのに必要
-gem "daemons"
+gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails'
 gem 'newrelic_rpm'
-gem 'google-api-client'
-gem 'oauth2'
+# gem 'google-api-client' # oauth2認証に必要
+# gem 'oauth2' # oauth2認証に必要
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

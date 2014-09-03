@@ -28,6 +28,7 @@ module UpdateTable
 
   # 秒を指定フォーマットへ変換
   # 時間の書式は、 hh:mm:ss
+  # ロジック変更が発生したら、useJqplot.js tickFormatter() もチェックすること
   def chg_time(v)
 
     v_org = v
@@ -36,7 +37,14 @@ module UpdateTable
     h = (v / 36000 | 0).to_s + (v / 3600 % 10 | 0).to_s
     m = (v % 3600 / 600 | 0).to_s + (v % 3600 / 60 % 10 | 0).to_s
     s = (v % 60 / 10 | 0).to_s + (v % 60 % 10).to_s
-    str = h + ':' + m + ':' + s
+    # str = h + ':' + m + ':' + s # 20140901 mm:ss 形式へ変更（分は3桁以上を許容）
+    m = m.to_i + h.to_i * 60
+    m = m.to_s
+    if m.size < 2
+      m = "0" + m
+    end
+    str = m + ':' + s
+    # puts 'converted time is ' + s
 
     if v_org.to_i  < 0 then
       str = "-" + str
