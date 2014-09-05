@@ -255,6 +255,7 @@ jQuery( function() {
         return false;
       }
 
+
       counter = counter + 1;
 
       // ページ名（全体、検索、など）を取得
