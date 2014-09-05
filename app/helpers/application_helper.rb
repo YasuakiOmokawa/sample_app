@@ -13,7 +13,9 @@ module ApplicationHelper
   # 環境別にタイトルを変更します。
   def title_per_env(page_title)
     env = Rails.env
-    unless Rails.env.production?
+    if Rails.env.production?
+      page_title
+    else
       "#{page_title} | #{env}"
     end
   end
