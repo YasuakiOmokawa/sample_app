@@ -25,8 +25,8 @@ gem 'jbuilder', '1.0.2'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails'
 gem 'newrelic_rpm'
-# gem 'google-api-client' # oauth2認証に必要
-# gem 'oauth2' # oauth2認証に必要
+gem 'google-api-client' # oauth2認証に必要
+gem 'oauth2' # oauth2認証に必要
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
