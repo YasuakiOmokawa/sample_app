@@ -4,6 +4,7 @@ class UsersController < ApplicationController
   require 'create_table'
   require 'insert_table'
   require 'update_table'
+  require 'parallel'
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy]
@@ -351,8 +352,8 @@ class UsersController < ApplicationController
       if shori != 0
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-        page.each do |x, z|
-          # フィルタオプション追加
+        Parallel.map(page, :in_threads=>4) { |x, z|
+        # フィルタオプション追加
           @cond[:filters].merge!(z)
           puts "page option is #{z}, start by pages"
 
@@ -503,20 +504,15 @@ class UsersController < ApplicationController
           # ページ項目へ追加
           p_hash[x] = homearr
           puts "pages data set success!"
-          # File.open(Rails.root.join('app', 'services', 'data', 'test.json'), "a") do |f|
-          #   f.write(p_hash.to_json)
-          # end
+
           # フィルタオプションのリセット
           @cond[:filters] = {}
           puts "option reset! now is #{@cond}"
-        end
+        }
         # jqplot へデータ渡す
         if shori != 0
           gon.homearr = p_hash
         end
-        # File.open(Rails.root.join('app', 'services', 'data', 'test.json'), "w") do |f|
-        #   f.write(p_hash.to_json)
-        # end
       end
     end
 end

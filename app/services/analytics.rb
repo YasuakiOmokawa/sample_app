@@ -1,8 +1,5 @@
-require 'rubygems'
 require 'garb'
-require 'uri'
 require 'active_support/time'
-require 'yaml'
 
 class Analytics
 
