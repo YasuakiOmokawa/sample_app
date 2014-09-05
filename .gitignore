@@ -17,5 +17,5 @@ doc/
 .DS_Store
 .idea
 .secret
-/vendor/bundle
+vendor/bundle
 /.rsync_cache

@@ -28,6 +28,7 @@ gem 'newrelic_rpm'
 gem 'google-api-client' # oauth2認証に必要
 gem 'oauth2' # oauth2認証に必要
 
+
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
   gem 'guard-rspec', '2.5.0'
