@@ -327,62 +327,62 @@ jQuery( function() {
   var graph = jQuery . jqplot('graph', arr, options);
 
   // ハイライトツールチップを表示
-  $('#graph').bind('jqplotDataHighlight',
-    function (ev, seriesIndex, pointIndex, data, radius) {
-      var
-        dt = data[3].split(';;'),
-        color = 'black',
-        chart_left = $('#graph').offset().left,
-        chart_top = $('#graph').offset().top,
-        // convert x axis unita to pixels
-        x = graph.axes.xaxis.u2p(data[0]),
-        // convert y axis units to pixels
-        y = graph.axes.yaxis.u2p(data[1]);
-      // console.log( "full data is " + dt );
+  // $('#graph').bind('jqplotDataHighlight',
+  //   function (ev, seriesIndex, pointIndex, data, radius) {
+  //     var
+  //       dt = data[3].split(';;'),
+  //       color = 'black',
+  //       chart_left = $('#graph').offset().left,
+  //       chart_top = $('#graph').offset().top,
+  //       // convert x axis unita to pixels
+  //       x = graph.axes.xaxis.u2p(data[0]),
+  //       // convert y axis units to pixels
+  //       y = graph.axes.yaxis.u2p(data[1]);
+  //     // console.log( "full data is " + dt );
 
-      var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
-      var id = $(page)[0].name;
-      console.log( "href action is " + id );
+  //     var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
+  //     var id = $(page)[0].name;
+  //     console.log( "href action is " + id );
 
-      var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
-      // console.log( "tooptip is  " + tips );
-      // ツールチップのCSS
-      $('#tooltip1s').css(
-        {
-          left: chart_left+x+radius + -5,
-          top: chart_top+y,
-          'text-align': 'center'
-        });
-      // ツールチップHTML
-      $('#tooltip1s').html(
-          '<a href="javascript:void(0)" name=' + id +' class="abtn" '
-          + ' style="font-size:14px;' +
-          'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
-          + tips[0]
-          + '</a>'
-        );
-      $('#tooltip1s').show();
-      // ツールチップへリンク付与
-      $("a.abtn").click(function(){
-        evtsend($(this));
-      });
+  //     var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
+  //     // console.log( "tooptip is  " + tips );
+  //     // ツールチップのCSS
+  //     $('#tooltip1s').css(
+  //       {
+  //         left: chart_left+x+radius + -5,
+  //         top: chart_top+y,
+  //         'text-align': 'center'
+  //       });
+  //     // ツールチップHTML
+  //     $('#tooltip1s').html(
+  //         '<a href="javascript:void(0)" name=' + id +' class="abtn" '
+  //         + ' style="font-size:14px;' +
+  //         'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
+  //         + tips[0]
+  //         + '</a>'
+  //       );
+  //     $('#tooltip1s').show();
+  //     // ツールチップへリンク付与
+  //     $("a.abtn").click(function(){
+  //       evtsend($(this));
+  //     });
 
-    }
-  );
+  //   }
+  // );
 
   // ハイライトツールチップを隠す
-  $('#graph').bind('jqplotDataUnhighlight',
-      function (ev, seriesIndex, pointIndex, data) {
-          // 絞り込み選択を解除
-          $('#narrow_select').each(function() {
-            this.selectedIndex = 0;
-          });
-          // グラフ描画オプションをpageview(初期値)に戻す
-          $('input[name="graphic_item"]').val('pageviews');
-          $('#tooltip1s').empty();
-          $('#tooltip1s').hide();
-      }
-  );
+  // $('#graph').bind('jqplotDataUnhighlight',
+  //     function (ev, seriesIndex, pointIndex, data) {
+  //         // 絞り込み選択を解除
+  //         $('#narrow_select').each(function() {
+  //           this.selectedIndex = 0;
+  //         });
+  //         // グラフ描画オプションをpageview(初期値)に戻す
+  //         $('input[name="graphic_item"]').val('pageviews');
+  //         $('#tooltip1s').empty();
+  //         $('#tooltip1s').hide();
+  //     }
+  // );
 
   // 項目一覧データをマウスオーバしたら該当データのみリプロットする
   $('#legend1b tr td.r a').hover(
@@ -412,10 +412,10 @@ jQuery( function() {
   );
 
   // 再描画ボタンがクリックされたらグラフをリプロットする
-  $('#circle .replot').click(function() {
-    var wd = $(this).text();
-    replotHome(wd);
-  })
+  // $('#circle .replot').click(function() {
+  //   var wd = $(this).text();
+  //   replotHome(wd);
+  // })
 
   // ホームグラフをリプロットする
   var replotHome = function(wd) {

@@ -352,7 +352,7 @@ class UsersController < ApplicationController
       if shori != 0
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-        Parallel.map(page, :in_threads=>6) { |x, z|
+        Parallel.map(page, :in_threads=>1) { |x, z|
         # フィルタオプション追加
           @cond[:filters].merge!(z)
           puts "page option is #{z}, start by pages"
