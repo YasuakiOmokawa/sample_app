@@ -139,26 +139,41 @@ module ParamUtils
   def set_select_box(data, tag)
     tg = tag.to_s
     arr = []
+    cntr = 0
     case tg
     when 'f'
-      data.each do |w|
+      # 人気ページテーブルと同じ順番
+      data.sort_by{ |a| a.pageviews.to_i}.reverse.each do |w|
+        cntr += 1
         arr.push([ w.page_title, w.page_title.to_s + tg ])
+        if cntr >= 10 then break end
       end
     when 's'
-      data.each do |w|
+      cntr += 1
+      data.sort_by{ |a|
+        [ -(a.sessions.to_i),
+          -(a.adsense_ads_clicks.to_i),
+          -(a.adsense_ctr.to_f) ] }.each do |w|
         arr.push([ w.keyword, w.keyword.to_s + tg ])
+        if cntr >= 5 then break end
       end
     when 'r'
+      cntr += 1
       data.each do |w|
         arr.push([ w.source, w.source.to_s + tg ])
+        if cntr >= 5 then break end
       end
     when 'l'
+      cntr += 1
       data.each do |w|
         arr.push([ w.social_network, w.social_network.to_s + tg ])
+        if cntr >= 5 then break end
       end
     when 'c'
+      cntr += 1
       data.each do |w|
         arr.push([ w.campaign, w.campaign.to_s + tg ])
+        if cntr >= 5 then break end
       end
     end
     return arr

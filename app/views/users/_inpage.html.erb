@@ -6,7 +6,7 @@
     <%
       cnt = 0
       @in_table.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }.each do |t|
-          cnt += 1
+        cnt += 1
     %>
     <tr>
       <td class="row"><%= truncate(t.page_title, :length => 19) %></td>
@@ -14,7 +14,20 @@
       <td><%= t.bounce_rate.to_f.round(1) %></td>
     </tr>
     <%
-        if cnt >= 10 then break end
+        if cnt >= 5 then break end
+      end
+      # 絞り込み数が5に満たない場合、テーブルを埋める
+      if @in_table.size <= 5
+        tpad_size = 5 - @in_table.size
+        tpad_size.times {
+    %>
+    <tr>
+      <td class="row">-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <%
+        }
       end
     %>
    </tbody>

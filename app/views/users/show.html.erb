@@ -128,18 +128,41 @@
       <tr id="line">
         <td>目標値</td><td class="row">人気ページ</td><td>現状値</td><td>差</td>
       </tr>
-      <% @favorite_table.sort_by{ |k, v| v[:index].to_i}.each do |k, v| %>
-        <% if k == "その他" then %>
-          <tr id="other">
-            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= k %></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
-          </tr>
-        <% else %>
-          <% title,page = k.split(";;") %>
-          <tr>
-            <td><%= v[:good].to_f.round(1).to_s %>%</td><td class="row"><%= title %><p><%= page %></p></td><td><%= v[:bad].to_f.round(1).to_s %>%</td><td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
-          </tr>
-        <% end  %>
-      <% end %>
+      <%
+        @favorite_table.sort_by{ |k, v| v[:index].to_i}.each do |k, v|
+          if k != "その他"
+            title,page = k.split(";;")
+      %>
+        <tr>
+          <td><%= v[:good].to_f.round(1).to_s %>%</td>
+          <td class="row"><%= title %><p><%= page %></p></td>
+          <td><%= v[:bad].to_f.round(1).to_s %>%</td>
+          <td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
+        </tr>
+      <%
+          end
+        end
+        # 人気ページ数が10に満たない場合、テーブルを埋める
+        if @favorite_table.size <= 11 # ← その他も含むので、maxは11になる
+          fpad_size = 11 - @favorite_table.size
+          fpad_size.times {
+      %>
+        <tr>
+          <td>-</td>
+          <td class="row">-<p>-</p></td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+      <%
+          }
+        end
+      %>
+      <tr id="other">
+        <td><%= @favorite_table["その他"][:good].to_f.round(1).to_s %>%</td>
+        <td class="row">その他</td>
+        <td><%= @favorite_table["その他"][:bad].to_f.round(1).to_s %>%</td>
+        <td class="gap"><%= @favorite_table["その他"][:gap].to_f.round(1).to_s %>%</td>
+      </tr>
     </table>
   </div><br>
 </div>

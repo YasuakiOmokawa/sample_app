@@ -18,7 +18,21 @@
        <td><%= t.adsense_ctr.to_f.round(1).to_s %>%</td>
     </tr>
     <%
-        if cnt >= 10 then break end
+        if cnt >= 5 then break end
+      end
+      # 絞り込み数が5に満たない場合、テーブルを埋める
+      if @search.size <= 5
+        tpad_size = 5 - @search.size
+        tpad_size.times {
+    %>
+    <tr>
+      <td class="row">-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <%
+        }
       end
     %>
   </table>

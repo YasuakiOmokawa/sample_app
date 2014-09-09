@@ -352,7 +352,7 @@ class UsersController < ApplicationController
       if shori != 0
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-        Parallel.map(page, :in_threads=>1) { |x, z|
+        Parallel.map(page, :in_threads=>6) { |x, z|
         # フィルタオプション追加
           @cond[:filters].merge!(z)
           puts "page option is #{z}, start by pages"
@@ -396,6 +396,8 @@ class UsersController < ApplicationController
             all_sessions = @common[0][:sessions]
           end
 
+          ## ◆相関算出
+
           # スケルトン作成
           @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
           create_skeleton_for_graph(@gap_table_for_graph, @from, @to, mets_sh)
@@ -416,7 +418,6 @@ class UsersController < ApplicationController
           # 曜日別の計算をしているときは、ここでgap値も算出している
           corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
-          # ◆人気テーブル
           # スケルトン作成
           f_mt = [
               (@cv_txt.classify + 's').to_sym,
@@ -473,6 +474,7 @@ class UsersController < ApplicationController
 
           # 数値をパーセンテージへ再計算
           skel.merge!(fav_gap)
+
           gap_day = Hash.new{ |h, k| h[k] = {} }
           corr.each do |k, v|
             if k =~ /(day_off|day_on)/ then
