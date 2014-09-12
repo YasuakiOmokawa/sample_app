@@ -324,7 +324,7 @@ jQuery( function() {
   });
 
   // jqplot描画
-  var graph = jQuery . jqplot('graph', arr, options);
+  var graph = jQuery . jqplot('gp', arr, options);
 
   // ハイライトツールチップを表示
   // $('#graph').bind('jqplotDataHighlight',
