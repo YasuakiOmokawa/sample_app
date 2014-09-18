@@ -11,7 +11,6 @@
 // about supported directives.
 //
 //= require jquery
-// require jquery.ui.all
 //= require jquery.ui.datepicker
 //= require jquery.ui.datepicker-ja
 //= require jquery.ui.dialog
@@ -28,4 +27,4 @@
 //= require jquery.spin
 //= require ./analytics/useDatepicker
 //= require ./analytics/fncCommon
-// require_tree .
+//= require colorbox-rails

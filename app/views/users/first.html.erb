@@ -3,9 +3,13 @@
     <div id="bubble">
       <!-- guraph -->
       <div id="graph">
+        <div class="loading">
+          <%= image_tag 'loading.gif', :width => "350", :height => "200", :alt => "Loading" %>
+        </div>
         <div id="gp"  style="z-index: 1;"></div>
         <div id="narrow">
-          <div>全体</div>
+          <a href="javascript:void(0)" onclick="callExecuter();"　class="all">全体</a>
+          <!-- <div>全体</div> -->
           <a href="">検索</a>
           <a href="">直接入力/ブックマーク</a>
           <a href="">その他ウェブサイト</a>

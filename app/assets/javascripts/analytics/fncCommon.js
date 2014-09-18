@@ -31,6 +31,51 @@ var setRange = function setRange() {
   $('#jrange input').val(range);
 }
 
+// バブルチャートのリクエストを実施したときのイベント（非同期）
+function callExecuter() {
+  var userpath = gon.narrow_action;
+  var xhr;
+  xhr = $.ajax({
+    type:'GET',
+    dataType: "json",
+    url: userpath,
+    data: {
+      from : $('#from').val(),
+      to : $('#to').val(),
+      cv_num : $('input[name="cv_num"]').val(),
+      shori : $('input[name="shori"]').val()
+    }
+  });
+  return xhr.done(function(result) {
+    console.log( '通信成功！');
+
+    // ホーム画面のグラフと項目一覧の描画
+    var r_obj = JSON.parse(result.homearr);
+    plotGraphHome(r_obj);
+
+  }).fail(function(result) {
+    console.log( '通信失敗！');
+  });
+}
+
+// Ajaxの通信中は、ローディング画像を表示
+$(document).ajaxSend(function() {
+
+  // 描画用htmlの整理
+  $('#gp').empty();
+  $('#legend1b').empty();
+
+  $(".loading").show();
+  $("#cboxOverlay").css("opacity", "0.3").show();
+});
+
+// Ajax通信が完了したら、ローディング画像の削除
+$(document).ajaxComplete(function() {
+  $("#cboxOverlay").fadeOut(1000);
+  $(".loading").fadeOut(1000);
+});
+
+
 $(document).ready(function() {
 
   // CVの選択のセレクトボックスを選択したときのイベント
@@ -61,6 +106,9 @@ $(document).ready(function() {
   // 絞り込みボタンを押したとき、プログレススピナーを起動する
   $('a#set').click(function(){
 
+    // ホーム画面の絞り込みボタンだった場合、スピナーを起動させない
+    // $('a#set').attr("class")
+
       // スピナーの実装
       if ( $('.spinner').length <= 0) {
         var opts = {
@@ -84,6 +132,7 @@ $(document).ready(function() {
         target.append(spinner.el);
         $('.spinner').css('margin-top', 2);
       }
+
   });
 
   // escボタンを押したとき、プログレススピナーをキャンセルする

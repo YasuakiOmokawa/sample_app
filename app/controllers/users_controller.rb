@@ -143,10 +143,12 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'ホーム'
     @narrow_action = user_path
+    gon.narrow_action = user_path
     @partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
 
-    render :layout => 'ganalytics', :file => '/app/views/users/first'
+    render json: { :homearr => @json } and return if request.xhr?
+    render :layout => 'ganalytics', :file => '/app/views/users/first' and return
   end
 
   def all
@@ -341,18 +343,18 @@ class UsersController < ApplicationController
       # ページ項目
       page = {
         '全体' => {},
-        '検索' => {:medium.matches => 'organic'},
-        '直接入力ブックマーク' => {:medium.matches => '(none)'},
-        'その他ウェブサイト' => {:medium.matches => 'referral'},
-        'ソーシャル' => {:has_social_source_referral.matches => 'Yes'},
-        'キャンペーン' => {:campaign.does_not_match => '(not set)'},
+        # '検索' => {:medium.matches => 'organic'},
+        # '直接入力ブックマーク' => {:medium.matches => '(none)'},
+        # 'その他ウェブサイト' => {:medium.matches => 'referral'},
+        # 'ソーシャル' => {:has_social_source_referral.matches => 'Yes'},
+        # 'キャンペーン' => {:campaign.does_not_match => '(not set)'},
       }
       # フラグで処理するか分ける
       shori = params[:shori].presence || 0
       if shori != 0
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-        Parallel.map(page, :in_threads=>3) { |x, z|
+        Parallel.map(page, :in_threads=>1) { |x, z|
         # フィルタオプション追加
           @cond[:filters].merge!(z)
           puts "page option is #{z}, start by pages"
@@ -513,8 +515,10 @@ class UsersController < ApplicationController
         }
         # jqplot へデータ渡す
         if shori != 0
-          gon.homearr = p_hash
+          # gon.watch.homearr = p_hash
+          @json = p_hash.to_json
         end
       end
     end
+
 end

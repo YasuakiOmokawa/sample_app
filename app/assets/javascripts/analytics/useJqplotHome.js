@@ -1,7 +1,7 @@
 // データ項目一覧の設定
-var setDataidx = function() {
+var setDataidx = function(obj) {
 
-  var homearr = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+  var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
   var idxarr = [];
   var arr = [];
   var cnt = 0;
@@ -27,9 +27,9 @@ var setDataidx = function() {
 }
 
 // グラフデータ全設定
-var setData = function(opt) {
+var setData = function(opt, obj) {
 
-  var homearr = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+  var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
   var arr = [];
   var cnt = 0;
 
@@ -163,72 +163,63 @@ function chk_days(data) {
   return d;
 }
 
-jQuery( function() {
+function plotGraphHome(robj) {
+  jQuery( function() {
 
-  // バブル（散布図）チャート相関グラフ
-  // x軸, y軸, 大きさ(radius), 項目名　の順に表示
-  // x ... GAP y ... 相関　で現す。
+    // バブル（散布図）チャート相関グラフ
+    // x軸, y軸, 大きさ(radius), 項目名　の順に表示
+    // x ... GAP y ... 相関　で現す。
 
-  // グラフ描画オプション
-  var options = {
-    seriesDefaults: {
-      renderer: jQuery.jqplot.BubbleRenderer,
-      rendererOptions: {
-        bubbleAlpha: 0.2,
-        highlightAlpha: 1.0,
-        showLabels: false,
-        varyBubbleColors: false,
-        autoscaleMultiplier: 0.15,
+    // グラフ描画オプション
+    var options = {
+      seriesDefaults: {
+        renderer: jQuery.jqplot.BubbleRenderer,
+        rendererOptions: {
+          bubbleAlpha: 0.2,
+          highlightAlpha: 1.0,
+          showLabels: false,
+          varyBubbleColors: false,
+          autoscaleMultiplier: 0.15,
+          shadow: false,
+        },
+      },
+      series: [], // ここに関数でカラーセットを行う
+      axesDefaults: {
+        numberTicks: 3,
+        tickOptions: {
+          fontSize: '10pt',
+          fontFamily: 'ヒラギノ角ゴ Pro W3',
+          markSize: 0
+        },
+      },
+      axes: {
+        // 見栄えの問題で、max は101, min は -1 で調整
+        xaxis: {
+          label: 'GAP',
+          min: -1,
+          max: 101,
+        },
+        yaxis: {
+          label: '相関',
+          min: -1,
+          max: 101,
+        },
+      },
+      // 背景色に関する設定
+      grid: {
+        background: "transparent",
+        gridLineColor: "#cccccc",
         shadow: false,
-      },
-    },
-    series: [], // ここに関数でカラーセットを行う
-    axesDefaults: {
-      numberTicks: 3,
-      tickOptions: {
-        fontSize: '10pt',
-        fontFamily: 'ヒラギノ角ゴ Pro W3',
-        markSize: 0
-      },
-    },
-    axes: {
-      // 見栄えの問題で、max は101, min は -1 で調整
-      xaxis: {
-        label: 'GAP',
-        min: -1,
-        max: 101,
-      },
-      yaxis: {
-        label: '相関',
-        min: -1,
-        max: 101,
-      },
-    },
-    // 背景色に関する設定
-    grid: {
-      background: "transparent",
-      gridLineColor: "#cccccc",
-      shadow: false,
-      drawGridlines: true,
-      drawBorder: false,
-    }
-  };
-
-  // グラフデータを設定
-  if (typeof(gon.homearr) == "undefined") {
-
-    // コントローラからデータが渡されない場合
-    var arr = [
-      [ 1, 1, 1, 'tst' ]
-    ];
-
-  } else {
+        drawGridlines: true,
+        drawBorder: false,
+      }
+    };
 
     // データセット
-    var arr = setData(options);
+    var arr = setData(options, robj);
 
-   // データ項目一覧セット
-    var idxarr = setDataidx();
+    // データ項目一覧セット
+    var idxarr = setDataidx(robj);
 
     // 優先順位の降順、ページ名、項目名の昇順でソート
     // > がマイナスリターン。。降順、< がプラスリターンで昇順
@@ -254,7 +245,6 @@ jQuery( function() {
       if (counter >= 50) {
         return false;
       }
-
 
       counter = counter + 1;
 
@@ -309,126 +299,58 @@ jQuery( function() {
         evtsend($(e.target).closest('td'));
     });
 
-  }
+    // jqplot描画後に実行する操作（jqplot描画前に書くこと）
+    $.jqplot.postDrawHooks.push(function(graph) {
 
-  // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  $.jqplot.postDrawHooks.push(function(graph) {
-
-    // 目盛り線のみ残して目盛りの値は削除
-    var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
-    for (var i=0; i<selcts.length; i++) {
-      $(selcts[i][0]).text('');
-      $(selcts[i][1]).text('');
-      $(selcts[i][2]).text('');
-    }
-  });
-
-  // jqplot描画
-  var graph = jQuery . jqplot('gp', arr, options);
-
-  // ハイライトツールチップを表示
-  // $('#graph').bind('jqplotDataHighlight',
-  //   function (ev, seriesIndex, pointIndex, data, radius) {
-  //     var
-  //       dt = data[3].split(';;'),
-  //       color = 'black',
-  //       chart_left = $('#graph').offset().left,
-  //       chart_top = $('#graph').offset().top,
-  //       // convert x axis unita to pixels
-  //       x = graph.axes.xaxis.u2p(data[0]),
-  //       // convert y axis units to pixels
-  //       y = graph.axes.yaxis.u2p(data[1]);
-  //     // console.log( "full data is " + dt );
-
-  //     var page = 'li.tab > a:contains(' + String(dt[0]) + ')';
-  //     var id = $(page)[0].name;
-  //     console.log( "href action is " + id );
-
-  //     var tips = setItem( dt, $('input[name="graphic_item"]'), $('#narrow_select') );
-  //     // console.log( "tooptip is  " + tips );
-  //     // ツールチップのCSS
-  //     $('#tooltip1s').css(
-  //       {
-  //         left: chart_left+x+radius + -5,
-  //         top: chart_top+y,
-  //         'text-align': 'center'
-  //       });
-  //     // ツールチップHTML
-  //     $('#tooltip1s').html(
-  //         '<a href="javascript:void(0)" name=' + id +' class="abtn" '
-  //         + ' style="font-size:14px;' +
-  //         'font-weight:bold;color:' + color + ';background-color: whitesmoke;">'
-  //         + tips[0]
-  //         + '</a>'
-  //       );
-  //     $('#tooltip1s').show();
-  //     // ツールチップへリンク付与
-  //     $("a.abtn").click(function(){
-  //       evtsend($(this));
-  //     });
-
-  //   }
-  // );
-
-  // ハイライトツールチップを隠す
-  // $('#graph').bind('jqplotDataUnhighlight',
-  //     function (ev, seriesIndex, pointIndex, data) {
-  //         // 絞り込み選択を解除
-  //         $('#narrow_select').each(function() {
-  //           this.selectedIndex = 0;
-  //         });
-  //         // グラフ描画オプションをpageview(初期値)に戻す
-  //         $('input[name="graphic_item"]').val('pageviews');
-  //         $('#tooltip1s').empty();
-  //         $('#tooltip1s').hide();
-  //     }
-  // );
-
-  // 項目一覧データをマウスオーバしたら該当データのみリプロットする
-  $('#legend1b tr td.r a').hover(
-    function() {
-      var $parents = $(this).parent('td.r');
-      var text = $parents.attr('data-page').split(';;');
-      // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
-      var rearr = [
-        [
-          [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, $parents.attr('data-page') ]
-        ]
-      ];
-      // console.log(rearr);
-      var addopt = { series: [] };
-      addopt.data = rearr;
-      setGraphcolor(text[0], addopt);
-      // console.log("replot strong " + text[0] );
-      graph.replot(addopt);
-    },
-    function() {
-      // 最後にフィルタしたグラフへ戻す
-      if (typeof(replotHomeflg) == "undefined") {
-        replotHomeflg = '全データを再表示';
+      // 目盛り線のみ残して目盛りの値は削除
+      var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
+      for (var i=0; i<selcts.length; i++) {
+        $(selcts[i][0]).text('');
+        $(selcts[i][1]).text('');
+        $(selcts[i][2]).text('');
       }
-      replotHome(replotHomeflg);
-    }
-  );
+    });
 
-  // 再描画ボタンがクリックされたらグラフをリプロットする
-  // $('#circle .replot').click(function() {
-  //   var wd = $(this).text();
-  //   replotHome(wd);
-  // })
+    // jqplot描画
+    var graph = jQuery . jqplot('gp', arr, options);
 
-  // ホームグラフをリプロットする
-  var replotHome = function(wd) {
+    // 項目一覧データをマウスオーバしたら該当データのみリプロットする
+    $('#legend1b tr td.r a').hover(
+      function() {
+        var $parents = $(this).parent('td.r');
+        var text = $parents.attr('data-page').split(';;');
+        // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
+        var rearr = [
+          [
+            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, $parents.attr('data-page') ]
+          ]
+        ];
+        // console.log(rearr);
+        var addopt = { series: [] };
+        addopt.data = rearr;
+        setGraphcolor(text[0], addopt);
+        // console.log("replot strong " + text[0] );
+        graph.replot(addopt);
+      },
+      function() {
+        // 最後にフィルタしたグラフへ戻す
+        if (typeof(replotHomeflg) == "undefined") {
+          replotHomeflg = '全データを再表示';
+        }
+        replotHome(replotHomeflg, robj);
+      }
+    );
 
-    var addopt = { series: [] };
+    // ホームグラフをリプロットする
+    var replotHome = function(wd, obj) {
 
-    if (typeof(gon.homearr) != "undefined" ) {
+      var addopt = { series: [] };
 
       if (wd == '全データを再表示') {
-        var arr = setData(addopt);
+        var arr = setData(addopt, obj);
         addopt.data = arr;
       } else {
-        var src = $.extend(true, {}, gon.homearr); // 参照渡しだとバグる。
+        var src = $.extend(true, {}, obj); // 参照渡しだとバグる。
         var rdata = replotdata(src, wd);
         addopt.data = rdata;
         setGraphcolor(wd, addopt);
@@ -441,9 +363,6 @@ jQuery( function() {
 
       // フィルタした処理の内容を記録(グローバル)
       replotHomeflg = wd;
-
-    } else {
-      console.log('描画対象のデータがないため、再描画は実行されません');
     }
-  }
-});
+  });
+}
