@@ -70,8 +70,10 @@ $(function() {
         setRange();
       // datepickerを自動表示させない
       $('#dummy').show();
-      // ページ遷移を行う
-      $('a#set').trigger('click');
+      // ホーム画面以外であればページ遷移を設定する
+      if ($('title').val().indexOf('ホーム') == 0) {
+        $('a#set').trigger('click');
+      }
       },
       "キャンセル": function(){
         $(this).dialog('close');

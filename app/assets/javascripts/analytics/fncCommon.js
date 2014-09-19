@@ -32,9 +32,10 @@ var setRange = function setRange() {
 }
 
 // バブルチャートのリクエストを実施したときのイベント（非同期）
-function callExecuter() {
+function callExecuter(elem) {
   var userpath = gon.narrow_action;
   var xhr;
+  console.log(elem.text());
   xhr = $.ajax({
     type:'GET',
     dataType: "json",
@@ -43,7 +44,8 @@ function callExecuter() {
       from : $('#from').val(),
       to : $('#to').val(),
       cv_num : $('input[name="cv_num"]').val(),
-      shori : $('input[name="shori"]').val()
+      shori : $('input[name="shori"]').val(),
+      act : elem.text()
     }
   });
   return xhr.done(function(result) {
@@ -51,6 +53,7 @@ function callExecuter() {
 
     // ホーム画面のグラフと項目一覧の描画
     var r_obj = JSON.parse(result.homearr);
+    console.log(r_obj);
     plotGraphHome(r_obj);
 
   }).fail(function(result) {
