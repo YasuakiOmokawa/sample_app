@@ -1,24 +1,26 @@
 // データ項目一覧の設定
-var setDataidx = function(obj) {
+var setDataidx = function(obj, wd) {
 
   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
   var idxarr = [];
   var arr = [];
   var cnt = 0;
+  var fltr_wd = wd;
 
-  for (var i in homearr) {
-    arr.push( homearr[i] );
+  for (var i in homearr[fltr_wd]) {
+    arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
       var nm = value[3].split(';;');
-      value[3] = String(i) + ';;' + value[3];
-      var ar = new Array();
+      value[3] = fltr_wd + ';;' + value[3];
 
       // GAPと相関の合計値が高いものほど優先度を高くする。
+      var ar = new Array();
       var pri = value[0] + value[1];
       ar['pri'] = pri;
       ar['arr'] = value;
-      ar['page'] = String(i);
       ar['name'] = nm[0];
+      ar['param'] = String(i);
+      ar['page'] = fltr_wd;
       idxarr.push(ar);
     });
     cnt += 1
@@ -27,20 +29,21 @@ var setDataidx = function(obj) {
 }
 
 // グラフデータ全設定
-var setData = function(opt, obj) {
+var setData = function(opt, obj, wd) {
 
   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
   var arr = [];
   var cnt = 0;
+  var fltr_wd = wd;
 
-  for (var i in homearr) {
-    arr.push( homearr[i] );
+  for (var i in homearr[fltr_wd]) {
+    arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
       value[3] = String(i) + ';;' + value[3];
     });
 
     // グラフ描画オプション（プロットデータのカラー）追加
-    setGraphcolor( i, opt );
+    // setGraphcolor( i, opt );
 
     cnt += 1;
   }
@@ -63,107 +66,46 @@ var replotdata = function(allarr, wd) {
   return a;
 }
 
-// グラフ項目の色を決定
-function setGraphcolor(wd, opt) {
+// グラフ項目と人気ページ項目の絞り込みパラメータを設定
+function addNarrowParam(data,  graph, narrow) {
 
-  // wd が直接入力ブックマーク の場合、スラッシュを削除
-  if (wd == '直接入力/ブックマーク') {
-    wd = wd.replace(/\//g, '');
-  }
-
-  var p_wd = wd
-
-  switch (p_wd) {
-
-    case '全体':
-      opt.series.push( { color: '#808080'} );
-      break;
-    case '検索':
-      opt.series.push( { color: '#e6b422'} );
-      break;
-    case '直接入力ブックマーク':
-      opt.series.push( { color: '#008000'} );
-      break;
-    case 'その他ウェブサイト':
-      opt.series.push( { color: '#1e50a2'} );
-      break;
-    case 'ソーシャル':
-      opt.series.push( { color: '#c9171e'} );
-      break;
-    case 'キャンペーン':
-      opt.series.push( { color: '#800080'} );
-      break;
-  }
-}
-
-// グラフ項目のinputパラメータを設定
-function setItem(data,  graph, narrow) {
   var option; // 項目名（オプション）
-  var tips = ''; // ツールチップの テキスト
-  var supl = ''; // 項目一覧のテキスト
-
-  var tab = data[0]; // 各ページ名
   var a;
   var item = data[1]; // 項目名
-  tips = tab + ':' + item;
+
   switch (item) {
     case 'PV数':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('pageviews');
       break;
     case '平均PV数':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('pageviews_per_session');
       break;
     case '訪問回数':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('sessions');
       break;
     case '直帰率':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('bounce_rate');
       break;
     case '新規訪問率':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('percent_new_sessions');
       break;
     case '平均滞在時間':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('avg_session_duration');
       break;
     case '再訪問率':
-      tips = tips + '<br>' + chk_days(data);
-      supl = chk_days(data);
       graph.val('repeat_rate');
       break;
     case '人気ページ':
-      tips = tips + '<br>' + data[2];
-      supl = data[2] + '<p>' + data[3] + '</p>'
-      $('#narrow_select').val( data[2] + 'f');
+      narrow.append($('<option>').html("一時追加項目").val(data[2] + 'f'));
+      narrow.val( data[2] + 'f');
+      graph.val('pageviews');
       break;
   }
-  return [ tips, supl ];
 }
 
-// 曜日別の判定
-function chk_days(data) {
-  var d;
-  if (data.length == 3) {
-    d = data[2];
-    // tips = tips + '<br>' + data[2];
-  }else{
-    d = ' ';
-  }
-  return d;
-}
 
-function plotGraphHome(robj) {
+// バブルチャートの生成
+function plotGraphHome(robj, fltr) {
   jQuery( function() {
 
     // バブル（散布図）チャート相関グラフ
@@ -215,13 +157,17 @@ function plotGraphHome(robj) {
       }
     };
 
+    // ホーム画面で指定したページ項目名
+    var page_fltr_wd = fltr;
+
     // データセット
-    var arr = setData(options, robj);
+    var arr = setData(options, robj, page_fltr_wd);
 
     // データ項目一覧セット
-    var idxarr = setDataidx(robj);
+    var idxarr = setDataidx(robj, page_fltr_wd);
 
-    // 優先順位の降順、ページ名、項目名の昇順でソート
+    // 優先順位の降順、
+    // 　ページ名と項目名の昇順でソート
     // > がマイナスリターン。。降順、< がプラスリターンで昇順
     idxarr = idxarr.sort(function(a,b) {
       if (a.pri > b.pri) return  -1;
@@ -242,21 +188,21 @@ function plotGraphHome(robj) {
     idxarr.some(function(value){
 
       // 表示件数の上限を50件に制限
-      if (counter >= 50) {
-        return false;
-      }
+      // if (counter >= 50) {
+      //   return false;
+      // }
 
       counter = counter + 1;
 
       // ページ名（全体、検索、など）を取得
-      text = value['arr'][3].split(';;');
-      pagenm = 'li.tab > a:contains(' + String(text[0]) + ')';
+      pagenm = 'li.tab > a:contains(' + page_fltr_wd + ')';
 
-      // ページへのリンク
+      // ページへのリンクを取得
       pagelink = $(pagenm)[0].name;
 
-      // 補足情報
-      // var tips = setItem( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+      // 絞り込み情報の追加
+      text = value['arr'][3].split(';;');
+      addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 項目一覧へ表示する文字列
       caption = text[0] + ':' + text[1];
@@ -273,7 +219,9 @@ function plotGraphHome(robj) {
               "class": "r",
               'data-gap': value['arr'][0],
               'data-sokan': value['arr'][1],
-              'data-page': value['arr'][3] })
+              'data-page': value['arr'][3],
+              'data-param': value['param']
+            })
             .append(
               $('<a>')
                 .attr({
@@ -290,10 +238,26 @@ function plotGraphHome(robj) {
         //要素の先祖要素で一番近いtdの
         //data-page属性の値を加工する
         var item = $(e.target).closest('td').data('page').split(';;');
-        // console.log(item);
+        console.log(item);
 
         // グラフ項目と人気ページパラメータを設定
-        setItem( item, $('input[name="graphic_item"]'), $('#narrow_select') );
+        addNarrowParam( item, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+        // 絞り込みチェックボックスパラメータを指定
+        var param = $(e.target).closest('td').data('param');
+        switch (param) {
+          case 'all':
+            $("#hallway input[name='device']").val(['all']);
+            $("#hallway input[name='visitor']").val(['all']);
+            break;
+          default :
+            var type = '#hallway input[value=' + param + ']';
+            var n = $(type).attr("name");
+            var m = '#hallway input[name=' + n + ']';
+            $(m).val([param]);
+            break;
+        }
+
 
         // ページ遷移
         evtsend($(e.target).closest('td'));
@@ -314,10 +278,16 @@ function plotGraphHome(robj) {
     // jqplot描画
     var graph = jQuery . jqplot('gp', arr, options);
 
-    // 項目一覧データをマウスオーバしたら該当データのみリプロットする
+    // 項目一覧データをマウスオーバしたら該当データのみリプロットする。
+    // 同時に、絞り込み項目も自動でセットさせる
     $('#legend1b tr td.r a').hover(
       function() {
+
         var $parents = $(this).parent('td.r');
+
+        // 絞り込み項目のセット
+        // $('input[name="device"]')
+
         var text = $parents.attr('data-page').split(';;');
         // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
         var rearr = [
@@ -328,7 +298,7 @@ function plotGraphHome(robj) {
         // console.log(rearr);
         var addopt = { series: [] };
         addopt.data = rearr;
-        setGraphcolor(text[0], addopt);
+        // setGraphcolor(text[0], addopt);
         // console.log("replot strong " + text[0] );
         graph.replot(addopt);
       },
@@ -347,13 +317,13 @@ function plotGraphHome(robj) {
       var addopt = { series: [] };
 
       if (wd == '全データを再表示') {
-        var arr = setData(addopt, obj);
+        var arr = setData(addopt, obj, page_fltr_wd);
         addopt.data = arr;
       } else {
         var src = $.extend(true, {}, obj); // 参照渡しだとバグる。
         var rdata = replotdata(src, wd);
         addopt.data = rdata;
-        setGraphcolor(wd, addopt);
+        // setGraphcolor(wd, addopt);
       }
       console.log("replot " + wd);
       // 再描画を実行

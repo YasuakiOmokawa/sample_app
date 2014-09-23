@@ -147,7 +147,9 @@ class UsersController < ApplicationController
     @partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
 
-    render json: { :homearr => @json } and return if request.xhr?
+    render json: {
+      :homearr => @json,
+      :page_fltr_wd => @page_fltr_wd } and return if request.xhr?
     render :layout => 'ganalytics', :file => '/app/views/users/first' and return
   end
 
@@ -352,17 +354,18 @@ class UsersController < ApplicationController
 
       # フィルタリング項目
       options = {
-        'pc' => { :device_category.matches => 'desktop' },
-        'sphone' => {
-          :device_category.matches => 'mobile',
-          :mobile_input_selector.matches => 'touchscreen'
-        },
-        'mobile' => {
-         :device_category.matches => 'mobile',
-          :mobile_input_selector.does_not_match => 'touchscreen'
-        },
+        # 'pc' => { :device_category.matches => 'desktop' },
+        # 'sphone' => {
+        #   :device_category.matches => 'mobile',
+        #   :mobile_input_selector.matches => 'touchscreen'
+        # },
+        # 'mobile' => {
+        #  :device_category.matches => 'mobile',
+        #   :mobile_input_selector.does_not_match => 'touchscreen'
+        # },
         'new' => {:user_type.matches => 'New Visitor'},
-        'repeat' => { :user_type.matches => 'Returning Visitor' }
+        'repeat' => { :user_type.matches => 'Returning Visitor' },
+        # 'all' => {}
       }
 
       # フラグで処理するか分ける
@@ -370,11 +373,13 @@ class UsersController < ApplicationController
       if shori != 0
 
         # リクエストパラメータに応じてpageの項目を絞る
+        wd = ' '
         if params[:act].present?
           wd = params[:act].gsub(/\//, '')
         else
           wd = '全体'
         end
+        @page_fltr_wd = wd
         page.select!{ |k,v| k == wd }
 
         # ページ項目ごとにデータ集計
@@ -534,7 +539,7 @@ class UsersController < ApplicationController
             homearr = concat(skel, corr, mets_sh)
 
             # ページ項目へ追加
-            p_hash[x] = homearr
+            p_hash[x][xy] = homearr
             puts "pages data set success!"
 
             # フィルタオプションのリセット

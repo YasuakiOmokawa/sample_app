@@ -64,15 +64,15 @@ $(function() {
       of: 'a#jrange'
     },
     buttons: {
-      "設定": function(){
+        "設定": function(){
         $(this).dialog('close');
         // 入力値を期間設定ボックスへ設定
         setRange();
-      // datepickerを自動表示させない
-      $('#dummy').show();
-      // ホーム画面以外であればページ遷移を設定する
-      if ($('title').val().indexOf('ホーム') == 0) {
-        $('a#set').trigger('click');
+        // datepickerを自動表示させない
+        $('#dummy').show();
+        // ホーム画面以外であればページ遷移を設定する
+        if ($('title').val().indexOf('ホーム') == 0) {
+          $('a#set').trigger('click');
       }
       },
       "キャンセル": function(){

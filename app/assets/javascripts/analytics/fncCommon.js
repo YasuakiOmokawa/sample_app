@@ -27,15 +27,19 @@ var evtsend = function (at) {
 
 // 期間設定ボックスの初期値を設定
 var setRange = function setRange() {
-  var range = $('#from').val() + ' ~ ' + $('#to').val();
-  $('#jrange input').val(range);
+  var from = $('#from').val().substr(2);
+  var to = $('#to').val().substr(2);
+  var range = from + '-' + to;
+  var txt = $('a#jrange').html().split(">");
+  txt2 = txt[0] + '>' + range;
+  $('a#jrange').html(txt2);
 }
 
 // バブルチャートのリクエストを実施したときのイベント（非同期）
 function callExecuter(elem) {
   var userpath = gon.narrow_action;
   var xhr;
-  console.log(elem.text());
+  // console.log(elem.text());
   xhr = $.ajax({
     type:'GET',
     dataType: "json",
@@ -49,21 +53,27 @@ function callExecuter(elem) {
     }
   });
   return xhr.done(function(result) {
-    console.log( '通信成功！');
+    console.log( 'ajax通信成功!');
 
     // ホーム画面のグラフと項目一覧の描画
     var r_obj = JSON.parse(result.homearr);
+    var page_fltr_wd = result.page_fltr_wd;
     console.log(r_obj);
-    plotGraphHome(r_obj);
+    console.log('ページ絞り込み名 :' + page_fltr_wd);
+    plotGraphHome(r_obj, page_fltr_wd);
 
-  }).fail(function(result) {
-    console.log( '通信失敗！');
+  }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+    console.log( 'ajax通信失敗!');
+    console.log("XMLHttpRequest : " + XMLHttpRequest.status);
+    console.log("textStatus : " + textStatus);
+    console.log("errorThrown : " + errorThrown.message);
   });
 }
 
 // Ajaxの通信中は、ローディング画像を表示
 $(document).ajaxSend(function() {
 
+  console.log( 'ajax通信開始!');
   // 描画用htmlの整理
   $('#gp').empty();
   $('#legend1b').empty();
@@ -76,6 +86,7 @@ $(document).ajaxSend(function() {
 $(document).ajaxComplete(function() {
   $("#cboxOverlay").fadeOut(1000);
   $(".loading").fadeOut(1000);
+  console.log( 'ajax通信終了!');
 });
 
 
@@ -109,33 +120,29 @@ $(document).ready(function() {
   // 絞り込みボタンを押したとき、プログレススピナーを起動する
   $('a#set').click(function(){
 
-    // ホーム画面の絞り込みボタンだった場合、スピナーを起動させない
-    // $('a#set').attr("class")
-
-      // スピナーの実装
-      if ( $('.spinner').length <= 0) {
-        var opts = {
-          lines: 13, // The number of lines to draw
-          length: 4, // The length of each line
-          width: 2, // The line thickness
-          radius: 3, // The radius of the inner circle
-          corners: 1, // Corner roundness (0..1)
-          rotate: 0, // The rotation offset
-          direction: 1, // 1: clockwise, -1: counterclockwise
-          color: 'white', // #rgb or #rrggbb or array of colors
-          speed: 1, // Rounds per second
-          trail: 60, // Afterglow percentage
-          shadow: false, // Whether to render a shadow
-          hwaccel: false, // Whether to use hardware acceleration
-          className: 'spinner', // The CSS class to assign to the spinner
-          zIndex: 2e9, // The z-index (defaults to 2000000000)
-        };
-        var target = $('#entrance');
-        var spinner = new Spinner(opts).spin();
-        target.append(spinner.el);
-        $('.spinner').css('margin-top', 2);
-      }
-
+    // スピナーの実装
+    if ( $('.spinner').length <= 0) {
+      var opts = {
+        lines: 13, // The number of lines to draw
+        length: 4, // The length of each line
+        width: 2, // The line thickness
+        radius: 3, // The radius of the inner circle
+        corners: 1, // Corner roundness (0..1)
+        rotate: 0, // The rotation offset
+        direction: 1, // 1: clockwise, -1: counterclockwise
+        color: 'white', // #rgb or #rrggbb or array of colors
+        speed: 1, // Rounds per second
+        trail: 60, // Afterglow percentage
+        shadow: false, // Whether to render a shadow
+        hwaccel: false, // Whether to use hardware acceleration
+        className: 'spinner', // The CSS class to assign to the spinner
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+      };
+      var target = $('#entrance');
+      var spinner = new Spinner(opts).spin();
+      target.append(spinner.el);
+      $('.spinner').css('margin-top', 2);
+    }
   });
 
   // escボタンを押したとき、プログレススピナーをキャンセルする
@@ -201,9 +208,6 @@ $(document).ready(function() {
   var cv = gon.cv_num
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
-
-  // ページ読み込み時の期間設定ボックス設定
-  setRange();
 
   // セレクトボックスの色を変更
   var dColor = '#999999';
