@@ -96,7 +96,7 @@ function addNarrowParam(data,  graph, narrow) {
       graph.val('repeat_rate');
       break;
     case '人気ページ':
-      narrow.append($('<option>').html("一時追加項目").val(data[2] + 'f'));
+      narrow.append($('<option>').html(" ").val(data[2] + 'f'));
       narrow.val( data[2] + 'f');
       graph.val('pageviews');
       break;
@@ -137,12 +137,12 @@ function plotGraphHome(robj, fltr) {
       axes: {
         // 見栄えの問題で、max は101, min は -1 で調整
         xaxis: {
-          label: 'GAP',
+          // label: 'GAP',
           min: -1,
           max: 101,
         },
         yaxis: {
-          label: '相関',
+          // label: '相関',
           min: -1,
           max: 101,
         },
@@ -188,9 +188,9 @@ function plotGraphHome(robj, fltr) {
     idxarr.some(function(value){
 
       // 表示件数の上限を50件に制限
-      // if (counter >= 50) {
-      //   return false;
-      // }
+      if (counter >= 50) {
+        return false;
+      }
 
       counter = counter + 1;
 

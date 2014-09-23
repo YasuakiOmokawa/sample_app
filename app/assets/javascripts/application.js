@@ -27,4 +27,3 @@
 //= require jquery.spin
 //= require ./analytics/useDatepicker
 //= require ./analytics/fncCommon
-//= require colorbox-rails

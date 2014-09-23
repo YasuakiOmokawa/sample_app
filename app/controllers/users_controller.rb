@@ -363,9 +363,9 @@ class UsersController < ApplicationController
         #  :device_category.matches => 'mobile',
         #   :mobile_input_selector.does_not_match => 'touchscreen'
         # },
-        'new' => {:user_type.matches => 'New Visitor'},
-        'repeat' => { :user_type.matches => 'Returning Visitor' },
-        # 'all' => {}
+        # 'new' => {:user_type.matches => 'New Visitor'},
+        # 'repeat' => { :user_type.matches => 'Returning Visitor' },
+        'all' => {}
       }
 
       # フラグで処理するか分ける
@@ -375,6 +375,7 @@ class UsersController < ApplicationController
         # リクエストパラメータに応じてpageの項目を絞る
         wd = ' '
         if params[:act].present?
+          # wd = params[:act]
           wd = params[:act].gsub(/\//, '')
         else
           wd = '全体'
@@ -389,8 +390,6 @@ class UsersController < ApplicationController
           # フィルタオプション追加
             @cond[:filters].merge!(z)
             @cond[:filters].merge!(zy)
-            # puts "page option is #{z}, start by pages"
-            # puts "filter option is #{zy}, start by pages"
 
             # データ項目
             mets = {

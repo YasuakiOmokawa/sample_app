@@ -70,10 +70,15 @@ $(function() {
         setRange();
         // datepickerを自動表示させない
         $('#dummy').show();
-        // ホーム画面以外であればページ遷移を設定する
+        // ホーム画面以外であればページ遷移を設定
+        // ホーム画面ならajaxリクエストを送信する
         if ($('title').val().indexOf('ホーム') == 0) {
           $('a#set').trigger('click');
-      }
+        } else {
+          var wd = '全体';
+          var txt = 'div#narrow a:contains(' + wd + ')';
+          $(txt).trigger('click');
+        }
       },
       "キャンセル": function(){
         $(this).dialog('close');

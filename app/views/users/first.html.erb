@@ -2,18 +2,18 @@
   <div id="brick">
     <div id="bubble">
       <!-- guraph -->
+      <div class="loading">
+        <%= image_tag 'loading.gif', :width => "350", :height => "200", :alt => "Loading" %>
+      </div>
       <div id="graph">
-        <div class="loading">
-          <%= image_tag 'loading.gif', :width => "350", :height => "200", :alt => "Loading" %>
-        </div>
         <div id="gp"  style="z-index: 1;"></div>
         <div id="narrow">
           <a href="javascript:void(0)" onclick="callExecuter($(this));"　>全体</a>
           <a href="javascript:void(0)" onclick="callExecuter($(this));"　>検索</a>
           <a href="javascript:void(0)" onclick="callExecuter($(this));"　>直接入力/ブックマーク</a>
-          <a href="">その他ウェブサイト</a>
-          <a href="">ソーシャル</a>
-          <a href="" id="ed">キャンペーン</a>
+          <a href="javascript:void(0)" onclick="callExecuter($(this));"　>その他ウェブサイト</a>
+          <a href="javascript:void(0)" onclick="callExecuter($(this));"　>ソーシャル</a>
+          <a href="javascript:void(0)" onclick="callExecuter($(this));"　id="ed">キャンペーン</a>
         </div>
       </div>
       <div id="info">

@@ -62,11 +62,32 @@ function callExecuter(elem) {
     console.log('ページ絞り込み名 :' + page_fltr_wd);
     plotGraphHome(r_obj, page_fltr_wd);
 
+    // ホームグラフのページ項目タグがdivになっていればリセットする
+    var h, y;
+    h = $('div#narrow div');
+    if (h.html() != 'キャンペーン' ) {
+      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));"　>';
+    } else {
+      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));"　id="ed">';
+    }
+    $(h).replaceWith(y + $(h).html() + '</a>');
+
+    // 選択したホームグラフのページ項目タグをdivへ変更
+    if (page_fltr_wd == '直接入力ブックマーク') {
+      page_fltr_wd = '直接入力/ブックマーク'
+    }
+    var tag = 'div#narrow a:contains(' + page_fltr_wd + ')';
+    var id = '<div>';
+    $(tag).replaceWith(id + $(tag).html() + '</div>');
+
   }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
     console.log( 'ajax通信失敗!');
     console.log("XMLHttpRequest : " + XMLHttpRequest.status);
     console.log("textStatus : " + textStatus);
     console.log("errorThrown : " + errorThrown.message);
+
+    // 失敗したら500ミリ秒待ってリトライ
+    setTimeout(arguments.callee, 500);
   });
 }
 

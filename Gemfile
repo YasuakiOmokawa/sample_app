@@ -28,7 +28,7 @@ gem 'newrelic_rpm'
 gem 'google-api-client' # oauth2認証に必要
 gem 'oauth2' # oauth2認証に必要
 gem 'parallel' # バブルチャート取得処理を並行化
-gem 'colorbox-rails' # ajaxのローディング（オーバーレイ）用
+# gem 'colorbox-rails' # ajaxのローディング（オーバーレイ）用
 
 
 
