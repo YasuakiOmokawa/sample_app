@@ -99,14 +99,12 @@ $(document).ajaxSend(function() {
   $('#gp').empty();
   $('#legend1b').empty();
 
-  $(".loading").show();
-  $("#cboxOverlay").css("opacity", "0.3").show();
+  $(".bload").show();
 });
 
 // Ajax通信が完了したら、ローディング画像の削除
 $(document).ajaxComplete(function() {
-  $("#cboxOverlay").fadeOut(1000);
-  $(".loading").fadeOut(1000);
+  $(".bload").fadeOut(1000);
   console.log( 'ajax通信終了!');
 });
 

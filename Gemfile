@@ -23,7 +23,7 @@ gem 'jquery-ui-rails', '4.2.1'
 gem 'turbolinks', '1.1.1'
 gem 'jbuilder', '1.0.2'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
-gem 'spinjs-rails'
+gem 'spinjs-rails', '1.3'
 gem 'newrelic_rpm'
 gem 'google-api-client' # oauth2認証に必要
 gem 'oauth2' # oauth2認証に必要
