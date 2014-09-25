@@ -42,6 +42,9 @@ function callExecuter(elem) {
   // console.log(elem.text());
   xhr = $.ajax({
     type:'GET',
+    // timeout: 3000,
+    tryCount: 0,
+    retryLimit: 3, // リトライは3回まで
     dataType: "json",
     url: userpath,
     data: {
@@ -80,14 +83,27 @@ function callExecuter(elem) {
     var id = '<div>';
     $(tag).replaceWith(id + $(tag).html() + '</div>');
 
-  }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+  }).fail( function(result, t) {
     console.log( 'ajax通信失敗!');
-    console.log("XMLHttpRequest : " + XMLHttpRequest.status);
-    console.log("textStatus : " + textStatus);
-    console.log("errorThrown : " + errorThrown.message);
+    console.log(result.status);
+    console.log(t);
 
-    // 失敗したら500ミリ秒待ってリトライ
-    setTimeout(arguments.callee, 500);
+    // タイムアウトで失敗したらリトライ
+    if ( t == 'timeout' ) {
+      this.tryCount++;
+      if (this.tryCount <= this.retryLimit) {
+        // リトライ
+        console.log( 'リトライ実施');
+        $.ajax(this);
+        return;
+      }
+      return;
+    }
+    if (result.status == 500) {
+      console.log("一時応答不能エラー。")
+    } else {
+      console.log("その他エラー。")
+    }
   });
 }
 
@@ -100,10 +116,12 @@ $(document).ajaxSend(function() {
   $('#legend1b').empty();
 
   $(".bload").show();
+  $("#cboxOverlay").css("opacity", "0.3").show();
 });
 
 // Ajax通信が完了したら、ローディング画像の削除
 $(document).ajaxComplete(function() {
+  $("#cboxOverlay").fadeOut(1000);
   $(".bload").fadeOut(1000);
   console.log( 'ajax通信終了!');
 });

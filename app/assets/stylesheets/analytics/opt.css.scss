@@ -3,8 +3,13 @@ optgroup {font-style:inherit;}
 
 .bload {
   display: none;
-  position: absolute;
   top: 300px;
   left: 372px;
   z-index: 10000;
+  height: 46px;
+  margin-left: -23px;
+  _position: absolute;
+  position: fixed;
+  margin-top: -23px;
+  width: 46px;
 }
