@@ -165,7 +165,7 @@ ul br {
   position: fixed;
   top: 79px;
   width: 100%;
-  min-width: 1000px;
+  min-width: 1200px;
   padding: 10px 0;
   font-size: 12px;
   text-align: center;
@@ -233,19 +233,18 @@ ul br {
   // background-color: #cccccc;
 }
 #childroom #brick #bubble {
-  width: 90%;
-  min-width: 1000px;
-  height: 610px;
+  width: 1130px;
+  height: 550px;
   margin: 25px auto 0 auto;
 }
 #childroom #brick #bubble #graph {
   float: left;
-  width: 74%;
+  min-width: 870px;
   height: 100%;
 }
 #childroom #brick #bubble #gp {
   width: 100%;
-  height: 550px;
+  height: 490px;
   // border: 1px solid #cccccc;
 }
 #childroom #brick #bubble #graph #narrow {
@@ -257,7 +256,7 @@ ul br {
   float: left;
   margin: 0 10px 0 0;
   padding: 15px 0;
-  width: 150px;
+  width: 135px;
   height: 100%;
   font-size: 12px;
   text-align: center;
@@ -267,11 +266,10 @@ ul br {
 }
 #childroom #brick #bubble #graph #narrow a#ed {
   display: block;
-  float: left;
+  float: right;
   margin: 0;
   padding: 15px 0;
-  width: 151px;
-  height: 100%;
+  width: 135px;
   font-size: 12px;
   text-align: center;
   border: 1px solid #cccccc;
@@ -281,8 +279,7 @@ ul br {
   float: left;
   margin: 0 10px 0 0;
   padding: 15px 0;
-  width: 150px;
-  height: 100%;
+  width: 135px;
   font-size: 12px;
   text-align: center;
   border: 1px solid #cccccc;
@@ -290,10 +287,10 @@ ul br {
   color: #ffffff;
 }
 #childroom #brick #bubble #graph #narrow div#ed {
-  float: left;
+  float: right;
   margin: 0;
   padding: 15px 0;
-  width: 151px;
+  width: 135px;
   height: 100%;
   font-size: 12px;
   text-align: center;
@@ -311,7 +308,7 @@ ul br {
 }
 #childroom #brick #bubble #info {
   float: right;
-  width: 25%;
+  width: 250px;
   height: 100%;
   background-color: #f5f5f5;
   overflow-y: scroll;

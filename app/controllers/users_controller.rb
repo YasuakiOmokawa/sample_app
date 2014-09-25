@@ -355,16 +355,16 @@ class UsersController < ApplicationController
       # フィルタリング項目
       options = {
         'pc' => { :device_category.matches => 'desktop' },
-        'sphone' => {
-          :device_category.matches => 'mobile',
-          :mobile_input_selector.matches => 'touchscreen'
-        },
-        'mobile' => {
-         :device_category.matches => 'mobile',
-          :mobile_input_selector.does_not_match => 'touchscreen'
-        },
-        'new' => {:user_type.matches => 'New Visitor'},
-        'repeat' => { :user_type.matches => 'Returning Visitor' },
+        # 'sphone' => {
+        #   :device_category.matches => 'mobile',
+        #   :mobile_input_selector.matches => 'touchscreen'
+        # },
+        # 'mobile' => {
+        #  :device_category.matches => 'mobile',
+        #   :mobile_input_selector.does_not_match => 'touchscreen'
+        # },
+        # 'new' => {:user_type.matches => 'New Visitor'},
+        # 'repeat' => { :user_type.matches => 'Returning Visitor' },
         'all' => {}
       }
 
