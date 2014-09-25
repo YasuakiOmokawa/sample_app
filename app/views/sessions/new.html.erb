@@ -1,21 +1,43 @@
-<% provide(:title, "ログイン") %>
-<h1>ログイン</h1>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta http-equiv="content-style-type" content="text/css">
+<title>ログイン ｜ AST</title>
+  <%= stylesheet_link_tag "analytics", media: "all" %>
+</head>
+<body>
 
-<div class="row">
-  <div class="span6 offset3">
-    <%= form_for(:session, url: sessions_path) do |f| %>
+<% flash.each do |key, value| %>
+  <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
+<% end %>
 
-      <%= f.label 'メールアドレス' %>
-      <%= f.text_field :email %>
-
-      <%= f.label 'パスワード' %>
-      <%= f.password_field :password %>
-
-      <%= f.submit "ログイン", class: "btn btn-large btn-primary" %>
-    <% end %>
-
-    <!-- <p>New user? <%= link_to "Sign up now!", signup_path %></p> -->
-    <p><%= link_to "パスワードを忘れた場合はこちら",
-    new_password_reset_path %></p>
-  </div>
+<div id="login">
+  <h1>AST&nbsp;ログイン</h1>
+  <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
+  <table>
+  <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
+    <tr>
+      <td>ID：</td><td><%= f.text_field :email %></td>
+    </tr>
+    <tr>
+      <td>パスワード：</td><td><%= f.password_field :password %></td>
+    </tr>
+    <tr>
+      <td></td><td><input type="checkbox"><span>ログインしたままにする</span></td>
+    </tr>
+    <tr>
+      <td></td><td><a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">ログイン</a></td>
+    </tr>
+    <tr>
+      <td></td><td><p>※ID、パスワードを忘れた方は、先駈までお問い合わせください。</p></td>
+    </tr>
+   <% end %>
+  </table>
+  <div id="ftr">Copyright (C) 2014 senk Inc. All Rights Reserved.</div>
 </div>
+
+</body>
+</html>
+<!-- <p>New user? <%= link_to "Sign up now!", signup_path %></p> -->
+<!--     <p><%= link_to "パスワードを忘れた場合はこちら",new_password_reset_path %></p>

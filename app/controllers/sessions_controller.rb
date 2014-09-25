@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
 
   def new
+    render :layout => false
   end
 
   def create
@@ -10,7 +11,7 @@ class SessionsController < ApplicationController
       redirect_back_or user
     else
       flash.now[:error] = 'Eメールかパスワードが間違っています'
-      render 'new'
+      render 'new', :layout => false
     end
   end
 
