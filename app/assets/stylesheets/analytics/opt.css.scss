@@ -1,6 +1,7 @@
 // firefox で絞り込みボックスのフォントを固定させる
 optgroup {font-style:inherit;}
 
+// ホーム画面のローディング画面
 .bload {
   display: none;
   top: 300px;
@@ -12,4 +13,17 @@ optgroup {font-style:inherit;}
   position: fixed;
   margin-top: -23px;
   width: 46px;
+}
+
+// ログイン画面のエラー表示
+#login div.alert-error {
+  text-align: center;
+  font-weight: bold;
+  color: red;
+}
+// ログイン画面の注意表示
+#login div.alert-notice {
+  text-align: center;
+  font-weight: bold;
+  color: green;
 }

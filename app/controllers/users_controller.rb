@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   require 'parallel'
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy]
+  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :last]
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign, :last]
@@ -210,7 +210,7 @@ class UsersController < ApplicationController
     def signed_in_user
       unless signed_in?
         store_location
-        redirect_to signin_url, notice: "Please sign in."
+        redirect_to signin_url, notice: "ログインしてください"
       end
     end
 
