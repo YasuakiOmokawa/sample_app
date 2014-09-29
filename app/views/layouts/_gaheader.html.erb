@@ -47,6 +47,7 @@
     <%= image_tag 'plus.png' , :class => "icon" %>
     <%= select_tag 'narrow_select', grouped_options_for_select(@categories), :include_blank => true, :prompt => '選択してください' %>
     <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
+    <span id="overlay"></span>
   </form>
 </div>
 <!-- datepicker form dialog start -->

@@ -1,3 +1,24 @@
+// バブル色の指定
+var setBubbleColor = function(x, y) {
+    var label;
+    var x = parseInt(x);
+    var y = parseInt(y);
+
+    if (x >= 51 && y >= 51) {
+        label = {color: '#c00000'};
+        // console.log('color is red');
+    }
+    else if ( (x <= 50 && y >= 51) || (x >= 51 && y <= 50) ) {
+        label = {color: '#ffc000'};
+        // console.log('color is yellow');
+    }
+    else if (x <= 50 && y <= 50) {
+        label = {color: '#0070c0'};
+        // console.log('color is blue');
+    }
+    return label;
+}
+
 // データ項目一覧の設定
 var setDataidx = function(obj, wd) {
 
@@ -39,7 +60,8 @@ var setData = function(opt, obj, wd) {
   for (var i in homearr[fltr_wd]) {
     arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
-      value[3] = String(i) + ';;' + value[3];
+      // value[3] = String(i) + ';;' + value[3];
+      value[3] = setBubbleColor(value[0], value[1]);
     });
 
     // グラフ描画オプション（プロットデータのカラー）追加
@@ -118,14 +140,13 @@ function plotGraphHome(robj, fltr) {
         renderer: jQuery.jqplot.BubbleRenderer,
         rendererOptions: {
           bubbleAlpha: 0.2,
-          highlightAlpha: 1.0,
+          // highlightAlpha: 1.0,
           showLabels: false,
-          varyBubbleColors: false,
           autoscaleMultiplier: 0.15,
           shadow: false,
         },
       },
-      series: [], // ここに関数でカラーセットを行う
+      series: [],
       axesDefaults: {
         numberTicks: 3,
         tickOptions: {
@@ -290,16 +311,15 @@ function plotGraphHome(robj, fltr) {
 
         var text = $parents.attr('data-page').split(';;');
         // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
+        var b = setBubbleColor($parents.attr('data-gap'), $parents.attr('data-sokan'));
         var rearr = [
           [
-            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, $parents.attr('data-page') ]
+            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, b]
           ]
         ];
         // console.log(rearr);
         var addopt = { series: [] };
         addopt.data = rearr;
-        // setGraphcolor(text[0], addopt);
-        // console.log("replot strong " + text[0] );
         graph.replot(addopt);
       },
       function() {
@@ -323,9 +343,8 @@ function plotGraphHome(robj, fltr) {
         var src = $.extend(true, {}, obj); // 参照渡しだとバグる。
         var rdata = replotdata(src, wd);
         addopt.data = rdata;
-        // setGraphcolor(wd, addopt);
       }
-      console.log("replot " + wd);
+      // console.log("replot " + wd);
       // 再描画を実行
       // jqplot の replot関数は、追加のオプションを設定すると
       // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。

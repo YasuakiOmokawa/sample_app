@@ -354,7 +354,7 @@ class UsersController < ApplicationController
 
       # フィルタリング項目
       options = {
-        'pc' => { :device_category.matches => 'desktop' },
+        # 'pc' => { :device_category.matches => 'desktop' },
         # 'sphone' => {
         #   :device_category.matches => 'mobile',
         #   :mobile_input_selector.matches => 'touchscreen'
@@ -370,7 +370,7 @@ class UsersController < ApplicationController
 
       # フラグで処理するか分ける
       shori = params[:shori].presence || 0
-      if shori != 0
+      if shori.to_i != 0
 
         # リクエストパラメータに応じてpageの項目を絞る
         wd = ' '

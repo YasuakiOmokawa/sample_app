@@ -42,7 +42,7 @@ function callExecuter(elem) {
   // console.log(elem.text());
   xhr = $.ajax({
     type:'GET',
-    // timeout: 3000,
+    timeout: 1000,
     tryCount: 0,
     retryLimit: 3, // リトライは3回まで
     dataType: "json",
@@ -69,9 +69,9 @@ function callExecuter(elem) {
     var h, y;
     h = $('div#narrow div');
     if (h.html() != 'キャンペーン' ) {
-      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));"　>';
+      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
     } else {
-      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));"　id="ed">';
+      y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
     }
     $(h).replaceWith(y + $(h).html() + '</a>');
 
@@ -81,10 +81,14 @@ function callExecuter(elem) {
     }
     var tag = 'div#narrow a:contains(' + page_fltr_wd + ')';
     var id = '<div>';
-    $(tag).replaceWith(id + $(tag).html() + '</div>');
+    var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
+    if (page_fltr_wd == 'キャンペーン') {
+      $('div#narrow div').attr('id', 'ed');
+    }
 
   }).fail( function(result, t) {
     console.log( 'ajax通信失敗!');
+    console.log(result);
     console.log(result.status);
     console.log(t);
 
@@ -93,8 +97,8 @@ function callExecuter(elem) {
       this.tryCount++;
       if (this.tryCount <= this.retryLimit) {
         // リトライ
-        console.log( 'リトライ実施');
-        $.ajax(this);
+        console.log('リトライ実施 :' + String(this.tryCount) + '回目');
+        $.ajax(result);
         return;
       }
       return;
@@ -129,6 +133,14 @@ $(document).ajaxComplete(function() {
 
 $(document).ready(function() {
 
+
+  // ホーム画面の時のみ、絞り込み機能を日付以外オーバレイする
+  if ($('title').text().indexOf('ホーム') == 0) {
+    $("span#overlay").show();
+  } else {
+    $("span#overlay").hide();
+  }
+
   // CVの選択のセレクトボックスを選択したときのイベント
   $('select#cvselect').change(function() {
       $('input[name="cv_num"]').val($(this).val());
@@ -152,6 +164,13 @@ $(document).ready(function() {
   });
   $('form [name=visitor]').click(function() {
     likeRadio($(this));
+  });
+
+  // ajax中にイベント発生したらイベント消去
+  $("body").bind("ajaxSend", function(c, xhr) {
+      $( window ).bind( 'beforeunload', function() {
+          xhr.abort();
+      })
   });
 
   // 絞り込みボタンを押したとき、プログレススピナーを起動する
@@ -223,6 +242,11 @@ $(document).ready(function() {
 
   // 各ページのタブへリンク付与
   $("li.tab a").click(function(){
+
+    // ホーム画面に戻るときはプロット処理を実行させない
+    if ($(this).text() == 'ホーム') {
+      $('input[name="shori"]').val('0');
+    }
     evtsend($(this));
   });
 

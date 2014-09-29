@@ -71,13 +71,12 @@ $(function() {
         // datepickerを自動表示させない
         $('#dummy').show();
         // ホーム画面以外であればページ遷移を設定
-        // ホーム画面ならajaxリクエストを送信する
-        if ($('title').val().indexOf('ホーム') == 0) {
-          $('a#set').trigger('click');
+        if ($('title').text().indexOf('ホーム') == 0) {
+          // var wd = '全体';
+          // var txt = 'div#narrow a:contains(' + wd + ')';
+          // $(txt).trigger('click');
         } else {
-          var wd = '全体';
-          var txt = 'div#narrow a:contains(' + wd + ')';
-          $(txt).trigger('click');
+          $('a#set').trigger('click');
         }
       },
       "キャンセル": function(){

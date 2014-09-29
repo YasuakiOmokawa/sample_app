@@ -27,3 +27,15 @@ optgroup {font-style:inherit;}
   font-weight: bold;
   color: green;
 }
+
+// ホーム画面で絞り込み機能を日付以外オーバレイして隠す
+span#overlay {
+  display: none;
+  position: fixed;
+  top: 82px;
+  left: 310px;
+  height: 40px;
+  width: 973px;
+  background: rgba(0,0,0,0.1);
+  z-index: 3;
+}
