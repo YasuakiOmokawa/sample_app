@@ -72,9 +72,9 @@ $(function() {
         $('#dummy').show();
         // ホーム画面以外であればページ遷移を設定
         if ($('title').text().indexOf('ホーム') == 0) {
-          // var wd = '全体';
-          // var txt = 'div#narrow a:contains(' + wd + ')';
-          // $(txt).trigger('click');
+          var wd = '全体';
+          var txt = 'div#narrow a:contains(' + wd + ')';
+          $(txt).trigger('click');
         } else {
           $('a#set').trigger('click');
         }

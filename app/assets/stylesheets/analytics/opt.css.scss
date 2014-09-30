@@ -39,3 +39,9 @@ span#overlay {
   background: rgba(0,0,0,0.1);
   z-index: 3;
 }
+
+// ホーム画面のajaxエラーメッセージ
+span#errormsg {
+  color: red;
+  font-weight: bold;
+}

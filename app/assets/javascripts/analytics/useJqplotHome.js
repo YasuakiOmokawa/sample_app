@@ -139,7 +139,7 @@ function plotGraphHome(robj, fltr) {
       seriesDefaults: {
         renderer: jQuery.jqplot.BubbleRenderer,
         rendererOptions: {
-          bubbleAlpha: 0.2,
+          // bubbleAlpha: 0.2,
           // highlightAlpha: 1.0,
           showLabels: false,
           autoscaleMultiplier: 0.15,

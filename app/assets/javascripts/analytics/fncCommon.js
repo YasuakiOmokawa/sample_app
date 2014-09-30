@@ -35,78 +35,100 @@ var setRange = function setRange() {
   $('a#jrange').html(txt2);
 }
 
-// バブルチャートのリクエストを実施したときのイベント（非同期）
+// バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
+
+  // ページ遷移先(同一ページ内)
   var userpath = gon.narrow_action;
-  var xhr;
-  // console.log(elem.text());
-  xhr = $.ajax({
-    type:'GET',
-    timeout: 1000,
-    tryCount: 0,
-    retryLimit: 3, // リトライは3回まで
-    dataType: "json",
-    url: userpath,
-    data: {
-      from : $('#from').val(),
-      to : $('#to').val(),
-      cv_num : $('input[name="cv_num"]').val(),
-      shori : $('input[name="shori"]').val(),
-      act : elem.text()
-    }
-  });
-  return xhr.done(function(result) {
-    console.log( 'ajax通信成功!');
 
-    // ホーム画面のグラフと項目一覧の描画
-    var r_obj = JSON.parse(result.homearr);
-    var page_fltr_wd = result.page_fltr_wd;
-    console.log(r_obj);
-    console.log('ページ絞り込み名 :' + page_fltr_wd);
-    plotGraphHome(r_obj, page_fltr_wd);
+  // ajaxリクエスト
+  var request = $.Deferred(function(deferred) {
+    $.ajax({
+      url: userpath,
+      type:'GET',
+      dataType: "json",
+      tryCount: 0,
+      // timeout: 100000, // 単位はミリ秒
+      retryLimit: 4, // 3回までリトライできる（最初の実施も含むため）
+      data: {
+        from : $('#from').val(),
+        to : $('#to').val(),
+        cv_num : $('input[name="cv_num"]').val(),
+        shori : $('input[name="shori"]').val(),
+        act : elem.text() // 取得するページ項目
+      },
+      error: function(xhr, ajaxOptions, thrownError) {
 
-    // ホームグラフのページ項目タグがdivになっていればリセットする
-    var h, y;
-    h = $('div#narrow div');
-    if (h.html() != 'キャンペーン' ) {
-      y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
-    } else {
-      y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
-    }
-    $(h).replaceWith(y + $(h).html() + '</a>');
+        // 内部エラーが発生したら表示
+        if (xhr.status == 500) {
+          $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+          return;
+        }
 
-    // 選択したホームグラフのページ項目タグをdivへ変更
-    if (page_fltr_wd == '直接入力ブックマーク') {
-      page_fltr_wd = '直接入力/ブックマーク'
-    }
-    var tag = 'div#narrow a:contains(' + page_fltr_wd + ')';
-    var id = '<div>';
-    var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
-    if (page_fltr_wd == 'キャンペーン') {
-      $('div#narrow div').attr('id', 'ed');
-    }
+        this.tryCount++;
 
-  }).fail( function(result, t) {
-    console.log( 'ajax通信失敗!');
-    console.log(result);
-    console.log(result.status);
-    console.log(t);
+        if (this.tryCount < this.retryLimit) {
 
-    // タイムアウトで失敗したらリトライ
-    if ( t == 'timeout' ) {
-      this.tryCount++;
-      if (this.tryCount <= this.retryLimit) {
-        // リトライ
-        console.log('リトライ実施 :' + String(this.tryCount) + '回目');
-        $.ajax(result);
-        return;
+          console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
+
+          $.ajax(this).done(function(data, textStatus, jqXHR) {
+            deferred.resolveWith(this, [data, textStatus, jqXHR]);
+          }).fail(function(jqXHR, textStatus, errorThrown) {
+            if (this.tryCount >= this.retryLimit) {
+
+              console.log('再試行の上限に達しました。エラー処理を実行します。');
+
+              deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
+            }
+          });
+        }
       }
-      return;
-    }
-    if (result.status == 500) {
-      console.log("一時応答不能エラー。")
+    }).done(function(data, textStatus, jqXHR) {
+      deferred.resolveWith(this, [data, textStatus, jqXHR]);
+    });
+  }).promise();
+
+  // ajax成功時の処理
+  request.done(function(data, textStatus, jqXHR) {
+      console.log( 'ajax通信成功!');
+
+      // ホーム画面のグラフと項目一覧の描画
+      var r_obj = JSON.parse(data.homearr);
+      var page_fltr_wd = data.page_fltr_wd;
+      console.log(r_obj);
+      console.log('ページ絞り込み名 :' + page_fltr_wd);
+      plotGraphHome(r_obj, page_fltr_wd);
+
+      // ホームグラフのページ項目タグがdivになっていればリセットする
+      var h, y;
+      h = $('div#narrow div');
+      if (h.html() != 'キャンペーン' ) {
+        y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
+      } else {
+        y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
+      }
+      $(h).replaceWith(y + $(h).html() + '</a>');
+
+      // 選択したホームグラフのページ項目タグをdivへ変更
+      if (page_fltr_wd == '直接入力ブックマーク') {
+        page_fltr_wd = '直接入力/ブックマーク'
+      }
+      var tag = 'div#narrow a:contains(' + page_fltr_wd + ')';
+      var id = '<div>';
+      var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
+      if (page_fltr_wd == 'キャンペーン') {
+        $('div#narrow div').attr('id', 'ed');
+      }
+  });
+
+  // ajax失敗時の処理
+  request.fail(function(jqXHR, textStatus, errorThrown) {
+    console.log( 'ajax通信失敗!');
+    console.log(errorThrown);
+    if (errorThrown == 'timeout') {
+      $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
     } else {
-      console.log("その他エラー。")
+      $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
     }
   });
 }
