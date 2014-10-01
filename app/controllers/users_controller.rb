@@ -170,7 +170,6 @@ class UsersController < ApplicationController
   def create
     params[:ga_password] = params[:password]
     @user = User.new(user_params)
-    beg
     if @user.save
       sign_in @user
       flash[:success] = "ようこそ！"
