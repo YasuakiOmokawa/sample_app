@@ -48,8 +48,21 @@ function callExecuter(elem) {
       type:'GET',
       dataType: "json",
       tryCount: 0,
-      timeout: 2000, // 単位はミリ秒
-      retryLimit: 4, // 3回までリトライできる（最初の実施も含むため）
+      // timeout: 2000, // 単位はミリ秒
+      retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+      beforeSend: function(XMLHttpRequest) {
+
+        console.log( 'ajax通信開始!');
+
+        // 表示項目のリセット
+        $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
+        $('#legend1b').empty();
+        $('#errormsg').empty();
+
+        // ローディング画面の表示
+        $('#gp').plainOverlay('show', {opacity: 0.2});
+        $('div#info').plainOverlay('show', {opacity: 0.2});
+      },
       data: {
         from : $('#from').val(),
         to : $('#to').val(),
@@ -141,27 +154,6 @@ function callExecuter(elem) {
 
 }
 
-// Ajaxの通信中は、ローディング画像を表示
-$(document).ajaxSend(function() {
-
-  console.log( 'ajax通信開始!');
-  // 表示項目のリセット
-  $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
-  $('#legend1b').empty();
-
-  // ローディング画面の表示
-  $('#gp').plainOverlay('show', {opacity: 0.6});
-  $('div#info').plainOverlay('show', {opacity: 0.6});
-});
-
-// Ajax通信が完了したら、ローディング画像の削除
-// $(document).ajaxComplete(function() {
-
-//   $('#gp').plainOverlay('hide');
-//   $('div#info').plainOverlay('hide');
-//   console.log( 'ajax通信終了!');
-// });
-
 // ホーム画面の絞り込み箇所のオーバーレイ（ウインドウのリサイズ後）
 function handler(event) {
   $('div.plainoverlay').css(
@@ -183,7 +175,6 @@ $(window).resize(function() {
         clearTimeout(timer);
     }
     timer = setTimeout(function() {
-        // console.log('resized');
         // オーバーレイcssの再設定
         handler();
     }, 200);
