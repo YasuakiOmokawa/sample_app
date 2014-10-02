@@ -48,7 +48,7 @@ function callExecuter(elem) {
       type:'GET',
       dataType: "json",
       tryCount: 0,
-      // timeout: 100000, // 単位はミリ秒
+      timeout: 2000, // 単位はミリ秒
       retryLimit: 4, // 3回までリトライできる（最初の実施も含むため）
       data: {
         from : $('#from').val(),
@@ -131,36 +131,82 @@ function callExecuter(elem) {
       $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
     }
   });
+
+  // ajax通信終了時の処理
+  request.always(function() {
+    $('#gp').plainOverlay('hide');
+    $('div#info').plainOverlay('hide');
+    console.log( 'ajax通信終了!');
+  });
+
 }
 
 // Ajaxの通信中は、ローディング画像を表示
 $(document).ajaxSend(function() {
 
   console.log( 'ajax通信開始!');
-  // 描画用htmlの整理
-  $('#gp').empty();
+  // 表示項目のリセット
+  $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
   $('#legend1b').empty();
 
-  $(".bload").show();
-  $("#cboxOverlay").css("opacity", "0.3").show();
+  // ローディング画面の表示
+  $('#gp').plainOverlay('show', {opacity: 0.6});
+  $('div#info').plainOverlay('show', {opacity: 0.6});
 });
 
 // Ajax通信が完了したら、ローディング画像の削除
-$(document).ajaxComplete(function() {
-  $("#cboxOverlay").fadeOut(1000);
-  $(".bload").fadeOut(1000);
-  console.log( 'ajax通信終了!');
-});
+// $(document).ajaxComplete(function() {
 
+//   $('#gp').plainOverlay('hide');
+//   $('div#info').plainOverlay('hide');
+//   console.log( 'ajax通信終了!');
+// });
+
+// ホーム画面の絞り込み箇所のオーバーレイ（ウインドウのリサイズ後）
+function handler(event) {
+  $('div.plainoverlay').css(
+    {
+      height: '42px',
+      cursor: 'auto',
+      top: '-14px',
+      'min-width': '1200px',
+      'background-color': 'white',
+      width: '100%',
+    }
+  );
+}
+
+// ウインドウがリサイズされた場合も、ホーム画面のオーバーレイを保持
+var timer = false;
+$(window).resize(function() {
+    if (timer !== false) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+        // console.log('resized');
+        // オーバーレイcssの再設定
+        handler();
+    }, 200);
+});
 
 $(document).ready(function() {
 
+  // ログイン直後、もしくは他のページタブからホーム画面に遷移した場合、
+  // ajaxイベントを実施する
+  if (gon.div_page_tab || gon.div_page_tab != "first") {
+    var wd = '全体';
+    var txt = 'div#narrow a:contains(' + wd + ')';
+    $(txt).trigger('click');
+  }
 
   // ホーム画面の時のみ、絞り込み機能を日付以外オーバレイする
   if ($('title').text().indexOf('ホーム') == 0) {
-    $("span#overlay").show();
-  } else {
-    $("span#overlay").hide();
+    $('span#poverlay').plainOverlay('show',
+      {
+        progress: false,
+        show: handler
+      }
+    );
   }
 
   // CVの選択のセレクトボックスを選択したときのイベント
