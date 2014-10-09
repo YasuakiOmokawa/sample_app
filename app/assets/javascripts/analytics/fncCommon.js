@@ -41,75 +41,104 @@ function callExecuter(elem) {
   // ページ遷移先(同一ページ内)
   var userpath = gon.narrow_action;
 
-  // ajaxリクエスト
-  var request = $.Deferred(function(deferred) {
-    $.ajax({
-      url: userpath,
-      type:'GET',
-      dataType: "json",
-      tryCount: 0,
-      // timeout: 2000, // 単位はミリ秒
-      retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
-      beforeSend: function(XMLHttpRequest) {
+  var opts = ['repeat', 'all'];
+  var requests = [];
+  var datas = {};
+  datas[elem.text()] = {};
 
-        console.log( 'ajax通信開始!');
 
-        // 表示項目のリセット
-        $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
-        $('#legend1b').empty();
-        $('#errormsg').empty();
+  for (var i=0; i < opts.length; i++) {
 
-        // ローディング画面の表示
-        $('#gp').plainOverlay('show', {opacity: 0.2});
-        $('div#info').plainOverlay('show', {opacity: 0.2});
-      },
-      data: {
-        from : $('#from').val(),
-        to : $('#to').val(),
-        cv_num : $('input[name="cv_num"]').val(),
-        shori : $('input[name="shori"]').val(),
-        act : elem.text() // 取得するページ項目
-      },
-      error: function(xhr, ajaxOptions, thrownError) {
+    // optsのテキスト
+    var opt_txt = String(opts[i]);
 
-        // 内部エラーが発生したら表示
-        if (xhr.status == 500) {
-          $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
-          return;
+    // ajaxリクエスト
+    var request = $.Deferred(function(deferred) {
+      $.ajax({
+        url: userpath,
+        type:'GET',
+        dataType: "json",
+        tryCount: 0,
+        // timeout: 2000, // 単位はミリ秒
+        retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+        beforeSend: function(XMLHttpRequest) {
+
+          console.log( 'ajax通信開始!');
+          console.log( opts[i]);
+
+          // 表示項目のリセット
+          $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
+          $('#legend1b').empty();
+          $('#errormsg').empty();
+
+          // ローディング画面の表示
+          $('#gp').plainOverlay('show', {opacity: 0.2});
+          $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
+        },
+        data: {
+          from : $('#from').val(),
+          to : $('#to').val(),
+          cv_num : $('input[name="cv_num"]').val(),
+          shori : $('input[name="shori"]').val(),
+          act : elem.text(), // 取得するページ項目
+          fltr : opt_txt // 取得するページのフィルタリング項目
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+
+          // 内部エラーが発生したら表示
+          if (xhr.status == 500) {
+            $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+            return;
+          }
+
+          this.tryCount++;
+
+          if (this.tryCount < this.retryLimit) {
+
+            console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
+
+            $.ajax(this).done(function(data, textStatus, jqXHR) {
+              deferred.resolveWith(this, [data, textStatus, jqXHR]);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+              if (this.tryCount >= this.retryLimit) {
+
+                console.log('再試行の上限に達しました。エラー処理を実行します。');
+
+                deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
+              }
+            });
+          }
         }
+      }).done(function(data, textStatus, jqXHR) {
+        deferred.resolveWith(this, [data, textStatus, jqXHR]);
+      });
+    }).promise();
+    requests.push(request);
+  }
 
-        this.tryCount++;
-
-        if (this.tryCount < this.retryLimit) {
-
-          console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
-
-          $.ajax(this).done(function(data, textStatus, jqXHR) {
-            deferred.resolveWith(this, [data, textStatus, jqXHR]);
-          }).fail(function(jqXHR, textStatus, errorThrown) {
-            if (this.tryCount >= this.retryLimit) {
-
-              console.log('再試行の上限に達しました。エラー処理を実行します。');
-
-              deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
-            }
-          });
-        }
-      }
-    }).done(function(data, textStatus, jqXHR) {
-      deferred.resolveWith(this, [data, textStatus, jqXHR]);
-    });
-  }).promise();
+  // 全てのajaxリクエストが成功してからの処理
+  $.when.apply($, requests).done(function() {
+    console.log( '全てのajax通信が成功!');
+    console.log(datas);
+  });
 
   // ajax成功時の処理
   request.done(function(data, textStatus, jqXHR) {
       console.log( 'ajax通信成功!');
 
+      // 項目名、フィルタ名の取得
+      var page_fltr_wd = data.page_fltr_wd;
+      var page_fltr_opt = data.page_fltr_opt;
+
       // ホーム画面のグラフと項目一覧の描画
       var r_obj = JSON.parse(data.homearr);
-      var page_fltr_wd = data.page_fltr_wd;
+
+      // 取得データをdatasへ格納
+      datas[page_filr_wd][page_fltr_opt] = r_obj[page_filr_wd][page_fltr_opt];
+
       console.log(r_obj);
       console.log('ページ絞り込み名 :' + page_fltr_wd);
+      console.log('ページ絞り込みオプション :' + page_fltr_opt);
       plotGraphHome(r_obj, page_fltr_wd);
 
       // ホームグラフのページ項目タグがdivになっていればリセットする

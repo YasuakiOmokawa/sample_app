@@ -7,13 +7,13 @@
   <%= stylesheet_link_tag "analytics", media: "all" %>
 </head>
 <body>
+<% flash.each do |key, value| %>
+    <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
+<% end %>
 <div id="login">
   <h1>AST&nbsp;ログイン</h1>
   <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
   <table>
-  <% flash.each do |key, value| %>
-    <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
-  <% end %>
   <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
     <tr>
       <td>ID：</td><td><%= f.text_field :email %></td>

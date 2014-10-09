@@ -16,13 +16,13 @@ optgroup {font-style:inherit;}
 }
 
 // ログイン画面のエラー表示
-#login div.alert-error {
+div.alert-error {
   text-align: center;
   font-weight: bold;
   color: red;
 }
 // ログイン画面の注意表示
-#login div.alert-notice {
+div.alert-notice {
   text-align: center;
   font-weight: bold;
   color: green;

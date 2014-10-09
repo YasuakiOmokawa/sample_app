@@ -149,7 +149,8 @@ class UsersController < ApplicationController
 
     render json: {
       :homearr => @json,
-      :page_fltr_wd => @page_fltr_wd } and return if request.xhr?
+      :page_fltr_wd => @page_fltr_wd,
+      :page_fltr_opt => @page_fltr_opt } and return if request.xhr?
     render :layout => 'ganalytics', :file => '/app/views/users/first' and return
   end
 
@@ -363,7 +364,7 @@ class UsersController < ApplicationController
         #   :mobile_input_selector.does_not_match => 'touchscreen'
         # },
         # 'new' => {:user_type.matches => 'New Visitor'},
-        # 'repeat' => { :user_type.matches => 'Returning Visitor' },
+        'repeat' => { :user_type.matches => 'Returning Visitor' },
         'all' => {}
       }
 
@@ -374,13 +375,24 @@ class UsersController < ApplicationController
         # リクエストパラメータに応じてpageの項目を絞る
         wd = ' '
         if params[:act].present?
-          # wd = params[:act]
           wd = params[:act].gsub(/\//, '')
         else
+          # 初期値は全体
           wd = '全体'
         end
         @page_fltr_wd = wd
         page.select!{ |k,v| k == wd }
+
+        # リクエストパラメータに応じてフィルタリング項目を絞る
+        fltr = ' '
+        if params[:fltr].present?
+          fltr = params[:fltr].gsub(/\//, '')
+        else
+          # 初期値はall
+          fltr = 'all'
+        end
+        @page_fltr_opt = fltr
+        options.select!{ |k,v| k == fltr }
 
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言

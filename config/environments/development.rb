@@ -27,7 +27,8 @@ SampleApp::Application.configure do
   # number of complex assets.
   config.assets.debug = true
 
-
+  # ログを日ごとにローテート
+  config.logger = Logger.new('log/development.log', 'daily')
 
   # メーラ設定
   # mailer内でURLを機能させる
