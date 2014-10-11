@@ -41,7 +41,16 @@ function callExecuter(elem) {
   // ページ遷移先(同一ページ内)
   var userpath = gon.narrow_action;
 
-  var opts = ['repeat', 'all'];
+  // 取得ページ項目の絞り込みオプション
+  var opts = [
+    'all',
+    'pc',
+    'sphone',
+    'mobile',
+    'new',
+    'repeat'
+  ];
+
   var requests = [];
   var datas = {};
   datas[elem.text()] = {};
@@ -49,10 +58,10 @@ function callExecuter(elem) {
 
   for (var i=0; i < opts.length; i++) {
 
-    // optsのテキスト
+    // 絞り込みオプションを文字列へ変換
     var opt_txt = String(opts[i]);
 
-    // ajaxリクエスト
+    // ajaxリクエストの生成
     var request = $.Deferred(function(deferred) {
       $.ajax({
         url: userpath,
@@ -113,32 +122,43 @@ function callExecuter(elem) {
         deferred.resolveWith(this, [data, textStatus, jqXHR]);
       });
     }).promise();
+
+    // ajaxリクエストを後でまとめて実行するため、配列へ格納
     requests.push(request);
+
   }
 
-  // 全てのajaxリクエストが成功してからの処理
-  $.when.apply($, requests).done(function() {
-    console.log( '全てのajax通信が成功!');
-    console.log(datas);
-  });
+  // request.done(function(data, textStatus, jqXHR) {
+  // ajaxリクエストを並列で実行。
+  // $.whenは可変長引数を取るので、applyメソッドを利用して配列で渡せるようにする
+  // $.whenのコンテキスト(applyの第一引数)はjQueryである必要があるので $ を渡す
+  $.when.apply($, requests)
 
-  // ajax成功時の処理
-  request.done(function(data, textStatus, jqXHR) {
+  // 成功時の処理
+    .done(function() {
       console.log( 'ajax通信成功!');
 
+      // グラフ描画用のデータ
+      var r_obj = {};
+
+      // 結果は仮引数に可変長で入る **順番は保証されている**
+      // 取り出すには arguments から取り出す
+      // さらにそれぞれには [data, textStatus, jqXHR] の配列になっている
+      for (i=0; i < arguments.length; i++) {
+
+        var result = arguments[i];
+        var r_obj_tmp = JSON.parse(result[0].homearr);
+
+        // データをマージ
+        $.extend(true, r_obj, r_obj_tmp);
+
+      }
+
       // 項目名、フィルタ名の取得
-      var page_fltr_wd = data.page_fltr_wd;
-      var page_fltr_opt = data.page_fltr_opt;
+      var page_fltr_wd = result[0].page_fltr_wd;
+      // var page_fltr_opt = result[0].page_fltr_opt;
 
-      // ホーム画面のグラフと項目一覧の描画
-      var r_obj = JSON.parse(data.homearr);
-
-      // 取得データをdatasへ格納
-      datas[page_filr_wd][page_fltr_opt] = r_obj[page_filr_wd][page_fltr_opt];
-
-      console.log(r_obj);
       console.log('ページ絞り込み名 :' + page_fltr_wd);
-      console.log('ページ絞り込みオプション :' + page_fltr_opt);
       plotGraphHome(r_obj, page_fltr_wd);
 
       // ホームグラフのページ項目タグがdivになっていればリセットする
@@ -161,29 +181,36 @@ function callExecuter(elem) {
       if (page_fltr_wd == 'キャンペーン') {
         $('div#narrow div').attr('id', 'ed');
       }
-  });
+    })
 
-  // ajax失敗時の処理
-  request.fail(function(jqXHR, textStatus, errorThrown) {
-    console.log( 'ajax通信失敗!');
-    console.log(errorThrown);
-    if (errorThrown == 'timeout') {
-      $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
-    } else {
-      $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
-    }
-  });
+    // ajax失敗時の処理
+    .fail(function(jqXHR, textStatus, errorThrown) {
+    // request.fail(function(jqXHR, textStatus, errorThrown) {
+      console.log( 'ajax通信失敗!');
+      console.log(errorThrown);
 
-  // ajax通信終了時の処理
-  request.always(function() {
-    $('#gp').plainOverlay('hide');
-    $('div#info').plainOverlay('hide');
-    console.log( 'ajax通信終了!');
-  });
+      if (errorThrown == 'timeout') {
+        $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
+      } else {
+        $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
+      }
+
+      // 失敗したら処理を抜ける
+      return false;
+
+    })
+
+    // ajax通信終了時に常に呼び出される処理
+    // request.always(function() {
+    .always(function() {
+      $('#gp').plainOverlay('hide');
+      $('div#info').plainOverlay('hide');
+      console.log( 'ajax通信終了!');
+    });
 
 }
 
-// ホーム画面の絞り込み箇所のオーバーレイ（ウインドウのリサイズ後）
+// ホーム画面の絞り込み箇所のオーバーレイcssを再設定するコード
 function handler(event) {
   $('div.plainoverlay').css(
     {
@@ -197,7 +224,7 @@ function handler(event) {
   );
 }
 
-// ウインドウがリサイズされた場合も、ホーム画面のオーバーレイを保持
+// ウインドウがリサイズされた場合、ホーム画面のオーバーレイcssを更新するイベント
 var timer = false;
 $(window).resize(function() {
     if (timer !== false) {

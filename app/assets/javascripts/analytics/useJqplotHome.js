@@ -29,6 +29,11 @@ var setDataidx = function(obj, wd) {
   var fltr_wd = wd;
 
   for (var i in homearr[fltr_wd]) {
+
+    // ページのフィルタリング項目
+    var dev_fltr = String(i);
+    var usr_fltr = String(i);
+
     arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
       var nm = value[3].split(';;');
@@ -40,7 +45,9 @@ var setDataidx = function(obj, wd) {
       ar['pri'] = pri;
       ar['arr'] = value;
       ar['name'] = nm[0];
-      ar['param'] = String(i);
+      ar['fltr'] = dev_fltr;
+      ar['dev_fltr'] = dev_fltr;
+      ar['usr_fltr'] = usr_fltr;
       ar['page'] = fltr_wd;
       idxarr.push(ar);
     });
@@ -123,6 +130,35 @@ function addNarrowParam(data,  graph, narrow) {
       graph.val('pageviews');
       break;
   }
+}
+
+// 項目一覧に表示する流入元データを日本語へ変換(デバイス)
+function devTnsltENtoJP (d) {
+
+  // 変換表
+  var options = {
+    pc: 'パソコン',
+    sphone: 'スマートフォン',
+    mobile: 'モバイル',
+    all: '全デバイス',
+  };
+
+  var wd = String(options[d]) === "undefined"? String(options['all']) : String(options[d]);
+  return wd;
+}
+
+// 項目一覧に表示する流入元データを日本語へ変換(訪問者)
+function usrTnsltENtoJP (d) {
+
+  // 変換表
+  var options = {
+    new: '新規',
+    repeat: 'リピーター',
+    all: '全訪問者',
+  };
+
+  var wd = String(options[d]) === "undefined"? String(options['all']) : String(options[d]);
+  return wd;
 }
 
 
@@ -208,8 +244,8 @@ function plotGraphHome(robj, fltr) {
     // 項目一覧データを追記
     idxarr.some(function(value){
 
-      // 表示件数の上限を50件に制限
-      if (counter >= 50) {
+      // 表示件数の上限を30件に制限
+      if (counter >= 30) {
         return false;
       }
 
@@ -226,7 +262,8 @@ function plotGraphHome(robj, fltr) {
       addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 項目一覧へ表示する文字列
-      caption = text[0] + ':' + text[1];
+      // データ指標：デバイス：ユーザー：絞り込み条件
+      caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']);
 
       $('#legend1b').append(
         $('<tr>').append(
@@ -241,7 +278,8 @@ function plotGraphHome(robj, fltr) {
               'data-gap': value['arr'][0],
               'data-sokan': value['arr'][1],
               'data-page': value['arr'][3],
-              'data-param': value['param']
+              'data-devfltr': value['dev_fltr'],
+              'data-usrfltr': value['usr_fltr']
             })
             .append(
               $('<a>')
@@ -264,21 +302,17 @@ function plotGraphHome(robj, fltr) {
         // グラフ項目と人気ページパラメータを設定
         addNarrowParam( item, $('input[name="graphic_item"]'), $('#narrow_select') );
 
-        // 絞り込みチェックボックスパラメータを指定
-        var param = $(e.target).closest('td').data('param');
-        switch (param) {
-          case 'all':
-            $("#hallway input[name='device']").val(['all']);
-            $("#hallway input[name='visitor']").val(['all']);
-            break;
-          default :
-            var type = '#hallway input[value=' + param + ']';
-            var n = $(type).attr("name");
-            var m = '#hallway input[name=' + n + ']';
-            $(m).val([param]);
-            break;
-        }
+        // 絞り込みチェックボックスの値を指定
+        var dp = $(e.target).closest('td').data('devfltr');
+        var up = $(e.target).closest('td').data('usrfltr');
 
+        $.each([dp,up], function(i, val) {
+          var type,n,m;
+          type = '#hallway input[value=' + val + ']';
+          n = $(type).attr("name");
+          m = '#hallway input[name=' + n + ']';
+          $(m).val([val]);
+        });
 
         // ページ遷移
         evtsend($(e.target).closest('td'));
