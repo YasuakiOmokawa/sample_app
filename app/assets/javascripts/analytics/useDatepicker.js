@@ -66,21 +66,31 @@ $(function() {
     buttons: {
         "設定": function(){
         $(this).dialog('close');
+
         // 入力値を期間設定ボックスへ設定
         setRange();
+
         // datepickerを自動表示させない
         $('#dummy').show();
-        // ホーム画面以外であればページ遷移を設定
+
+        // ホーム画面の判別
         if ($('title').text().indexOf('ホーム') == 0) {
-          var wd = '全体';
-          var txt = 'div#narrow a:contains(' + wd + ')';
-          $(txt).trigger('click');
+
+          // ページ遷移直後は全体ページ、
+          // バブル描画後は描画されたページの項目を格納
+          var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
+
+          // ajaxリクエストを実行
+          callExecuter(wd);
         } else {
+
+          // ホーム画面でないときは非ajaxリクエストを実行
           $('a#set').trigger('click');
         }
       },
       "キャンセル": function(){
         $(this).dialog('close');
+
         // datepickerを自動表示させない
         $('#dummy').show();
       }

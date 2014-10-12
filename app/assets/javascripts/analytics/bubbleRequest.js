@@ -19,32 +19,17 @@ var bbl_shori_flg = 0;
 // ajaxリクエスト格納
 var request;
 
-// ajaxリクエストがボタンクリックイベントかどうかの判定用
-// var elm_txt;
-
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
 
   // ajax二重リクエストの防止
   if (request) {
-    console.log('ajax二重リクエストはできません');
+    $("span#errormsg").html('バブルチャートの重複リクエストはできません。処理完了までお待ちください');
     return;
   }
 
-  // elemがDOM要素でないなら、ajaxコールバック用の文字列と判定
+  // elem引数から、表示するページ項目を取り出す
   if ($.type(elem) === 'object') {
-
-    // ボタン名称を設定
-    // var btn_name = elem.text();
-
-    // // ログイン直後ではなく、ajax実行中に別ページへのajaxリクエストが実行された場合は、別ページリクエストをキャンセル
-    // if (gon.div_page_tab && request) {
-    //   if (elm_txt != btn_name) { // ajax実行中に別ページへのajaxリクエストが実行されたかを判定
-    //     console.log('ajax実施中に別ページへのajaxリクエストはできません');
-    //     return;
-    //   }
-    // }
-
     elm_txt = elem.text();
   } else {
     elm_txt = String(elem);
@@ -64,7 +49,7 @@ function callExecuter(elem) {
       type:'GET',
       dataType: "json",
       tryCount: 0,
-      timeout: 2000, // 単位はミリ秒
+      // timeout: 2000, // 単位はミリ秒
       retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
       beforeSend: function(XMLHttpRequest) {
 
@@ -182,6 +167,9 @@ function callExecuter(elem) {
         $('div#narrow div').attr('id', 'ed');
       }
     }
+
+    // リクエスト実行時のエラーメッセージ表示をリセット
+    $('#errormsg').empty();
   });
 
   // ajax失敗時の処理
@@ -198,9 +186,6 @@ function callExecuter(elem) {
     // 失敗したら処理終了
     bbl_shori_flg = 2;
     callManager(bbl_shori_flg);
-
-    // ajaxリクエストの破器
-    jqXHR.abort();
   });
 
   // ajax通信終了時に常に呼び出される処理
