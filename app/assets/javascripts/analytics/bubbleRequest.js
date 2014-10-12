@@ -1,11 +1,12 @@
 // バブルチャート取得ページ項目の絞り込みオプション
+var opts_cntr = 0;
 var opts = [
   'all',
   'pc',
-  'sphone',
-  'mobile',
-  'new',
-  'repeat'
+  // 'sphone',
+  // 'mobile',
+  // 'new',
+  // 'repeat'
 ];
 
 // バブルチャート描画用のデータオブジェクト
@@ -18,15 +19,32 @@ var bbl_shori_flg = 0;
 // ajaxリクエスト格納
 var request;
 
+// ajaxリクエストがボタンクリックイベントかどうかの判定用
+// var elm_txt;
 
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
 
-  // elemがDOM要素でないなら、ajaxコールバック用の引数と判定し、
-  // elemを文字列と認識
-  var elm_txt;
+  // ajax二重リクエストの防止
+  if (request) {
+    console.log('ajax二重リクエストはできません');
+    return;
+  }
 
+  // elemがDOM要素でないなら、ajaxコールバック用の文字列と判定
   if ($.type(elem) === 'object') {
+
+    // ボタン名称を設定
+    // var btn_name = elem.text();
+
+    // // ログイン直後ではなく、ajax実行中に別ページへのajaxリクエストが実行された場合は、別ページリクエストをキャンセル
+    // if (gon.div_page_tab && request) {
+    //   if (elm_txt != btn_name) { // ajax実行中に別ページへのajaxリクエストが実行されたかを判定
+    //     console.log('ajax実施中に別ページへのajaxリクエストはできません');
+    //     return;
+    //   }
+    // }
+
     elm_txt = elem.text();
   } else {
     elm_txt = String(elem);
@@ -36,13 +54,8 @@ function callExecuter(elem) {
   var userpath = gon.narrow_action;
 
   // 絞り込みオプションを文字列へ変換
-  var opt = opts.shift();
+  var opt = opts[opts_cntr];
   var opt_txt = String(opt);
-
-  if (request) {
-    console.log('ajax二重リクエストはできません');
-    return;
-  }
 
   // ajaxリクエストの生成
   request = $.Deferred(function(deferred) {
@@ -51,7 +64,7 @@ function callExecuter(elem) {
       type:'GET',
       dataType: "json",
       tryCount: 0,
-      // timeout: 2000, // 単位はミリ秒
+      timeout: 2000, // 単位はミリ秒
       retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
       beforeSend: function(XMLHttpRequest) {
 
@@ -122,8 +135,11 @@ function callExecuter(elem) {
     var page_fltr_wd = data.page_fltr_wd;
     var page_fltr_opt = data.page_fltr_opt;
 
+    // カウンタを進める
+    opts_cntr++;
+
     // フィルタリングオプションの配列が無くなるまでajaxを実行
-    if (opts.length) {
+    if (opts_cntr <= opts.length - 1) {
 
       // リクエストを処理中
       bbl_shori_flg = 1;
@@ -201,6 +217,9 @@ function callExecuter(elem) {
 
       // リクエストを未処理状態へ
       bbl_shori_flg = 0;
+
+      // カウンタをリセット
+      opts_cntr = 0;
     }
   });
 }

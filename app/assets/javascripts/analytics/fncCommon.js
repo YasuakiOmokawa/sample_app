@@ -98,7 +98,7 @@ $(document).ready(function() {
     $('div#footer').attr("id", 'footer_custom');
   }
 
-  // チェックボックスの複数選択を抑止
+  // 訪問者、デバイス毎にチェックボックスの複数選択を抑止
   $('form [name=device]').click(function() {
     likeRadio($(this));
   });
@@ -106,7 +106,7 @@ $(document).ready(function() {
     likeRadio($(this));
   });
 
-  // ajax中にページ遷移したらajax消去
+  // ajax中に別ページへの通常リクエストが発生したらajax消去
   $("body").bind("ajaxSend", function(c, xhr) {
       $( window ).bind( 'beforeunload', function() {
           xhr.abort();
