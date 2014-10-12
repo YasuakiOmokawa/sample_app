@@ -9,6 +9,9 @@ var opts = [
   // 'repeat'
 ];
 
+// 絞り込み用キーワード
+var kwds = [];
+
 // バブルチャート描画用のデータオブジェクト
 var r_obj = {};
 
@@ -37,6 +40,15 @@ function callExecuter(elem) {
 
   // ページ遷移先の設定
   var userpath = gon.narrow_action;
+
+  // ページ項目に合わせた絞り込みキーワードを取得する
+  if (kwds.length == 0) {
+    $.ajax({url: userpath, dataType: 'json', } )
+      .done(function(data, textStatus, jqXHR) {
+        
+    });
+  }
+
 
   // 絞り込みオプションを文字列へ変換
   var opt = opts[opts_cntr];

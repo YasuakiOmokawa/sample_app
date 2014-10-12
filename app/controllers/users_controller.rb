@@ -394,6 +394,25 @@ class UsersController < ApplicationController
         @page_fltr_opt = fltr
         options.select!{ |k,v| k == fltr }
 
+        # ページ項目の値に応じて絞り込みキーワードを選定する
+        kwds = []
+        case wd
+        when '全体'
+          # 絞り込みキーワードなし
+        when '検索'
+          @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
+          @search.sort_by{ |a|
+            [ -(a.sessions.to_i),
+              -(a.adsense_ads_clicks.to_i),
+              -(a.adsense_ctr.to_f) ]
+          }.each do |t|
+                kwds.push(t.keyword)
+                if kwds.size >= 5 then break end
+          end
+          @json = kwds.to_json
+          return
+        end
+
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
         Parallel.map(page, :in_threads=>1) { |x, z|
