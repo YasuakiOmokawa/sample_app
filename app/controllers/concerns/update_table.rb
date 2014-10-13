@@ -13,6 +13,7 @@ module UpdateTable
   def calc_gap_for_graph(table, clm)
     begin
       shori = 'グラフ値テーブルのGAP値を計算'
+
       table.each do |k, v|
         date = k.to_s # きちんと変換してやんないとnilClass エラーになるので注意
         clm.each do |u, w|

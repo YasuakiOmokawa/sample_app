@@ -298,8 +298,8 @@ class UsersController < ApplicationController
       # GAP値をスケルトンへ挿入
       # gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, @graphic_item) # 再訪問率をセッションベースにするためコメントアウト
       gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {})
-      calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
       put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ], all_sessions = 1)
+      calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
 
       # グラフ表示プログラムへ渡すCVデータのハッシュを作成
       @hash_for_graph = Hash.new{ |h,k| h[k] = {} }

@@ -18,12 +18,15 @@ module InsertTable
       if data[t].total_results != 0 then
         data[t].each do |s|
           s.to_h.each do |k, v|
-            if k != 'percent_new_sessions'.to_sym
+            if k != 'repeat_rate'.to_sym
+            # puts 'k is ' + k.to_s
+            # puts 'v is ' + v.to_s
             # if all.nil? then
 
               # 再訪問率以外の計算
               tbl[k][t.to_sym] = v
-            else
+
+              # end
 
               # 再訪問率の計算方式を、一時的にセッションベースにするためコメントアウト
               # al = all.to_i
@@ -31,13 +34,12 @@ module InsertTable
               # if al < 1 then al = 1 end # ゼロ除算例外の防止
               # p al
               # tbl[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
-
-              # 再訪問率の計算
-              # セッションベースで計算(100 - 新規訪問率) 単位：%
-              tbl[:repeat_rate][t.to_sym] = 100 - tbl[:percent_new_sessions][t.to_sym].to_i
-
             end
           end
+
+          # 再訪問率の計算
+          # セッションベースで計算(100 - 新規訪問率) 単位：%
+          tbl[:repeat_rate][t.to_sym] = 100 - tbl[:percent_new_sessions][t.to_sym].to_i
         end
       end
     end
@@ -51,7 +53,7 @@ module InsertTable
         data[k].each do |d|
           date = d.date
           item.each do |t|
-            if t == :repeat_rate then
+            if t == 'repeat_rate'.to_sym then
 
               # if all.to_f <= 0 then all = 1 end
               # if d[:sessions].to_f > 0 then

@@ -336,7 +336,7 @@ function plotGraphHome(robj, fltr) {
           p = p.split('/');
 
           // 遷移先を判別
-          switch (p[2]) {
+          switch (p[3]) {
             case 'search':
               flg = 's';
               break;
@@ -357,8 +357,12 @@ function plotGraphHome(robj, fltr) {
           }
 
           // 遷移先のキーワードとページ情報を設定
-          $('#narrow_select').append($('<option>').html(" ").val(kp + flg));
-          $('#narrow_select').val(kp + flg);
+          var n_wd = kp + flg;
+          $('#narrow_select')
+            .append($('<option>')
+              .html(" ")
+              .val(n_wd)
+            ).val(n_wd);
         }
 
         // ページ遷移
