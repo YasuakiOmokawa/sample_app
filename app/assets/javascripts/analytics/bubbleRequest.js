@@ -81,13 +81,13 @@ function callExecuter(elem) {
       console.log('絞り込み用キーワード取得処理の終了');
 
       var dev_opts = [ // デバイス
-        // 'pc',
-        // 'sphone',
-        // 'mobile',
+        'pc',
+        'sphone',
+        'mobile',
       ];
       var usr_opts = [ // 訪問者
-        // 'new',
-        // 'repeat'
+        'new',
+        'repeat'
       ];
 
       // パラメータの全ての組み合わせを網羅した配列を作る
