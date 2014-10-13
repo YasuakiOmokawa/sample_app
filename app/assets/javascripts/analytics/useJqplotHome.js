@@ -26,13 +26,15 @@ var setDataidx = function(obj, wd) {
   var idxarr = [];
   var arr = [];
   var cnt = 0;
-  var fltr_wd = wd;
+  var fltr_wd = wd
 
   for (var i in homearr[fltr_wd]) {
 
-    // ページのフィルタリング項目
-    var dev_fltr = String(i);
-    var usr_fltr = String(i);
+    // 絞り込みオプションの取り出し
+    var fltr = String(i).split('::');    // デバイス::訪問者::キーワード
+    var dev_fltr = fltr[0];
+    var usr_fltr = fltr[1];
+    var kwd_fltr = fltr[2];
 
     arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
@@ -45,9 +47,9 @@ var setDataidx = function(obj, wd) {
       ar['pri'] = pri;
       ar['arr'] = value;
       ar['name'] = nm[0];
-      ar['fltr'] = dev_fltr;
       ar['dev_fltr'] = dev_fltr;
       ar['usr_fltr'] = usr_fltr;
+      ar['kwd_fltr'] = kwd_fltr;
       ar['page'] = fltr_wd;
       idxarr.push(ar);
     });
@@ -67,12 +69,8 @@ var setData = function(opt, obj, wd) {
   for (var i in homearr[fltr_wd]) {
     arr.push( homearr[fltr_wd][i] );
     arr[cnt].forEach( function(value) {
-      // value[3] = String(i) + ';;' + value[3];
       value[3] = setBubbleColor(value[0], value[1]);
     });
-
-    // グラフ描画オプション（プロットデータのカラー）追加
-    // setGraphcolor( i, opt );
 
     cnt += 1;
   }
@@ -158,6 +156,18 @@ function usrTnsltENtoJP (d) {
   };
 
   var wd = String(options[d]) === "undefined"? String(options['all']) : String(options[d]);
+  return wd;
+}
+
+// キーワードがnokwdの場合は半角ブランクへ変換
+function kwdTnsltENtoJP (d) {
+
+  var wd;
+  if (d === 'nokwd' ) {
+    wd = ' ';
+  } else {
+    wd = d;
+  }
   return wd;
 }
 
@@ -259,11 +269,11 @@ function plotGraphHome(robj, fltr) {
 
       // 絞り込み情報の追加
       text = value['arr'][3].split(';;');
-      addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+      // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 項目一覧へ表示する文字列
-      // データ指標：デバイス：ユーザー：絞り込み条件
-      caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']);
+      // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
+      caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
 
       $('#legend1b').append(
         $('<tr>').append(
@@ -279,7 +289,8 @@ function plotGraphHome(robj, fltr) {
               'data-sokan': value['arr'][1],
               'data-page': value['arr'][3],
               'data-devfltr': value['dev_fltr'],
-              'data-usrfltr': value['usr_fltr']
+              'data-usrfltr': value['usr_fltr'],
+              'data-kwdfltr': value['kwd_fltr']
             })
             .append(
               $('<a>')
@@ -313,6 +324,42 @@ function plotGraphHome(robj, fltr) {
           m = '#hallway input[name=' + n + ']';
           $(m).val([val]);
         });
+
+        // 絞り込みキーワードの値を設定
+        var kp = $(e.target).closest('td').data('kwdfltr'); // キーワード
+
+        if (kp != 'nokwd') {
+          var flg; // どのページのキーワードか判別用
+
+          // 遷移先の最後のアクション名を取得
+          var p = $(e.target).closest('td').attr("name");
+          p = p.split('/');
+
+          // 遷移先を判別
+          switch (p[2]) {
+            case 'search':
+              flg = 's';
+              break;
+            case 'direct':
+              flg = 'f';
+              break;
+            case 'referral':
+              flg = 'r';
+              break;
+            case 'social':
+              flg = 'l';
+              break;
+            case 'campaign':
+              flg = 'c';
+              break;
+            default:
+              flg = 'f';
+          }
+
+          // 遷移先のキーワードとページ情報を設定
+          $('#narrow_select').append($('<option>').html(" ").val(kp + flg));
+          $('#narrow_select').val(kp + flg);
+        }
 
         // ページ遷移
         evtsend($(e.target).closest('td'));

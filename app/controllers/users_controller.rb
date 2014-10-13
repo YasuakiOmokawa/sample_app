@@ -150,7 +150,11 @@ class UsersController < ApplicationController
     render json: {
       :homearr => @json,
       :page_fltr_wd => @page_fltr_wd,
-      :page_fltr_opt => @page_fltr_opt } and return if request.xhr?
+      :page_fltr_dev => @page_fltr_dev,
+      :page_fltr_usr => @page_fltr_usr,
+      :page_fltr_kwd => @page_fltr_kwd
+    } and return if request.xhr?
+
     render :layout => 'ganalytics', :file => '/app/views/users/first' and return
   end
 
@@ -341,6 +345,7 @@ class UsersController < ApplicationController
 
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+      cv = @cv_txt
 
       # ページ項目
       page = {
@@ -352,8 +357,8 @@ class UsersController < ApplicationController
         'キャンペーン' => {:campaign.does_not_match => '(not set)'},
       }
 
-      # フィルタリング項目
-      options = {
+      # デバイス
+      dev_opts = {
         'pc' => { :device_category.matches => 'desktop' },
         'sphone' => {
           :device_category.matches => 'mobile',
@@ -363,6 +368,11 @@ class UsersController < ApplicationController
          :device_category.matches => 'mobile',
           :mobile_input_selector.does_not_match => 'touchscreen'
         },
+        'all' => {}
+      }
+
+      # 訪問者
+      usr_opts = {
         'new' => {:user_type.matches => 'New Visitor'},
         'repeat' => { :user_type.matches => 'Returning Visitor' },
         'all' => {}
@@ -383,203 +393,277 @@ class UsersController < ApplicationController
         @page_fltr_wd = wd
         page.select!{ |k,v| k == wd }
 
-        # リクエストパラメータに応じてフィルタリング項目を絞る
-        fltr = ' '
-        if params[:fltr].present?
-          fltr = params[:fltr].gsub(/\//, '')
+        # リクエストパラメータに応じてデバイスを絞る
+        dev = ' '
+        if params[:dev].present? and params[:dev] != 'undefined'
+          dev = params[:dev]
         else
           # 初期値はall
-          fltr = 'all'
+          dev = 'all'
         end
-        @page_fltr_opt = fltr
-        options.select!{ |k,v| k == fltr }
+        @page_fltr_dev = dev
+        dev_opts.select!{ |k,v| k == dev }
+
+        # リクエストパラメータに応じて訪問者を絞る
+        usr = ' '
+        if params[:usr].present? and params[:usr] != 'undefined'
+          usr = params[:usr]
+        else
+          # 初期値はall
+          usr = 'all'
+        end
+        @page_fltr_usr = usr
+        usr_opts.select!{ |k,v| k == usr }
 
         # ページ項目の値に応じて絞り込みキーワードを選定する
-        kwds = []
-        case wd
-        when '全体'
-          # 絞り込みキーワードなし
-        when '検索'
-          @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
-          @search.sort_by{ |a|
-            [ -(a.sessions.to_i),
-              -(a.adsense_ads_clicks.to_i),
-              -(a.adsense_ctr.to_f) ]
-          }.each do |t|
-                kwds.push(t.keyword)
-                if kwds.size >= 5 then break end
+        kwd = ''
+        if params[:kwd].present?
+
+          logger.info('parameter keyword is ' + kwd)
+          # キーワードがnokwdでない場合
+          if params[:kwd].to_s != 'nokwd'
+
+            kwd = params[:kwd].to_s
+            p = kwd.slice!(0)
+
+            # ページ項目の判定と、絞り込みキーワードの設定
+            set_narrow_word(kwd, @cond, p)
+          else
+            kwd = 'nokwd'
           end
+
+        elsif kwd.empty?
+
+          # 絞り込みキーワードが指定されていない場合はキーワードを取得
+          kwds = []
+          case wd
+          when '検索'
+            search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
+            search.sort_by{ |a|
+              [ -(a.sessions.to_i),
+                -(a.adsense_ads_clicks.to_i),
+                -(a.adsense_ctr.to_f) ]
+            }.each do |t|
+                  kwds.push('s' + t.keyword)
+                  if kwds.size >= 5 then break end
+            end
+          when '直接入力ブックマーク'
+            direct = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+
+            direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }.each do |t|
+                  kwds.push('f' + t.page_title)
+                  if kwds.size >= 5 then break end
+            end
+          when 'その他ウェブサイト'
+            dimend_key = :source
+            referral = Analytics.create_class('FetchKeywordForRef',
+                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+
+            referral.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
+              kwds.push('r' + t.source)
+              if kwds.size >= 5 then break end
+            end
+          when 'ソーシャル'
+            dimend_key = :socialNetwork
+            social = Analytics.create_class('FetchKeywordForSoc',
+                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+
+            social.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
+              kwds.push( 'l' + t.social_network)
+              if kwds.size >= 5 then break end
+            end
+          when 'キャンペーン'
+            dimend_key = :campaign
+            campaign = Analytics.create_class('FetchKeywordForCam',
+                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+
+            campaign.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
+              kwds.push( 'c' + t.campaign)
+              if kwds.size >= 5 then break end
+            end
+          end
+
+          # キーワード配列を格納
           @json = kwds.to_json
+
+          # コントローラを抜ける
           return
         end
+        @page_fltr_kwd = kwd
+        logger.info('setted keyword is ' + kwd)
 
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+
+        # パラレル処理は考えていないが、一応残しておく（API制限がもしかしたら外れるかも。。）
         Parallel.map(page, :in_threads=>1) { |x, z|
-          Parallel.map(options, :in_threads=>1) { |xy, zy|
-          # フィルタオプション追加
-            @cond[:filters].merge!(z)
-            @cond[:filters].merge!(zy)
 
-            # データ項目
-            mets = {
-              @cvr_txt.classify.to_sym => 'CVR',
-              :pageviews => 'PV数',
-              :pageviewsPerSession => '平均PV数',
-              :sessions => '訪問回数',
-              :avgSessionDuration => '平均滞在時間',
-              :bounceRate => '直帰率',
-              :percentNewSessions => '新規訪問率',
-            }
-            mets_ca = [] # アナリティクスAPIデータ取得用
-            mets_sa = [] # データ構造構築用
-            mets_sh = {} # jqplot用データ構築用
-            mets.each do |k, v|
-              mets_sh[k.to_s.to_snake_case.to_sym] = v
-              mets_ca.push(k)
-              mets_sa.push(k.to_s.to_snake_case.to_sym)
-            end
-            # アナリティクスAPIに用意されていないもの
-            {
-              :repeat_rate => '再訪問率',
-            }.each do |k, v|
-              mets_sh[k] = v
-              mets_sa.push(k)
-            end
+          room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
 
-            # 再訪問率計算用のセッション総数
-            @common = Analytics.create_class('Common',
-              [
-                :sessions,
-                :pageviews
-              ] ).results(@ga_profile,@cond)
-            # 総セッション数の取得（再訪問率計算用)
-            if @common.total_results == 0 then
-              all_sessions = 1
-            else
-              all_sessions = @common[0][:sessions]
-            end
+          # フィルタオプション追加（キーワードは追加済み）
+          @cond[:filters].merge!(z)                            # ページ項目
+          @cond[:filters].merge!(dev_opts[dev])       # デバイス
+          @cond[:filters].merge!(usr_opts[usr])        # 訪問者
 
-            ## ◆相関算出
-
-            # スケルトン作成
-            @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-            create_skeleton_for_graph(@gap_table_for_graph, @from, @to, mets_sh)
-
-            # CV代入
-            @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
-              [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
-            put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
-
-            # GAP算出
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
-            put_table_for_graph(gap, @gap_table_for_graph, mets_sa, all_sessions)
-            gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
-            put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_rate], all_sessions)
-            calc_gap_for_graph(@gap_table_for_graph, mets_sa)
-
-            # 相関算出
-            # 曜日別の計算をしているときは、ここでgap値も算出している
-            corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
-
-            # スケルトン作成
-            f_mt = [
-                (@cv_txt.classify + 's').to_sym,
-                :pageviews
-            ]
-            f_dm = [
-                :date,
-                :pageTitle,
-                :pagePath
-            ]
-            fmt_hsh = {}
-            @favorite.each do |k, v|
-              key = k.page_title + ";;" + k.page_path
-              fmt_hsh[key] = k.pageviews
-            end
-            @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-            create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
-            # CV代入
-            @cv_for_fav = Analytics.create_class('CVFav', f_mt, f_dm ).results(@ga_profile, @cond)
-            put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
-            # GAP算出
-            fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
-            put_favorite_table(fgap, @ftbl, flg = 'date')
-            calc_gap_for_graph(@ftbl, fmt_hsh)
-            # 相関算出
-            fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
-            # top10 を抽出
-            fvt_corr = substr_fav(fvt_corr, @rank_arr)
-            # jqplotへデータを渡すため、キーを変更
-            fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
-
-            # 各相関をマージ
-            corr.merge!(fvt_corr)
-
-            ## ◆GAP総数算出
-
-            # 人気ページテーブル
-            @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-            create_skeleton_favorite_table(@favorite, @s_ftbl)
-            gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
-            put_favorite_table(gap, @s_ftbl)
-            calc_gap_for_favorite(@s_ftbl)
-            fav_gap = substr_fav(@s_ftbl, @rank_arr)
-            fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
-
-            # その他
-            skel = create_skeleton_bubble(mets_sa)
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-            put_common_for_gap(skel, gap)
-            gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
-              {:user_type.matches => 'Returning Visitor'} )
-            put_common_for_gap(skel, gap_rep, all_sessions) #再訪問率
-            skel = calc_gap_for_common(skel)
-
-            # 数値をパーセンテージへ再計算
-            skel.merge!(fav_gap)
-
-            gap_day = Hash.new{ |h, k| h[k] = {} }
-            corr.each do |k, v|
-              if k =~ /(day_off|day_on)/ then
-                gap_day[k][:gap] = v[:gap]
-              end
-            end
-            skel.merge!(gap_day)
-
-            skel = calc_num_to_pct(skel)
-
-            # jqplot用データ構築
-            # mets_sh の キーが、実際にグラフに渡される値
-            # mets_sh の値は、グラフの表示項目を示す
-            mets_sh.delete(@cvr_txt.to_sym) #CVRは不要
-            hsh = {}
-            mets_sh.each do |k, v|
-              {:day_off => '土日祝', :day_on => '平日'}.each do |c,d|
-                key = k.to_s + ' ' + c.to_s
-                val = v.to_s + ';;' + d.to_s
-                hsh[key] = val
-              end
-            end
-            mets_sh.merge!(hsh)
-            mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
-            mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
-
-            homearr = concat(skel, corr, mets_sh)
-
-            # ページ項目へ追加
-            p_hash[x][xy] = homearr
-            puts "pages data set success!"
-
-            # フィルタオプションのリセット
-            puts "filters option reset start. now is #{@cond}"
-            @cond[:filters] = {}
-            puts "filters option reset end. now is #{@cond}"
+          # データ項目
+          mets = {
+            @cvr_txt.classify.to_sym => 'CVR',
+            :pageviews => 'PV数',
+            :pageviewsPerSession => '平均PV数',
+            :sessions => '訪問回数',
+            :avgSessionDuration => '平均滞在時間',
+            :bounceRate => '直帰率',
+            :percentNewSessions => '新規訪問率',
           }
+          mets_ca = [] # アナリティクスAPIデータ取得用
+          mets_sa = [] # データ構造構築用
+          mets_sh = {} # jqplot用データ構築用
+          mets.each do |k, v|
+            mets_sh[k.to_s.to_snake_case.to_sym] = v
+            mets_ca.push(k)
+            mets_sa.push(k.to_s.to_snake_case.to_sym)
+          end
+          # アナリティクスAPIに用意されていないもの
+          {
+            :repeat_rate => '再訪問率',
+          }.each do |k, v|
+            mets_sh[k] = v
+            mets_sa.push(k)
+          end
+
+          # 再訪問率計算用のセッション総数
+          @common = Analytics.create_class('Common',
+            [
+              :sessions,
+              :pageviews
+            ] ).results(@ga_profile,@cond)
+          # 総セッション数の取得（再訪問率計算用)
+          if @common.total_results == 0 then
+            all_sessions = 1
+          else
+            all_sessions = @common[0][:sessions]
+          end
+
+          ## ◆相関算出
+
+          # スケルトン作成
+          @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          create_skeleton_for_graph(@gap_table_for_graph, @from, @to, mets_sh)
+
+          # CV代入
+          @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
+            [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+          put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
+
+          # GAP算出
+          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+          put_table_for_graph(gap, @gap_table_for_graph, mets_sa, all_sessions)
+          gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
+          put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_rate], all_sessions)
+          calc_gap_for_graph(@gap_table_for_graph, mets_sa)
+
+          # 相関算出
+          # 曜日別の計算をしているときは、ここでgap値も算出している
+          corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
+
+          # スケルトン作成
+          f_mt = [
+              (@cv_txt.classify + 's').to_sym,
+              :pageviews
+          ]
+          f_dm = [
+              :date,
+              :pageTitle,
+              :pagePath
+          ]
+          fmt_hsh = {}
+          @favorite.each do |k, v|
+            key = k.page_title + ";;" + k.page_path
+            fmt_hsh[key] = k.pageviews
+          end
+          @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
+          # CV代入
+          @cv_for_fav = Analytics.create_class('CVFav', f_mt, f_dm ).results(@ga_profile, @cond)
+          put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
+          # GAP算出
+          fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+          put_favorite_table(fgap, @ftbl, flg = 'date')
+          calc_gap_for_graph(@ftbl, fmt_hsh)
+          # 相関算出
+          fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
+          # top10 を抽出
+          fvt_corr = substr_fav(fvt_corr, @rank_arr)
+          # jqplotへデータを渡すため、キーを変更
+          fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
+
+          # 各相関をマージ
+          corr.merge!(fvt_corr)
+
+          ## ◆GAP総数算出
+
+          # 人気ページテーブル
+          @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          create_skeleton_favorite_table(@favorite, @s_ftbl)
+          gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
+          put_favorite_table(gap, @s_ftbl)
+          calc_gap_for_favorite(@s_ftbl)
+          fav_gap = substr_fav(@s_ftbl, @rank_arr)
+          fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
+
+          # その他
+          skel = create_skeleton_bubble(mets_sa)
+          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
+          put_common_for_gap(skel, gap)
+          gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
+            {:user_type.matches => 'Returning Visitor'} )
+          put_common_for_gap(skel, gap_rep, all_sessions) #再訪問率
+          skel = calc_gap_for_common(skel)
+
+          # 数値をパーセンテージへ再計算
+          skel.merge!(fav_gap)
+
+          gap_day = Hash.new{ |h, k| h[k] = {} }
+          corr.each do |k, v|
+            if k =~ /(day_off|day_on)/ then
+              gap_day[k][:gap] = v[:gap]
+            end
+          end
+          skel.merge!(gap_day)
+
+          skel = calc_num_to_pct(skel)
+
+          # jqplot用データ構築
+          # mets_sh の キーが、実際にグラフに渡される値
+          # mets_sh の値は、グラフの表示項目を示す
+          mets_sh.delete(@cvr_txt.to_sym) #CVRは不要
+          hsh = {}
+          mets_sh.each do |k, v|
+            {:day_off => '土日祝', :day_on => '平日'}.each do |c,d|
+              key = k.to_s + ' ' + c.to_s
+              val = v.to_s + ';;' + d.to_s
+              hsh[key] = val
+            end
+          end
+          mets_sh.merge!(hsh)
+          mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
+          mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
+
+          homearr = concat(skel, corr, mets_sh)
+
+          # ページ項目へ追加
+          p_hash[x][room] = homearr
+          logger.info("pages data set success!")
+
+          # フィルタオプションのリセット
+          logger.info("filters option reset start. now is #{@cond}")
+          @cond[:filters] = {}
+          logger.info("filters option reset end. now is #{@cond}")
+
         }
-        # jqplot へデータ渡す
+
+        # ループ終了。jqplot へデータ渡す
         if shori != 0
-          # gon.watch.homearr = p_hash
           @json = p_hash.to_json
         end
       end
