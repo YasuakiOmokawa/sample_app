@@ -31,9 +31,6 @@ module CreateTable
     return rhsh
   end
 
-
-
-
   # グラフ値テーブルスケルトンを作成
   def create_skeleton_for_graph(hsh, from, to, clm)
     idx = 1
@@ -122,7 +119,6 @@ module CreateTable
     end
     return table
   end
-
 
   # referral, social, campaign 個別テーブルを生成
   def create_skeleton_for_rsc(data, key)

@@ -169,7 +169,9 @@ module UpdateTable
     case t
     # 相関係数を計算(pv, sessions, bounce_rate)
     when :pageviews, :sessions, :bounce_rate then
-      if ( ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) ) and (ee >= 0.0 ) # gap, cv 共に共通変更あり
+
+      # gap, cv 共に共通変更あり
+      if ( ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) ) and (ee >= 0.0 )
         p "e3pt"
         pt = 3
       elsif ( dd == 0.0 or ff == 0 ) and (ee >= 0.0) # どちらかが前日と同じ

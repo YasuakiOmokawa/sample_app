@@ -12,20 +12,30 @@ module InsertTable
   end
 
   # 共通ギャップ値テーブルへ値を代入
+  # def put_common_for_gap(tbl, data, all = nil)
   def put_common_for_gap(tbl, data, all = nil)
     ['good', 'bad'].each do |t|
       if data[t].total_results != 0 then
         data[t].each do |s|
           s.to_h.each do |k, v|
-            if all.nil? then
+            if k != 'percent_new_sessions'.to_sym
+            # if all.nil? then
+
+              # 再訪問率以外の計算
               tbl[k][t.to_sym] = v
             else
-              # アナリティクスに無い項目を算出する
-              al = all.to_i
-              p al
-              if al < 1 then al = 1 end # ゼロ除算例外の防止
-              p al
-              tbl[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
+
+              # 再訪問率の計算方式を、一時的にセッションベースにするためコメントアウト
+              # al = all.to_i
+              # p al
+              # if al < 1 then al = 1 end # ゼロ除算例外の防止
+              # p al
+              # tbl[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
+
+              # 再訪問率の計算
+              # セッションベースで計算(100 - 新規訪問率) 単位：%
+              tbl[:repeat_rate][t.to_sym] = 100 - tbl[:percent_new_sessions][t.to_sym].to_i
+
             end
           end
         end
@@ -42,10 +52,15 @@ module InsertTable
           date = d.date
           item.each do |t|
             if t == :repeat_rate then
-              if all.to_f <= 0 then all = 1 end
-              if d[:sessions].to_f > 0 then
-                tbl[date][t][v] = (d[:sessions].to_f / all.to_f) * 100
-              end
+
+              # if all.to_f <= 0 then all = 1 end
+              # if d[:sessions].to_f > 0 then
+              #   tbl[date][t][v] = (d[:sessions].to_f / all.to_f) * 100
+              # end
+
+              # 再訪問率をセッションベースで計算(100 - 新規訪問率) 単位：%
+              tbl[date][t][v] = 100 - d[:percent_new_sessions].to_i
+              puts 'repeat_rate is ' + tbl[date][t][v].to_s
             else
               tbl[date][t][v] = d[t]
             end
