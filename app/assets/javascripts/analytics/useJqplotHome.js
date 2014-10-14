@@ -368,7 +368,7 @@ function plotGraphHome(robj, fltr) {
         }
 
         // 遷移先の強調項目を設定
-        $('input[name="red_item"]').val(item[0]);
+        $('input[name="red_item"]').val(item[1]);
 
         // ページ遷移
         evtsend($(e.target).closest('td'));

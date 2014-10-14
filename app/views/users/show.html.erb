@@ -94,21 +94,21 @@
         <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
       </tr>
       <tr>
-        <td><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
+        <td class="markpv"><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
         <td class="gap"><%= @gap_table[:pageviews_per_session][:gap].to_f.round(1).to_s %></td>
       </tr>
       <tr>
-        <td><%= @gap_table[:avg_session_duration][:good] %></td>
+        <td class="marktime"><%= @gap_table[:avg_session_duration][:good] %></td>
         <td class="row">平均滞在時間</td>
         <td><%= @gap_table[:avg_session_duration][:bad] %></td>
         <td class="gap"><%= @gap_table[:avg_session_duration][:gap] %></td>
       </tr>
       <tr>
-           <td><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
+           <td class="marknew"><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
            <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
-          <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">再訪問率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
+          <td class="markrpt"><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">再訪問率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
     </table>
     <div id="knife">

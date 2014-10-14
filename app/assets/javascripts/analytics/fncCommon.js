@@ -158,45 +158,6 @@ $(document).ready(function() {
   //   }
   // });
 
-  // ホーム画面で指定した項目を赤で強調表示する
-  if (gon.red_item) {
-    var i = gon.red_item;
-    switch (i) {
-      case 'PV数':
-        $('#kitchen table tr:nth-child(2) td:first').css("color", "red");
-        html body div#childroom div#kitchen table tbody tr td
-        break;
-      case '平均PV数':
-        $('#kitchen table tr td:contains("平均PV数")').css("color", "red");
-        break;
-      case '訪問回数':
-        $('#kitchen table tr#line td:contains("訪問回数")').css("color", "red");
-        break;
-      case '直帰率':
-        $('#kitchen #knife td:contains("直帰率")').css("color", "red");
-        break;
-      case '新規訪問率':
-        graph.val('percent_new_sessions');
-        break;
-      case '平均滞在時間':
-        graph.val('avg_session_duration');
-        break;
-      case '再訪問率':
-        graph.val('repeat_rate');
-        break;
-      case '人気ページ':
-        narrow.append($('<option>').html(" ").val(data[2] + 'f'));
-        narrow.val( data[2] + 'f');
-        graph.val('pageviews');
-        break;
-      }
-    }
-
-    var thing = $('body:contains("' + '人気ページ' + '")');
-    var thing = $('body:contains("' + gon.red_item + '")');
-  }
-
-
   // 曜日ごとに背景色を変更
   // 土。。薄い青　日、祝。。　薄い赤
   $('td[data-day]').each(function() {
@@ -238,6 +199,48 @@ $(document).ready(function() {
   // セレクトボックスの選択値を保持
   var nrw_wd = gon.narrow_word
   $('select[name="narrow_select"]').val(nrw_wd);
+
+  // ホーム画面で指定した項目を赤で強調表示する
+  // 目標値のある項目は目標の数値。それ以外は数値を強調表示する
+  if (gon.red_item) {
+    var i = gon.red_item;
+    switch (String(i)) {
+      case 'PV数':
+        // 数値
+        $('#kitchen table tr:nth-child(2) td:first').css("color", "red");
+        break;
+      case '平均PV数':
+        // 目標値
+        $('#kitchen table tr td.markpv').css("color", "red");
+        break;
+      case '訪問回数':
+        // 数値
+        $('#kitchen table tr:nth-child(2) td:nth-child(2)').css("color", "red");
+        break;
+      case '直帰率':
+        // 数値
+        $('#knife table tr td:nth-child(2)').css("color", "red");
+        break;
+      case '新規訪問率':
+        // 目標値
+        $('#kitchen table tr td.marknew').css("color", "red");
+        break;
+      case '平均滞在時間':
+        // 目標値
+        $('#kitchen table tr td.marktime').css("color", "red");
+        break;
+      case '再訪問率':
+        // 目標値
+        $('#kitchen table tr td.markrpt').css("color", "red");
+        break;
+      case '人気ページ':
+        // 目標値
+        var w = $('#narrow_select').val();
+        var kwd = w.substr(0, w.length - 1);
+        $('#bedroom table tbody tr:contains(' + kwd + ') td:first').css("color", "red");
+        break;
+      }
+  }
 
   // グラフ表示項目の選択値を保持
   var grh_fmt = gon.graphic_item
