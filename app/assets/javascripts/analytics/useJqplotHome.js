@@ -192,6 +192,8 @@ function plotGraphHome(robj, fltr) {
           shadow: false,
         },
       },
+      // グラフ幅の調整
+      gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
       series: [],
       axesDefaults: {
         numberTicks: 3,
@@ -221,7 +223,7 @@ function plotGraphHome(robj, fltr) {
         shadow: false,
         drawGridlines: true,
         drawBorder: false,
-      }
+      },
     };
 
     // ホーム画面で指定したページ項目名
@@ -364,6 +366,9 @@ function plotGraphHome(robj, fltr) {
               .val(n_wd)
             ).val(n_wd);
         }
+
+        // 遷移先の強調項目を設定
+        $('input[name="red_item"]').val(item[0]);
 
         // ページ遷移
         evtsend($(e.target).closest('td'));

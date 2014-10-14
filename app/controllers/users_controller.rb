@@ -242,6 +242,8 @@ class UsersController < ApplicationController
       gon.radio_visitor = set_visitor_type( (params[:visitor].presence || "all"),@cond)                                 # 来訪者
       #　グラフ表示項目
      @graphic_item  = (params[:graphic_item].presence || 'pageviews').to_sym
+      #　赤で強調表示項目
+     gon.red_item  = (params[:red_item].presence || '')
      gon.graphic_item = @graphic_item.to_s
      gon.format_string = check_format_graph(@graphic_item)
      @cv_num = (params[:cv_num].presence || 1)                                                     # CV種類

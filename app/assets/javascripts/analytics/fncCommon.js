@@ -149,14 +149,53 @@ $(document).ready(function() {
   });
 
   // GAP値がマイナスなら赤色にする
-  $('td.gap').each(function() {
-    var str = $(this).text();
-    if( str.substr(0,1) == "-" ) {
-      $(this).css("color", "red");
-    // } else {
-    //   $(this).css("color", "black");
+  // $('td.gap').each(function() {
+  //   var str = $(this).text();
+  //   if( str.substr(0,1) == "-" ) {
+  //     $(this).css("color", "red");
+  //   // } else {
+  //   //   $(this).css("color", "black");
+  //   }
+  // });
+
+  // ホーム画面で指定した項目を赤で強調表示する
+  if (gon.red_item) {
+    var i = gon.red_item;
+    switch (i) {
+      case 'PV数':
+        $('#kitchen table tr:nth-child(2) td:first').css("color", "red");
+        html body div#childroom div#kitchen table tbody tr td
+        break;
+      case '平均PV数':
+        $('#kitchen table tr td:contains("平均PV数")').css("color", "red");
+        break;
+      case '訪問回数':
+        $('#kitchen table tr#line td:contains("訪問回数")').css("color", "red");
+        break;
+      case '直帰率':
+        $('#kitchen #knife td:contains("直帰率")').css("color", "red");
+        break;
+      case '新規訪問率':
+        graph.val('percent_new_sessions');
+        break;
+      case '平均滞在時間':
+        graph.val('avg_session_duration');
+        break;
+      case '再訪問率':
+        graph.val('repeat_rate');
+        break;
+      case '人気ページ':
+        narrow.append($('<option>').html(" ").val(data[2] + 'f'));
+        narrow.val( data[2] + 'f');
+        graph.val('pageviews');
+        break;
+      }
     }
-  });
+
+    var thing = $('body:contains("' + '人気ページ' + '")');
+    var thing = $('body:contains("' + gon.red_item + '")');
+  }
+
 
   // 曜日ごとに背景色を変更
   // 土。。薄い青　日、祝。。　薄い赤
