@@ -297,7 +297,9 @@ function plotGraphHome(robj, fltr) {
             .append(
               $('<a>')
                 .attr({
-                  "href": 'javascript:void(0)'})
+                  "href": 'javascript:void(0)',
+                  "title": caption,
+                })
                 .text(caption)
               )
         )

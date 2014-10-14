@@ -33,3 +33,13 @@ span#errormsg {
   color: red;
   font-weight: bold;
 }
+
+// ホーム画面の項目一覧が長すぎたら文字列を省略表示する
+div#info #legend1b tr td.r {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-text-overflow: ellipsis; /* Safari */
+  -o-text-overflow: ellipsis; /* Opera */
+}
+
