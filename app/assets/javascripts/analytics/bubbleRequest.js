@@ -47,8 +47,43 @@ function callExecuter(elem) {
     $('#legend1b').empty();
     $('#errormsg').empty();
 
-    // ローディング画面の表示
-    $('#gp').plainOverlay('show', {opacity: 0.2});
+    // 進捗画面の生成
+    var shaft = {
+      lines: 13, // The number of lines to draw
+      length: 20, // The length of each line
+      width: 10, // The line thickness
+      radius: 30, // The radius of the inner circle
+      corners: 1, // Corner roundness (0..1)
+      rotate: 0, // The rotation offset
+      direction: 1, // 1: clockwise, -1: counterclockwise
+      color: '#000', // #rgb or #rrggbb or array of colors
+      speed: 1, // Rounds per second
+      trail: 60, // Afterglow percentage
+      shadow: false, // Whether to render a shadow
+      hwaccel: false, // Whether to use hardware acceleration
+      className: 'spinner', // The CSS class to assign to the spinner
+      zIndex: 2e9, // The z-index (defaults to 2000000000)
+      top: '50%', // Top position relative to parent
+      left: '50%' // Left position relative to parent
+    };
+    var spinner = new Spinner(shaft).spin();
+
+    // ローディング画面の表示とバブルチャートのオーバーレイ
+    $('#gp').plainOverlay(
+      'show',
+      {
+        opacity: 0.2,
+        progress: function() {
+
+          // ローディング中のメッセージを生成
+          var target = $('<div id="guardian"></div><table id="daemon"><tr><td>now loading ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
+
+          return target;
+        }
+    });
+    $('#guardian').append(spinner.el);
+
+    // 項目一覧のオーバレイ
     $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
 
     // ページ項目に合わせた絞り込みキーワードを取得する
@@ -107,7 +142,6 @@ function callExecuter(elem) {
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
     });
   }
-
 
   // ajaxリクエストの生成
   request = $.Deferred(function(deferred) {
@@ -194,7 +228,7 @@ function callExecuter(elem) {
       bbl_shori_flg = 1;
       callManager(bbl_shori_flg); // システム動作継続のため、リクエスト変数をリセット
 
-      console.log('ajax通信成功。');
+      console.log('ajax通信に成功しました。');
       console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
       console.log('ajax処理を継続します');
 
@@ -202,6 +236,9 @@ function callExecuter(elem) {
       dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
       usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
+
+      // ローディング画面に進捗を表示
+      $('#daemon tr:nth-child(3) td').text('progresses ' + String(opts_cntr) + '/' + String(opts.length));
 
       callExecuter(page_fltr_wd);
     }

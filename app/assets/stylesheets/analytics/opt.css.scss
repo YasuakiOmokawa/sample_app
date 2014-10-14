@@ -43,3 +43,12 @@ div#info #legend1b tr td.r {
   -o-text-overflow: ellipsis; /* Opera */
 }
 
+// ホーム画面のローディング画面メッセージ
+table#daemon {
+  font-type: inherit;
+  font-size: 24px;
+  margin-left: -70px;
+  margin-top: 75px;
+}
+
+

@@ -49,7 +49,7 @@ function handler(event) {
   );
 }
 
-// ウインドウがリサイズされた場合、ホーム画面のオーバーレイcssを更新するイベント
+// ブラウザのウインドウがリサイズされた場合、ホーム画面のオーバーレイcssを更新するイベント
 var timer = false;
 $(window).resize(function() {
     if (timer !== false) {
