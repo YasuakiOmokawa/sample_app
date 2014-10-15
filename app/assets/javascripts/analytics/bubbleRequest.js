@@ -50,9 +50,9 @@ function callExecuter(elem) {
     // 進捗画面の生成
     var shaft = {
       lines: 13, // The number of lines to draw
-      length: 20, // The length of each line
-      width: 10, // The line thickness
-      radius: 30, // The radius of the inner circle
+      length: 15, // The length of each line
+      width: 9, // The line thickness
+      radius: 18, // The radius of the inner circle
       corners: 1, // Corner roundness (0..1)
       rotate: 0, // The rotation offset
       direction: 1, // 1: clockwise, -1: counterclockwise
@@ -116,12 +116,12 @@ function callExecuter(elem) {
       console.log('絞り込み用キーワード取得処理の終了');
 
       var dev_opts = [ // デバイス
-        'pc',
-        'sphone',
-        'mobile',
+        // 'pc',
+        // 'sphone',
+        // 'mobile',
       ];
       var usr_opts = [ // 訪問者
-        'new',
+        // 'new',
         'repeat'
       ];
 
@@ -238,7 +238,8 @@ function callExecuter(elem) {
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
 
       // ローディング画面に進捗を表示
-      $('#daemon tr:nth-child(3) td').text('progresses ' + String(opts_cntr) + '/' + String(opts.length));
+      var prcnt = (opts_cntr / opts.length) * 100;
+      $('#daemon tr:nth-child(3) td').text('progresses ' + String(prcnt) + '%');
 
       callExecuter(page_fltr_wd);
     }
@@ -249,6 +250,9 @@ function callExecuter(elem) {
       callManager(bbl_shori_flg);
 
       console.log('ページ絞り込み名 :' + page_fltr_wd);
+
+      // ローディング完了テキストを表示
+      $('#daemon tr:nth-child(3) td').text('complete!');
 
       // バブルチャートを描画
       plotGraphHome(r_obj, page_fltr_wd);

@@ -1,3 +1,6 @@
+// マイナス値があるか判定するフラグ
+var chk_minus = 0;
+
 // コントローラから渡されたパラメータをグラフ描画用の配列に加工
 var setArr = function(hash) {
     var arr_gap = [], arr_cv = [], dts;
@@ -6,6 +9,12 @@ var setArr = function(hash) {
       dts = String(Number(dts.substr(4, 2)))
         + "/" + String(Number(dts.substr(6, 2)));
       arr_gap.push( [ dts, gon.hash_for_graph[i][0] ]);
+
+      // gap値にマイナスがあるか判定
+      if ( String(gon.hash_for_graph[i][0]).indexOf('-') == 0 ) {
+        chk_minus = 1;
+      }
+
       arr_cv.push( [ dts, gon.hash_for_graph[i][1] ]);
     };
     arr.push(arr_gap, arr_cv);
@@ -91,7 +100,7 @@ var resetYtick = function(val) {
     color: 'gray',
     dashPattern: [4,4],
     lineCap: 'square',
-    lineWidth: 0.8
+    lineWidth: 0.3
   };
 
   return data;
@@ -123,7 +132,7 @@ var resetXbgc = function(nm, dt, yval) {
 
 // 実験コード：　マイナスデータを表示させたい場合
 // gon.hash_for_graph[20121205][0] = -12;
-// gon.hash_for_graph[20121205][1] = -10;
+// gon.hash_for_graph[20121205][1] = 10;
 // gon.hash_for_graph[20121210][0] = -70;
 // gon.hash_for_graph[20121210][1] = 40;
 
@@ -178,7 +187,7 @@ var options = {
         },
         yaxis: {
             autoscale: true,
-            numberTicks: 10,
+            numberTicks: 11,
             pad: 1,
             tickOptions: {
               // GAP値は自作関数でフォーマットする
@@ -188,7 +197,7 @@ var options = {
         },
         y2axis: {
             autoscale: true,
-            numberTicks: 10,
+            numberTicks: 11,
             pad: 1,
             tickOptions: {
               showGridline: false,
@@ -212,13 +221,21 @@ var options = {
 // グラフのフォーマット設定は自作関数で行う
 options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
+// gap値にマイナスがあれば、y軸の目盛りの数を変更
+if (chk_minus == 1) {
+  options.axes.yaxis.numberTicks = 10;
+  options.axes.y2axis.numberTicks = 10;
+}
+
 jQuery( function() {
 
   // 再描画用のオプション
   var tickopt = {
     canvasOverlay: {
       show: true,
-      objects: []
+      objects: [],
+      yaxis: {},
+      y2axis: {}
     }
   };
 
@@ -266,7 +283,7 @@ jQuery( function() {
 
   });
 
-  // jqplot描画
+  // ★jqplot描画
   var squareBar = jQuery . jqplot( 'square', arr, options);
 
   // グラフのy座標へ水平線を設定

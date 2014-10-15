@@ -63,14 +63,6 @@ $(window).resize(function() {
 
 $(document).ready(function() {
 
-  // ログイン直後、もしくは他のページタブからホーム画面に遷移した場合、
-  // ajaxイベントを実施する
-  if (gon.div_page_tab || gon.div_page_tab != "first") {
-    var wd = '全体';
-    var txt = 'div#narrow a:contains(' + wd + ')';
-    $(txt).trigger('click');
-  }
-
   // ホーム画面の時のみ、絞り込み機能を日付以外オーバレイする
   if ($('title').text().indexOf('ホーム') == 0) {
     $('span#poverlay').plainOverlay('show',
@@ -117,7 +109,7 @@ $(document).ready(function() {
   $('a#set').click(function(){
 
     // スピナーの実装
-    if ( $('.spinner').length <= 0) {
+    if ( $('#entrance.spinner').length <= 0) {
       var opts = {
         lines: 13, // The number of lines to draw
         length: 4, // The length of each line
@@ -271,4 +263,16 @@ $(document).ready(function() {
         $('#narrow_select').css('color', fColor);
       }
   });
+});
+
+// DOMツリー（htmlタグ）が全て読み込まれた後に実施されるイベント
+$(window).load(function() {
+
+  // ホーム画面に遷移した場合、
+  // ajaxイベントを実施する
+  if ($('title').text().indexOf('ホーム') == 0) {
+    var wd = '全体';
+    var txt = 'div#narrow a:contains(' + wd + ')';
+    $(txt).trigger('click');
+  }
 });

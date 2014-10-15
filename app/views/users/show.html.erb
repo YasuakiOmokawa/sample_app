@@ -133,7 +133,7 @@
       %>
         <tr>
           <td><%= v[:good].to_f.round(1).to_s %>%</td>
-          <td class="row"><%= title %><p><%= page %></p></td>
+          <td class="row"><%= truncate(title, :length => 30) %><p><%= page %></p></td>
           <td><%= v[:bad].to_f.round(1).to_s %>%</td>
           <td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
         </tr>
