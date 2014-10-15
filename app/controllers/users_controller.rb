@@ -284,8 +284,7 @@ class UsersController < ApplicationController
         ] ).results(@ga_profile,@cond)
       put_common(@common_table, @common)
 
-      # 再訪問率を、一時的にセッションベースにするためコメントアウト
-      # all_sessions = @common_table[:sessions] # 総セッション数の取得（再訪問率計算用)
+      all_sessions = @common_table[:sessions] # 共通ギャップ値テーブルの総セッション数の取得（再訪問率計算用)
 
       # グラフテーブル
       @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -326,7 +325,7 @@ class UsersController < ApplicationController
       #   {:user_type.matches => 'Returning Visitor'} )
       # put_common_for_gap(@gap_table, gap_for_repeat, all_sessions) # 再訪問率計算のためコメントアウト
 
-      put_common_for_gap(@gap_table, gap)
+      put_common_for_gap(@gap_table, gap, all_sessions)
       calc_gap_for_common(@gap_table)
 
       # 時間のフォーマットを変更
@@ -547,19 +546,17 @@ class UsersController < ApplicationController
 
           # 再訪問率をセッションベースに変更するためコメントアウト
           # 再訪問率計算用のセッション総数
-          # @common = Analytics.create_class('Common',
-          #   [
-          #     :sessions,
-          #     :pageviews
-          #   ] ).results(@ga_profile,@cond)
+          @common = Analytics.create_class('Common',
+            [
+              :sessions,
+              :pageviews
+            ] ).results(@ga_profile,@cond)
           # 総セッション数の取得（再訪問率計算用)
-          # if @common.total_results == 0 then
-
-          all_sessions = 1
-
-          # else
-          #   all_sessions = @common[0][:sessions]
-          # end
+          if @common.total_results == 0
+            all_sessions = 0
+          else
+            all_sessions = @common[0][:sessions]
+          end
 
           ## ◆相関算出
 
@@ -634,7 +631,7 @@ class UsersController < ApplicationController
           # その他
           skel = create_skeleton_bubble(mets_sa)
           gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-          put_common_for_gap(skel, gap)
+          put_common_for_gap(skel, gap, all_sessions)
 
           # 再訪問率をセッションベースにするためコメントアウト
           # gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
