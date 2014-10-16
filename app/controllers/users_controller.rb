@@ -299,7 +299,7 @@ class UsersController < ApplicationController
       # GAP値をスケルトンへ挿入
       # gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, @graphic_item) # 再訪問率をセッションベースにするためコメントアウト
       gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {})
-      put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ], all_sessions = 1)
+      put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ])
       calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
 
       # グラフ表示プログラムへ渡すCVデータのハッシュを作成
@@ -546,17 +546,17 @@ class UsersController < ApplicationController
 
           # 再訪問率をセッションベースに変更するためコメントアウト
           # 再訪問率計算用のセッション総数
-          @common = Analytics.create_class('Common',
-            [
-              :sessions,
-              :pageviews
-            ] ).results(@ga_profile,@cond)
-          # 総セッション数の取得（再訪問率計算用)
-          if @common.total_results == 0
-            all_sessions = 0
-          else
-            all_sessions = @common[0][:sessions]
-          end
+          # @common = Analytics.create_class('Common',
+          #   [
+          #     :sessions,
+          #     :pageviews
+          #   ] ).results(@ga_profile,@cond)
+          # # 総セッション数の取得（再訪問率計算用)
+          # if @common.total_results == 0
+          #   all_sessions = 0
+          # else
+          #   all_sessions = @common[0][:sessions]
+          # end
 
           ## ◆相関算出
 
@@ -571,11 +571,11 @@ class UsersController < ApplicationController
 
           # GAP算出
           gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
-          put_table_for_graph(gap, @gap_table_for_graph, mets_sa, all_sessions)
+          put_table_for_graph(gap, @gap_table_for_graph, mets_sa)
 
           # 再訪問率をセッションベースにするためコメントアウト
           # gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
-          # put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_rate], all_sessions)
+          # put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_r)
           calc_gap_for_graph(@gap_table_for_graph, mets_sa)
 
           # 相関算出
@@ -631,7 +631,7 @@ class UsersController < ApplicationController
           # その他
           skel = create_skeleton_bubble(mets_sa)
           gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-          put_common_for_gap(skel, gap, all_sessions)
+          put_common_for_gap(skel, gap)
 
           # 再訪問率をセッションベースにするためコメントアウト
           # gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
