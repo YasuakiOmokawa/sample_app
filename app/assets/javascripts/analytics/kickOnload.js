@@ -6,6 +6,6 @@ $(window).load(function() {
   if ($('title').text().indexOf('ホーム') == 0) {
     var wd = '全体';
     var txt = 'div#narrow a:contains(' + wd + ')';
-    setTimeout( function(){ $(txt).trigger('click'); }, 2000);
+    setTimeout( function(){ $(txt).trigger('click'); }, 1000);
   }
 });
