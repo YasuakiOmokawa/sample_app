@@ -238,7 +238,7 @@ function callExecuter(elem) {
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
 
       // ローディング画面に進捗を表示
-      var prcnt = (opts_cntr / opts.length) * 100;
+      var prcnt = parseInt( (opts_cntr / opts.length) * 100 );
       $('#daemon tr:nth-child(3) td').text('progresses ' + String(prcnt) + '%');
 
       callExecuter(page_fltr_wd);
