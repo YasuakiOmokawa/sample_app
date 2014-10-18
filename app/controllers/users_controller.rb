@@ -264,6 +264,10 @@ class UsersController < ApplicationController
       @rank_arr = seikei_rank(@top_ten)
 
       @categories["人気ページ"] = set_select_box(@favorite, 'f')
+
+      # 遷移元ページのタイトルを保存
+      gon.prev_pagetitle = params[:prev_pagetitle].presence || 'ホーム';
+
     end
 
     def create_common_table

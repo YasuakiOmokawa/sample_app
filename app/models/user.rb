@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  extend FriendlyId
+  friendly_id :name, use: :slugged
   belongs_to :gaproject
   has_many :gaprojects
   before_save { self.email = email.downcase }

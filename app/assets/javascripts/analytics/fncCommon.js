@@ -263,4 +263,9 @@ $(document).ready(function() {
         $('#narrow_select').css('color', fColor);
       }
   });
+
+  // 遷移元ページのタイトルを保持
+  var prev_title = gon.prev_pagetitle;
+  $('input[name="prev_pagetitle"]').val(prev_title);
+
 });
