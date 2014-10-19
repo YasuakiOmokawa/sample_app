@@ -244,7 +244,7 @@ module UpdateTable
   def concat(tb, b, hsh)
     arr = []
     hsh.each do |k, v|
-      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 5, v ] )
+      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 1, v ] )
       puts "array push success! hash_key is #{k}, corr_name is #{v} "
     end
     return arr

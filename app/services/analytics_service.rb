@@ -20,6 +20,27 @@ class AnalyticsService
     return session
   end
 
+  # セッションログイン(並列処理用)
+  def login_multi(user_data, mlt_id)
+
+    session = Garb::Session.new
+
+    # gaprojectの指定
+    gaproject = Gaproject.find(mlt_id.to_i)
+
+    # apikeyの投入
+    session.api_key = gaproject.api_key
+
+    # Single User Login
+    session.login(
+        gaproject.proj_owner_email,
+        gaproject.proj_owner_password
+    )
+
+    return session
+  end
+
+  # プロファイルのロード
   def load_profile(session, user_data)
 
     # プロファイル情報の取得
@@ -31,6 +52,7 @@ class AnalyticsService
     return profile
   end
 
+  # 設定されているゴール値の取得
   def get_goal(profile)
 
     # リターン用ハッシュ

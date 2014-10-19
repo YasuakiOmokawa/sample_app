@@ -232,7 +232,15 @@ class UsersController < ApplicationController
 
       @user = User.find(params[:id])
       analyticsservice = AnalyticsService.new
-      @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
+
+      # 並列処理を選択しているか？
+      if params[:multi_id].present?
+        multi_id = params[:multi_id].to_i
+        @session = analyticsservice.login_multi(@user, multi_id)                                     # アナリティクスAPI認証パラメータ１
+      else
+        @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
+      end
+
       @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
       @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
       @from = params[:from].presence || Date.today.prev_month
@@ -249,7 +257,12 @@ class UsersController < ApplicationController
      gon.red_item  = (params[:red_item].presence || '')
      gon.graphic_item = @graphic_item.to_s
      gon.format_string = check_format_graph(@graphic_item)
+
      @cv_num = (params[:cv_num].presence.to_i || 1)                                                     # CV種類
+     if @cv_num == 0
+        @cv_num = 1
+     end
+
      gon.cv_num = @cv_num
       # 絞り込みキーワード
       @narrow_word = params[:narrow_select].presence
@@ -510,6 +523,18 @@ class UsersController < ApplicationController
         end
         @page_fltr_kwd = kwd
         logger.info('setted keyword is ' + kwd)
+
+        # ユーザ所有のGAアカウント一覧を取得
+        if params[:gaccnt].present?
+          uid = params[:id].to_i
+          gaccnt = Gaproject.where(:userid => uid).pluck(:id)
+
+          # GAアカウント配列を格納
+          @json = gaccnt.to_json
+
+          # コントローラを抜ける
+          return
+        end
 
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言

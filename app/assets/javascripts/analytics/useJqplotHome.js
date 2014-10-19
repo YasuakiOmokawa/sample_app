@@ -188,7 +188,7 @@ function plotGraphHome(robj, fltr) {
           // bubbleAlpha: 0.2,
           // highlightAlpha: 1.0,
           showLabels: false,
-          autoscaleMultiplier: 0.15,
+          autoscaleMultiplier: 0.1,
           shadow: false,
         },
       },
@@ -406,7 +406,7 @@ function plotGraphHome(robj, fltr) {
         var b = setBubbleColor($parents.attr('data-gap'), $parents.attr('data-sokan'));
         var rearr = [
           [
-            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 5, b]
+            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 1, b]
           ]
         ];
         // console.log(rearr);
