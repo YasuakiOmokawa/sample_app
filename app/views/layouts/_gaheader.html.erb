@@ -2,14 +2,7 @@
 <!-- header_st -->
 <div id="entrance">
   <h1>Analytics Support Tool</h1>
-  <%
-    cv_hash = {}
-    (1..20).each do |t|
-      key = "CV" + t.to_s
-      cv_hash[key] = t
-    end
-  %>
-  <%= select_tag 'cvselect', options_for_select( cv_hash ) %>
+  <%= select_tag 'cvselect', options_for_select( @ga_goal ) %>
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
   <div>ID：<%= @user.name %></div>

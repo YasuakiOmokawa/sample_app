@@ -231,7 +231,10 @@ class UsersController < ApplicationController
       # パラメータ共通設定
 
       @user = User.find(params[:id])
-      @ga_profile = AnalyticsService.new.load_profile(@user)                                     # アナリティクスAPI認証パラメータ
+      analyticsservice = AnalyticsService.new
+      @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
+      @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
+      @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
       @from = params[:from].presence || Date.today.prev_month
       if params[:from].present? then @from = set_date_format(@from) end
       @to = params[:to].presence || Date.today
@@ -246,7 +249,7 @@ class UsersController < ApplicationController
      gon.red_item  = (params[:red_item].presence || '')
      gon.graphic_item = @graphic_item.to_s
      gon.format_string = check_format_graph(@graphic_item)
-     @cv_num = (params[:cv_num].presence || 1)                                                     # CV種類
+     @cv_num = (params[:cv_num].presence.to_i || 1)                                                     # CV種類
      gon.cv_num = @cv_num
       # 絞り込みキーワード
       @narrow_word = params[:narrow_select].presence
