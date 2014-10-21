@@ -31,7 +31,7 @@ function callExecuter(elem) {
 
   // ajax二重リクエストの防止
   if (request) {
-    $("span#errormsg").html('バブルチャートの重複リクエストはできません。処理完了までお待ちください');
+    $("span#errormsg").html('只今処理の実行中です。');
     return;
   }
 
@@ -360,10 +360,10 @@ function callExecuter(elem) {
 
     // リクエスト実行時のエラーメッセージ表示をリセット
     $('#errormsg').empty();
-  });
+  })
 
   // ajax失敗時の処理
-  request.fail(function(jqXHR, textStatus, errorThrown) {
+  .fail(function(jqXHR, textStatus, errorThrown) {
     console.log( 'ajax通信失敗!通信を中断します');
     console.log(errorThrown);
 
@@ -376,10 +376,10 @@ function callExecuter(elem) {
     // 失敗したら処理終了
     bbl_shori_flg = 2;
     callManager(bbl_shori_flg);
-  });
+  })
 
   // ajax通信終了時に常に呼び出される処理
-  request.always(function() {
+  .always(function() {
 
     // リクエスト処理が終了した場合に実行される
     if (bbl_shori_flg == 2) {
@@ -406,7 +406,7 @@ function callExecuter(elem) {
       kwd_opts = [];
 
       // ユーザが所有しているgaアカウントの配列をリセット
-      var gaccounts = [];
+      gaccounts = [];
     }
   });
 }
