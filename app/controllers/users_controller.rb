@@ -234,12 +234,12 @@ class UsersController < ApplicationController
       analyticsservice = AnalyticsService.new
 
       # 並列処理を選択しているか？
-      if params[:multi_id].present?
-        multi_id = params[:multi_id].to_i
-        @session = analyticsservice.login_multi(@user, multi_id)                                     # アナリティクスAPI認証パラメータ１
-      else
-        @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
-      end
+      # if params[:multi_id].present?
+      #   multi_id = params[:multi_id].to_i
+      #   @session = analyticsservice.login_multi(@user, multi_id)                                     # アナリティクスAPI認証パラメータ１
+      # else
+      @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
+      # end
 
       @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
       @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
@@ -525,16 +525,16 @@ class UsersController < ApplicationController
         logger.info('setted keyword is ' + kwd)
 
         # ユーザ所有のGAアカウント一覧を取得
-        if params[:gaccnt].present?
-          uid = params[:id].to_i
-          gaccnt = Gaproject.where(:userid => uid).pluck(:id)
+        # if params[:gaccnt].present?
+        #   uid = params[:id].to_i
+        #   gaccnt = Gaproject.where(:userid => uid).pluck(:id)
 
-          # GAアカウント配列を格納
-          @json = gaccnt.to_json
+        #   # GAアカウント配列を格納
+        #   @json = gaccnt.to_json
 
-          # コントローラを抜ける
-          return
-        end
+        #   # コントローラを抜ける
+        #   return
+        # end
 
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -589,6 +589,12 @@ class UsersController < ApplicationController
           # else
           #   all_sessions = @common[0][:sessions]
           # end
+
+          # リクエストパラメータの遅延時間分だけ、スリープ実施
+          delay_sec = params[:gadelay].presence || 0
+
+          sleep(delay_sec.to_i)
+
 
           ## ◆相関算出
 

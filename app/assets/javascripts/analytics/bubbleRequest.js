@@ -26,6 +26,10 @@ var requests = [];
 // ユーザが所有しているgaアカウントの配列
 var gaccounts = [];
 
+// ajax並列リクエスト用の遅延時間配列
+var gadelays = [0, 1, 2];
+
+
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
 
@@ -148,41 +152,42 @@ function callExecuter(elem) {
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
     });
 
-    // ユーザ所有のgaアカウントを取得
-    $.ajax({
-      url: userpath,
-      async: false,
-      dataType: 'json',
-      data: {
-        shori : $('input[name="shori"]').val(),
-        gaccnt : 'true', // GAアカウントを取得するか？
-        kwd : 'nokwd'
-      }
-    })
-    .done(function(data, textStatus, jqXHR) {
-      var d = JSON.parse(data.homearr);
-      console.log( '所有GAアカウント情報取得完了');
-      console.log(d);
-      $.extend(true, gaccounts, d);
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      $('span#errormsg').html('所有GAアカウント取得エラーが発生しました： ' + String(errorThrown));
-    })
-    .always(function() {
-      console.log('所有GAアカウント取得処理の終了');
-    });
+    // // ユーザ所有のgaアカウントを取得
+    // $.ajax({
+    //   url: userpath,
+    //   async: false,
+    //   dataType: 'json',
+    //   data: {
+    //     shori : $('input[name="shori"]').val(),
+    //     gaccnt : 'true', // GAアカウントを取得するか？
+    //     kwd : 'nokwd'
+    //   }
+    // })
+    // .done(function(data, textStatus, jqXHR) {
+    //   var d = JSON.parse(data.homearr);
+    //   console.log( '所有GAアカウント情報取得完了');
+    //   console.log(d);
+    //   $.extend(true, gaccounts, d);
+    // })
+    // .fail(function(jqXHR, textStatus, errorThrown) {
+    //   $('span#errormsg').html('所有GAアカウント取得エラーが発生しました： ' + String(errorThrown));
+    // })
+    // .always(function() {
+    //   console.log('所有GAアカウント取得処理の終了');
+    // });
 
   }
 
-  // GAアカウントの所有数分、ajaxリクエストを作成
-  for (var i = 0; i < gaccounts.length; i++) {
+  // ディレイ時間の分、ajaxリクエストを作成
+  for (var i = 0; i < gadelays.length; i++) {
 
     // リクエスト用のパラメータを設定
     dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
     usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
     kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
-    // GAアカウントIDを数値へ変換
-    var gacntid = parseInt(gaccounts[i]);
+
+    // 遅延時間を取得
+    var gadelay = gadelays[i];
 
     // ajaxリクエストの生成
     request = $.Deferred(function(deferred) {
@@ -212,7 +217,7 @@ function callExecuter(elem) {
           dev : dev,                 // デバイス
           usr : usr,                   // 訪問者
           kwd : kwd,                 // キーワード
-          multi_id : gacntid      // GAアカウントID
+          gadelay : gadelay      // リクエスト遅延時間
         },
         error: function(xhr, ajaxOptions, thrownError) {
 
@@ -407,6 +412,7 @@ function callExecuter(elem) {
 
       // ユーザが所有しているgaアカウントの配列をリセット
       gaccounts = [];
+
     }
   });
 }
