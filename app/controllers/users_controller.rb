@@ -6,6 +6,7 @@ class UsersController < ApplicationController
   require 'update_table'
   require 'parallel'
   require 'securerandom'
+  require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :last]
@@ -613,6 +614,10 @@ class UsersController < ApplicationController
 
           sleep(delay_sec.to_i)
 
+          # リトライ時のメッセージを指定
+          exception_cb = Proc.new do |retries|
+            puts "API request retry: #{retries}"
+          end
 
           ### APIデータ取得部
 
@@ -624,27 +629,48 @@ class UsersController < ApplicationController
           rndm = SecureRandom.hex(4)
 
           cls_name = 'CVForGraphSkeleton' + rndm.to_s
-          @cv_for_graph = Analytics.create_class(cls_name,
-            [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+          # 4回までリトライできます
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            @cv_for_graph = Analytics.create_class(cls_name,
+              [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+          end
 
           # GAP算出用
-          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+          # 4回までリトライできます
+          gap = ''
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+          end
 
           # 人気ページCV代入用
           cls_name = 'CVFav' + rndm.to_s
-          @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
+          # 4回までリトライできます
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
+          end
 
           # 人気ページGAP算出用
-          fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+          # 4回までリトライできます
+          fgap = ''
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+          end
 
           ## ◆GAP算出
 
           # 人気ページテーブル用
-          pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
+          # 4回までリトライできます
+          pg_gap = ''
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
+          end
 
           # その他テーブル用
-          sonota_gap = fetch_analytics_data('FetchSonota', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-
+          # 4回までリトライできます
+          sonota_gap = ''
+          retryable(:tries => 5, :sleep => lambda { |n| 2**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            sonota_gap = fetch_analytics_data('FetchSonota', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
+          end
 
 
           ### データ計算部
