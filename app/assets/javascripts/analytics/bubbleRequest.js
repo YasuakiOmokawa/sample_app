@@ -28,7 +28,7 @@ var gaccounts = [];
 
 // ajax並列リクエスト用の遅延時間配列
 var gadelays = [0.4, 0.8, 1];
-// var gadelays = [0.5, 1, 1.5, 2, 2.5];
+// var gadelays = [0.4, 0.6, 0.8, 1, 1.2];
 
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
