@@ -5,6 +5,7 @@ class UsersController < ApplicationController
   require 'insert_table'
   require 'update_table'
   require 'parallel'
+  require 'securerandom'
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :last]
@@ -575,6 +576,21 @@ class UsersController < ApplicationController
             mets_sa.push(k)
           end
 
+          # 人気ページ用スケルトン作成
+          f_mt = [
+              (@cv_txt.classify + 's').to_sym,
+              :pageviews
+          ]
+          f_dm = [
+              :date,
+              :pageTitle,
+              :pagePath
+          ]
+          fmt_hsh = {}
+          @favorite.each do |k, v|
+            key = k.page_title + ";;" + k.page_path
+            fmt_hsh[key] = k.pageviews
+          end
 
           # 再訪問率をセッションベースに変更するためコメントアウト
           # 再訪問率計算用のセッション総数
@@ -593,8 +609,45 @@ class UsersController < ApplicationController
           # リクエストパラメータの遅延時間分だけ、スリープ実施
           delay_sec = params[:gadelay].presence || 0
 
+          logger.info('sleep before request ' + delay_sec.to_s + ' second!')
+
           sleep(delay_sec.to_i)
 
+
+          ### APIデータ取得部
+
+          ## ◆相関算出
+
+          # CV代入用
+
+          # クラス名を一意にするため、乱数を算出
+          rndm = SecureRandom.hex(4)
+
+          cls_name = 'CVForGraphSkeleton' + rndm.to_s
+          @cv_for_graph = Analytics.create_class(cls_name,
+            [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+
+          # GAP算出用
+          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+
+          # 人気ページCV代入用
+          cls_name = 'CVFav' + rndm.to_s
+          @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
+
+          # 人気ページGAP算出用
+          fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+
+          ## ◆GAP算出
+
+          # 人気ページテーブル用
+          pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
+
+          # その他テーブル用
+          sonota_gap = fetch_analytics_data('FetchSonota', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
+
+
+
+          ### データ計算部
 
           ## ◆相関算出
 
@@ -603,12 +656,9 @@ class UsersController < ApplicationController
           create_skeleton_for_graph(@gap_table_for_graph, @from, @to, mets_sh)
 
           # CV代入
-          @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
-            [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
 
           # GAP算出
-          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
           put_table_for_graph(gap, @gap_table_for_graph, mets_sa)
 
           # 再訪問率をセッションベースにするためコメントアウト
@@ -620,56 +670,42 @@ class UsersController < ApplicationController
           # 曜日別の計算をしているときは、ここでgap値も算出している
           corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
-          # スケルトン作成
-          f_mt = [
-              (@cv_txt.classify + 's').to_sym,
-              :pageviews
-          ]
-          f_dm = [
-              :date,
-              :pageTitle,
-              :pagePath
-          ]
-          fmt_hsh = {}
-          @favorite.each do |k, v|
-            key = k.page_title + ";;" + k.page_path
-            fmt_hsh[key] = k.pageviews
-          end
+          # 人気ページ
           @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
           create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
 
-          # CV代入
-          @cv_for_fav = Analytics.create_class('CVFav', f_mt, f_dm ).results(@ga_profile, @cond)
+          # 人気ページCV代入
           put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
-          # GAP算出
-          fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+
+          # 人気ページGAP算出
           put_favorite_table(fgap, @ftbl, flg = 'date')
           calc_gap_for_graph(@ftbl, fmt_hsh)
+
           # 相関算出
           fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
+
           # top10 を抽出
           fvt_corr = substr_fav(fvt_corr, @rank_arr)
+
           # jqplotへデータを渡すため、キーを変更
           fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
 
           # 各相関をマージ
           corr.merge!(fvt_corr)
 
-          ## ◆GAP総数算出
+          ## ◆GAP算出
 
           # 人気ページテーブル
           @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
           create_skeleton_favorite_table(@favorite, @s_ftbl)
-          gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
-          put_favorite_table(gap, @s_ftbl)
+          put_favorite_table(pg_gap, @s_ftbl)
           calc_gap_for_favorite(@s_ftbl)
           fav_gap = substr_fav(@s_ftbl, @rank_arr)
           fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
 
-          # その他
+          # その他テーブル
           skel = create_skeleton_bubble(mets_sa)
-          gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-          put_common_for_gap(skel, gap)
+          put_common_for_gap(skel, sonota_gap)
 
           # 再訪問率をセッションベースにするためコメントアウト
           # gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
@@ -690,6 +726,8 @@ class UsersController < ApplicationController
           skel.merge!(gap_day)
 
           skel = calc_num_to_pct(skel)
+
+
 
           # jqplot用データ構築
           # mets_sh の キーが、実際にグラフに渡される値

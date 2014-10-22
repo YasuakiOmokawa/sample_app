@@ -2,6 +2,7 @@ module UserFunc
 
   # 理想値、現状値を取得
   def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil, dimensions = nil)
+
     hash = {}
     o = opt.dup
     o[:filters] = o[:filters].merge( filter )
@@ -14,14 +15,29 @@ module UserFunc
       elsif metrics == :repeat_rate then
         c[:filters] = c[:filters].merge( { :user_type.matches => 'Returning Visitor' })
         p c[:filters]
+
+        # クラス名を一意にするため、乱数を算出
+        rndm = SecureRandom.hex(4)
+        name = name + rndm.to_s
+
         hash[k] = Analytics.create_class(name,
           [ :sessions ],
           [:date]).results(prof, c)
       elsif dimensions.nil?
+
+        # クラス名を一意にするため、乱数を算出
+        rndm = SecureRandom.hex(4)
+        name = name + rndm.to_s
+
         hash[k] = Analytics.create_class(name,
           [ metrics ],
           [:date]).results(prof, c)
       else
+
+        # クラス名を一意にするため、乱数を算出
+        rndm = SecureRandom.hex(4)
+        name = name + rndm.to_s
+
         hash[k] = Analytics.create_class(name,
           [ metrics ],
           [ dimensions ]).results(prof, c)
