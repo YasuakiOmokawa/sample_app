@@ -7,6 +7,10 @@ module UserFunc
     o = opt.dup
     o[:filters] = o[:filters].merge( filter )
     {'good' => :gte, 'bad' => :lt}.each do |k, v|
+
+      # API同時接続制限対処のため、sleep 指定
+      sleep(0.5)
+
       c = o.dup
       c[:filters] = o[:filters].merge( { cv.to_sym.send(v) => 1 } )
 
