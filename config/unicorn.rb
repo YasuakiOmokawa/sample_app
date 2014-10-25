@@ -19,4 +19,11 @@ after_fork do |server, worker|
 
   defined?(ActiveRecord::Base) and
     ActiveRecord::Base.establish_connection
+
+  # memcachier 用の設定
+  if defined?(ActiveSupport::Cache::DalliStore) && Rails.cache.is_a?(ActiveSupport::Cache::DalliStore)
+    Rails.cache.reset
+
+    ObjectSpace.each_object(ActionDispatch::Session::DalliStore) { |obj| obj.reset }
+  end
 end

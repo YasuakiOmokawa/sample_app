@@ -84,13 +84,4 @@ SampleApp::Application.configure do
   # memcached の使用
   config.cache_store = :dalli_store, {:expires_in => 1.day, :compress => true }
 
-  # memcached の fork をreset - unicornサーバ用
-  after_fork do |server, worker|
-    if defined?(ActiveSupport::Cache::DalliStore) && Rails.cache.is_a?(ActiveSupport::Cache::DalliStore)
-      Rails.cache.reset
-
-      ObjectSpace.each_object(ActionDispatch::Session::DalliStore) { |obj| obj.reset }
-    end
-  end
-
 end
