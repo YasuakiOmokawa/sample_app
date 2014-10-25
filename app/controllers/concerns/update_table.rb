@@ -110,7 +110,7 @@ module UpdateTable
             d = d2 - d1
             f = f2 - f1
             e = e2 - e1
-            p "d is #{d}, and f is #{f}, and e is #{e} d1, d2, f1, f2, e1, e2 is #{d1} #{d2} #{f1} #{f2} #{e1} #{e2}"
+            # p "d is #{d}, and f is #{f}, and e is #{e} d1, d2, f1, f2, e1, e2 is #{d1} #{d2} #{f1} #{f2} #{e1} #{e2}"
             pt = calc_soukan(t, d, e, f)
             ky = t.to_s + ' ' + day1.to_s
             case flg
@@ -173,25 +173,25 @@ module UpdateTable
 
       # gap, cv 共に共通変更あり
       if ( ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) ) and (ee >= 0.0 )
-        p "e3pt"
+        # p "e3pt"
         pt = 3
       elsif ( dd == 0.0 or ff == 0 ) and (ee >= 0.0) # どちらかが前日と同じ
-        p "e2pt"
+        # p "e2pt"
         pt = 2
       else
-        p "e1pt"
+        # p "e1pt"
         pt = 1
       end
     else
       # 相関係数を計算(それ以外)
       if ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) # gap, cv 共に共通変更あり
-        p "2pt"
+        # p "2pt"
         pt = 2
       elsif ( dd == 0.0 or ff == 0 ) # どちらかが前日と同じ
-        p "1pt"
+        # p "1pt"
         pt = 1
       else
-        p "0pt"
+        # p "0pt"
         pt = 0
       end
     end

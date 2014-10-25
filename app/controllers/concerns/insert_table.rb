@@ -66,7 +66,7 @@ module InsertTable
               else
                 tbl[date][t][v] = 0
               end
-              puts 'repeat_rate is ' + tbl[date][t][v].to_s
+              # puts 'repeat_rate is ' + tbl[date][t][v].to_s
             else
               tbl[date][t][v] = d[t]
             end

@@ -30,6 +30,7 @@ gem 'oauth2' # oauth2認証に必要
 gem 'parallel' # バブルチャート取得処理を並行化
 gem 'friendly_id' # URL表記をわかりやすくする
 gem 'retryable' # APIコールのリトライを実行しやすくする
+gem 'dalli' # memcache クライアント
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

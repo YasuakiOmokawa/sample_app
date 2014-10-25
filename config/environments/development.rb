@@ -48,6 +48,7 @@ SampleApp::Application.configure do
     :enable_starttls_auto => true
   }
 
-
+  # memcached の使用
+  config.cache_store = :dalli_store, {:expires_in => 1.day, :compress => true }
 
 end

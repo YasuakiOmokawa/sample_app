@@ -230,6 +230,27 @@ class UsersController < ApplicationController
     end
 
     def chk_param
+
+      # ajaxリクエストの判定
+      if request.xhr?
+
+        @req_str = request.fullpath.to_s
+
+        logger.info('req path is ' + @req_str)
+
+        # キャッシュを取得する
+        cached_item = Rails.cache.read(@req_str)
+
+        # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
+        if cached_item.present?
+          puts 'cached_item is ' + cached_item
+          @json = cached_item
+          return
+        else
+          puts 'no cached_item'
+        end
+      end
+
       # パラメータ共通設定
 
       @user = User.find(params[:id])
@@ -289,9 +310,10 @@ class UsersController < ApplicationController
     end
 
     def create_common_table
-       #　◆ページ共通のテーブルを生成
 
-       # pv数 ~ 直帰率（ギャップなしデータ）
+      # ◆ページ共通のテーブルを生成
+
+      # pv数 ~ 直帰率（ギャップなしデータ）
       @common_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
@@ -375,7 +397,8 @@ class UsersController < ApplicationController
     end
 
     def create_home
-       #　◆ページ先頭のバブルチャートを生成
+
+      #　◆ページ先頭のバブルチャートを生成
 
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
@@ -468,6 +491,9 @@ class UsersController < ApplicationController
 
         elsif kwd.empty?
 
+          # キャッシュ済のデータがあればコントローラを抜ける
+          return if @json.present?
+
           # 絞り込みキーワードが指定されていない場合はキーワードを取得
           kwds = []
           case wd
@@ -520,6 +546,9 @@ class UsersController < ApplicationController
           # キーワード配列を格納
           @json = kwds.to_json
 
+          # 結果をキャッシュへ格納
+          Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
+
           # コントローラを抜ける
           return
         end
@@ -537,6 +566,9 @@ class UsersController < ApplicationController
         #   # コントローラを抜ける
         #   return
         # end
+
+        # キャッシュ済のデータがあればコントローラを抜ける
+        return if @json.present?
 
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -608,11 +640,11 @@ class UsersController < ApplicationController
           # end
 
           # リクエストパラメータの遅延時間分だけ、スリープ実施
-          delay_sec = params[:gadelay].presence || 0
+          # delay_sec = params[:gadelay].presence || 0
 
-          logger.info('sleep before request ' + delay_sec.to_s + ' second!')
+          # logger.info('sleep before request ' + delay_sec.to_s + ' second!')
 
-          sleep(delay_sec.to_i)
+          # sleep(delay_sec.to_i)
 
           # リトライ時のメッセージを指定
           exception_cb = Proc.new do |retries|
@@ -630,7 +662,7 @@ class UsersController < ApplicationController
 
           cls_name = 'CVForGraphSkeleton' + rndm.to_s
           # 4回までリトライできます
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             @cv_for_graph = Analytics.create_class(cls_name,
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
@@ -638,21 +670,21 @@ class UsersController < ApplicationController
           # GAP算出用
           # 4回までリトライできます
           gap = ''
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
           end
 
           # 人気ページCV代入用
           cls_name = 'CVFav' + rndm.to_s
           # 4回までリトライできます
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
           end
 
           # 人気ページGAP算出用
           # 4回までリトライできます
           fgap = ''
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
           end
 
@@ -661,14 +693,14 @@ class UsersController < ApplicationController
           # 人気ページテーブル用
           # 4回までリトライできます
           pg_gap = ''
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
           end
 
           # その他テーブル用
           # 4回までリトライできます
           sonota_gap = ''
-          retryable(:tries => 5, :sleep => 1, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             sonota_gap = fetch_analytics_data('FetchSonota', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
           end
 
@@ -787,6 +819,9 @@ class UsersController < ApplicationController
         # ループ終了。jqplot へデータ渡す
         if shori != 0
           @json = p_hash.to_json
+
+          # 結果をキャッシュへ格納
+          Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
         end
       end
     end
