@@ -3,5 +3,5 @@
 # SampleApp::Application.config.session_store :cookie_store, key: '_sample_app_session'
 
 # セッションをmemcached で管理
-SampleApp::Application.config.session_store :dalli_store, :expire_after => 1.day
+SampleApp::Application.config.session_store :dalli_store, {:expire_after => 1.day}
 
