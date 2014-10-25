@@ -264,8 +264,4 @@ $(document).ready(function() {
       }
   });
 
-  // 遷移元ページのタイトルを保持
-  var prev_title = gon.prev_pagetitle;
-  $('input[name="prev_pagetitle"]').val(prev_title);
-
 });

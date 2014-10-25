@@ -20,17 +20,8 @@ var bbl_shori_flg = 0;
 // ajaxリクエスト格納
 var request;
 
-// ajaxリクエスト格納(並列用)
-// var requests = [];
-
-// ユーザが所有しているgaアカウントの配列
-// var gaccounts = [];
-
-// ajax並列リクエスト用の遅延時間配列
-// var gadelays = [0.4, 0.8, 0.6];
-// var gadelays = [0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.2];
-// var gadelays = [0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8];
-// var gadelays = [0.4, 0.6, 0.8, 1, 1.2];
+// ユニークキーを格納
+var kwd_strgs = 0;
 
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elem) {
@@ -152,278 +143,210 @@ function callExecuter(elem) {
       dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
       usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
       kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
+
+      // キャッシュ用ユニークキー生成
+      var frm = $('#from').val();
+      var to = $('#to').val();
+      var cv_num = $('input[name="cv_num"]').val();
+
+      // キーワードの総文字数を格納
+      if (kwd_opts.length >= 1) {
+        for (var k = 0; k < kwd_opts.length; k++) {
+          var x = kwd_opts[k];
+          kwd_strgs = kwd_strgs + parseInt(x.length);
+        }
+        // console.log(kwd_strgs);
+      }
+
+      // キャッシュ済データの取得
+      var data;
+
+      if (elm_txt == '直接入力/ブックマーク') {
+        elm_txt = '直接入力ブックマーク';
+      }
+
+      var c_obj = cacheResult(kwd_strgs, data, false, elm_txt, 'GET');
+
+      // キャッシュ済データがあるか？
+      if (c_obj) {
+
+        // バブルチャートを描画
+        plotGraphHome(c_obj, elm_txt);
+
+        // 事後処理
+        afterCall();
+
+        // ページ名のdivタグをグレーアウト
+        markPageBtn(elm_txt);
+
+        //処理を終了
+        return;
+
+      } else {
+
+        // ajax処理中
+        bbl_shori_flg = 1;
+      }
     });
-
-    // // ユーザ所有のgaアカウントを取得
-    // $.ajax({
-    //   url: userpath,
-    //   async: false,
-    //   dataType: 'json',
-    //   data: {
-    //     shori : $('input[name="shori"]').val(),
-    //     gaccnt : 'true', // GAアカウントを取得するか？
-    //     kwd : 'nokwd'
-    //   }
-    // })
-    // .done(function(data, textStatus, jqXHR) {
-    //   var d = JSON.parse(data.homearr);
-    //   console.log( '所有GAアカウント情報取得完了');
-    //   console.log(d);
-    //   $.extend(true, gaccounts, d);
-    // })
-    // .fail(function(jqXHR, textStatus, errorThrown) {
-    //   $('span#errormsg').html('所有GAアカウント取得エラーが発生しました： ' + String(errorThrown));
-    // })
-    // .always(function() {
-    //   console.log('所有GAアカウント取得処理の終了');
-    // });
-
-  // ajax処理中
-  bbl_shori_flg = 1;
-
   }
 
-  // ディレイ時間の分、ajaxリクエストを作成
-  // for (var i = 0; i < gadelays.length; i++) {
-
-    // リクエスト用のパラメータを設定
-    // dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
-    // usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
-    // kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
-
-    // 遅延時間を取得
-    // var gadelay = gadelays[i];
-
   // ajaxリクエストの生成
-  request = $.Deferred(function(deferred) {
-    $.ajax({
-      url: userpath,
-      type:'GET',
-      dataType: "json",
-      tryCount: 0,
-      // timeout: 2000, // 単位はミリ秒
-      retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
-      beforeSend: function(XMLHttpRequest) {
+  if (bbl_shori_flg == 1) {
 
-        // 最初のリクエスト時のみ実行
-        if (bbl_shori_flg == 0) {
+    request = $.Deferred(function(deferred) {
+      $.ajax({
+        url: userpath,
+        type:'GET',
+        dataType: "json",
+        tryCount: 0,
+        // timeout: 2000, // 単位はミリ秒
+        retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+        beforeSend: function(XMLHttpRequest) {
 
-          console.log( 'ajax通信開始!');
+          // 最初のリクエスト時のみ実行
+          if (bbl_shori_flg == 0) {
 
+            console.log( 'ajax通信開始!');
+
+          }
+        },
+        // バブルチャート用データ取得用のパラメータ
+        data: {
+          from : $('#from').val(),
+          to : $('#to').val(),
+          cv_num : $('input[name="cv_num"]').val(),
+          shori : $('input[name="shori"]').val(),
+          act : elm_txt,             // 取得するページ項目
+          dev : dev,                 // デバイス
+          usr : usr,                   // 訪問者
+          kwd : kwd,                 // キーワード
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+
+          // 内部エラーが発生したら表示
+          if (xhr.status == 500) {
+            $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+            return;
+          }
+
+          this.tryCount++;
+
+          if (this.tryCount < this.retryLimit) {
+
+            console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
+
+            $.ajax(this).done(function(data, textStatus, jqXHR) {
+              deferred.resolveWith(this, [data, textStatus, jqXHR]);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+              if (this.tryCount >= this.retryLimit) {
+
+                console.log('再試行の上限に達しました。エラー処理を実行します。');
+
+                deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
+              }
+            });
+          }
         }
-      },
-      // バブルチャート用データ取得用のパラメータ
-      data: {
-        from : $('#from').val(),
-        to : $('#to').val(),
-        cv_num : $('input[name="cv_num"]').val(),
-        shori : $('input[name="shori"]').val(),
-        act : elm_txt,             // 取得するページ項目
-        dev : dev,                 // デバイス
-        usr : usr,                   // 訪問者
-        kwd : kwd,                 // キーワード
-        // gadelay : gadelay      // リクエスト遅延時間
-      },
-      error: function(xhr, ajaxOptions, thrownError) {
-
-        // 内部エラーが発生したら表示
-        if (xhr.status == 500) {
-          $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
-          return;
-        }
-
-        this.tryCount++;
-
-        if (this.tryCount < this.retryLimit) {
-
-          console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
-
-          $.ajax(this).done(function(data, textStatus, jqXHR) {
-            deferred.resolveWith(this, [data, textStatus, jqXHR]);
-          }).fail(function(jqXHR, textStatus, errorThrown) {
-            if (this.tryCount >= this.retryLimit) {
-
-              console.log('再試行の上限に達しました。エラー処理を実行します。');
-
-              deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
-            }
-          });
-        }
-      }
-    }).done(function(data, textStatus, jqXHR) {
-      deferred.resolveWith(this, [data, textStatus, jqXHR]);
-    });
-  }).promise();
-
-    // リクエストを配列へ格納
-    // requests.push(request);
-    // console.log('requests contains below');
-    // console.log(requests);
-
-    // パラメータ配列のカウンタを進める
-    // opts_cntr++;
-
-    // パラメータ配列が無くなったらajax生成のforループを抜ける
-    // if (opts_cntr <= opts.length - 1) {
-
-    //   // リクエストを処理中
-    //   bbl_shori_flg = 1;
-    // } else {
-
-    //   // リクエストを処理終了
-    //   bbl_shori_flg = 2;
-    //   break;
-    // }
-
-  // }
+      }).done(function(data, textStatus, jqXHR) {
+        deferred.resolveWith(this, [data, textStatus, jqXHR]);
+      });
+    }).promise();
+  }
 
   // 並列リクエストだとアナリティクスAPIの割り当て制限エラーに引っ掛かるので逐次リクエストへ変更。
   // ⇒ 2014/10/19 GAアカウントの所有数だけ並列でリクエストを実施することで、API制限を回避。
   // ⇒ 2014/10/25 API制限回避できず。直列方式へ再度変更
-  request.done(function(data, textStatus, jqXHR) {
-  // $.when.apply($, requests).done(function(data, textStatus, jqXHR) {
 
-    console.log( 'ajax通信成功!');
+  if (request) {
 
-    // 結果は仮引数に可変長で入る **順番は保証されている**
-    // 取り出すには arguments から取り出す
-    // さらにそれぞれには [data, textStatus, jqXHR] の配列になっている
-    // for (i=0; i < arguments.length; i++) {
-    //   var result = arguments[i];
-    //   var r_obj_tmp = JSON.parse(result[0].homearr);
-    //   $.extend(true, r_obj, r_obj_tmp);
-    // }
+    request.done(function(data, textStatus, jqXHR) {
 
-    // グラフ描画用のデータをマージ
-    var r_obj_tmp = JSON.parse(data.homearr);
-    $.extend(true, r_obj, r_obj_tmp);
+      console.log( 'ajax通信成功!');
 
-    // 項目名、フィルタ名の取得
-    var page_fltr_wd = data.page_fltr_wd;
-    var page_fltr_dev = data.page_fltr_dev;
-    var page_fltr_usr = data.page_fltr_usr;
-    var page_fltr_kwd = data.page_fltr_kwd;
-    // var page_fltr_wd = result[0].page_fltr_wd;
-    // var page_fltr_dev = result[0].page_fltr_dev;
-    // var page_fltr_usr = result[0].page_fltr_usr;
-    // var page_fltr_kwd = result[0].page_fltr_kwd;
+      // グラフ描画用のデータをマージ
+      var r_obj_tmp = JSON.parse(data.homearr);
+      $.extend(true, r_obj, r_obj_tmp);
 
-    // カウンタを進める
-    opts_cntr++;
+      // 項目名、フィルタ名の取得
+      var page_fltr_wd = data.page_fltr_wd;
+      var page_fltr_dev = data.page_fltr_dev;
+      var page_fltr_usr = data.page_fltr_usr;
+      var page_fltr_kwd = data.page_fltr_kwd;
 
-    // フィルタリングオプションの配列が無くなるまでajaxを実行
-    if (opts_cntr <= opts.length - 1) {
+      // カウンタを進める
+      opts_cntr++;
 
-    // if (bbl_shori_flg == 1) {
+      // フィルタリングオプションの配列が無くなるまでajaxを実行
+      if (opts_cntr <= opts.length - 1) {
 
-      // リクエストを処理中
-      // bbl_shori_flg = 1;
-      callManager(bbl_shori_flg); // システム動作継続のため、リクエスト変数をリセット
+        callManager(bbl_shori_flg); // システム動作継続のため、リクエスト変数をリセット
 
-      console.log('ajax通信に成功しました。');
-      console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
-      console.log('ajax処理を継続します');
+        console.log('ajax通信に成功しました。');
+        console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
+        console.log('ajax処理を継続します');
 
-      // リクエスト用のパラメータを設定し、ajaxを再実行
-      dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
-      usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
-      kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
+        // リクエスト用のパラメータを設定し、ajaxを再実行
+        dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
+        usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
+        kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
 
-      // ローディング画面に進捗を表示
-      var prcnt = parseInt( (opts_cntr / opts.length) * 100 );
-      $('#daemon tr:nth-child(3) td').text(String(prcnt) + '%');
+        // ローディング画面に進捗を表示
+        var prcnt = parseInt( (opts_cntr / opts.length) * 100 );
+        $('#daemon tr:nth-child(3) td').text(String(prcnt) + '%');
 
-      // ajax処理を再実行
-      callExecuter(page_fltr_wd);
-    } else {
-    // else if (bbl_shori_flg = 2) {
+        // ajax処理を再実行
+        callExecuter(page_fltr_wd);
+      } else {
 
-      // リクエストを処理終了
+        // リクエストを処理終了
+        bbl_shori_flg = 2;
+        callManager(bbl_shori_flg);
+
+        console.log('ページ絞り込み名 :' + page_fltr_wd);
+
+        // ローディング完了テキストを表示
+        $('#daemon tr:nth-child(3) td').text('complete!');
+
+        // バブルチャートを描画
+        plotGraphHome(r_obj, page_fltr_wd);
+
+        // ホームグラフのページ項目タグがdivになっていればリセットする
+        markPageBtn(page_fltr_wd);
+
+        // 結果データのキャッシュ
+        cacheResult(kwd_strgs, r_obj, true, page_fltr_wd, 'POST');
+      }
+    })
+
+    // ajax失敗時の処理
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      console.log( 'ajax通信失敗!通信を中断します');
+      console.log(errorThrown);
+
+      if (errorThrown == 'timeout') {
+        $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
+      } else {
+        $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
+      }
+
+      // 失敗したら処理終了
       bbl_shori_flg = 2;
       callManager(bbl_shori_flg);
+    })
 
-      console.log('ページ絞り込み名 :' + page_fltr_wd);
+    // ajax通信終了時に常に呼び出される処理
+    .always(function() {
 
-      // ローディング完了テキストを表示
-      $('#daemon tr:nth-child(3) td').text('complete!');
+      // リクエスト処理が終了した場合に実行される
+      if (bbl_shori_flg == 2) {
 
-      // バブルチャートを描画
-      plotGraphHome(r_obj, page_fltr_wd);
+        console.log( 'ajax通信終了!');
 
-      // ホームグラフのページ項目タグがdivになっていればリセットする
-      var h, y;
-      h = $('div#narrow div');
-      if (h.html() != 'キャンペーン' ) {
-        y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
-      } else {
-        y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
+        afterCall();
       }
-      $(h).replaceWith(y + $(h).html() + '</a>');
+    });
+  }
 
-      // 選択したホームグラフのページ項目タグをdivへ変更
-      if (page_fltr_wd == '直接入力ブックマーク') {
-        page_fltr_wd = '直接入力/ブックマーク'
-      }
-      var tag = 'div#narrow a:contains(' + page_fltr_wd + ')';
-      var id = '<div>';
-      var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
-      if (page_fltr_wd == 'キャンペーン') {
-        $('div#narrow div').attr('id', 'ed');
-      }
-    }
-
-    // リクエスト実行時のエラーメッセージ表示をリセット
-    $('#errormsg').empty();
-  })
-
-  // ajax失敗時の処理
-  .fail(function(jqXHR, textStatus, errorThrown) {
-    console.log( 'ajax通信失敗!通信を中断します');
-    console.log(errorThrown);
-
-    if (errorThrown == 'timeout') {
-      $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
-    } else {
-      $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
-    }
-
-    // 失敗したら処理終了
-    bbl_shori_flg = 2;
-    callManager(bbl_shori_flg);
-  })
-
-  // ajax通信終了時に常に呼び出される処理
-  .always(function() {
-
-    // リクエスト処理が終了した場合に実行される
-    if (bbl_shori_flg == 2) {
-
-      console.log( 'ajax通信終了!');
-
-      // ローディングアニメーションのリセット
-      $('#gp').plainOverlay('hide');
-      $('div#info').plainOverlay('hide');
-
-      // リクエストを未処理状態へ
-      bbl_shori_flg = 0;
-
-      // カウンタをリセット
-      opts_cntr = 0;
-
-      // パラメータ配列をリセット
-      opts = [];
-
-      // バブルチャート描画用のデータオブジェクトをリセット
-      r_obj = {};
-
-      // 絞り込み用キーワードのリセット
-      kwd_opts = [];
-
-      // ユーザが所有しているgaアカウントの配列をリセット
-      // gaccounts = [];
-
-    }
-  });
 }
 
 // 二重送信防止のため、リクエストが未処理以外のときは送信リクエスト変数をリセットする
@@ -432,5 +355,59 @@ function callManager(flg) {
   if (flg != 0) {
     request = '';
     requests = [];
+  }
+}
+
+// 処理完了時のリセット処理
+function afterCall() {
+  // ローディングアニメーションのリセット
+  $('#gp').plainOverlay('hide');
+  $('div#info').plainOverlay('hide');
+
+  // リクエストを未処理状態へ
+  bbl_shori_flg = 0;
+
+  // カウンタをリセット
+  opts_cntr = 0;
+
+  // パラメータ配列をリセット
+  opts = [];
+
+  // バブルチャート描画用のデータオブジェクトをリセット
+  r_obj = {};
+
+  // 絞り込み用キーワードのリセット
+  kwd_opts = [];
+
+  // ユーザが所有しているgaアカウントの配列をリセット
+  // gaccounts = [];
+
+  // ユニークキーをリセット
+  kwd_strgs = 0;
+
+  // リクエスト実行時のエラーメッセージ表示をリセット
+  $('#errormsg').empty();
+}
+
+// ホームグラフのページ項目タグがdivになっていればリセットする
+function markPageBtn(page) {
+  var h, y;
+  h = $('div#narrow div');
+  if (h.html() != 'キャンペーン' ) {
+    y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
+  } else {
+    y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
+  }
+  $(h).replaceWith(y + $(h).html() + '</a>');
+
+  // 選択したホームグラフのページ項目タグをdivへ変更
+  if (page == '直接入力ブックマーク') {
+    page = '直接入力/ブックマーク'
+  }
+  var tag = 'div#narrow a:contains(' + page + ')';
+  var id = '<div>';
+  var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
+  if (page == 'キャンペーン') {
+    $('div#narrow div').attr('id', 'ed');
   }
 }

@@ -3,5 +3,6 @@ Rails.application.config.assets.precompile += %w[
   usejqplot.js
   usejqplothome.js
   bubblerequest.js
+  finBubble.js
   kickonload.js
 ]

@@ -3,6 +3,7 @@ SampleApp::Application.routes.draw do
   resources :users ,:except => [:index] do
     member do
       get :search, :direct, :referral, :social, :campaign, :last, :all
+      post :show
     end
   end
   resources :sessions, only: [:new, :create, :destroy]

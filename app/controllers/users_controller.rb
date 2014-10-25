@@ -238,8 +238,36 @@ class UsersController < ApplicationController
 
         logger.info('req path is ' + @req_str)
 
-        # キャッシュを取得する
+        # キャッシュを取得する(キーワード数)
         cached_item = Rails.cache.read(@req_str)
+
+        # データオブジェクトとオブジェクト格納キーが存在するか？
+        if params[:r_obj].present? && params[:kwds_len].present?
+
+          puts 'caching data'
+
+          # ユニークキーを取得する
+          uniq = params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+
+          # 
+          s_txt = params[:r_obj].to_s
+
+          # 結果をキャッシュへ格納してコントローラを抜ける
+          Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
+
+          puts s_txt
+
+          return
+        elsif params[:kwds_len].present?
+
+          puts 'getting cached data'
+
+          # ユニークキーを取得する
+          uniq = params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+
+          # データを読み込む
+          cached_item = Rails.cache.read(uniq)
+        end
 
         # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
         if cached_item.present?
@@ -304,8 +332,8 @@ class UsersController < ApplicationController
 
       @categories["人気ページ"] = set_select_box(@favorite, 'f')
 
-      # 遷移元ページのタイトルを保存
-      gon.prev_pagetitle = params[:prev_pagetitle].presence || 'ホーム';
+      # 遷移元ページタブを保存
+      gon.prev_page = params[:prev_page].presence
 
     end
 
@@ -821,7 +849,7 @@ class UsersController < ApplicationController
           @json = p_hash.to_json
 
           # 結果をキャッシュへ格納
-          Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
+          # Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
         end
       end
     end
