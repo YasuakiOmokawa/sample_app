@@ -247,9 +247,13 @@ class UsersController < ApplicationController
           puts 'caching data'
 
           # ユニークキーを取得する
-          uniq = params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
 
-          # 
+          # ユーザ単位で一意にするため
+          usrid = params[:id].to_s
+
+          uniq = usrid + params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+
+          # 格納用データオブジェクト
           s_txt = params[:r_obj].to_s
 
           # 結果をキャッシュへ格納してコントローラを抜ける
