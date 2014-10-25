@@ -248,7 +248,7 @@ class UsersController < ApplicationController
 
           # ユニークキーを取得する
 
-          # ユーザ単位で一意にするため
+          # ユーザ単位で一意にするため指定
           usrid = params[:id].to_s
 
           uniq = usrid + params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
@@ -267,7 +267,11 @@ class UsersController < ApplicationController
           puts 'getting cached data'
 
           # ユニークキーを取得する
-          uniq = params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+
+          # ユーザ単位で一意にするため指定
+          usrid = params[:id].to_s
+
+          uniq = usrid + params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
 
           # データを読み込む
           cached_item = Rails.cache.read(uniq)
