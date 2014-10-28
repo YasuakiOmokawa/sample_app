@@ -204,7 +204,7 @@ module UpdateTable
     end
   end
 
-  # 曜日別GAPの算出
+  # 曜日種類別にGAPの算出
   def calc_gap_per_day(d_hsh, r_hsh, ky)
 
     # d_hsh の中身 k.. 項目と曜日の種別 v.. 曜日の数
@@ -212,13 +212,11 @@ module UpdateTable
     d_hsh.each do |c, d|
 
       # binding.pry # ブレークポイントスイッチ
-      if c =~ /(rate|percent|avg_|_per_)/ then
+      if c =~ /(rate|percent|avg_|_per_)/
 
         # puts "calc average because of item is #{c}"
 
-        if d_hsh[c] == 0 then
-          d_hsh[c] = 1
-        end
+        d_hsh[c] = 1 if d_hsh[c] == 0
 
         avg = r_hsh[c][:gap] / d_hsh[c]
 
@@ -227,7 +225,7 @@ module UpdateTable
         puts "calc gap_avg ok! key is #{d_hsh[ky]}, value is #{avg}"
       end
     end
-    return r_hsh
+    r_hsh
   end
 
   # GAP値のパーセンテージを値へ変換
