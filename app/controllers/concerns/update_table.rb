@@ -119,13 +119,15 @@ module UpdateTable
             cvr = cvr_dy - cvr_dy_bf
             p "gp is #{gp}, and cv is #{cv}, and cvr is #{cvr} gp_dy_bf, gp_dy, cv_dy_bf, cv_dy, cvr_dy_bf, cvr_dy is #{gp_dy_bf} #{gp_dy} #{cv_dy_bf} #{cv_dy} #{cvr_dy_bf} #{cvr_dy}"
             pt = calc_soukan(t, gp, cvr, cv)
-            ky = t.to_s + ' ' + dy_bf.to_s
+
+            # 曜日別の項目数を格納
+            ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー
             case flg
             when 'fvt' then
-              # .. 人気ページのときは曜日別計算をしない
+              # .. 人気ページのときは計算なし
             else
               d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別のカウンタ
-              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別の値
+              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値
             end
             if dy == dy_bf then # 相関ポイント計算
               r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
@@ -136,6 +138,7 @@ module UpdateTable
                 r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の値
               end
             end
+
            end
            # binding.pry
            dy = dy_bf
