@@ -1,5 +1,5 @@
 class Corr
-  Properties = %i(dy_bf gp_dy_bf cvr_dy_bf cv_dy_bf)
+  Properties = %i(dy gp_dy cvr_dy cv_dy dt_dy)
   Properties.each do |prop|
     attr_accessor prop
   end

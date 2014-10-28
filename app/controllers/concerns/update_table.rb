@@ -90,31 +90,38 @@ module UpdateTable
       r_hsh = Hash.new{ |h,k| h[k] = {} }
       d_hsh = {} # 曜日種別の日数を保持
       cr = Corr.new # 相関算出用に前日の値を格納していくインスタンス
-      cr.dy_bf = ''
+      cr.dy = ''
       ky, pt = '', 0
-      cr.cvr_dy_bf = cr.gp_dy_bf = cr.cv_dy_bf = 0.0
-      cvr_dy = gp_dy = cv_dy = dy = nil
+      cr.cvr_dy = cr.gp_dy = cr.cv_dy = cr.dt_dy = cr.dy = 0.0
+      cvr_dy_bf = gp_dy_bf = cv_dy_bf = dt_dy_bf = dy_bf = nil
 
       # 項目別
       col.each do |t, i|
 
         # 日付別
         tbl.sort_by{|a, b| (b['idx']) }.each do |k, v|
-           cr.gp_dy_bf = v[t][2].to_f # GAP
-           cr.dy_bf = v[t][3] # 曜日種別
-           cr.cvr_dy_bf = 1
+           cr.dt_dy = v[t][0].to_f + v[t][1].to_f # 項目値(理想値＋現実値)
+           cr.gp_dy = v[t][2].to_f # GAP
+           cr.dy = v[t][3] # 曜日種別
+           cr.cvr_dy = 1
 
            # ページ相関の種類によってプロパティ値を変更
-           chk_flg(cr, v, flg, cvr)           
+           chk_flg(cr, v, flg, cvr, t)
+           # binding.pry # ブレークポイントスイッチ
 
            # 前日と当日のデータが揃っていれば相関計算を開始
-           unless gp_dy.nil? && cv_dy.nil? && cvr_dy.nil? && dy.nil?
+           unless dt_dy_bf.nil? && gp_dy_bf.nil? && cv_dy_bf.nil? && cvr_dy_bf.nil? && dy_bf.nil?
+            # binding.pry # ブレークポイントスイッチ
+            dt = cr.dt_dy - dt_dy_bf
+            gp = cr.gp_dy - gp_dy_bf
+            cv = cr.cv_dy - cv_dy_bf
+            cvr = cr.cvr_dy - cvr_dy_bf
+            puts "dt is #{dt}, gp is #{gp}, and cv is #{cv}, and cvr is #{cvr}"
+
+            # binding.pry # ブレークポイントスイッチ
+            # 相関ポイントの計算
+            pt = calc_soukan(t, gp, cvr, cv, cr.cv_dy, cr.gp_dy, dt, cr.dt_dy)
             binding.pry # ブレークポイントスイッチ
-            gp = gp_dy - cr.gp_dy_bf
-            cv = cv_dy - cr.cv_dy_bf
-            cvr = cvr_dy - cr.cvr_dy_bf
-            p "gp is #{gp}, and cv is #{cv}, and cvr is #{cvr} gp_dy_bf, gp_dy, cv_dy_bf, cv_dy, cvr_dy_bf, cvr_dy is #{gp_dy_bf} #{gp_dy} #{cv_dy_bf} #{cv_dy} #{cvr_dy_bf} #{cvr_dy}"
-            pt = calc_soukan(t, gp, cvr, cv)
 
             # 曜日別の項目数を格納
             ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー
@@ -122,7 +129,7 @@ module UpdateTable
               d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別の項目数をカウント
               r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値
             end
-            if dy == dy_bf # 相関の計算
+            if cr.dy == dy_bf # 相関の計算
               r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
               unless flg == 'fvt'
                 r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の相関
@@ -131,27 +138,19 @@ module UpdateTable
 
            end
            # binding.pry
-           dy = cr.dy_bf
+           dy_bf = cr.dy
+           dt_dy_bf = cr.dt_dy
+           gp_dy_bf = cr.gp_dy
+           cv_dy_bf = cr.cv_dy
+           cvr_dy_bf = cr.cvr_dy
+           cr.cvr_dy, cr.gp_dy, cr.cv_dy, cr.dt_dy = [] # 前日値のリセット
         end
-        gp_dy = cr.gp_dy_bf
-        cv_dy = cr.cv_dy_bf
-        cvr_dy = cr.cvr_dy_bf
-        cr.cvr_dy_bf, cr.gp_dy_bf, cr.cv_dy_bf = [] # 前日値のリセット
+        binding.pry # ブレークポイントスイッチ
       end
 
       # 曜日別GAPの算出
       calc_gap_per_day(d_hsh, r_hsh, ky)
 
-      # 相関の算出
-      # col.each do |t, i|
-      #   case t
-      #   when :pageviews, :sessions, :bounce_rate then
-      #     souten = (tbl.size * 3).to_f
-      #   else
-      #     souten = (tbl.size * 2).to_f
-      #   end
-      #   r_hsh[t][:corr] = (r_hsh[t][:corr].to_f / souten * 100).to_i
-      # end
       r_hsh
     rescue => e
       puts "エラー： #{shori}"
@@ -159,49 +158,63 @@ module UpdateTable
     end
   end
 
-  def calc_soukan(mtrcs, gp, cvr, cv)
+  # 相関ポイントの計算
+  def calc_soukan(mtrcs, gp, cvr, cv, cv_dy, gp_dy, dt, dt_dy)
+
+    shori = '相関ポイントの計算'
 
     case mtrcs
-    # 相関係数を計算(pv, sessions, bounce_rate)
-    when :pageviews, :sessions, :bounce_rate then
 
-      # gap, cv 共に共通変更あり
-      if ( ( gp < 0.0 and cv < 0 ) or ( gp > 0.0 and cv > 0) ) and (cvr >= 0.0 )
-        # p "e3pt"
-        pt = 3
-      elsif ( gp == 0.0 or cv == 0 ) and (cvr >= 0.0) # どちらかが前日と同じ
-        # p "cvr_dypt"
-        pt = 2
-      else
-        # p "cvr_dy_bfpt"
+    # GAP値のあるものについて、相関を計算
+    # 対象: 平均PV数、平均滞在時間、新規訪問率、再訪問率
+    when :pageviews_per_session, :avg_session_duration, :percent_new_sessions, :repeat_rate
+      if ( cv < 0 && gp > 0.0 ) || ( cv > 0 && gp < 0.0) || (( cv == 0 && cv_dy >= 1 ) && ( gp == 0 && gp_dy > 0.0 ))
+        p "#{mtrcs} get 1pt"
         pt = 1
+      else
+        p "#{mtrcs} get 0pt"
+        pt = 0
       end
-    else
-      # 相関係数を計算(それ以外)
-      if ( gp < 0.0 and cv < 0 ) or ( gp > 0.0 and cv > 0) # gap, cv 共に共通変更あり
-        # p "2pt"
-        pt = 2
-      elsif ( gp == 0.0 or cv == 0 ) # どちらかが前日と同じ
-        # p "1pt"
+    # 直帰率の場合
+    when :bounce_rate
+      if ( cv < 0 && dt > 0.0 ) || ( cv > 0 && dt < 0.0) || (( cv == 0 && cv_dy >= 1 ) && ( dt == 0 && dt_dy > 0.0 ))
+        p "#{mtrcs} get 1pt"
         pt = 1
       else
-        # p "0pt"
+        p "#{mtrcs} get 0pt"
+        pt = 0
+      end
+    # その他、GAP値なしデータについて、相関を計算
+    else
+      if ( cv > 0 && dt > 0.0 ) || ( cv < 0 && dt < 0.0) || (( cv == 0 && cv_dy >= 1 ) && ( dt == 0 && dt_dy > 0.0 ))
+        p "#{mtrcs} get 1pt"
+        pt = 1
+      else
+        p "#{mtrcs} get 0pt"
         pt = 0
       end
     end
-    return pt
+    pt
+    rescue => e
+      puts "エラー： #{shori}"
+      puts e.message
   end
 
   # ページ相関の種類によってプロパティ値を変更
-  def chk_flg(cr, v, flg, cvr)
+  def chk_flg(cr, v, flg, cvr, t)
 
+    shori = 'ページ相関の種類によってプロパティ値を変更'
+    # binding.pry # ブレークポイントスイッチ
     case flg
     when 'fvt' then # 人気ページ相関の場合
-      cr.cv_dy_bf = v[t][4].to_i
+      cr.cv_dy = v[t][4].to_i
     else
-      cr.cv_dy_bf = v[:cv].to_i
-      cr.cvr_dy_bf = v[cvr][2].to_f
+      cr.cv_dy = v[:cv].to_i
+      cr.cvr_dy = v[cvr][2].to_f
     end
+    rescue => e
+      puts "エラー： #{shori}"
+      puts e.message
   end
 
   # 曜日種類別にGAPの算出
