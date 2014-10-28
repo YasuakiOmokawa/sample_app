@@ -82,6 +82,7 @@ module UpdateTable
     return tbl
   end
 
+  # バブル（散布図）チャートのために相関を出す
   def calc_corr(tbl, col, cvr, flg = 'none')
     begin
       shori = 'バブル（散布図）チャートのために相関を出す'
@@ -103,10 +104,10 @@ module UpdateTable
            cr.dy_bf = v[t][3] # 曜日種別
            cr.cvr_dy_bf = 1
 
-           # 人気ページ相関かどうかのチェック
+           # ページ相関の種類によってプロパティ値を変更
            chk_flg(cr, v, flg, cvr)           
 
-           # 前日と当日のデータが揃っているか？
+           # 前日と当日のデータが揃っていれば相関計算を開始
            unless gp_dy.nil? && cv_dy.nil? && cvr_dy.nil? && dy.nil?
             binding.pry # ブレークポイントスイッチ
             gp = gp_dy - cr.gp_dy_bf
@@ -117,47 +118,41 @@ module UpdateTable
 
             # 曜日別の項目数を格納
             ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー
-            case flg
-            when 'fvt' then
-              # .. 人気ページのときは計算なし
-            else
-              d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別のカウンタ
+            unless flg == 'fvt'
+              d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別の項目数をカウント
               r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値
             end
-            if dy == dy_bf then # 相関ポイント計算
+            if dy == dy_bf # 相関の計算
               r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
-              case flg
-              when 'fvt' then
-                # ..
-              else
-                r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の値
+              unless flg == 'fvt'
+                r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の相関
               end
             end
 
            end
            # binding.pry
-           dy = dy_bf
+           dy = cr.dy_bf
         end
-        gp_dy = gp_dy_bf
-        cv_dy = cv_dy_bf
-        cvr_dy = cvr_dy_bf
-        cvr_dy_bf = gp_dy_bf = cv_dy_bf = ''
+        gp_dy = cr.gp_dy_bf
+        cv_dy = cr.cv_dy_bf
+        cvr_dy = cr.cvr_dy_bf
+        cr.cvr_dy_bf, cr.gp_dy_bf, cr.cv_dy_bf = [] # 前日値のリセット
       end
 
       # 曜日別GAPの算出
       calc_gap_per_day(d_hsh, r_hsh, ky)
 
       # 相関の算出
-      col.each do |t, i|
-        case t
-        when :pageviews, :sessions, :bounce_rate then
-          souten = (tbl.size * 3).to_f
-        else
-          souten = (tbl.size * 2).to_f
-        end
-        r_hsh[t][:corr] = (r_hsh[t][:corr].to_f / souten * 100).to_i
-      end
-      return r_hsh
+      # col.each do |t, i|
+      #   case t
+      #   when :pageviews, :sessions, :bounce_rate then
+      #     souten = (tbl.size * 3).to_f
+      #   else
+      #     souten = (tbl.size * 2).to_f
+      #   end
+      #   r_hsh[t][:corr] = (r_hsh[t][:corr].to_f / souten * 100).to_i
+      # end
+      r_hsh
     rescue => e
       puts "エラー： #{shori}"
       puts e.message
@@ -197,7 +192,7 @@ module UpdateTable
     return pt
   end
 
-  # # ページ相関の種類によってプロパティ値を変更
+  # ページ相関の種類によってプロパティ値を変更
   def chk_flg(cr, v, flg, cvr)
 
     case flg
