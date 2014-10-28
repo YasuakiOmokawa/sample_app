@@ -102,9 +102,17 @@ module UpdateTable
            cvr_dy_bf = 1
 
            # 人気ページ相関かどうかのチェック
-           chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
-
-           if not gp_dy.nil? and not cv_dy.nil? and not cvr_dy.nil? and not dy.nil?
+           case flg
+           when 'fvt' then # 人気ページ相関の場合
+             cv_dy_bf = v[t][4].to_i # CV
+           else
+            # binding.pry # ブレークポイントスイッチ
+             cv_dy_bf = v[:cv].to_i
+             cvr_dy_bf = v[cvr][2].to_f # CVR
+           end
+           
+           # 前日と当日のデータが揃っているか？
+           unless gp_dy.nil? && cv_dy.nil? && cvr_dy.nil? && dy.nil?
             binding.pry # ブレークポイントスイッチ
             gp = gp_dy - gp_dy_bf
             cv = cv_dy - cv_dy_bf
@@ -191,22 +199,22 @@ module UpdateTable
     return pt
   end
 
-  # 人気ページ相関かどうかのチェック
-  def chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
+  # # 人気ページ相関かどうかのチェック
+  # def chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
 
-   case flg
-   when 'fvt' then # 人気ページ相関の場合
-     cv_dy_bf = v[t][4].to_i # CV
+  # case flg
+  # when 'fvt' then # 人気ページ相関の場合
+  #   cv_dy_bf = v[t][4].to_i # CV
 
-     return cv_dy_bf.to_i
-   else
-    # binding.pry # ブレークポイントスイッチ
-     cv_dy_bf = v[:cv].to_i
-     cvr_dy_bf = v[cvr][2].to_f # CVR
+  #   return cv_dy_bf.to_i
+  # else
+  #   # binding.pry # ブレークポイントスイッチ
+  #   cv_dy_bf = v[:cv].to_i
+  #   cvr_dy_bf = v[cvr][2].to_f # CVR
 
-     return cv_dy_bf.to_i, cvr_dy_bf.to_f
-   end
-  end
+  #   return cv_dy_bf.to_i, cvr_dy_bf.to_f
+  # end
+  # end
 
   # 曜日別GAPの算出
   def calc_gap_per_day(d_hsh, r_hsh, ky)
