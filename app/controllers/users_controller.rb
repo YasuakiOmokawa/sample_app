@@ -591,18 +591,6 @@ class UsersController < ApplicationController
         @page_fltr_kwd = kwd
         logger.info('setted keyword is ' + kwd)
 
-        # ユーザ所有のGAアカウント一覧を取得
-        # if params[:gaccnt].present?
-        #   uid = params[:id].to_i
-        #   gaccnt = Gaproject.where(:userid => uid).pluck(:id)
-
-        #   # GAアカウント配列を格納
-        #   @json = gaccnt.to_json
-
-        #   # コントローラを抜ける
-        #   return
-        # end
-
         # キャッシュ済のデータがあればコントローラを抜ける
         return if @json.present?
 
@@ -691,11 +679,10 @@ class UsersController < ApplicationController
 
           ## ◆相関算出
 
-          # CV代入用
-
           # クラス名を一意にするため、乱数を算出
           rndm = SecureRandom.hex(4)
 
+          # CV代入用
           cls_name = 'CVForGraphSkeleton' + rndm.to_s
           # 4回までリトライできます
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
@@ -703,21 +690,21 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
-          # GAP算出用
+          # 相関のGAP値算出用
           # 4回までリトライできます
           gap = ''
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
           end
 
-          # 人気ページCV代入用
+          # 人気ページ相関のCV代入用
           cls_name = 'CVFav' + rndm.to_s
           # 4回までリトライできます
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
           end
 
-          # 人気ページGAP算出用
+          # 人気ページ相関のGAP算出用
           # 4回までリトライできます
           fgap = ''
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
@@ -752,16 +739,20 @@ class UsersController < ApplicationController
           # CV代入
           put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
 
-          # GAP算出
-          put_table_for_graph(gap, @gap_table_for_graph, mets_sa)
+          # 相関のGAPを算出
+          put_table_for_graph(gap, @gap_table_for_graph, mets_sa) # 項目の理想値、現実値をスケルトンへ代入
 
-          # 再訪問率をセッションベースにするためコメントアウト
+          # 再訪問率の計算はセッションベースにしているため以下のロジックはコメントアウト
           # gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
           # put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_r)
-          calc_gap_for_graph(@gap_table_for_graph, mets_sa)
+
+          calc_gap_for_graph(@gap_table_for_graph, mets_sa) # スケルトンからGAP値を計算
 
           # 相関算出
           # 曜日別の計算をしているときは、ここでgap値も算出している
+
+load 'update_table.rb'
+include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
           corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
           # 人気ページ

@@ -85,42 +85,41 @@ module UpdateTable
   def calc_corr(tbl, col, cvr, flg = 'none')
     begin
       shori = 'バブル（散布図）チャートのために相関を出す'
-      ky = ''
+
       r_hsh = Hash.new{ |h,k| h[k] = {} }
-      d_hsh = {} # 曜日別の日数を保持
-      day1 = ''
-      e1 = d1 = f1 = 0.0
-      e2 = d2 = f2 = day2 = nil
-      pt = 0
+      d_hsh = {} # 曜日種別の日数を保持
+      ky, dy_bf, pt = '', '', 0
+      cvr_dy_bf = gp_dy_bf = cv_dy_bf = 0.0
+      cvr_dy = gp_dy = cv_dy = dy = nil
+
       # 項目別
       col.each do |t, i|
+
         # 日付別
-        tbl.sort_by{|a, b| -(b['idx']) }.each do |k, v|
-           d1 = v[t][2].to_f # GAP
-           day1 = v[t][3] # 曜日別
-           e1 = 1
-           case flg
-           when 'fvt' then # 人気ページ相関の場合
-             f1 = v[t][4].to_i # CV
-           else
-             f1 = v[:cv].to_i
-             e1 = v[cvr][2].to_f # CVR
-           end
-           if not d2.nil? and not f2.nil? and not e2.nil? and not day2.nil?
-            d = d2 - d1
-            f = f2 - f1
-            e = e2 - e1
-            # p "d is #{d}, and f is #{f}, and e is #{e} d1, d2, f1, f2, e1, e2 is #{d1} #{d2} #{f1} #{f2} #{e1} #{e2}"
-            pt = calc_soukan(t, d, e, f)
-            ky = t.to_s + ' ' + day1.to_s
+        tbl.sort_by{|a, b| (b['idx']) }.each do |k, v|
+           gp_dy_bf = v[t][2].to_f # GAP
+           dy_bf = v[t][3] # 曜日種別
+           cvr_dy_bf = 1
+
+           # 人気ページ相関かどうかのチェック
+           chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
+
+           if not gp_dy.nil? and not cv_dy.nil? and not cvr_dy.nil? and not dy.nil?
+            binding.pry # ブレークポイントスイッチ
+            gp = gp_dy - gp_dy_bf
+            cv = cv_dy - cv_dy_bf
+            cvr = cvr_dy - cvr_dy_bf
+            p "gp is #{gp}, and cv is #{cv}, and cvr is #{cvr} gp_dy_bf, gp_dy, cv_dy_bf, cv_dy, cvr_dy_bf, cvr_dy is #{gp_dy_bf} #{gp_dy} #{cv_dy_bf} #{cv_dy} #{cvr_dy_bf} #{cvr_dy}"
+            pt = calc_soukan(t, gp, cvr, cv)
+            ky = t.to_s + ' ' + dy_bf.to_s
             case flg
             when 'fvt' then
               # .. 人気ページのときは曜日別計算をしない
             else
               d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別のカウンタ
-              r_hsh[ky][:gap] = d1 + r_hsh[ky][:gap].to_i # 曜日別の値
+              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別の値
             end
-            if day2 == day1 then # 相関ポイント計算
+            if dy == dy_bf then # 相関ポイント計算
               r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
               case flg
               when 'fvt' then
@@ -130,25 +129,18 @@ module UpdateTable
               end
             end
            end
-           day2 = day1
+           # binding.pry
+           dy = dy_bf
         end
-        d2 = d1
-        f2 = f1
-        e2 = e1
-        e1 = d1 = f1 = ''
+        gp_dy = gp_dy_bf
+        cv_dy = cv_dy_bf
+        cvr_dy = cvr_dy_bf
+        cvr_dy_bf = gp_dy_bf = cv_dy_bf = ''
       end
+
       # 曜日別GAPの算出
-      d_hsh.each do |c, d|
-        if c =~ /(rate|percent|avg_|_per_)/ then
-          puts "calc average because of item is #{c}"
-          if d_hsh[c] == 0 then
-            d_hsh[c] = 1
-          end
-          avg = r_hsh[c][:gap] / d_hsh[c]
-          r_hsh[c][:gap] = avg
-          puts "calc avg ok! cntr_info is #{ky}, cntr is #{d_hsh[ky]}, value is #{avg}"
-        end
-      end
+      calc_gap_per_day(d_hsh, r_hsh, ky)
+
       # 相関の算出
       col.each do |t, i|
         case t
@@ -166,28 +158,29 @@ module UpdateTable
     end
   end
 
-  def calc_soukan(t, dd, ee, ff)
-    case t
+  def calc_soukan(mtrcs, gp, cvr, cv)
+
+    case mtrcs
     # 相関係数を計算(pv, sessions, bounce_rate)
     when :pageviews, :sessions, :bounce_rate then
 
       # gap, cv 共に共通変更あり
-      if ( ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) ) and (ee >= 0.0 )
+      if ( ( gp < 0.0 and cv < 0 ) or ( gp > 0.0 and cv > 0) ) and (cvr >= 0.0 )
         # p "e3pt"
         pt = 3
-      elsif ( dd == 0.0 or ff == 0 ) and (ee >= 0.0) # どちらかが前日と同じ
-        # p "e2pt"
+      elsif ( gp == 0.0 or cv == 0 ) and (cvr >= 0.0) # どちらかが前日と同じ
+        # p "cvr_dypt"
         pt = 2
       else
-        # p "e1pt"
+        # p "cvr_dy_bfpt"
         pt = 1
       end
     else
       # 相関係数を計算(それ以外)
-      if ( dd < 0.0 and ff < 0 ) or ( dd > 0.0 and ff > 0) # gap, cv 共に共通変更あり
+      if ( gp < 0.0 and cv < 0 ) or ( gp > 0.0 and cv > 0) # gap, cv 共に共通変更あり
         # p "2pt"
         pt = 2
-      elsif ( dd == 0.0 or ff == 0 ) # どちらかが前日と同じ
+      elsif ( gp == 0.0 or cv == 0 ) # どちらかが前日と同じ
         # p "1pt"
         pt = 1
       else
@@ -196,6 +189,49 @@ module UpdateTable
       end
     end
     return pt
+  end
+
+  # 人気ページ相関かどうかのチェック
+  def chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
+
+   case flg
+   when 'fvt' then # 人気ページ相関の場合
+     cv_dy_bf = v[t][4].to_i # CV
+
+     return cv_dy_bf.to_i
+   else
+    # binding.pry # ブレークポイントスイッチ
+     cv_dy_bf = v[:cv].to_i
+     cvr_dy_bf = v[cvr][2].to_f # CVR
+
+     return cv_dy_bf.to_i, cvr_dy_bf.to_f
+   end
+  end
+
+  # 曜日別GAPの算出
+  def calc_gap_per_day(d_hsh, r_hsh, ky)
+
+    # d_hsh の中身 k.. 項目と曜日の種別 v.. 曜日の数
+
+    d_hsh.each do |c, d|
+
+      # binding.pry # ブレークポイントスイッチ
+      if c =~ /(rate|percent|avg_|_per_)/ then
+
+        # puts "calc average because of item is #{c}"
+
+        if d_hsh[c] == 0 then
+          d_hsh[c] = 1
+        end
+
+        avg = r_hsh[c][:gap] / d_hsh[c]
+
+        r_hsh[c][:gap] = avg
+
+        puts "calc gap_avg ok! key is #{d_hsh[ky]}, value is #{avg}"
+      end
+    end
+    return r_hsh
   end
 
   # GAP値のパーセンテージを値へ変換
