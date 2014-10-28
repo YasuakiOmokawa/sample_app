@@ -88,8 +88,10 @@ module UpdateTable
 
       r_hsh = Hash.new{ |h,k| h[k] = {} }
       d_hsh = {} # 曜日種別の日数を保持
-      ky, dy_bf, pt = '', '', 0
-      cvr_dy_bf = gp_dy_bf = cv_dy_bf = 0.0
+      cr = Corr.new # 相関算出用に前日の値を格納していくインスタンス
+      cr.dy_bf = ''
+      ky, pt = '', 0
+      cr.cvr_dy_bf = cr.gp_dy_bf = cr.cv_dy_bf = 0.0
       cvr_dy = gp_dy = cv_dy = dy = nil
 
       # 項目別
@@ -97,26 +99,19 @@ module UpdateTable
 
         # 日付別
         tbl.sort_by{|a, b| (b['idx']) }.each do |k, v|
-           gp_dy_bf = v[t][2].to_f # GAP
-           dy_bf = v[t][3] # 曜日種別
-           cvr_dy_bf = 1
+           cr.gp_dy_bf = v[t][2].to_f # GAP
+           cr.dy_bf = v[t][3] # 曜日種別
+           cr.cvr_dy_bf = 1
 
            # 人気ページ相関かどうかのチェック
-           case flg
-           when 'fvt' then # 人気ページ相関の場合
-             cv_dy_bf = v[t][4].to_i # CV
-           else
-            # binding.pry # ブレークポイントスイッチ
-             cv_dy_bf = v[:cv].to_i
-             cvr_dy_bf = v[cvr][2].to_f # CVR
-           end
-           
+           chk_flg(cr, v, flg, cvr)           
+
            # 前日と当日のデータが揃っているか？
            unless gp_dy.nil? && cv_dy.nil? && cvr_dy.nil? && dy.nil?
             binding.pry # ブレークポイントスイッチ
-            gp = gp_dy - gp_dy_bf
-            cv = cv_dy - cv_dy_bf
-            cvr = cvr_dy - cvr_dy_bf
+            gp = gp_dy - cr.gp_dy_bf
+            cv = cv_dy - cr.cv_dy_bf
+            cvr = cvr_dy - cr.cvr_dy_bf
             p "gp is #{gp}, and cv is #{cv}, and cvr is #{cvr} gp_dy_bf, gp_dy, cv_dy_bf, cv_dy, cvr_dy_bf, cvr_dy is #{gp_dy_bf} #{gp_dy} #{cv_dy_bf} #{cv_dy} #{cvr_dy_bf} #{cvr_dy}"
             pt = calc_soukan(t, gp, cvr, cv)
 
@@ -202,22 +197,17 @@ module UpdateTable
     return pt
   end
 
-  # # 人気ページ相関かどうかのチェック
-  # def chk_flg(v, flg, cv_dy_bf, cvr_dy_bf, cvr)
+  # # ページ相関の種類によってプロパティ値を変更
+  def chk_flg(cr, v, flg, cvr)
 
-  # case flg
-  # when 'fvt' then # 人気ページ相関の場合
-  #   cv_dy_bf = v[t][4].to_i # CV
-
-  #   return cv_dy_bf.to_i
-  # else
-  #   # binding.pry # ブレークポイントスイッチ
-  #   cv_dy_bf = v[:cv].to_i
-  #   cvr_dy_bf = v[cvr][2].to_f # CVR
-
-  #   return cv_dy_bf.to_i, cvr_dy_bf.to_f
-  # end
-  # end
+    case flg
+    when 'fvt' then # 人気ページ相関の場合
+      cr.cv_dy_bf = v[t][4].to_i
+    else
+      cr.cv_dy_bf = v[:cv].to_i
+      cr.cvr_dy_bf = v[cvr][2].to_f
+    end
+  end
 
   # 曜日別GAPの算出
   def calc_gap_per_day(d_hsh, r_hsh, ky)
