@@ -5,16 +5,19 @@ $(window).load(function() {
   // ajaxイベントを実施する
   if ($('title').text().indexOf('ホーム') == 0) {
 
-    if ( $('input[name="prev_page"]').val() ) {
-      var wd = $('input[name="prev_page"]').val();
-    } else {
-      var wd = '全体';
-    }
+    // 2014/10/29 ログイン直後に期間設定ダイアログを表示させるよう改修
+    $( "#onlogin-dialog" ).dialog('open');
 
-    var txt = 'div#narrow a:contains(' + wd + ')';
+    // if ( $('input[name="prev_page"]').val() ) {
+    //   var wd = $('input[name="prev_page"]').val();
+    // } else {
+    //   var wd = '全体';
+    // }
 
-    // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、１秒待つ
-    //  おそらくターボリンクスのせい
-    setTimeout( function(){ $(txt).trigger('click'); }, 1000);
+    // var txt = 'div#narrow a:contains(' + wd + ')';
+
+    // // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、１秒待つ
+    // //  おそらくターボリンクスのせい
+    // setTimeout( function(){ $(txt).trigger('click'); }, 1000);
   }
 });

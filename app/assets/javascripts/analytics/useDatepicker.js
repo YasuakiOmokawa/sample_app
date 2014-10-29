@@ -105,6 +105,45 @@ $(function() {
     }
   });
 
+  // ログイン直後に表示する期間設定ダイアログ
+  $('#onlogin-dialog').dialog({
+    closeOnEscape: false,
+    autoOpen: false,
+    draggable: false,
+    open:function(event, ui){
+      $(".ui-dialog-titlebar-close").hide();
+      // datepickerを自動表示させない
+      $('#dummy').hide();
+    },
+    width: 400,
+    height: 200,
+    // title: '期間設定',
+    modal: true,
+    position: {
+      my: "left top",
+      at: "left top",
+      of: 'a#jrange'
+    },
+    buttons: {
+        "設定": function(){
+        $(this).dialog('close');
+
+        // 入力値を期間設定ボックスへ設定
+        setRange();
+
+        // datepickerを自動表示させない
+        $('#dummy').show();
+
+        // ページ遷移直後は全体ページ、
+        // バブル描画後は描画されたページの項目を格納
+        var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
+
+        // ajaxリクエストを実行
+        callExecuter(wd);
+      }
+    }
+  });
+
   // 日付のリンクをクリックしたら、現在の期間設定をダイアログへ
   // 反映させる
   $( "a#jrange" )
