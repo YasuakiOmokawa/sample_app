@@ -138,7 +138,7 @@ module InsertTable
             end
           rescue => e
             puts "エラー：　#{shori}"
-            puts e.message
+            puts e
           end
         end
         begin

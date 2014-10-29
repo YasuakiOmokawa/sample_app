@@ -121,18 +121,20 @@ module UpdateTable
             # binding.pry # ブレークポイントスイッチ
             # 相関ポイントの計算
             pt = calc_soukan(t, gp, cvr, cv, cr.cv_dy, cr.gp_dy, dt, cr.dt_dy)
-            binding.pry # ブレークポイントスイッチ
+            # binding.pry # ブレークポイントスイッチ
 
-            # 曜日別の項目数を格納
             ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー
             unless flg == 'fvt'
+              # 曜日別の項目数を格納
               d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別の項目数をカウント
-              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値
+              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値を集計
             end
-            if cr.dy == dy_bf # 相関の計算
+            if cr.dy == dy_bf # 相関のポイントを集計
               r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
+
               unless flg == 'fvt'
-                r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の相関
+                # 曜日別の相関ポイントを格納
+                r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i
               end
             end
 
@@ -145,7 +147,7 @@ module UpdateTable
            cvr_dy_bf = cr.cvr_dy
            cr.cvr_dy, cr.gp_dy, cr.cv_dy, cr.dt_dy = [] # 前日値のリセット
         end
-        binding.pry # ブレークポイントスイッチ
+        # binding.pry # ブレークポイントスイッチ
       end
 
       # 曜日別GAPの算出
@@ -209,8 +211,9 @@ module UpdateTable
     when 'fvt' then # 人気ページ相関の場合
       cr.cv_dy = v[t][4].to_i
     else
+      # binding.pry # ブレークポイントスイッチ
       cr.cv_dy = v[:cv].to_i
-      cr.cvr_dy = v[cvr][2].to_f
+      # cr.cvr_dy = v[cvr][2].to_f
     end
     rescue => e
       puts "エラー： #{shori}"
