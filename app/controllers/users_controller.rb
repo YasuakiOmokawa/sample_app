@@ -751,8 +751,6 @@ class UsersController < ApplicationController
           # 相関算出
           # 曜日別の計算をしているときは、ここでgap値も算出している
 
-load 'update_table.rb'
-include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
           corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
           # 人気ページ
