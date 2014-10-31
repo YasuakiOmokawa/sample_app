@@ -41,6 +41,63 @@ var chgPos = function(input, inst, elm) {
    }, 10);
 }
 
+// 日付リンクの期間設定を入力ダイアログへ反映させる
+function addRangeToDatePicker() {
+    var v = $("a#jrange").text(), d, f, t;
+
+    d = v.split('-');
+
+     f = '20' + d[0];
+     t = '20' + d[1];
+
+    $('input.fromd').datepicker('setDate', f);
+    $('input.tod').datepicker('setDate', t);
+}
+
+// ダイアログ内のdatepicker
+function addDatepicker() {
+  $("input.fromd").datepicker({
+    changeMonth: true,
+    changeYear: true,
+    numberOfMonths: 2,
+    dateFormat:"yy/mm/dd",
+    beforeShow: function(input, inst) {
+      chgPos(input, inst, $(this));
+    },
+    onSelect: function( selectedDate ) {
+      var dte = calc(selectedDate, '+', 31);
+      var opt = fmt(dte);
+      $( "#from" ).val(selectedDate);
+      $( "input.tod" ).datepicker( "option",
+        {
+          minDate: selectedDate,
+          maxDate: opt
+        }
+      );
+    }
+  });
+
+  $("input.tod").datepicker({
+    changeMonth: true,
+    changeYear: true,
+    numberOfMonths: 2,
+    dateFormat:"yy/mm/dd",
+    beforeShow: function(input, inst) {
+      chgPos(input, inst, $(this));
+    },
+    onSelect: function( selectedDate ) {
+      var dte = calc(selectedDate, '-', 31);
+      var opt = fmt(dte);
+      $( "#to" ).val(selectedDate);
+      $( "input.fromd" ).datepicker( "option",
+        {
+          minDate: opt,
+          maxDate: selectedDate
+        }
+      );
+    }
+  });
+}
 
 $(function() {
 
@@ -50,9 +107,16 @@ $(function() {
     autoOpen: false,
     draggable: false,
     open:function(event, ui){
+
+      // 閉じるボタンを表示させない
       $(".ui-dialog-titlebar-close").hide();
-      // datepickerを自動表示させない
-      $('input.dummy').hide();
+
+      // datepickerを設定
+      addDatepicker();
+
+      // 日付リンクから、期間設定をダイアログの入力ボックスへ転記
+      addRangeToDatePicker();
+
     },
     width: 400,
     height: 200,
@@ -65,34 +129,41 @@ $(function() {
     },
     buttons: {
         "設定": function(){
-        $(this).dialog('close');
 
-        // 入力値を期間設定ボックスへ設定
-        setRange();
+          // 入力ボックスの値を#from, #to へ格納
+          $("#from").val( $("input.fromd").val() );
+          $("#to").val( $("input.tod").val() );
 
-        // datepickerを自動表示させない
-        $('input.dummy').show();
+          $(this).dialog('close');
 
-        // ホーム画面の判別
-        if ($('title').text().indexOf('ホーム') == 0) {
+          // 入力値を期間設定のhidden inputへ設定
+          setRange();
 
-          // ページ遷移直後は全体ページ、
-          // バブル描画後は描画されたページの項目を格納
-          var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
+          // datepicker の削除
+          $("input.fromd").datepicker("destroy");
+          $("input.tod").datepicker("destroy");
 
-          // ajaxリクエストを実行
-          callExecuter(wd);
-        } else {
+          // ホーム画面の判別
+          if ($('title').text().indexOf('ホーム') == 0) {
 
-          // ホーム画面でないときは非ajaxリクエストを実行
-          $('a#set').trigger('click');
-        }
+            // ページ遷移直後は全体ページ、
+            // バブル描画後は描画されたページの項目を格納
+            var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
+
+            // ajaxリクエストを実行
+            callExecuter(wd);
+          } else {
+
+            // ホーム画面でないときは非ajaxリクエストを実行
+            $('a#set').trigger('click');
+          }
       },
       "キャンセル": function(){
         $(this).dialog('close');
 
-        // datepickerを自動表示させない
-        $('#dummy').show();
+        // datepickerを削除
+        $("input.fromd").datepicker("destroy");
+        $("input.tod").datepicker("destroy");
       }
     }
   });
@@ -105,10 +176,26 @@ $(function() {
     dialogClass: 'jquery-ui-dialog-onlogin',
     open:function(event, ui){
 
+      // datepickerを設定
+      addDatepicker();
+
+      // from , to の値をリセット
+      $('input.fromd').datepicker('setDate', null);
+      $('input.tod').datepicker('setDate', null);
+
+      // datepicker を表示させるため、初期focus を行う。
+      $( "div.jquery-ui-dialog-onlogin" ).focus();
+
       // 確認ダイアログを表示
-      $( "a#start" ).click(function() {
+      $( "div.jquery-ui-dialog-onlogin a#start" ).click(function() {
+
         $('#onlogin-dialog-confirm').dialog('open');
+
         $('#onlogin-dialog').dialog('close');
+
+        // datepicker の削除
+        $("input.fromd").datepicker("destroy");
+        $("input.tod").datepicker("destroy");
       });
     },
     width: 1000,
@@ -131,15 +218,17 @@ $(function() {
       $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
 
       // 分析開始ボタンの動作
-      $( "a#go" ).click(function() {
-        $("#onlogin-dialog-confirm").dialog('close');
+      $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
         // $('#onlogin-dialog-confirm').dialog('open');
+        $("#onlogin-dialog-confirm").dialog('close');
+
       });
 
       // 期間修正ボタンの動作
-      $( "a#cancel" ).click(function() {
+      $( "div.jquery-ui-dialog-onlogin a#cancel" ).click(function() {
         $('#onlogin-dialog').dialog('open');
         $("#onlogin-dialog-confirm").dialog('close');
+
       });
     },
     width: 1000,
@@ -147,67 +236,8 @@ $(function() {
     modal: true,
   });
 
-  // 日付のリンクをクリックしたら、現在の期間設定をダイアログへ
-  // 反映させる
-  $( "a#jrange" )
-    .click( function() {
-      var v = $(this).text(), d, f, t;
-
-      d = v.split('-');
-
-       f = '20' + d[0];
-       t = '20' + d[1];
-
-      $('input.fromd').datepicker('setDate', f);
-      $('input.tod').datepicker('setDate', t);
-
+  // 日付のリンクをクリックしたら、期間設定ダイアログをオープン
+  $("a#jrange").click(function() {
       $( "#dialog-form" ).dialog('open');
   });
-
-  // ダイアログ内のdatepicker
-  $("input.fromd").datepicker({
-    changeMonth: true,
-    changeYear: true,
-    numberOfMonths: 2,
-    dateFormat:"yy/mm/dd",
-    beforeShow: function(input, inst) {
-      chgPos(input, inst, $(this));
-    },
-    onSelect: function( selectedDate ) {
-      var dte = calc(selectedDate, '+', 31);
-      var opt = fmt(dte);
-      $( "#from" ).val(selectedDate);
-      $( "input.tod" ).datepicker( "option",
-        {
-          minDate: selectedDate,
-          maxDate: opt
-        }
-      );
-      // console.log( "to val change, " + $("input.tod").val() );
-      // $("#to").val( $("input.tod").val() );
-    }
-  });
-  $("input.tod").datepicker({
-    changeMonth: true,
-    changeYear: true,
-    numberOfMonths: 2,
-    dateFormat:"yy/mm/dd",
-    beforeShow: function(input, inst) {
-      chgPos(input, inst, $(this));
-    },
-    onSelect: function( selectedDate ) {
-      var dte = calc(selectedDate, '-', 31);
-      var opt = fmt(dte);
-      $( "#to" ).val(selectedDate);
-      $( "input.fromd" ).datepicker( "option",
-        {
-          minDate: opt,
-          maxDate: selectedDate
-        }
-      );
-      // console.log( "fromd val change, " + $("input.fromd").val() );
-      // $("#from").val( $("input.fromd").val() );
-    }
-  });
-
 });

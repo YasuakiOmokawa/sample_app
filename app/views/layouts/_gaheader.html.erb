@@ -50,7 +50,6 @@
 <div id="dialog-form">
   <p>期間を設定してください</p>
   <p>指定範囲は最大1か月です</p>
-  <input id="dummy" readonly="readonly"/>
   <br/>
     <label for="fromd">開始</label>
     <input type="text" class="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />
@@ -63,11 +62,10 @@
 <div id="onlogin-dialog">
   <br/><br/><br/><br/><br/>
   <p>期間を設定してください　　　　　　　　　　　　　</p>
-  <input class="dummy" readonly="readonly"/>
-  <br/>
-    <input type="text" class="fromd" name="fromd" readonly="readonly"  />&nbsp;～&nbsp;
+  <br/><br/>
+  <input type="text" class="fromd" name="fromd" readonly="readonly"  />&nbsp;～&nbsp;
     <input type="text" class="tod" name="tod" readonly="readonly"  />
-    <a href id="start">設定</a>
+    <a href="javascript:void(0)" id="start">設定</a>
 </div>
 <!-- onLogin dialog end -->
 
@@ -76,8 +74,8 @@
   <br/><br/><br/><br/><br/>
   <p id="confirm-msg"></p>
   <br/><br/><br/>
-  <a href id="go">分析開始</a>
-  <a href id="cancel">期間修正</a>
+  <a href="javascript:void(0)" id="go">分析開始</a>&nbsp;
+  <a href="javascript:void(0)" id="cancel">期間修正</a>
 </div>
 <!-- onLogin confirm dialog end -->
 

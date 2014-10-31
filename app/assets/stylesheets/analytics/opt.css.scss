@@ -75,13 +75,22 @@ div.ui-corner-all.jquery-ui-dialog-onlogin {
 // ボタンのサイズを変更
 .jquery-ui-dialog-onlogin a {
   margin: 0 0 0 40px;
-  padding: 5px 30px 0px 30px;
+  padding: 14px 30px 6px 30px;
   color: #ffffff;
   background-color: #808080;
+  font-size: 17px;
+  font-weight: bold;
 }
 
 // ボタンホバー時の動作を指定
 .jquery-ui-dialog-onlogin a:hover {
   text-decoration: none;
   background-color: #C0C0C0;
+}
+
+// 日付入力ボックスのサイズを変更
+.jquery-ui-dialog-onlogin input.hasDatepicker {
+  width: 200px;
+  height: 42px;
+  text-align: center;
 }
