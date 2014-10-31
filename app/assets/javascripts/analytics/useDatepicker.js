@@ -107,50 +107,23 @@ $(function() {
     closeOnEscape: false,
     autoOpen: false,
     draggable: false,
-    dialogClass: 'jquery-ui-dialog-onlogin-confirm',
+    dialogClass: 'jquery-ui-dialog-onlogin',
     open:function(event, ui){
 
       // 期間メッセージを表示
       var f = $("#from").val();
       var t = $("#to").val();
       var msg = f + "～" + t + "　の期間で分析をします。"
-      $("#onlogin-dialog-confirm p#confirm-msg").text(msg);
+      $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
 
-      // タイトルバーを非表示
-      $("div.ui-dialog-titlebar").hide();
-
-      // ダイアログの角を丸くしない
-      $(".ui-corner-all").css({
-        "border-top-right-radius": "0px",
-        "border-top-left-radius": "0px",
-        "border-bottom-right-radius": "0px",
-        "border-bottom-left-radius": "0px"
-      });
-
-      // ダイアログのサイズを変更
-      $(".jquery-ui-dialog-onlogin-confirm").css({
-        "font-family": "inherit",
-        "font-size": "25px",
-        "text-align": "center",
-      });
-
-      // 設定ボタンのサイズを変更
-      $("#onlogin-dialog-confirm a").css({
-        "margin": "0 0 0 40px",
-        "text-decoration": "none",
-        "padding": "5px 30px 0px 30px",
-        "color": "#ffffff",
-        "background-color": "#808080",
-      });
-
-      // 設定ボタンのサイズを変更
-      $('#onlogin-dialog-confirm a').hover(
-        function(){
-            $(this).css("background-color","#C0C0C0");
-        },function(){
-            $(this).css("background-color","#808080");
-        }
-      );
+      // // 設定ボタンのサイズを変更
+      // $('#onlogin-dialog-confirm a').hover(
+      //   function(){
+      //       $(this).css("background-color","#C0C0C0");
+      //   },function(){
+      //       $(this).css("background-color","#808080");
+      //   }
+      // );
 
       // 分析開始ボタンの動作
       $( "a#go" ).click(function() {
@@ -177,51 +150,14 @@ $(function() {
     dialogClass: 'jquery-ui-dialog-onlogin',
     open:function(event, ui){
 
-      // タイトルバーを非表示
-      $("div.ui-dialog-titlebar").hide();
-
-      // ダイアログの角を丸くしない
-      $(".ui-corner-all").css({
-        "border-top-right-radius": "0px",
-        "border-top-left-radius": "0px",
-        "border-bottom-right-radius": "0px",
-        "border-bottom-left-radius": "0px"
-      });
-
-      // datepickerを自動表示させない
-      $('input.dummy').hide();
-
-      // ダイアログのサイズを変更
-      $(".jquery-ui-dialog-onlogin").css({
-        "font-family": "inherit",
-        "font-size": "25px",
-        "text-align": "center",
-      });
-
-      // 日付入力ボックスのサイズを変更
-      $("input.hasDatepicker").css({
-        "width": "200px",
-        "height": "42px",
-        "text-align": "center",
-      })
-
       // 設定ボタンのサイズを変更
-      $("a#start").css({
-        "margin": "0 0 0 40px",
-        "text-decoration": "none",
-        "padding": "5px 30px 0px 30px",
-        "color": "#ffffff",
-        "background-color": "#808080",
-      });
-
-      // 設定ボタンのサイズを変更
-      $('a#start').hover(
-        function(){
-            $(this).css("background-color","#C0C0C0");
-        },function(){
-            $(this).css("background-color","#808080");
-        }
-      );
+      // $('a#start').hover(
+      //   function(){
+      //       $(this).css("background-color","#C0C0C0");
+      //   },function(){
+      //       $(this).css("background-color","#808080");
+      //   }
+      // );
 
       // 確認ダイアログを表示
       $( "a#start" ).click(function() {
