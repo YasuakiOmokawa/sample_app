@@ -48,27 +48,37 @@
 </div>
 <!-- datepicker form dialog start -->
 <div id="dialog-form">
-  <p>期間を指定してください</p>
+  <p>期間を設定してください</p>
   <p>指定範囲は最大1か月です</p>
   <input id="dummy" readonly="readonly"/>
   <br/>
     <label for="fromd">開始</label>
-    <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />
+    <input type="text" class="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />
     <label for="tod">終了</label>
-    <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+    <input type="text" class="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
 </div>
 <!-- datepicker form dialog end -->
 
 <!-- onLogin dialog start -->
 <div id="onlogin-dialog">
-  <p>期間を指定してください</p>
-  <input id="dummy" readonly="readonly"/>
+  <br/><br/><br/><br/><br/>
+  <p>期間を設定してください　　　　　　　　　　　　　</p>
+  <input class="dummy" readonly="readonly"/>
   <br/>
-    <label for="fromd">開始</label>
-    <input type="text" id="fromd" name="fromd" size="10" style="width:100px;" readonly="readonly"  />
-    <label for="tod">終了</label>
-    <input type="text" id="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
+    <input type="text" class="fromd" name="fromd" readonly="readonly"  />&nbsp;～&nbsp;
+    <input type="text" class="tod" name="tod" readonly="readonly"  />
+    <a href id="start">設定</a>
 </div>
 <!-- onLogin dialog end -->
+
+<!-- onLogin confirm dialog start -->
+<div id="onlogin-dialog-confirm">
+  <br/><br/><br/><br/><br/>
+  <p id="confirm-msg"></p>
+  <br/>
+  <a href id="go">分析開始</a>
+  <a href id="cancel">期間修正</a>
+</div>
+<!-- onLogin confirm dialog end -->
 
 <!-- header_end -->
