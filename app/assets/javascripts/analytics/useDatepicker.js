@@ -97,12 +97,26 @@ $(function() {
     }
   });
 
+  // ログイン直後に表示する期間設定ダイアログ
+  $('#onlogin-dialog').dialog({
+    closeOnEscape: false,
+    autoOpen: false,
+    draggable: false,
+    dialogClass: 'jquery-ui-dialog-onlogin',
+    open:function(event, ui){
+
+      // 確認ダイアログを表示
+      $( "a#start" ).click(function() {
+        $('#onlogin-dialog-confirm').dialog('open');
+        $('#onlogin-dialog').dialog('close');
+      });
+    },
+    width: 1000,
+    height: 300,
+    modal: true,
+  });
+
   // ログイン直後ダイアログの設定ボタンをクリックした後の確認ダイアログ
-
-// ↓エラー発生
-// TypeError: $(...).data(...) is null
-// .data( widgetFullName )._focusTabbable();
-
   $('#onlogin-dialog-confirm').dialog({
     closeOnEscape: false,
     autoOpen: false,
@@ -116,15 +130,6 @@ $(function() {
       var msg = f + "～" + t + "　の期間で分析をします。"
       $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
 
-      // // 設定ボタンのサイズを変更
-      // $('#onlogin-dialog-confirm a').hover(
-      //   function(){
-      //       $(this).css("background-color","#C0C0C0");
-      //   },function(){
-      //       $(this).css("background-color","#808080");
-      //   }
-      // );
-
       // 分析開始ボタンの動作
       $( "a#go" ).click(function() {
         $("#onlogin-dialog-confirm").dialog('close');
@@ -135,34 +140,6 @@ $(function() {
       $( "a#cancel" ).click(function() {
         $('#onlogin-dialog').dialog('open');
         $("#onlogin-dialog-confirm").dialog('close');
-      });
-    },
-    width: 1000,
-    height: 300,
-    modal: true,
-  });
-
-  // ログイン直後に表示する期間設定ダイアログ
-  $('#onlogin-dialog').dialog({
-    closeOnEscape: false,
-    autoOpen: false,
-    draggable: false,
-    dialogClass: 'jquery-ui-dialog-onlogin',
-    open:function(event, ui){
-
-      // 設定ボタンのサイズを変更
-      // $('a#start').hover(
-      //   function(){
-      //       $(this).css("background-color","#C0C0C0");
-      //   },function(){
-      //       $(this).css("background-color","#808080");
-      //   }
-      // );
-
-      // 確認ダイアログを表示
-      $( "a#start" ).click(function() {
-        $('#onlogin-dialog-confirm').dialog('open');
-        $('#onlogin-dialog').dialog('close');
       });
     },
     width: 1000,
