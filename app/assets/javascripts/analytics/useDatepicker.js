@@ -99,9 +99,10 @@ $(function() {
 
   // ログイン直後ダイアログの設定ボタンをクリックした後の確認ダイアログ
 
-// TypeError: $(...).data(...) is null ←エラー発生
+// ↓エラー発生
+// TypeError: $(...).data(...) is null
+// .data( widgetFullName )._focusTabbable();
 
-.data( widgetFullName )._focusTabbable();
   $('#onlogin-dialog-confirm').dialog({
     closeOnEscape: false,
     autoOpen: false,
