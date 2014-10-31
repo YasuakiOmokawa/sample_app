@@ -27,6 +27,8 @@ var setDataidx = function(obj, wd) {
   var arr = [];
   var cnt = 0;
   var fltr_wd = wd
+  var pagenm = 'li.tab > a:contains(' + fltr_wd + ')';   // ページ名（全体、検索、など）を取得
+  var pagelink = $(pagenm)[0].name;   // ページへのリンクを取得
 
   for (var i in homearr[fltr_wd]) {
 
@@ -51,6 +53,7 @@ var setDataidx = function(obj, wd) {
       ar['usr_fltr'] = usr_fltr;
       ar['kwd_fltr'] = kwd_fltr;
       ar['page'] = fltr_wd;
+      ar['pagelink'] = pagelink;
       idxarr.push(ar);
     });
     cnt += 1
@@ -251,7 +254,7 @@ function plotGraphHome(robj, fltr) {
     var counter = 0;
     // 項目一覧へ表示する文字列
     var caption;
-    var ptxt, pagenm, pagelink;
+    // var ptxt, pagenm, pagelink;
 
     // 項目一覧データを追記
     idxarr.some(function(value){
@@ -263,11 +266,11 @@ function plotGraphHome(robj, fltr) {
 
       counter = counter + 1;
 
-      // ページ名（全体、検索、など）を取得
-      pagenm = 'li.tab > a:contains(' + page_fltr_wd + ')';
+    //   // ページ名（全体、検索、など）を取得
+    //   pagenm = 'li.tab > a:contains(' + page_fltr_wd + ')';
 
-      // ページへのリンクを取得
-      pagelink = $(pagenm)[0].name;
+    //   // ページへのリンクを取得
+    //   pagelink = $(pagenm)[0].name;
 
       // 絞り込み情報の追加
       text = value['arr'][3].split(';;');
@@ -285,7 +288,7 @@ function plotGraphHome(robj, fltr) {
           ).append(
             $('<td>')
             .attr({
-              "name": pagelink,
+              "name": value['pagelink'],
               "class": "r",
               'data-gap': value['arr'][0],
               'data-sokan': value['arr'][1],
