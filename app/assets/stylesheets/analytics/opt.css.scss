@@ -51,4 +51,32 @@ table#daemon {
   margin-top: 65px;
 }
 
+// ログイン直後ダイアログ関連
+// タイトルバー削除
+div.jquery-ui-dialog-onlogin div.ui-dialog-titlebar {
+  display: none;
+}
 
+// ダイアログの角を丸くしない
+div.ui-corner-all.jquery-ui-dialog-onlogin {
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+// コンテンツ全体のサイズを変更
+.jquery-ui-dialog-onlogin {
+  font-family: inherit;
+  font-size: 25px;
+  text-align: center;
+}
+
+// ボタンのサイズを変更
+.jquery-ui-dialog-onlogin a {
+  margin: 0 0 0 40px;
+  text-decoration: none;
+  padding: 5px 30px 0px 30px;
+  color: #ffffff;
+  background-color: #808080;
+}
