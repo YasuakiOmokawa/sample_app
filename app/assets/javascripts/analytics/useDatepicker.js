@@ -219,8 +219,25 @@ $(function() {
 
       // 分析開始ボタンの動作
       $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
-        // $('#onlogin-dialog-confirm').dialog('open');
+
         $("#onlogin-dialog-confirm").dialog('close');
+
+
+        // ホーム画面で指定したページ項目名
+        var page_fltr_wd = "全体";
+
+        // ajaxリクエストを実行
+        var r_obj = callOwner(page_fltr_wd);
+
+        // データセット
+        var arr = setData(r_obj, page_fltr_wd);
+
+        // データ項目一覧セット
+        var idxarr = setDataidx(r_obj, page_fltr_wd);
+
+        // バブルチャートを描画
+        plotGraphHome(arr, idxarr);
+
 
       });
 

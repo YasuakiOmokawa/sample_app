@@ -1,30 +1,235 @@
-// バブルチャート取得用のオプション配列
-var opts = [];
-
-// バブルチャート取得用のオプション
-var dev, usr, kwd;
-
-// オプション配列用のカウンタ
-var opts_cntr = 0;
-
-// 絞り込み用キーワード
-var kwd_opts = [];
-
-// バブルチャート描画用のデータオブジェクト
-var r_obj = {};
+// ajaxリクエスト格納
+var request;
 
 // バブルチャート表示リクエストの処理開始、完了フラグ
 // 0: 未処理 1: 処理中 2: 処理終了
 var bbl_shori_flg = 0;
 
-// ajaxリクエスト格納
-var request;
+// バブルチャート取得関数
+function callOwner(elem) {
 
-// ユニークキーを格納
-var kwd_strgs = 0;
+  console.log( 'ajax通信開始!');
+
+  // ページ遷移先の設定
+  var userpath = gon.narrow_action;
+
+  // elem引数から、表示するページ項目を取り出す
+  var elm_txt = parseElem(elem);
+
+  // バブルチャート取得用のオプション配列
+  var opts = [];
+
+  // バブルチャート取得用のオプション
+  var dev, usr, kwd;
+
+  // オプション配列用のカウンタ
+  var opts_cntr = 0;
+
+  // 表示項目のリセット
+  resetHome();
+
+  // プログレススピナーを生成
+  var spinner = createSpinner();
+
+  // ローディング中のメッセージを生成
+  // var target = $('<div id="guardian"></div><table id="daemon"><tr><td>分析中 ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
+
+  // バブルチャートをオーバーレイ
+  addOverlay();
+
+  // プログレススピナーを表示
+  $('#guardian').append(spinner.el);
+
+  // 項目一覧のオーバレイ
+  $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
+
+  // オプションキーワードを生成
+  var kwd_opts = setKwds(elm_txt, userpath);
+
+  // オプション配列を生成
+  setOpts(opts, kwd_opts);
+
+  // キャッシュ用ユニーク文字数を格納
+  var kwd_strgs = createCacheKeyNum(kwd_opts);
+
+  // キャッシュ済データを取得
+  var data;
+  var c_obj = cacheResult(kwd_strgs, data, false, elm_txt, 'GET');
+
+  // キャッシュ済データがあるか？
+  if (c_obj) {
+
+    // 事後処理
+    afterCall();
+
+    // ページ名のdivタグをグレーアウト
+    markPageBtn(elm_txt);
+
+    //処理を終了
+    return c_obj;
+  } else {
+
+    // ajax処理中
+    bbl_shori_flg = 1;
+
+    // データリクエストを実行
+    var r_obj = {};
+    callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj);
+
+    // 結果データのキャッシュ
+    cacheResult(kwd_strgs, r_obj, true, elm_txt, 'POST');
+
+    return r_obj;
+  }
+
+}
+
+// バブルチャートをオーバーレイ
+function addOverlay() {
+
+  $('#gp').plainOverlay(
+    'show',
+    {
+      opacity: 0.2,
+      progress: function() {
+        var target = $('<div id="guardian"></div><table id="daemon"><tr><td>分析中 ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
+        return target;
+      }
+  });
+}
+
+// プログレススピナーを生成
+function createSpinner() {
+
+  var shaft = {
+    lines: 13, // The number of lines to draw
+    length: 15, // The length of each line
+    width: 9, // The line thickness
+    radius: 18, // The radius of the inner circle
+    corners: 1, // Corner roundness (0..1)
+    rotate: 0, // The rotation offset
+    direction: 1, // 1: clockwise, -1: counterclockwise
+    color: '#000', // #rgb or #rrggbb or array of colors
+    speed: 1, // Rounds per second
+    trail: 60, // Afterglow percentage
+    shadow: false, // Whether to render a shadow
+    hwaccel: false, // Whether to use hardware acceleration
+    className: 'spinner', // The CSS class to assign to the spinner
+    zIndex: 2e9, // The z-index (defaults to 2000000000)
+    top: '50%', // Top position relative to parent
+    left: '50%' // Left position relative to parent
+  };
+  var spinner = new Spinner(shaft).spin();
+
+  return spinner;
+}
+
+// 表示項目のリセット
+function resetHome() {
+
+  $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
+  $('#legend1b').empty();
+  $('#errormsg').empty();
+}
+
+// ページ項目に合わせた絞り込みキーワードを取得する
+function setKwds(elm_txt, userpath) {
+
+  // 返り値
+  var dt = [];
+
+  // ページ項目に合わせた絞り込みキーワードを取得する
+  // この時点では絞り込みオプションを指定しない
+  console.log( '絞り込み用キーワード取得対象 : ' + String(elm_txt));
+  console.log( '絞り込み用キーワード取得処理の開始');
+
+  $.ajax({
+    url: userpath,
+    async: false,
+    dataType: 'json',
+    data: {
+      from : $('#from').val(),
+      to : $('#to').val(),
+      cv_num : $('input[name="cv_num"]').val(),
+      shori : $('input[name="shori"]').val(),
+      act : elm_txt, // 取得するページ項目
+    }
+  })
+
+  .done(function(data, textStatus, jqXHR) {
+    var d = JSON.parse(data.homearr);
+    console.log( '絞り込み用キーワード取得完了');
+    console.log(d);
+    $.extend(true, dt, d);
+  })
+
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    $('span#errormsg').html('絞り込み用キーワード取得エラーが発生しました： ' + String(errorThrown));
+  })
+
+  .always(function() {
+    console.log('絞り込み用キーワード取得処理の終了');
+  });
+
+  return dt;
+}
+
+// パラメータの全ての組み合わせを網羅した配列を作る
+function setOpts(opts, kwd_opts) {
+
+  var dev_opts = [ // デバイス
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
+  ];
+
+  var usr_opts = [ // 訪問者
+    'new',
+    // 'repeat'
+  ];
+
+  for (var i = 0; i <= dev_opts.length; i++) {
+    for (var j = 0; j <= usr_opts.length; j++) {
+      for (var k = 0; k <= kwd_opts.length; k++) {
+        opts.push( {dev: dev_opts[i], usr: usr_opts[j], kwd: kwd_opts[k] });
+      }
+    }
+  }
+  console.log('全パラメータ組み合わせ数 : ' + String(opts.length));
+}
+
+// キャッシュ用キー文字数を生成
+function createCacheKeyNum(kwd_opts) {
+
+  // 返り値
+  var kwd_strgs = 0;
+
+  // キーワードの総文字数を格納
+  if (kwd_opts.length >= 1) {
+    for (var k = 0; k < kwd_opts.length; k++) {
+      var x = kwd_opts[k];
+      kwd_strgs = kwd_strgs + parseInt(x.length);
+    }
+  }
+
+  return kwd_strgs;
+}
+
+// elem引数から、表示するページ項目を取り出す
+function parseElem(elem) {
+
+  var elm_txt;
+
+  if ($.type(elem) === 'object') {
+    elm_txt = elem.text();
+  } else {
+    elm_txt = String(elem);
+  }
+  return elm_txt;
+}
 
 // バブルチャート用データのリクエスト（非同期）
-function callExecuter(elem) {
+function callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj) {
 
   // ajax二重リクエストの防止
   if (request) {
@@ -32,166 +237,17 @@ function callExecuter(elem) {
     return;
   }
 
-  // elem引数から、表示するページ項目を取り出す
-  if ($.type(elem) === 'object') {
-    elm_txt = elem.text();
-  } else {
-    elm_txt = String(elem);
-  }
-
-  // ページ遷移先の設定
-  var userpath = gon.narrow_action;
-
-  // 最初のリクエスト時のみ実行
-  if (bbl_shori_flg == 0) {
-
-    // 表示項目のリセット
-    $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
-    $('#legend1b').empty();
-    $('#errormsg').empty();
-
-    // 進捗画面の生成
-    var shaft = {
-      lines: 13, // The number of lines to draw
-      length: 15, // The length of each line
-      width: 9, // The line thickness
-      radius: 18, // The radius of the inner circle
-      corners: 1, // Corner roundness (0..1)
-      rotate: 0, // The rotation offset
-      direction: 1, // 1: clockwise, -1: counterclockwise
-      color: '#000', // #rgb or #rrggbb or array of colors
-      speed: 1, // Rounds per second
-      trail: 60, // Afterglow percentage
-      shadow: false, // Whether to render a shadow
-      hwaccel: false, // Whether to use hardware acceleration
-      className: 'spinner', // The CSS class to assign to the spinner
-      zIndex: 2e9, // The z-index (defaults to 2000000000)
-      top: '50%', // Top position relative to parent
-      left: '50%' // Left position relative to parent
-    };
-    var spinner = new Spinner(shaft).spin();
-
-    // ローディング画面の表示とバブルチャートのオーバーレイ
-    $('#gp').plainOverlay(
-      'show',
-      {
-        opacity: 0.2,
-        progress: function() {
-
-          // ローディング中のメッセージを生成
-          var target = $('<div id="guardian"></div><table id="daemon"><tr><td>分析中 ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
-
-          return target;
-        }
-    });
-    $('#guardian').append(spinner.el);
-
-    // 項目一覧のオーバレイ
-    $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
-
-    // ページ項目に合わせた絞り込みキーワードを取得する
-    // この時点では絞り込みオプションを指定しない
-    console.log( '絞り込み用キーワード取得対象 : ' + String(elm_txt));
-    console.log( '絞り込み用キーワード取得処理の開始');
-
-    $.ajax({
-      url: userpath,
-      async: false,
-      dataType: 'json',
-      data: {
-        from : $('#from').val(),
-        to : $('#to').val(),
-        cv_num : $('input[name="cv_num"]').val(),
-        shori : $('input[name="shori"]').val(),
-        act : elm_txt, // 取得するページ項目
-      }
-    })
-    .done(function(data, textStatus, jqXHR) {
-      var d = JSON.parse(data.homearr);
-      console.log( '絞り込み用キーワード取得完了');
-      console.log(d);
-      $.extend(true, kwd_opts, d);
-    })
-    .fail(function(jqXHR, textStatus, errorThrown) {
-      $('span#errormsg').html('絞り込み用キーワード取得エラーが発生しました： ' + String(errorThrown));
-    })
-    .always(function() {
-      console.log('絞り込み用キーワード取得処理の終了');
-
-      var dev_opts = [ // デバイス
-        // 'pc',
-        // 'sphone',
-        // 'mobile',
-      ];
-      var usr_opts = [ // 訪問者
-        'new',
-        // 'repeat'
-      ];
-
-      // パラメータの全ての組み合わせを網羅した配列を作る
-      for (var i = 0; i <= dev_opts.length; i++) {
-        for (var j = 0; j <= usr_opts.length; j++) {
-          for (var k = 0; k <= kwd_opts.length; k++) {
-            opts.push( {dev: dev_opts[i], usr: usr_opts[j], kwd: kwd_opts[k] });
-          }
-        }
-      }
-
-      console.log('全パラメータ組み合わせ数 : ' + String(opts.length));
-
-      // 初期リクエスト用のパラメータを設定
-      dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
-      usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
-      kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
-
-      // キャッシュ用ユニークキー生成
-      var frm = $('#from').val();
-      var to = $('#to').val();
-      var cv_num = $('input[name="cv_num"]').val();
-
-      // キーワードの総文字数を格納
-      if (kwd_opts.length >= 1) {
-        for (var k = 0; k < kwd_opts.length; k++) {
-          var x = kwd_opts[k];
-          kwd_strgs = kwd_strgs + parseInt(x.length);
-        }
-        // console.log(kwd_strgs);
-      }
-
-      // キャッシュ済データの取得
-      var data;
-
-      if (elm_txt == '直接入力/ブックマーク') {
-        elm_txt = '直接入力ブックマーク';
-      }
-
-      var c_obj = cacheResult(kwd_strgs, data, false, elm_txt, 'GET');
-
-      // キャッシュ済データがあるか？
-      if (c_obj) {
-
-        // バブルチャートを描画
-        plotGraphHome(c_obj, elm_txt);
-
-        // 事後処理
-        afterCall();
-
-        // ページ名のdivタグをグレーアウト
-        markPageBtn(elm_txt);
-
-        //処理を終了
-        return;
-
-      } else {
-
-        // ajax処理中
-        bbl_shori_flg = 1;
-      }
-    });
+  if (elm_txt == '直接入力/ブックマーク') {
+    elm_txt = '直接入力ブックマーク';
   }
 
   // ajaxリクエストの生成
   if (bbl_shori_flg == 1) {
+
+    // ajaxリクエスト用のパラメータを設定
+    var dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
+    var usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
+    var kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
 
     request = $.Deferred(function(deferred) {
       $.ajax({
@@ -202,13 +258,7 @@ function callExecuter(elem) {
         // timeout: 2000, // 単位はミリ秒
         retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
         beforeSend: function(XMLHttpRequest) {
-
-          // 最初のリクエスト時のみ実行
-          if (bbl_shori_flg == 0) {
-
-            console.log( 'ajax通信開始!');
-
-          }
+          // なんかあったら追加
         },
         // バブルチャート用データ取得用のパラメータ
         data: {
@@ -273,7 +323,7 @@ function callExecuter(elem) {
       var page_fltr_usr = data.page_fltr_usr;
       var page_fltr_kwd = data.page_fltr_kwd;
 
-      // カウンタを進める
+      // オプションの配列のカウンタを進める
       opts_cntr++;
 
       // フィルタリングオプションの配列が無くなるまでajaxを実行
@@ -285,17 +335,12 @@ function callExecuter(elem) {
         console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
         console.log('ajax処理を継続します');
 
-        // リクエスト用のパラメータを設定し、ajaxを再実行
-        dev = String(opts[opts_cntr].dev); // undefined の場合はサーバ側でall を指定する
-        usr = String(opts[opts_cntr].usr); // undefined の場合はサーバ側でall を指定する
-        kwd = String(opts[opts_cntr].kwd) === "undefined"? 'nokwd' : String(opts[opts_cntr].kwd);
-
         // ローディング画面に進捗を表示
         var prcnt = parseInt( (opts_cntr / opts.length) * 100 );
         $('#daemon tr:nth-child(3) td').text(String(prcnt) + '%');
 
         // ajax処理を再実行
-        callExecuter(page_fltr_wd);
+        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, r_obj)
       } else {
 
         // リクエストを処理終了
@@ -307,14 +352,8 @@ function callExecuter(elem) {
         // ローディング完了テキストを表示
         $('#daemon tr:nth-child(3) td').text('complete!');
 
-        // バブルチャートを描画
-        plotGraphHome(r_obj, page_fltr_wd);
-
         // ホームグラフのページ項目タグがdivになっていればリセットする
         markPageBtn(page_fltr_wd);
-
-        // 結果データのキャッシュ
-        cacheResult(kwd_strgs, r_obj, true, page_fltr_wd, 'POST');
       }
     })
 
@@ -354,7 +393,6 @@ function callManager(flg) {
 
   if (flg != 0) {
     request = '';
-    requests = [];
   }
 }
 
@@ -364,29 +402,15 @@ function afterCall() {
   $('#gp').plainOverlay('hide');
   $('div#info').plainOverlay('hide');
 
-  // リクエストを未処理状態へ
-  bbl_shori_flg = 0;
-
-  // カウンタをリセット
-  opts_cntr = 0;
-
-  // パラメータ配列をリセット
-  opts = [];
-
-  // バブルチャート描画用のデータオブジェクトをリセット
-  r_obj = {};
-
-  // 絞り込み用キーワードのリセット
-  kwd_opts = [];
-
-  // ユーザが所有しているgaアカウントの配列をリセット
-  // gaccounts = [];
-
-  // ユニークキーをリセット
-  kwd_strgs = 0;
-
   // リクエスト実行時のエラーメッセージ表示をリセット
   $('#errormsg').empty();
+
+  // ajaxリクエストをリセット
+  request = '';
+
+  // バブルチャート処理フラグをリセット
+  bbl_shori_flg = 0;
+
 }
 
 // ホームグラフのページ項目タグがdivになっていればリセットする

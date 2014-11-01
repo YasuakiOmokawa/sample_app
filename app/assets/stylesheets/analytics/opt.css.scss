@@ -82,6 +82,11 @@ div.ui-corner-all.jquery-ui-dialog-onlogin {
   font-weight: bold;
 }
 
+// ボタンの位置調整（中央揃えにするため）
+.jquery-ui-dialog-onlogin a#go {
+  margin: 0 0 0 00px;
+}
+
 // ボタンホバー時の動作を指定
 .jquery-ui-dialog-onlogin a:hover {
   text-decoration: none;

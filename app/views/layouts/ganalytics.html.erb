@@ -6,10 +6,13 @@
     <title><%= full_title(@title) %></title>
     <%= stylesheet_link_tag "analytics", media: "all" %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+    <%= javascript_include_tag "usedatepicker", "data-turbolinks-track" => true %>
+    <%= javascript_include_tag "fnccommon", "data-turbolinks-track" => true %>
     <%= include_gon %>
     <% if @title == 'ホーム' %>
       <%= javascript_include_tag "usejqplothome", "data-turbolinks-track" => true %>
       <%= javascript_include_tag "bubblerequest", "data-turbolinks-track" => true %>
+      <%= javascript_include_tag "finbubble", "data-turbolinks-track" => true %>
       <%= javascript_include_tag "kickonload", "data-turbolinks-track" => true %>
     <% else %>
       <%= javascript_include_tag "usejqplot", "data-turbolinks-track" => true %>

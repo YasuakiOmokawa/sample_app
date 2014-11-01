@@ -62,7 +62,7 @@ var setDataidx = function(obj, wd) {
 }
 
 // グラフデータ全設定
-var setData = function(opt, obj, wd) {
+var setData = function(obj, wd) {
 
   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
   var arr = [];
@@ -176,7 +176,7 @@ function kwdTnsltENtoJP (d) {
 
 
 // バブルチャートの生成
-function plotGraphHome(robj, fltr) {
+function plotGraphHome(arr, idxarr) {
   jQuery( function() {
 
     // バブル（散布図）チャート相関グラフ
@@ -229,14 +229,14 @@ function plotGraphHome(robj, fltr) {
       },
     };
 
-    // ホーム画面で指定したページ項目名
-    var page_fltr_wd = fltr;
+    // // ホーム画面で指定したページ項目名
+    // var page_fltr_wd = fltr;
 
-    // データセット
-    var arr = setData(options, robj, page_fltr_wd);
+    // // データセット
+    // var arr = setData(robj, page_fltr_wd);
 
-    // データ項目一覧セット
-    var idxarr = setDataidx(robj, page_fltr_wd);
+    // // データ項目一覧セット
+    // var idxarr = setDataidx(robj, page_fltr_wd);
 
     // 優先順位の降順、
     // 　ページ名と項目名の昇順でソート
@@ -437,7 +437,7 @@ function plotGraphHome(robj, fltr) {
       var addopt = { series: [] };
 
       if (wd == '全データを再表示') {
-        var arr = setData(addopt, obj, page_fltr_wd);
+        var arr = setData(obj);
         addopt.data = arr;
       } else {
         var src = $.extend(true, {}, obj); // 参照渡しだとバグる。
