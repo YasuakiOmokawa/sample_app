@@ -6,15 +6,12 @@ var request;
 var bbl_shori_flg = 0;
 
 // バブルチャート取得関数
-function callOwner(elem) {
+function callOwner(elem, robj) {
 
   console.log( 'ajax通信開始!');
 
   // ページ遷移先の設定
   var userpath = gon.narrow_action;
-
-  // elem引数から、表示するページ項目を取り出す
-  var elm_txt = parseElem(elem);
 
   // バブルチャート取得用のオプション配列
   var opts = [];
@@ -44,7 +41,7 @@ function callOwner(elem) {
   $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
 
   // オプションキーワードを生成
-  var kwd_opts = setKwds(elm_txt, userpath);
+  var kwd_opts = setKwds(elem, userpath);
 
   // オプション配列を生成
   setOpts(opts, kwd_opts);
@@ -54,7 +51,7 @@ function callOwner(elem) {
 
   // キャッシュ済データを取得
   var data;
-  var c_obj = cacheResult(kwd_strgs, data, false, elm_txt, 'GET');
+  var c_obj = cacheResult(kwd_strgs, data, false, elem, 'GET');
 
   // キャッシュ済データがあるか？
   if (c_obj) {
@@ -62,26 +59,18 @@ function callOwner(elem) {
     // 事後処理
     afterCall();
 
-    // ページ名のdivタグをグレーアウト
-    markPageBtn(elm_txt);
-
-    //処理を終了
-    return c_obj;
+    // データマージ
+    $.extend(true, robj, c_obj);
   } else {
 
     // ajax処理中
     bbl_shori_flg = 1;
 
     // データリクエストを実行
-    var r_obj = {};
-    callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj);
+    var tmp_obj = {};
 
-    // 結果データのキャッシュ
-    cacheResult(kwd_strgs, r_obj, true, elm_txt, 'POST');
-
-    return r_obj;
+    callExecuter(elem, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs);
   }
-
 }
 
 // バブルチャートをオーバーレイ
@@ -133,14 +122,14 @@ function resetHome() {
 }
 
 // ページ項目に合わせた絞り込みキーワードを取得する
-function setKwds(elm_txt, userpath) {
+function setKwds(elem, userpath) {
 
   // 返り値
   var dt = [];
 
   // ページ項目に合わせた絞り込みキーワードを取得する
   // この時点では絞り込みオプションを指定しない
-  console.log( '絞り込み用キーワード取得対象 : ' + String(elm_txt));
+  console.log( '絞り込み用キーワード取得対象 : ' + String(elem));
   console.log( '絞り込み用キーワード取得処理の開始');
 
   $.ajax({
@@ -152,7 +141,7 @@ function setKwds(elm_txt, userpath) {
       to : $('#to').val(),
       cv_num : $('input[name="cv_num"]').val(),
       shori : $('input[name="shori"]').val(),
-      act : elm_txt, // 取得するページ項目
+      act : elem, // 取得するページ項目
     }
   })
 
@@ -229,7 +218,7 @@ function parseElem(elem) {
 }
 
 // バブルチャート用データのリクエスト（非同期）
-function callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj) {
+function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs) {
 
   // ajax二重リクエストの防止
   if (request) {
@@ -315,7 +304,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj) {
 
       // グラフ描画用のデータをマージ
       var r_obj_tmp = JSON.parse(data.homearr);
-      $.extend(true, r_obj, r_obj_tmp);
+      $.extend(true, tmp_obj, r_obj_tmp);
 
       // 項目名、フィルタ名の取得
       var page_fltr_wd = data.page_fltr_wd;
@@ -340,7 +329,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj) {
         $('#daemon tr:nth-child(3) td').text(String(prcnt) + '%');
 
         // ajax処理を再実行
-        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, r_obj)
+        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs)
       } else {
 
         // リクエストを処理終了
@@ -352,8 +341,15 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, r_obj) {
         // ローディング完了テキストを表示
         $('#daemon tr:nth-child(3) td').text('complete!');
 
-        // ホームグラフのページ項目タグがdivになっていればリセットする
-        markPageBtn(page_fltr_wd);
+        // // ホームグラフのページ項目タグがdivになっていればリセットする
+        // markPageBtn(page_fltr_wd);
+
+      // グラフ描画用のデータを最終マージ
+      $.extend(true, robj, tmp_obj);
+
+      // データをキャッシュ
+      cacheResult(kwd_strgs, robj, true, elm_txt, 'POST');
+
       }
     })
 
@@ -435,3 +431,111 @@ function markPageBtn(page) {
     $('div#narrow div').attr('id', 'ed');
   }
 }
+
+// バブル作成用にページ下部のタブリンクに埋め込む関数
+function bubbleCreateAtTabLink(wd) {
+
+  // 返り値データ
+  var idxarr = [], arr = [];
+
+  // wd引数から、表示するページ項目を取り出す
+  var elm_txt = parseElem(wd);
+
+  // 生成されたarr, idxarr を使ってバブルチャートを作成
+  createBubbleWithParts(arr, idxarr);
+
+  // バブル作成用にarr, idxarr を生成
+  createBubbleParts(elm_txt, idxarr, arr);
+}
+
+// バブル作成用のパーツを生成する関数
+function createBubbleParts(wd, idxarr, arr) {
+
+  // オブジェクト
+  var robj = {};
+
+  // ajaxリクエストを実行
+  callOwner(wd, robj);
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+   if(Object.keys(robj).length != 0){
+
+      // wd が直接入力ブックマーク の場合、スラッシュを削除
+      if (wd == '直接入力/ブックマーク') {
+        wd = wd.replace(/\//g, '');
+      }
+
+      // データセット
+      setData(robj, wd, arr);
+
+      // データ項目一覧セット
+      setDataidx(robj, wd, idxarr);
+
+      // ページ名のdivタグをグレーアウト
+      markPageBtn(wd);
+
+     clearInterval(timerID);
+     timerID = null;
+    }
+  },1000);
+}
+
+// 全ページ種類のグラフを生成する関数
+function createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr) {
+
+  // バブル作成用にarr, idxarr を生成
+  createBubbleParts(page_fltr_wds[pcntr], idxarr, arr);
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+   if(Object.keys(arr).length != 0 && Object.keys(idxarr).length != 0){
+
+      // データセット
+      Array.prototype.push.apply(arr_all, arr);
+      Array.prototype.push.apply(idxarr_all, idxarr);
+
+      // データリセット
+      arr = [];
+      idxarr = [];
+
+      // increment counter
+      pcntr++;
+
+      // 全部のページ種類の分析が終わった？
+      if (pcntr >= 6) {
+
+        // 生成されたarr, idxarr を使ってバブルチャートを作成
+        createBubbleWithParts(arr_all, idxarr_all);
+
+      } else {
+
+        // バブル作成用にarr, idxarr を生成
+        createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr);
+      }
+
+     clearInterval(timerID);
+     timerID = null;
+    }
+  },1000);
+}
+
+// 生成されたパーツを使ってバブルチャートを作成
+function createBubbleWithParts(arr, idxarr) {
+
+  // 返り値データ
+  // var arr = {}, idxarr;
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+   if(Object.keys(arr).length != 0 && Object.keys(idxarr).length != 0){
+
+      // バブルチャートを描画
+      plotGraphHome(arr, idxarr);
+
+     clearInterval(timerID);
+     timerID = null;
+    }
+  },1000);
+}
+

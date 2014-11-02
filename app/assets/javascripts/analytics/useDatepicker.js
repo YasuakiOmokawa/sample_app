@@ -150,8 +150,9 @@ $(function() {
             // バブル描画後は描画されたページの項目を格納
             var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
 
-            // ajaxリクエストを実行
-            callExecuter(wd);
+            // ページ下部のタブリンクに埋め込んでいる関数を流用
+            bubbleCreateAtTabLink(wd);
+
           } else {
 
             // ホーム画面でないときは非ajaxリクエストを実行
@@ -222,22 +223,22 @@ $(function() {
 
         $("#onlogin-dialog-confirm").dialog('close');
 
+        // 返り値データ
+        var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
 
-        // ホーム画面で指定したページ項目名
-        var page_fltr_wd = "全体";
+        // ホーム画面のページ項目名
+        var page_fltr_wds = [
+          "検索",
+          "直接入力/ブックマーク",
+          "その他ウェブサイト",
+          "ソーシャル",
+          "キャンペーン",
+          "全体"
+        ];
 
-        // ajaxリクエストを実行
-        var r_obj = callOwner(page_fltr_wd);
-
-        // データセット
-        var arr = setData(r_obj, page_fltr_wd);
-
-        // データ項目一覧セット
-        var idxarr = setDataidx(r_obj, page_fltr_wd);
-
-        // バブルチャートを描画
-        plotGraphHome(arr, idxarr);
-
+        // 全ページ種類のグラフを生成する関数
+        var pcntr = 0;
+        createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr);
 
       });
 

@@ -20,10 +20,10 @@ var setBubbleColor = function(x, y) {
 }
 
 // データ項目一覧の設定
-var setDataidx = function(obj, wd) {
+var setDataidx = function(obj, wd, idxarr) {
 
   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
-  var idxarr = [];
+  // var idxarr = [];
   var arr = [];
   var cnt = 0;
   var fltr_wd = wd
@@ -44,7 +44,7 @@ var setDataidx = function(obj, wd) {
       value[3] = fltr_wd + ';;' + value[3];
 
       // GAPと相関の合計値が高いものほど優先度を高くする。
-      var ar = new Array();
+      var ar = {};
       var pri = value[0] + value[1];
       ar['pri'] = pri;
       ar['arr'] = value;
@@ -58,14 +58,14 @@ var setDataidx = function(obj, wd) {
     });
     cnt += 1
   }
-  return idxarr;
+  // return idxarr;
 }
 
 // グラフデータ全設定
-var setData = function(obj, wd) {
+var setData = function(obj, wd, arr) {
 
   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
-  var arr = [];
+  // var arr = [];
   var cnt = 0;
   var fltr_wd = wd;
 
@@ -77,7 +77,7 @@ var setData = function(obj, wd) {
 
     cnt += 1;
   }
-  return arr;
+  // return arr;
 }
 
 // 再描画用にデータを集める
@@ -266,19 +266,13 @@ function plotGraphHome(arr, idxarr) {
 
       counter = counter + 1;
 
-    //   // ページ名（全体、検索、など）を取得
-    //   pagenm = 'li.tab > a:contains(' + page_fltr_wd + ')';
-
-    //   // ページへのリンクを取得
-    //   pagelink = $(pagenm)[0].name;
-
       // 絞り込み情報の追加
       text = value['arr'][3].split(';;');
       // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 項目一覧へ表示する文字列
-      // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
-      caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
+      // ページ項目:データ指標：デバイス：ユーザー：絞り込み条件(あれば)
+      caption = text[0] + ':' + text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
 
       $('#legend1b').append(
         $('<tr>').append(
