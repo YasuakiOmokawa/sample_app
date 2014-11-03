@@ -5,7 +5,6 @@ var request;
 
 // バブルチャート用データのリクエスト（非同期）
 var cacheResult = function(data, async, type, analyzetype, kwdslen, elm_txt) {
-// var cacheResult = function(kwds_len, data, async, elm_txt, type) {
 
   // 返却データ
   var rdata;

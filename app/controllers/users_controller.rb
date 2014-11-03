@@ -264,6 +264,10 @@ class UsersController < ApplicationController
 
             puts s_txt
 
+            # 分析完了メールを送信
+            user = User.find(params[:id])
+            UserMailer.send_message_for_complete_analyze(user) if user
+
             return
           else
 

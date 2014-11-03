@@ -243,23 +243,6 @@ var setDataidx = function(obj, wd, idxarr) {
   }
 }
 
-// グラフデータ全設定
-// var setData = function(obj, wd, arr) {
-
-//   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
-//   var cnt = 0;
-//   var fltr_wd = wd;
-
-//   for (var i in homearr[fltr_wd]) {
-//     arr.push( homearr[fltr_wd][i] );
-//     arr[cnt].forEach( function(value) {
-//       value[3] = setBubbleColor(value[0], value[1]);
-//     });
-
-//     cnt += 1;
-//   }
-// }
-
 // 再描画用にデータを集める
 var replotdata = function(allarr, wd) {
 
@@ -362,6 +345,9 @@ function plotGraphHome(arr, idxarr) {
     // x軸, y軸, 大きさ(radius), 項目名　の順に表示
     // x ... GAP y ... 相関　で現す。
 
+    // リプロット用にarr をグローバルオブジェクトとして確保
+    arr_for_replot = $.extend(true, {}, arr);
+
     // グラフ描画オプション
     var options = {
       seriesDefaults: {
@@ -436,9 +422,6 @@ function plotGraphHome(arr, idxarr) {
 
         var $parents = $(this).parent('td.r');
 
-        // 絞り込み項目のセット
-        // $('input[name="device"]')
-
         var text = $parents.attr('data-page').split(';;');
         // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
         var b = setBubbleColor($parents.attr('data-gap'), $parents.attr('data-sokan'));
@@ -457,7 +440,7 @@ function plotGraphHome(arr, idxarr) {
         if (typeof(replotHomeflg) == "undefined") {
           replotHomeflg = '全データを再表示';
         }
-        replotHome(replotHomeflg, robj);
+        replotHome(replotHomeflg, arr_for_replot);
       }
     );
 
@@ -467,14 +450,9 @@ function plotGraphHome(arr, idxarr) {
       var addopt = { series: [] };
 
       if (wd == '全データを再表示') {
-        var arr = setData(obj);
-        addopt.data = arr;
-      } else {
-        var src = $.extend(true, {}, obj); // 参照渡しだとバグる。
-        var rdata = replotdata(src, wd);
-        addopt.data = rdata;
+        addopt.data = obj;
       }
-      // console.log("replot " + wd);
+
       // 再描画を実行
       // jqplot の replot関数は、追加のオプションを設定すると
       // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。

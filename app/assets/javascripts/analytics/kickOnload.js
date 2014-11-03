@@ -11,6 +11,8 @@ $(window).load(function() {
 
       createBubbleWithParts(cached_obj);
 
+      markPageBtn('全体');
+
     } else {
 
       $( "#onlogin-dialog" ).dialog('open');

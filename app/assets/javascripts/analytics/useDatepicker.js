@@ -169,6 +169,11 @@ $(function() {
     }
   });
 
+  // 日付のリンクをクリックしたら、期間設定ダイアログをオープン
+  $("a#jrange").click(function() {
+      $( "#dialog-form" ).dialog('open');
+  });
+
   // ログイン直後に表示する期間設定ダイアログ
   $('#onlogin-dialog').dialog({
     closeOnEscape: false,
@@ -210,11 +215,6 @@ $(function() {
     width: 1000,
     height: 300,
     modal: true,
-  });
-
-  // 日付のリンクをクリックしたら、期間設定ダイアログをオープン
-  $("a#jrange").click(function() {
-      $( "#dialog-form" ).dialog('open');
   });
 
   // 分析開始ボタンの動作
