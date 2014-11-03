@@ -4,7 +4,8 @@
 var request;
 
 // バブルチャート用データのリクエスト（非同期）
-var cacheResult = function(kwds_len, data, async, elm_txt, type) {
+var cacheResult = function(data, async, type, analyzetype, kwdslen, elm_txt) {
+// var cacheResult = function(kwds_len, data, async, elm_txt, type) {
 
   // 返却データ
   var rdata;
@@ -12,8 +13,23 @@ var cacheResult = function(kwds_len, data, async, elm_txt, type) {
   // ページ遷移先の設定
   var userpath = gon.narrow_action;
 
-  // 送信タイプ
-  var type = String(type);
+  var params = {
+    r_obj : JSON.stringify(data),          // バブルチャート用キャッシュ対象データ
+    from : $('#from').val(),
+    to : $('#to').val(),
+    analyze_type : analyzetype             // 全体分析か個別分析か
+  };
+
+  if (analyzetype == 'kobetsu') {
+
+    var kobetsu_params = {
+      act : elm_txt,
+      cv_num : $('input[name="cv_num"]').val(),
+      kwds_len : kwdslen             // キャッシュ用ユニークキー
+    };
+
+    $.extend(true, params, kobetsu_params);
+  }
 
   // ajaxリクエストの生成
   request = $.Deferred(function(deferred) {
@@ -27,14 +43,7 @@ var cacheResult = function(kwds_len, data, async, elm_txt, type) {
       // timeout: 2000, // 単位はミリ秒
       retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
       // バブルチャート用データ取得用のパラメータ
-      data: {
-        r_obj : JSON.stringify(data),          // バブルチャート用キャッシュ対象データ
-        from : $('#from').val(),
-        to : $('#to').val(),
-        act : elm_txt,
-        cv_num : $('input[name="cv_num"]').val(),
-        kwds_len : kwds_len             // キャッシュ用ユニークキー
-      },
+      data: params,
       error: function(xhr, ajaxOptions, thrownError) {
 
         // 内部エラーが発生したら表示

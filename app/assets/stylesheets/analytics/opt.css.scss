@@ -99,3 +99,8 @@ div.ui-corner-all.jquery-ui-dialog-onlogin {
   height: 42px;
   text-align: center;
 }
+
+// スピナーの場所を変更
+.jquery-ui-dialog-onlogin p#confirm-msg div.spinner {
+  left: 50%;
+}

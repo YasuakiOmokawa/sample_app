@@ -5,6 +5,9 @@ var request;
 // 0: 未処理 1: 処理中 2: 処理終了
 var bbl_shori_flg = 0;
 
+// ページ全体ローディング中のカウンタ
+var prcnt_all_cntr = 0;
+
 // バブルチャート取得関数
 function callOwner(elem, robj) {
 
@@ -25,20 +28,10 @@ function callOwner(elem, robj) {
   // 表示項目のリセット
   resetHome();
 
-  // プログレススピナーを生成
-  var spinner = createSpinner();
-
-  // ローディング中のメッセージを生成
-  // var target = $('<div id="guardian"></div><table id="daemon"><tr><td>分析中 ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
-
-  // バブルチャートをオーバーレイ
-  addOverlay();
-
-  // プログレススピナーを表示
-  $('#guardian').append(spinner.el);
-
-  // 項目一覧のオーバレイ
-  $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
+  // ページ個別のローディングであればローディングモーションを表示
+  if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
+    setLoadingMortion();
+  }
 
   // オプションキーワードを生成
   var kwd_opts = setKwds(elem, userpath);
@@ -51,13 +44,10 @@ function callOwner(elem, robj) {
 
   // キャッシュ済データを取得
   var data;
-  var c_obj = cacheResult(kwd_strgs, data, false, elem, 'GET');
+  var c_obj = cacheResult(data, false, 'GET', 'kobetsu', kwd_strgs, elem);
 
   // キャッシュ済データがあるか？
   if (c_obj) {
-
-    // 事後処理
-    afterCall();
 
     // データマージ
     $.extend(true, robj, c_obj);
@@ -66,9 +56,9 @@ function callOwner(elem, robj) {
     // ajax処理中
     bbl_shori_flg = 1;
 
-    // データリクエストを実行
     var tmp_obj = {};
 
+    // データリクエストを実行
     callExecuter(elem, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs);
   }
 }
@@ -173,7 +163,7 @@ function setOpts(opts, kwd_opts) {
   ];
 
   var usr_opts = [ // 訪問者
-    'new',
+    // 'new',
     // 'repeat'
   ];
 
@@ -219,12 +209,6 @@ function parseElem(elem) {
 
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs) {
-
-  // ajax二重リクエストの防止
-  if (request) {
-    $("span#errormsg").html('只今処理の実行中です。');
-    return;
-  }
 
   if (elm_txt == '直接入力/ブックマーク') {
     elm_txt = '直接入力ブックマーク';
@@ -324,9 +308,25 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
         console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
         console.log('ajax処理を継続します');
 
-        // ローディング画面に進捗を表示
-        var prcnt = parseInt( (opts_cntr / opts.length) * 100 );
-        $('#daemon tr:nth-child(3) td').text(String(prcnt) + '%');
+        // 進捗を表示
+        if ($(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
+
+          // ページ全体の進捗カウンタを進める
+          prcnt_all_cntr++;
+
+          // 進捗を算出
+          var prcnt_all = calcProgress(prcnt_all_cntr, 380);
+
+          // ダイアログに進捗を表示
+          displayProgress('.jquery-ui-dialog-onlogin div#onlogin-dialog-confirm div#monsterball', prcnt_all);
+        } else {
+
+          // ページ個別の進捗を算出
+          var prcnt = calcProgress(opts_cntr, opts.length);
+
+          // 画面に進捗を表示
+          displayProgress('#daemon tr:nth-child(3) td', prcnt);
+        }
 
         // ajax処理を再実行
         callExecuter(page_fltr_wd, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs)
@@ -341,14 +341,12 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
         // ローディング完了テキストを表示
         $('#daemon tr:nth-child(3) td').text('complete!');
 
-        // // ホームグラフのページ項目タグがdivになっていればリセットする
-        // markPageBtn(page_fltr_wd);
-
       // グラフ描画用のデータを最終マージ
       $.extend(true, robj, tmp_obj);
 
       // データをキャッシュ
-      cacheResult(kwd_strgs, robj, true, elm_txt, 'POST');
+      cacheResult(robj, true, 'POST', 'kobetsu', kwd_strgs, elm_txt);
+      // cacheResult(kwd_strgs, robj, true, elm_txt, 'POST');
 
       }
     })
@@ -377,7 +375,6 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
 
         console.log( 'ajax通信終了!');
 
-        afterCall();
       }
     });
   }
@@ -414,9 +411,9 @@ function markPageBtn(page) {
   var h, y;
   h = $('div#narrow div');
   if (h.html() != 'キャンペーン' ) {
-    y = '<a href="javascript:void(0)" onclick="callExecuter($(this));" >';
+    y = '<a href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
   } else {
-    y = '<a id="ed" href="javascript:void(0)" onclick="callExecuter($(this));" >';
+    y = '<a id="ed" href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
   }
   $(h).replaceWith(y + $(h).html() + '</a>');
 
@@ -435,21 +432,26 @@ function markPageBtn(page) {
 // バブル作成用にページ下部のタブリンクに埋め込む関数
 function bubbleCreateAtTabLink(wd) {
 
+  // ajax二重リクエストの防止
+  if (request) {
+    $("span#errormsg").html('只今処理の実行中です。');
+    return;
+  }
+
   // 返り値データ
   var idxarr = [], arr = [];
 
   // wd引数から、表示するページ項目を取り出す
   var elm_txt = parseElem(wd);
 
-  // 生成されたarr, idxarr を使ってバブルチャートを作成
-  createBubbleWithParts(arr, idxarr);
+  createBubbleWithParts(idxarr);
 
-  // バブル作成用にarr, idxarr を生成
-  createBubbleParts(elm_txt, idxarr, arr);
+  createBubbleParts(elm_txt, idxarr);
+
 }
 
 // バブル作成用のパーツを生成する関数
-function createBubbleParts(wd, idxarr, arr) {
+function createBubbleParts(wd, idxarr) {
 
   // オブジェクト
   var robj = {};
@@ -466,9 +468,6 @@ function createBubbleParts(wd, idxarr, arr) {
         wd = wd.replace(/\//g, '');
       }
 
-      // データセット
-      setData(robj, wd, arr);
-
       // データ項目一覧セット
       setDataidx(robj, wd, idxarr);
 
@@ -478,25 +477,23 @@ function createBubbleParts(wd, idxarr, arr) {
      clearInterval(timerID);
      timerID = null;
     }
-  },1000);
+  },100);
 }
 
 // 全ページ種類のグラフを生成する関数
-function createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr) {
+function createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content) {
 
-  // バブル作成用にarr, idxarr を生成
-  createBubbleParts(page_fltr_wds[pcntr], idxarr, arr);
+  // バブル用のパーツ作成
+  createBubbleParts(page_fltr_wds[pcntr], idxarr);
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-   if(Object.keys(arr).length != 0 && Object.keys(idxarr).length != 0){
+   if(Object.keys(idxarr).length != 0){
 
-      // データセット
-      Array.prototype.push.apply(arr_all, arr);
+      // データマージ
       Array.prototype.push.apply(idxarr_all, idxarr);
 
       // データリセット
-      arr = [];
       idxarr = [];
 
       // increment counter
@@ -505,37 +502,139 @@ function createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr)
       // 全部のページ種類の分析が終わった？
       if (pcntr >= 6) {
 
-        // 生成されたarr, idxarr を使ってバブルチャートを作成
-        createBubbleWithParts(arr_all, idxarr_all);
+        // バブルチャートを作成
+        createBubbleWithParts(idxarr_all);
+
+        setTimeout(function() {
+
+          afterCallWithPlotAll();
+
+          var shaped_idxarr = [];
+
+          // 優先順位の降順、
+          // 　ページ名と項目名の昇順でソート
+          // > がマイナスリターン。。降順、< がプラスリターンで昇順
+          shaped_idxarr = sortIdxarr(idxarr_all);
+
+          // 項目を指定数分取り出す
+          shaped_idxarr = headIdxarr(idxarr_all, 30);
+
+          // 作成済みデータをキャッシュ
+          cacheResult(shaped_idxarr, true, 'POST', 'zentai');
+        }, 3000);
 
       } else {
 
-        // バブル作成用にarr, idxarr を生成
-        createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr);
+        createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
       }
 
      clearInterval(timerID);
      timerID = null;
     }
-  },1000);
+  },100);
 }
 
 // 生成されたパーツを使ってバブルチャートを作成
-function createBubbleWithParts(arr, idxarr) {
-
-  // 返り値データ
-  // var arr = {}, idxarr;
+function createBubbleWithParts(idxarr) {
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-   if(Object.keys(arr).length != 0 && Object.keys(idxarr).length != 0){
+   if(Object.keys(idxarr).length != 0){
+
+      var shaped_idxarr = [];
+
+      // 優先順位の降順、
+      // 　ページ名と項目名の昇順でソート
+      // > がマイナスリターン。。降順、< がプラスリターンで昇順
+      shaped_idxarr = sortIdxarr(idxarr);
+
+      // 項目を指定数分取り出す
+      shaped_idxarr = headIdxarr(idxarr, 30);
+
+      // プロットデータの作成
+      var arr = [];
+      createPlotArr(shaped_idxarr, arr);
 
       // バブルチャートを描画
-      plotGraphHome(arr, idxarr);
+      plotGraphHome(arr, shaped_idxarr);
 
-     clearInterval(timerID);
-     timerID = null;
+      // 事後処理
+      afterCall();
+
+      clearInterval(timerID);
+      timerID = null;
+
     }
-  },1000);
+  },100);
+}
+
+// ローディング進捗の計算
+function calcProgress(opts_cntr, length) {
+  var prcnt = parseInt( (opts_cntr / length) * 100 );
+  return prcnt;
+}
+
+// 指定要素へ進捗率を表示
+function displayProgress(prgtarget, prcnt) {
+
+  var trgt = String(prgtarget);
+
+  $(trgt).text(String(prcnt) + '%');
+}
+
+// ページ個別のモーションを設定
+function setLoadingMortion() {
+
+  // プログレススピナーを生成
+  var spinner = createSpinner();
+
+  // バブルチャートをオーバーレイ
+  addOverlay();
+
+  // プログレススピナーを表示
+  $('#guardian').append(spinner.el);
+
+  // 項目一覧のオーバレイ
+  $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
+}
+
+// ダイアログへ全体進捗を表示
+function addLoadingMortion() {
+
+  // 元のコンテンツを保存
+  var origin_content = $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html();
+
+  // プログレススピナーを生成
+  var spinner = createSpinner();
+
+  // ボタンを消去
+  $(".jquery-ui-dialog-onlogin a")
+    .remove();
+
+  // プログレススピナーを表示
+  $(".jquery-ui-dialog-onlogin p#confirm-msg")
+    .empty()
+    .append(spinner.el);
+
+  // ローディング中のメッセージを生成
+  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm")
+    .append('<br/><br/>')
+    .append('<div id="pokemon">分析中 ...</div>')
+    .append('<br/><br/>')
+    .append('<div id="monsterball"></div>');
+
+  return origin_content;
+}
+
+function afterCallWithPlotAll() {
+  // バブルチャートをaddしたダイアログを閉じる
+  $("#onlogin-dialog-confirm").dialog('close');
+
+  // ダイアログの内容を元に戻す
+  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html("");
+  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html(origin_content);
+
+  // 進捗カウンタをリセット
+  prcnt_all_cntr = 0;
 }
 

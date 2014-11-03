@@ -221,7 +221,8 @@ $(function() {
       // 分析開始ボタンの動作
       $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
 
-        $("#onlogin-dialog-confirm").dialog('close');
+        // 進捗状態の表示へ切り替え
+        var origin_content = addLoadingMortion();
 
         // 返り値データ
         var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
@@ -238,8 +239,7 @@ $(function() {
 
         // 全ページ種類のグラフを生成する関数
         var pcntr = 0;
-        createBubbleAll(idxarr, arr, idxarr_all, arr_all, page_fltr_wds, pcntr);
-
+        createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
       });
 
       // 期間修正ボタンの動作

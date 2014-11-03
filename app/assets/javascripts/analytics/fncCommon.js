@@ -1,3 +1,9 @@
+// 要素の表示、非表示を判定する
+$.fn.isVisible = function() {
+    return $.expr.filters.visible(this[0]);
+};
+
+// チェックボックスのふるまいをラジオボタンと同じする
 function likeRadio(obj) {
   var n = obj.attr("name");
   var m = '#hallway input[name=' + n + ']';

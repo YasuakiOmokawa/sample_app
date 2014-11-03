@@ -149,6 +149,9 @@ class UsersController < ApplicationController
     @partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
 
+    # gon.display_dialog_onlogin_flg = User.find(params[:id]).limitanalyzeall <=> Time.now
+    # gon.display_dialog_onlogin_flg = 1 if display_dialog_onlogin_flg.nil? || display_dialog_onlogin_flg == 1
+
     render json: {
       :homearr => @json,
       :page_fltr_wd => @page_fltr_wd,
@@ -241,40 +244,34 @@ class UsersController < ApplicationController
         # キャッシュを取得する(キーワード数)
         cached_item = Rails.cache.read(@req_str)
 
-        # データオブジェクトとオブジェクト格納キーが存在するか？
-        if params[:r_obj].present? && params[:kwds_len].present?
+        # キャッシュ読み書き(バブル用データ)
+        if params[:analyze_type].present?
 
-          puts 'caching data'
+          analyze_type = params[:analyze_type].to_s
 
-          # ユニークキーを取得する
+          uniq = create_cache_key(analyze_type)
 
-          # ユーザ単位で一意にするため指定
-          usrid = params[:id].to_s
+          if params[:r_obj].present?
 
-          uniq = usrid + params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+            puts 'caching data'
 
-          # 格納用データオブジェクト
-          s_txt = params[:r_obj].to_s
+            # 格納用データオブジェクト
+            s_txt = params[:r_obj].to_s
 
-          # 結果をキャッシュへ格納してコントローラを抜ける
-          Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
+            # 結果をキャッシュへ格納してコントローラを抜ける
+            # キャッシュの保持時間は1h
+            Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
 
-          puts s_txt
+            puts s_txt
 
-          return
-        elsif params[:kwds_len].present?
+            return
+          else
 
-          puts 'getting cached data'
+            puts 'getting cached data'
 
-          # ユニークキーを取得する
-
-          # ユーザ単位で一意にするため指定
-          usrid = params[:id].to_s
-
-          uniq = usrid + params[:from].to_s + params[:to].to_s + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
-
-          # データを読み込む
-          cached_item = Rails.cache.read(uniq)
+            # データを読み込む
+            cached_item = Rails.cache.read(uniq)
+          end
         end
 
         # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
@@ -470,6 +467,12 @@ class UsersController < ApplicationController
         'repeat' => { :user_type.matches => 'Returning Visitor' },
         'all' => {}
       }
+
+      # 全体分析の完了したタイムスタンプを保持
+      if params[:analyzeallcomplete].present?
+        User.find(params[:id]).update_attribute(:limitanalyzeall, Time.now + 1.hour)
+        return
+      end
 
       # フラグで処理するか分ける
       shori = params[:shori].presence || 0

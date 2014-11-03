@@ -1,3 +1,186 @@
+function createPlotArr(idxarr, arr) {
+
+  var plot_color = {}, tmp_arr = [];
+
+  for (i=0; i < idxarr.length; i++) {
+
+    color = setBubbleColor(idxarr[i].arr[0], idxarr[i].arr[1]);
+
+    // x, y, radius, plot_color
+    tmp_arr[i] = [parseInt(idxarr[i].arr[0]), parseInt(idxarr[i].arr[1]), 1, color];
+  }
+
+  arr.push(tmp_arr);
+}
+
+function headIdxarr(idxarr, limit) {
+
+  var headed_obj = [];
+
+  if (idxarr.length < limit) {
+    return idxarr;
+  }
+
+  for (var i=0; i < idxarr.length; i++) {
+
+    headed_obj[i] = idxarr[i];
+
+    // 表示件数の上限を30件に制限
+    if (i >= limit -1) {
+      return headed_obj;
+    }
+  }
+
+}
+
+// 項目一覧データにクリックイベントを追加
+function addClickEvtToInfo() {
+
+  $('#legend1b tr td a').click(function(e) {
+
+      //要素の先祖要素で一番近いtdの
+      //data-page属性の値を加工する
+      var item = $(e.target).closest('td').data('page').split(';;');
+      console.log(item);
+
+      // グラフ項目と人気ページパラメータを設定
+      addNarrowParam( item, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+      // 絞り込みチェックボックスの値を指定
+      var dp = $(e.target).closest('td').data('devfltr');
+      var up = $(e.target).closest('td').data('usrfltr');
+
+      $.each([dp,up], function(i, val) {
+        var type,n,m;
+        type = '#hallway input[value=' + val + ']';
+        n = $(type).attr("name");
+        m = '#hallway input[name=' + n + ']';
+        $(m).val([val]);
+      });
+
+      // 絞り込みキーワードの値を設定
+      var kp = $(e.target).closest('td').data('kwdfltr'); // キーワード
+
+      if (kp != 'nokwd') {
+        var flg; // どのページのキーワードか判別用
+
+        // 遷移先の最後のアクション名を取得
+        var p = $(e.target).closest('td').attr("name");
+        p = p.split('/');
+
+        // 遷移先を判別
+        switch (p[3]) {
+          case 'search':
+            flg = 's';
+            break;
+          case 'direct':
+            flg = 'f';
+            break;
+          case 'referral':
+            flg = 'r';
+            break;
+          case 'social':
+            flg = 'l';
+            break;
+          case 'campaign':
+            flg = 'c';
+            break;
+          default:
+            flg = 'f';
+        }
+
+        // 遷移先のキーワードとページ情報を設定
+        var n_wd = kp + flg;
+        $('#narrow_select')
+          .append($('<option>')
+            .html(" ")
+            .val(n_wd)
+          ).val(n_wd);
+      }
+
+      // 遷移先の強調項目を設定
+      $('input[name="red_item"]').val(item[1]);
+
+      // 遷移先ページタブ情報を保持
+      var prev_page = String(item[0]);
+      $('input[name="prev_page"]').val(prev_page);
+
+      // ページ遷移
+      evtsend($(e.target).closest('td'));
+  });
+}
+
+// 項目一覧へ要素を追記
+function addInfo(idxarr) {
+
+  // 項目一覧へ表示する項目番号
+  var counter = 0;
+
+  // 項目一覧へ表示する文字列
+  var caption;
+
+  // 絞り込み情報の保持
+  var text;
+
+  // 項目一覧データを追記
+  idxarr.some(function(value){
+
+    counter = counter + 1;
+
+    // 絞り込み情報の追加
+    text = value['arr'][3].split(';;');
+    // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
+
+    // 項目一覧へ表示する文字列
+    // ページ項目:データ指標：デバイス：ユーザー：絞り込み条件(あれば)
+    caption = text[0] + ':' + text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
+
+    $('#legend1b').append(
+      $('<tr>').append(
+        $('<td>')
+          .attr("class", "l")
+          .text(counter)
+        ).append(
+          $('<td>')
+          .attr({
+            "name": value['pagelink'],
+            "class": "r",
+            'data-gap': value['arr'][0],
+            'data-sokan': value['arr'][1],
+            'data-page': value['arr'][3],
+            'data-devfltr': value['dev_fltr'],
+            'data-usrfltr': value['usr_fltr'],
+            'data-kwdfltr': value['kwd_fltr']
+          })
+          .append(
+            $('<a>')
+              .attr({
+                "href": 'javascript:void(0)',
+                "title": caption,
+              })
+              .text(caption)
+            )
+      )
+    );
+  });
+}
+
+// 優先順位の降順、
+// 　ページ名と項目名の昇順でソート
+// > がマイナスリターン。。降順、< がプラスリターンで昇順
+function sortIdxarr(idxarr) {
+
+  var idxarr = idxarr.sort(function(a,b) {
+    if (a.pri > b.pri) return  -1;
+    if (a.pri < b.pri) return  1;
+    if (a.page > b.page) return  1;
+    if (a.page < b.page) return  -1;
+    if (a.name > b.name) return  1;
+    if (a.name < b.name) return  -1;
+  });
+  return idxarr;
+}
+
 // バブル色の指定
 var setBubbleColor = function(x, y) {
     var label;
@@ -58,27 +241,24 @@ var setDataidx = function(obj, wd, idxarr) {
     });
     cnt += 1
   }
-  // return idxarr;
 }
 
 // グラフデータ全設定
-var setData = function(obj, wd, arr) {
+// var setData = function(obj, wd, arr) {
 
-  var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
-  // var arr = [];
-  var cnt = 0;
-  var fltr_wd = wd;
+//   var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
+//   var cnt = 0;
+//   var fltr_wd = wd;
 
-  for (var i in homearr[fltr_wd]) {
-    arr.push( homearr[fltr_wd][i] );
-    arr[cnt].forEach( function(value) {
-      value[3] = setBubbleColor(value[0], value[1]);
-    });
+//   for (var i in homearr[fltr_wd]) {
+//     arr.push( homearr[fltr_wd][i] );
+//     arr[cnt].forEach( function(value) {
+//       value[3] = setBubbleColor(value[0], value[1]);
+//     });
 
-    cnt += 1;
-  }
-  // return arr;
-}
+//     cnt += 1;
+//   }
+// }
 
 // 再描画用にデータを集める
 var replotdata = function(allarr, wd) {
@@ -174,8 +354,7 @@ function kwdTnsltENtoJP (d) {
   return wd;
 }
 
-
-// バブルチャートの生成
+// バブルチャートの生成(main function)
 function plotGraphHome(arr, idxarr) {
   jQuery( function() {
 
@@ -229,154 +408,11 @@ function plotGraphHome(arr, idxarr) {
       },
     };
 
-    // // ホーム画面で指定したページ項目名
-    // var page_fltr_wd = fltr;
-
-    // // データセット
-    // var arr = setData(robj, page_fltr_wd);
-
-    // // データ項目一覧セット
-    // var idxarr = setDataidx(robj, page_fltr_wd);
-
-    // 優先順位の降順、
-    // 　ページ名と項目名の昇順でソート
-    // > がマイナスリターン。。降順、< がプラスリターンで昇順
-    idxarr = idxarr.sort(function(a,b) {
-      if (a.pri > b.pri) return  -1;
-      if (a.pri < b.pri) return  1;
-      if (a.page > b.page) return  1;
-      if (a.page < b.page) return  -1;
-      if (a.name > b.name) return  1;
-      if (a.name < b.name) return  -1;
-    });
-
-    // 項目一覧へ表示する項目番号
-    var counter = 0;
-    // 項目一覧へ表示する文字列
-    var caption;
-    // var ptxt, pagenm, pagelink;
-
-    // 項目一覧データを追記
-    idxarr.some(function(value){
-
-      // 表示件数の上限を30件に制限
-      if (counter >= 30) {
-        return false;
-      }
-
-      counter = counter + 1;
-
-      // 絞り込み情報の追加
-      text = value['arr'][3].split(';;');
-      // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
-
-      // 項目一覧へ表示する文字列
-      // ページ項目:データ指標：デバイス：ユーザー：絞り込み条件(あれば)
-      caption = text[0] + ':' + text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
-
-      $('#legend1b').append(
-        $('<tr>').append(
-          $('<td>')
-            .attr("class", "l")
-            .text(counter)
-          ).append(
-            $('<td>')
-            .attr({
-              "name": value['pagelink'],
-              "class": "r",
-              'data-gap': value['arr'][0],
-              'data-sokan': value['arr'][1],
-              'data-page': value['arr'][3],
-              'data-devfltr': value['dev_fltr'],
-              'data-usrfltr': value['usr_fltr'],
-              'data-kwdfltr': value['kwd_fltr']
-            })
-            .append(
-              $('<a>')
-                .attr({
-                  "href": 'javascript:void(0)',
-                  "title": caption,
-                })
-                .text(caption)
-              )
-        )
-      );
-    });
+    // 項目一覧へ要素を追記
+    addInfo(idxarr);
 
     // 項目一覧データにクリックイベントを追加
-    $('#legend1b tr td a').click(function(e) {
-
-        //要素の先祖要素で一番近いtdの
-        //data-page属性の値を加工する
-        var item = $(e.target).closest('td').data('page').split(';;');
-        console.log(item);
-
-        // グラフ項目と人気ページパラメータを設定
-        addNarrowParam( item, $('input[name="graphic_item"]'), $('#narrow_select') );
-
-        // 絞り込みチェックボックスの値を指定
-        var dp = $(e.target).closest('td').data('devfltr');
-        var up = $(e.target).closest('td').data('usrfltr');
-
-        $.each([dp,up], function(i, val) {
-          var type,n,m;
-          type = '#hallway input[value=' + val + ']';
-          n = $(type).attr("name");
-          m = '#hallway input[name=' + n + ']';
-          $(m).val([val]);
-        });
-
-        // 絞り込みキーワードの値を設定
-        var kp = $(e.target).closest('td').data('kwdfltr'); // キーワード
-
-        if (kp != 'nokwd') {
-          var flg; // どのページのキーワードか判別用
-
-          // 遷移先の最後のアクション名を取得
-          var p = $(e.target).closest('td').attr("name");
-          p = p.split('/');
-
-          // 遷移先を判別
-          switch (p[3]) {
-            case 'search':
-              flg = 's';
-              break;
-            case 'direct':
-              flg = 'f';
-              break;
-            case 'referral':
-              flg = 'r';
-              break;
-            case 'social':
-              flg = 'l';
-              break;
-            case 'campaign':
-              flg = 'c';
-              break;
-            default:
-              flg = 'f';
-          }
-
-          // 遷移先のキーワードとページ情報を設定
-          var n_wd = kp + flg;
-          $('#narrow_select')
-            .append($('<option>')
-              .html(" ")
-              .val(n_wd)
-            ).val(n_wd);
-        }
-
-        // 遷移先の強調項目を設定
-        $('input[name="red_item"]').val(item[1]);
-
-        // 遷移先ページタブ情報を保持
-        var prev_page = String(item[0]);
-        $('input[name="prev_page"]').val(prev_page);
-
-
-        // ページ遷移
-        evtsend($(e.target).closest('td'));
-    });
+    addClickEvtToInfo();
 
     // jqplot描画後に実行する操作（jqplot描画前に書くこと）
     $.jqplot.postDrawHooks.push(function(graph) {
