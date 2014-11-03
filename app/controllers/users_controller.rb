@@ -253,7 +253,7 @@ class UsersController < ApplicationController
 
           if params[:r_obj].present?
 
-            puts 'caching data'
+            puts 'set data for cache'
 
             # 格納用データオブジェクト
             s_txt = params[:r_obj].to_s
