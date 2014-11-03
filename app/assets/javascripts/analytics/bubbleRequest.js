@@ -344,9 +344,10 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
       // グラフ描画用のデータを最終マージ
       $.extend(true, robj, tmp_obj);
 
-      // データをキャッシュ
+    // ページ全体ロードの時はデータをキャッシュさせない
+    if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
       cacheResult(robj, true, 'POST', 'kobetsu', kwd_strgs, elm_txt);
-      // cacheResult(kwd_strgs, robj, true, elm_txt, 'POST');
+    }
 
       }
     })
