@@ -7,15 +7,18 @@ $(window).load(function() {
     var cached_obj;
     cached_obj = cacheResult(cached_obj, false, 'GET', 'zentai');
 
-    if (cached_obj) {
+    setTimeout(function() {
 
-      createBubbleWithParts(cached_obj);
+      if (cached_obj) {
 
-    } else {
+        createBubbleWithParts(cached_obj);
 
-      $( "#onlogin-dialog" ).dialog('open');
+      } else {
 
-    }
+        $( "#onlogin-dialog" ).dialog('open');
+
+      }
+    }, 1000);
 
   }
 });
