@@ -186,18 +186,6 @@ $(function() {
 
       // datepicker を表示させるため、初期focus を行う。
       $( "div.jquery-ui-dialog-onlogin" ).focus();
-
-      // 確認ダイアログを表示
-      $( "div.jquery-ui-dialog-onlogin a#start" ).click(function() {
-
-        $('#onlogin-dialog-confirm').dialog('open');
-
-        $('#onlogin-dialog').dialog('close');
-
-        // datepicker の削除
-        $("input.fromd").datepicker("destroy");
-        $("input.tod").datepicker("destroy");
-      });
     },
     width: 1000,
     height: 300,
@@ -218,36 +206,6 @@ $(function() {
       var msg = f + "～" + t + "　の期間で分析をします。"
       $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
 
-      // 分析開始ボタンの動作
-      $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
-
-        // 進捗状態の表示へ切り替え
-        var origin_content = addLoadingMortion();
-
-        // 返り値データ
-        var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
-
-        // ホーム画面のページ項目名
-        var page_fltr_wds = [
-          "検索",
-          "直接入力/ブックマーク",
-          "その他ウェブサイト",
-          "ソーシャル",
-          "キャンペーン",
-          "全体"
-        ];
-
-        // 全ページ種類のグラフを生成する関数
-        var pcntr = 0;
-        createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
-      });
-
-      // 期間修正ボタンの動作
-      $( "div.jquery-ui-dialog-onlogin a#cancel" ).click(function() {
-        $('#onlogin-dialog').dialog('open');
-        $("#onlogin-dialog-confirm").dialog('close');
-
-      });
     },
     width: 1000,
     height: 300,
@@ -258,4 +216,50 @@ $(function() {
   $("a#jrange").click(function() {
       $( "#dialog-form" ).dialog('open');
   });
+
+  // 分析開始ボタンの動作
+  $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
+
+    // 進捗状態の表示へ切り替え
+    var origin_content = addLoadingMortion();
+
+    // 返り値データ
+    var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
+
+    // ホーム画面のページ項目名
+    var page_fltr_wds = [
+      "検索",
+      "直接入力/ブックマーク",
+      "その他ウェブサイト",
+      "ソーシャル",
+      "キャンペーン",
+      "全体"
+    ];
+
+    // 全ページ種類のグラフを生成する関数
+    var pcntr = 0;
+    createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
+  });
+
+  // 確認ダイアログを表示
+  $( "div.jquery-ui-dialog-onlogin a#start" ).click(function() {
+
+    $('#onlogin-dialog-confirm').dialog('open');
+
+    $('#onlogin-dialog').dialog('close');
+
+    // datepicker の削除
+    $("input.fromd").datepicker("destroy");
+    $("input.tod").datepicker("destroy");
+  });
+
+  // 期間修正ボタンの動作
+  $( "div.jquery-ui-dialog-onlogin a#cancel" ).click(function() {
+
+    $('#onlogin-dialog').dialog('open');
+
+    $("#onlogin-dialog-confirm").dialog('close');
+  });
 });
+
+

@@ -508,7 +508,7 @@ function createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_conten
 
         setTimeout(function() {
 
-          afterCallWithPlotAll();
+          afterCallWithPlotAll(origin_content);
 
           var shaped_idxarr = [];
 
@@ -522,7 +522,7 @@ function createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_conten
 
           // 作成済みデータをキャッシュ
           cacheResult(shaped_idxarr, true, 'POST', 'zentai');
-        }, 3000);
+        }, 1000);
 
       } else {
 
@@ -627,7 +627,7 @@ function addLoadingMortion() {
   return origin_content;
 }
 
-function afterCallWithPlotAll() {
+function afterCallWithPlotAll(origin_content) {
   // バブルチャートをaddしたダイアログを閉じる
   $("#onlogin-dialog-confirm").dialog('close');
 
