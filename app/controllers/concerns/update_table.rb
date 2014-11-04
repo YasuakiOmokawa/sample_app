@@ -113,16 +113,17 @@ module UpdateTable
            # 前日と当日のデータが揃っていれば相関計算を開始
            unless dt_dy_bf.nil? && gp_dy_bf.nil? && cv_dy_bf.nil? && cvr_dy_bf.nil? && dy_bf.nil?
             # binding.pry # ブレークポイントスイッチ
+            puts "差分を計算します。 日付：　#{k} マイナス #{date_bf}  項目： #{t}"
             dt_sbn = cr.dt_dy - dt_dy_bf
             gp_sbn = cr.gp_dy - gp_dy_bf
             cv_sbn = cr.cv_dy - cv_dy_bf
             cvr_sbn = cr.cvr_dy - cvr_dy_bf
-            puts "sabun keisan #{k} minus #{date_bf}"
-            puts "dt_sbn is #{dt_sbn}, gp_sbn is #{gp_sbn}, and cv_sbn is #{cv_sbn}, and cvr_sbn is #{cvr_sbn}"
+            puts "項目の差分 is #{dt_sbn}, gap値の差分 is #{gp_sbn}, and CVの差分 is #{cv_sbn}"
+            puts "当日の項目値 is #{cr.dt_dy}, 当日のCV is #{cr.cv_dy}, 当日のGAP値 is #{cr.gp_dy}"
 
             # binding.pry # ブレークポイントスイッチ
             # 相関ポイントの計算
-            pt = calc_soukan(t, gp, cvr, cv, cr.cv_dy, cr.gp_dy, dt, cr.dt_dy)
+            pt = calc_soukan(t, gp_sbn, cvr_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
             # binding.pry # ブレークポイントスイッチ
 
             ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー

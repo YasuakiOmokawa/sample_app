@@ -234,6 +234,11 @@ class UsersController < ApplicationController
 
     def chk_param
 
+      @from = params[:from].presence || Date.today.prev_month
+      @to = params[:to].presence || Date.today
+      @from = set_date_format(@from) if params[:from].present?
+      @to = set_date_format(@to) if params[:to].present?
+
       # ajaxリクエストの判定
       if request.xhr?
 
@@ -262,11 +267,9 @@ class UsersController < ApplicationController
             # キャッシュの保持時間は1h
             Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
 
-            puts s_txt
-
             # 分析完了メールを送信
             user = User.find(params[:id])
-            UserMailer.send_message_for_complete_analyze(user).deliver if user
+            UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
 
             return
           else
@@ -303,10 +306,6 @@ class UsersController < ApplicationController
 
       @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
       @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
-      @from = params[:from].presence || Date.today.prev_month
-      if params[:from].present? then @from = set_date_format(@from) end
-      @to = params[:to].presence || Date.today
-      if params[:to].present? then @to = set_date_format(@to) end
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      set_action(params[:action], @cond)
       gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末

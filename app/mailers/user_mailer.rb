@@ -13,8 +13,10 @@ class UserMailer < ActionMailer::Base
     mail :to => user.email, :subject => "【TAS for GA】パスワードをリセット"
   end
 
-  def send_message_for_complete_analyze(user)
+  def send_message_for_complete_analyze(user, from, to)
     @user = user
+    @user.created_at = from
+    @user.updated_at = to
 
     mail :to => user.email, :subject => "分析完了のお知らせ"
   end

@@ -559,8 +559,14 @@ function createBubbleWithParts(idxarr) {
       // バブルチャートを描画
       plotGraphHome(arr, shaped_idxarr);
 
+      // 処理完了
+      $('.jquery-ui-dialog-onlogin div#onlogin-dialog-confirm div#monsterball').text('cpmplete!');
+
       // 事後処理
       afterCall();
+
+      // 期間表示ハイパーリンクを変更
+      setRange();
 
       clearInterval(timerID);
       timerID = null;
