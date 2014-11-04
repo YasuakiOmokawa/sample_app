@@ -94,6 +94,7 @@ module UpdateTable
       ky, pt = '', 0
       cr.cvr_dy = cr.gp_dy = cr.cv_dy = cr.dt_dy = cr.dy = 0.0
       cvr_dy_bf = gp_dy_bf = cv_dy_bf = dt_dy_bf = dy_bf = nil
+      date_bf = ''
 
       # 項目別
       col.each do |t, i|
@@ -112,11 +113,12 @@ module UpdateTable
            # 前日と当日のデータが揃っていれば相関計算を開始
            unless dt_dy_bf.nil? && gp_dy_bf.nil? && cv_dy_bf.nil? && cvr_dy_bf.nil? && dy_bf.nil?
             # binding.pry # ブレークポイントスイッチ
-            dt = cr.dt_dy - dt_dy_bf
-            gp = cr.gp_dy - gp_dy_bf
-            cv = cr.cv_dy - cv_dy_bf
-            cvr = cr.cvr_dy - cvr_dy_bf
-            puts "dt is #{dt}, gp is #{gp}, and cv is #{cv}, and cvr is #{cvr}"
+            dt_sbn = cr.dt_dy - dt_dy_bf
+            gp_sbn = cr.gp_dy - gp_dy_bf
+            cv_sbn = cr.cv_dy - cv_dy_bf
+            cvr_sbn = cr.cvr_dy - cvr_dy_bf
+            puts "sabun keisan #{k} minus #{date_bf}"
+            puts "dt_sbn is #{dt_sbn}, gp_sbn is #{gp_sbn}, and cv_sbn is #{cv_sbn}, and cvr_sbn is #{cvr_sbn}"
 
             # binding.pry # ブレークポイントスイッチ
             # 相関ポイントの計算
@@ -146,6 +148,7 @@ module UpdateTable
            cv_dy_bf = cr.cv_dy
            cvr_dy_bf = cr.cvr_dy
            cr.cvr_dy, cr.gp_dy, cr.cv_dy, cr.dt_dy = [] # 前日値のリセット
+           date_bf = k
         end
         # binding.pry # ブレークポイントスイッチ
       end
@@ -286,7 +289,6 @@ module UpdateTable
 
 
   # バブル（散布図）チャートの総ギャップ値と相関を合わせた配列（jqplotへ渡す）
-  # バブルにする場合は、push時に３番目にradiusを設定
   def concat(tb, b, hsh)
     arr = []
     hsh.each do |k, v|
