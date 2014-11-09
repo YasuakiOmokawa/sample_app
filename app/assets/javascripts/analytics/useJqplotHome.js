@@ -4,10 +4,10 @@ function createPlotArr(idxarr, arr) {
 
   for (i=0; i < idxarr.length; i++) {
 
-    color = setBubbleColor(idxarr[i].arr[0], idxarr[i].arr[1]);
+    plot_color = setBubbleColor(idxarr[i]['arr'][0], idxarr[i]['arr'][1]);
 
     // x, y, radius, plot_color
-    tmp_arr[i] = [parseInt(idxarr[i].arr[0]), parseInt(idxarr[i].arr[1]), 1, color];
+    tmp_arr[i] = [idxarr[i]['arr'][0], idxarr[i]['arr'][1], 1, plot_color];
   }
 
   arr.push(tmp_arr);

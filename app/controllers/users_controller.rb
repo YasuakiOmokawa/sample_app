@@ -650,31 +650,10 @@ class UsersController < ApplicationController
               :pagePath
           ]
           fmt_hsh = {}
-          @favorite.each do |k, v|
-            key = k.page_title + ";;" + k.page_path
-            fmt_hsh[key] = k.pageviews
+          @top_ten.each do |k, v|
+            key = v[0] + ";;" + v[1]
+            fmt_hsh[key] = v[2]
           end
-
-          # 再訪問率をセッションベースに変更するためコメントアウト
-          # 再訪問率計算用のセッション総数
-          # @common = Analytics.create_class('Common',
-          #   [
-          #     :sessions,
-          #     :pageviews
-          #   ] ).results(@ga_profile,@cond)
-          # # 総セッション数の取得（再訪問率計算用)
-          # if @common.total_results == 0
-          #   all_sessions = 0
-          # else
-          #   all_sessions = @common[0][:sessions]
-          # end
-
-          # リクエストパラメータの遅延時間分だけ、スリープ実施
-          # delay_sec = params[:gadelay].presence || 0
-
-          # logger.info('sleep before request ' + delay_sec.to_s + ' second!')
-
-          # sleep(delay_sec.to_i)
 
           # リトライ時のメッセージを指定
           exception_cb = Proc.new do |retries|
@@ -748,10 +727,6 @@ class UsersController < ApplicationController
           # 相関のGAPを算出
           put_table_for_graph(gap, @gap_table_for_graph, mets_sa) # 項目の理想値、現実値をスケルトンへ代入
 
-          # 再訪問率の計算はセッションベースにしているため以下のロジックはコメントアウト
-          # gap_rep = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, :repeat_rate)
-          # put_table_for_graph(gap_rep, @gap_table_for_graph, [:repeat_r)
-
           calc_gap_for_graph(@gap_table_for_graph, mets_sa) # スケルトンからGAP値を計算
 
           # 相関算出
@@ -782,6 +757,10 @@ class UsersController < ApplicationController
           # 各相関をマージ
           corr.merge!(fvt_corr)
 
+          # 曜日別GAPを抜き出す
+          gap_day = pickup_gap_per_day(corr)
+
+
           ## ◆GAP算出
 
           # 人気ページテーブル
@@ -795,28 +774,20 @@ class UsersController < ApplicationController
           # その他テーブル
           skel = create_skeleton_bubble(mets_sa)
           put_common_for_gap(skel, sonota_gap)
-
-          # 再訪問率をセッションベースにするためコメントアウト
-          # gap_rep = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
-          #   {:user_type.matches => 'Returning Visitor'} )
-          # put_common_for_gap(skel, gap_rep, all_sessions) #再訪問率
-
           skel = calc_gap_for_common(skel)
 
-          # 数値をパーセンテージへ再計算
+          # 日別、人気ページ別gapをマージ
           skel.merge!(fav_gap)
-
-          gap_day = Hash.new{ |h, k| h[k] = {} }
-          corr.each do |k, v|
-            if k =~ /(day_off|day_on)/ then
-              gap_day[k][:gap] = v[:gap]
-            end
-          end
           skel.merge!(gap_day)
 
-          skel = calc_num_to_pct(skel)
+          # グラフ表示用に、gap値絶対値へ変換
+          change_gap_to_abs(skel)
 
+          # pageviews, sessions, bounce_rate のgap値を項目値へ変更（グラフ表示の為）
+          change_gap_to_komoku(skel)
 
+          # 数値をパーセンテージへ再計算
+          re_calced_skel = calc_num_to_pct(skel)
 
           # jqplot用データ構築
           # mets_sh の キーが、実際にグラフに渡される値
@@ -834,7 +805,7 @@ class UsersController < ApplicationController
           mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
           mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
 
-          homearr = concat(skel, corr, mets_sh)
+          homearr = concat(re_calced_skel, corr, mets_sh)
 
           # ページ項目へ追加
           p_hash[x][room] = homearr

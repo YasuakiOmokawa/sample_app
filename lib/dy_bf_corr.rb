@@ -1,4 +1,4 @@
-class Corr
+class DyBfCorr
   Properties = %i(dy gp_dy cvr_dy cv_dy dt_dy date)
   Properties.each do |prop|
     attr_accessor prop

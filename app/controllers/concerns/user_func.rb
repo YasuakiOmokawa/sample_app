@@ -205,7 +205,7 @@ module ParamUtils
     cntr = 0
     dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
       cntr += 1
-      r_hsh[cntr] = [t.page_title, t.page_path]
+      r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
       if cntr >= 10 then break end
     end
     cntr = cntr + 1

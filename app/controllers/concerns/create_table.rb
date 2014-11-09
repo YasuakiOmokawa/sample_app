@@ -112,6 +112,9 @@ module CreateTable
       [:good, :bad, :gap].each do |s|
         table[key][s] = 0
       end
+
+      if cnt >= 10 then break end
+
     end
     table["その他"][:index] = cnt + 1
     [:good, :bad, :gap].each do |s|

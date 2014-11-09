@@ -84,84 +84,96 @@ module UpdateTable
 
   # バブル（散布図）チャートのために相関を出す
   def calc_corr(tbl, col, cvr, flg = 'none')
-    begin
-      shori = 'バブル（散布図）チャートのために相関を出す'
+    r_hsh = Hash.new{ |h,k| h[k] = {} }
+    d_hsh = {} # 曜日種別の日数を保持
+    cr = Corr.new # 相関算出用に当日の値を格納
 
-      r_hsh = Hash.new{ |h,k| h[k] = {} }
-      d_hsh = {} # 曜日種別の日数を保持
-      cr = Corr.new # 相関算出用に前日の値を格納していくインスタンス
-      cr.dy = ''
-      ky, pt = '', 0
-      cr.cvr_dy = cr.gp_dy = cr.cv_dy = cr.dt_dy = cr.dy = 0.0
-      cvr_dy_bf = gp_dy_bf = cv_dy_bf = dt_dy_bf = dy_bf = nil
-      date_bf = ''
+    # 項目別
+    col.each do |komoku, i|
 
-      # 項目別
-      col.each do |t, i|
+      dy_bf_cr = DyBfCorr.new # 相関算出用に前日の値を格納
 
-        # 日付別
-        tbl.sort_by{|a, b| (b['idx']) }.each do |k, v|
-           cr.dt_dy = v[t][0].to_f + v[t][1].to_f # 項目値(理想値＋現実値)
-           cr.gp_dy = v[t][2].to_f # GAP
-           cr.dy = v[t][3] # 曜日種別
-           cr.cvr_dy = 1
+      # 日付別
+      tbl.sort_by{|a, b| (b['idx']) }.each do |date, per_date_value|
 
-           # ページ相関の種類によってプロパティ値を変更
-           chk_flg(cr, v, flg, cvr, t)
-           # binding.pry # ブレークポイントスイッチ
+        set_data_of_calc_corr(per_date_value, cr, komoku, date)
 
-           # 前日と当日のデータが揃っていれば相関計算を開始
-           unless dt_dy_bf.nil? && gp_dy_bf.nil? && cv_dy_bf.nil? && cvr_dy_bf.nil? && dy_bf.nil?
-            # binding.pry # ブレークポイントスイッチ
-            puts "差分を計算します。 日付：　#{k} マイナス #{date_bf}  項目： #{t}"
-            dt_sbn = cr.dt_dy - dt_dy_bf
-            gp_sbn = cr.gp_dy - gp_dy_bf
-            cv_sbn = cr.cv_dy - cv_dy_bf
-            cvr_sbn = cr.cvr_dy - cvr_dy_bf
-            puts "項目の差分 is #{dt_sbn}, gap値の差分 is #{gp_sbn}, and CVの差分 is #{cv_sbn}"
-            puts "当日の項目値 is #{cr.dt_dy}, 当日のCV is #{cr.cv_dy}, 当日のGAP値 is #{cr.gp_dy}"
-
-            # binding.pry # ブレークポイントスイッチ
-            # 相関ポイントの計算
-            pt = calc_soukan(t, gp_sbn, cvr_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
-            # binding.pry # ブレークポイントスイッチ
-
-            ky = t.to_s + ' ' + dy_bf.to_s # 曜日別の項目数を格納するキー
-            unless flg == 'fvt'
-              # 曜日別の項目数を格納
-              d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別の項目数をカウント
-              r_hsh[ky][:gap] = gp_dy_bf + r_hsh[ky][:gap].to_i # 曜日別のGAP値を集計
-            end
-            if cr.dy == dy_bf # 相関のポイントを集計
-              r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
-
-              unless flg == 'fvt'
-                # 曜日別の相関ポイントを格納
-                r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i
-              end
-            end
-
-           end
-           # binding.pry
-           dy_bf = cr.dy
-           dt_dy_bf = cr.dt_dy
-           gp_dy_bf = cr.gp_dy
-           cv_dy_bf = cr.cv_dy
-           cvr_dy_bf = cr.cvr_dy
-           cr.cvr_dy, cr.gp_dy, cr.cv_dy, cr.dt_dy = [] # 前日値のリセット
-           date_bf = k
-        end
+        # ページ相関の種類によってプロパティ値を変更
+        chk_flg(cr, per_date_value, flg, komoku)
         # binding.pry # ブレークポイントスイッチ
+
+        # 前日と当日のデータが揃っていれば相関計算を開始
+        unless dy_bf_cr.gp_dy.nil?
+          # binding.pry # ブレークポイントスイッチ
+
+          puts "差分を計算します。 日付：　#{cr.date} マイナス #{dy_bf_cr.date}  項目： #{komoku}"
+          dt_sbn, gp_sbn, cv_sbn, cvr_sbn = calc_sabun_of_calc_corr(cr, dy_bf_cr)
+
+          # binding.pry # ブレークポイントスイッチ
+          # 相関ポイントの計算
+          pt = calc_soukan(komoku, gp_sbn, cvr_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
+          # binding.pry # ブレークポイントスイッチ
+
+          unless flg == 'fvt'
+            day_of_the_week_key = komoku.to_s + ' ' + cr.dy.to_s # 曜日別の項目数を格納するキー
+            counts_day_of_the_week(d_hsh, day_of_the_week_key, cr.gp_dy, pt, r_hsh)
+          end
+
+          # 相関ポイント集計
+          count_corr_point(komoku, pt, r_hsh)
+        end
+        # binding.pickup_gap_per_day
+        dy_bf_cr.date = date
+        set_cr_to_dy_bf_cr_of_calc_corr(cr, dy_bf_cr)
       end
-
-      # 曜日別GAPの算出
-      calc_gap_per_day(d_hsh, r_hsh, ky)
-
-      r_hsh
-    rescue => e
-      puts "エラー： #{shori}"
-      puts e.message
+      # binding.pry # ブレークポイントスイッチ
     end
+
+    # 曜日別GAPの算出
+    calc_gap_per_day(d_hsh, r_hsh)
+
+    r_hsh
+  rescue
+    puts $!
+    puts $@
+  end
+
+  def set_cr_to_dy_bf_cr_of_calc_corr(cr, bf)
+    bf.dy = cr.dy
+    bf.dt_dy = cr.dt_dy
+    bf.gp_dy = cr.gp_dy
+    bf.cv_dy = cr.cv_dy
+    bf.cvr_dy = cr.cvr_dy
+  end
+
+  def calc_sabun_of_calc_corr(cr, bf)
+    dt_sbn = cr.dt_dy - bf.dt_dy
+    gp_sbn = cr.gp_dy - bf.gp_dy
+    cv_sbn = cr.cv_dy - bf.cv_dy
+    cvr_sbn = cr.cvr_dy - bf.cvr_dy
+    puts "項目の差分 is #{dt_sbn}, gap値の差分 is #{gp_sbn}, and CVの差分 is #{cv_sbn}"
+    puts "当日の項目値 is #{cr.dt_dy}, 当日のCV is #{cr.cv_dy}, 当日のGAP値 is #{cr.gp_dy}"
+    puts " "
+    return dt_sbn, gp_sbn, cv_sbn, cvr_sbn
+  end
+
+  def set_data_of_calc_corr(v, cr, komoku, date)
+    cr.dt_dy = v[komoku][0].to_f + v[komoku][1].to_f # 項目値(理想値＋現実値)
+    cr.gp_dy = v[komoku][2].to_f # GAP
+    cr.dy = v[komoku][3] # 曜日種別
+    cr.cvr_dy = 1
+    cr.date = date
+  end
+
+  # 相関ポイント集計
+  def count_corr_point(t, pt, r_hsh)
+    r_hsh[t][:corr] = pt + r_hsh[t][:corr].to_i
+  end
+
+  def counts_day_of_the_week(d_hsh, ky, gp_dy, pt, r_hsh)
+    d_hsh[ky] = 1 + d_hsh[ky].to_i # 曜日別の項目数をカウント
+    r_hsh[ky][:gap] = gp_dy + r_hsh[ky][:gap].to_i # 曜日別のGAP値を集計
+    r_hsh[ky][:corr] = pt + r_hsh[ky][:corr].to_i # 曜日別の相関ポイントを集計
   end
 
   # 相関ポイントの計算
@@ -207,7 +219,7 @@ module UpdateTable
   end
 
   # ページ相関の種類によってプロパティ値を変更
-  def chk_flg(cr, v, flg, cvr, t)
+  def chk_flg(cr, v, flg, t)
 
     shori = 'ページ相関の種類によってプロパティ値を変更'
     # binding.pry # ブレークポイントスイッチ
@@ -225,7 +237,7 @@ module UpdateTable
   end
 
   # 曜日種類別にGAPの算出
-  def calc_gap_per_day(d_hsh, r_hsh, ky)
+  def calc_gap_per_day(d_hsh, r_hsh)
 
     # d_hsh の中身 k.. 項目と曜日の種別 v.. 曜日の数
 
@@ -242,7 +254,8 @@ module UpdateTable
 
         r_hsh[c][:gap] = avg
 
-        puts "calc gap_avg ok! key is #{d_hsh[ky]}, value is #{avg}"
+        puts "calc gap_avg ok! key is #{c}, value is #{avg}"
+        # binding.pry
       end
     end
     r_hsh
@@ -265,14 +278,14 @@ module UpdateTable
   # GAP値の数値をパーセンテージへ変換
   def calc_num_to_pct(tbl)
 
-    max = tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.max_by {|k,v| v[:gap] }[1][:gap]
-    min = tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.min_by {|k,v| v[:gap] }[1][:gap]
+    max = tbl.reject{|k,v| k =~ /(rate|percent)/}.max_by {|k,v| v[:gap] }[1][:gap]
+    min = tbl.reject{|k,v| k =~ /(rate|percent)/}.min_by {|k,v| v[:gap] }[1][:gap]
 
     # 変換の基準となる値を算出
     basis = ((max - min) / 100)
-    logger.info( " max is #{max}, min is #{min}, base value is #{basis}")
+    puts " max is #{max}, min is #{min}, base value is #{basis}"
 
-    tbl.reject{|k,v| k =~ /(rate|percent|fav_page)/}.each do |k,v|
+    tbl.reject{|k,v| k =~ /(rate|percent)/}.each do |k,v|
       if v[:gap] == max and v[:gap] > 0 then
         value = 100
       elsif v[:gap] == min and v[:gap] == 0 then
@@ -281,11 +294,31 @@ module UpdateTable
         value = (v[:gap] / basis).to_i
       end
 
-      logger.info( "Convert num to pct success! key is #{k}, row value is #{v[:gap]}, converted value is #{value}" )
+      puts "Convert num to pct success! key is #{k}, row value is #{v[:gap]}, converted value is #{value}"
 
       v[:gap] = value
     end
     return tbl
+  end
+
+  # pageviews, sessions は gap の箇所に項目値を入れる（グラフ表示の為）
+  def change_gap_to_komoku(skel)
+    # skel.select{|k, v| k =~ /(^pageviews$|^pageviews |^sessions $)/}
+    skel.select{|k, v| k =~ /(^pageviews$|^sessions$|^bounce_rate$)/}.each do |k, v|
+      v[:gap] = v[:good].to_i + v[:bad].to_i
+    end
+  end
+
+  def change_gap_to_abs(skel)
+    skel.each do |k, v|
+      v[:gap] = v[:gap].abs
+    end
+  end
+
+  def change_gap_to_minus(skel)
+    skel.each do |k, v|
+      v[:gap] = - v[:gap]
+    end
   end
 
 
@@ -326,5 +359,33 @@ module UpdateTable
     return arr
   end
 
+  def pickup_gap_per_day(corr)
+    gap_day = Hash.new{ |h, k| h[k] = {} }
+
+    corr.select{|k, v| k =~ /(day_)/}.each do |k, v|
+
+      page, day_type = k.split(' ')
+
+      select_day_type_for_pickup_gap_per_day(day_type, gap_day, page, v)
+
+    end
+    gap_day
+
+    rescue => e
+      puts e.message
+  end
+
+  def select_day_type_for_pickup_gap_per_day(day_type, gap_day, page, v)
+
+    if  day_type =~ /(day_on)/
+      gap_day["#{page} day_on"][:gap] = v[:gap]
+    else
+      gap_day["#{page} day_off"][:gap] = v[:gap]
+    end
+
+  rescue
+    puts $!
+    puts $@
+  end
 
 end

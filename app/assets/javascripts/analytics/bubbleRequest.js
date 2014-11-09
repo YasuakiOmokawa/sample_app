@@ -315,7 +315,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
           prcnt_all_cntr++;
 
           // 進捗を算出
-          var prcnt_all = calcProgress(prcnt_all_cntr, 380);
+          var prcnt_all = calcProgress(prcnt_all_cntr, 300);
 
           // ダイアログに進捗を表示
           displayProgress('.jquery-ui-dialog-onlogin div#onlogin-dialog-confirm div#monsterball', prcnt_all);
@@ -544,6 +544,10 @@ function createBubbleWithParts(idxarr) {
 
       var shaped_idxarr = [];
 
+      idxarr = reverseKomoku(idxarr, 'PV数');
+
+      idxarr = reverseKomoku(idxarr, '訪問回数');
+
       // 優先順位の降順、
       // 　ページ名と項目名の昇順でソート
       // > がマイナスリターン。。降順、< がプラスリターンで昇順
@@ -644,4 +648,80 @@ function afterCallWithPlotAll(origin_content) {
   // 進捗カウンタをリセット
   prcnt_all_cntr = 0;
 }
+
+
+function pickupValueForReverse(idxarr_all, item_name) {
+  var pvss = $.grep(idxarr_all, function(item, index) {
+    return item.name == item_name;
+  });
+  return pvss;
+}
+
+function noPickupValueForReverse(idxarr_all, item_name) {
+  var pvss = $.grep(idxarr_all, function(item, index) {
+    return item.name != item_name;
+  });
+  return pvss;
+}
+
+function sortAscValueForReverse(pvss) {
+  pvss.sort(function(a, b) {
+    if (a['arr'][0] > b['arr'][0] ) return 1;
+    if (a['arr'][0] < b['arr'][0] ) return -1;
+    if (a.page > b.page) return  1;
+    if (a.page < b.page) return  -1;
+    if (a.dev_fltr > b.dev_fltr) return  1;
+    if (a.dev_fltr < b.dev_fltr) return  -1;
+    if (a.kwd_fltr > b.kwd_fltr) return  1;
+    if (a.kwd_fltr < b.kwd_fltr) return  -1;
+    if (a.usr_fltr > b.usr_fltr) return  1;
+    if (a.usr_fltr < b.usr_fltr) return  -1;
+  });
+  return pvss;
+}
+
+function sortDescValueForReverse(pvss) {
+  pvss.sort(function(a, b) {
+    if (a['arr'][0] < b['arr'][0] ) return 1;
+    if (a['arr'][0] > b['arr'][0] ) return -1;
+    if (a.page < b.page) return  1;
+    if (a.page > b.page) return  -1;
+    if (a.dev_fltr < b.dev_fltr) return  1;
+    if (a.dev_fltr > b.dev_fltr) return  -1;
+    if (a.kwd_fltr < b.kwd_fltr) return  1;
+    if (a.kwd_fltr > b.kwd_fltr) return  -1;
+    if (a.usr_fltr < b.usr_fltr) return  1;
+    if (a.usr_fltr > b.usr_fltr) return  -1;
+  });
+  return pvss;
+}
+
+function exchangePickupedValue(pvss_asc, pvss_desc) {
+  for(var i=0; i < pvss_asc.length; i++) {
+    pvss_asc[i]['arr'][0] = pvss_desc[i]['arr'][0];
+  }
+  return pvss_asc;
+}
+
+function reCalcPriority(no_pickuped) {
+  for(var i=0; i < no_pickuped.length; i++) {
+    no_pickuped[i].pri = no_pickuped[i]['arr'][0] + no_pickuped[i]['arr'][1];
+  }
+}
+
+function reverseKomoku(idxarr_all, komoku_name) {
+
+  var pickuped = pickupValueForReverse(idxarr_all, komoku_name);
+  var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
+  var asced_pickuped = sortAscValueForReverse(pickuped);
+  var desced_pickuped = sortDescValueForReverse(pickuped);
+  var exchanged_pickuped = exchangePickupedValue(asced_pickuped, desced_pickuped);
+  reCalcPriority(exchanged_pickuped);
+  Array.prototype.push.apply(no_pickuped, exchanged_pickuped);
+
+  return no_pickuped;
+}
+
+
+
 
