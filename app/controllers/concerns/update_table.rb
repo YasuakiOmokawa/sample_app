@@ -85,7 +85,7 @@ module UpdateTable
   # バブル（散布図）チャートのために相関を出す
   def calc_corr(tbl, col, cvr, flg = 'none')
     r_hsh = Hash.new{ |h,k| h[k] = {} }
-    d_hsh = {} # 曜日種別の日数を保持
+    per_day_nums = {} # 曜日種別の日数を保持
     cr = Corr.new # 相関算出用に当日の値を格納
 
     # 項目別
@@ -97,10 +97,10 @@ module UpdateTable
       tbl.sort_by{|a, b| (b['idx']) }.each do |date, per_date_value|
 
         set_data_of_calc_corr(per_date_value, cr, komoku, date)
+        binding.pry # ブレークポイントスイッチ
 
         # ページ相関の種類によってプロパティ値を変更
         chk_flg(cr, per_date_value, flg, komoku)
-        # binding.pry # ブレークポイントスイッチ
 
         # 前日と当日のデータが揃っていれば相関計算を開始
         unless dy_bf_cr.gp_dy.nil?
@@ -116,7 +116,7 @@ module UpdateTable
 
           unless flg == 'fvt'
             day_of_the_week_key = komoku.to_s + ' ' + cr.dy.to_s # 曜日別の項目数を格納するキー
-            counts_day_of_the_week(d_hsh, day_of_the_week_key, cr.gp_dy, pt, r_hsh)
+            counts_day_of_the_week(per_day_nums, day_of_the_week_key, cr.gp_dy, pt, r_hsh)
           end
 
           # 相関ポイント集計
@@ -130,7 +130,7 @@ module UpdateTable
     end
 
     # 曜日別GAPの算出
-    calc_gap_per_day(d_hsh, r_hsh)
+    calc_gap_per_day(per_day_nums, r_hsh)
 
     r_hsh
   rescue
@@ -157,13 +157,6 @@ module UpdateTable
     return dt_sbn, gp_sbn, cv_sbn, cvr_sbn
   end
 
-  def set_data_of_calc_corr(v, cr, komoku, date)
-    cr.dt_dy = v[komoku][0].to_f + v[komoku][1].to_f # 項目値(理想値＋現実値)
-    cr.gp_dy = v[komoku][2].to_f # GAP
-    cr.dy = v[komoku][3] # 曜日種別
-    cr.cvr_dy = 1
-    cr.date = date
-  end
 
   # 相関ポイント集計
   def count_corr_point(t, pt, r_hsh)
@@ -370,7 +363,6 @@ module UpdateTable
 
     end
     gap_day
-
     rescue => e
       puts e.message
   end
@@ -382,10 +374,27 @@ module UpdateTable
     else
       gap_day["#{page} day_off"][:gap] = v[:gap]
     end
-
   rescue
     puts $!
     puts $@
   end
+
+  private
+
+    def set_data_of_calc_corr(v, cr, komoku, date)
+      cr.dt_dy = v[komoku][0].to_f + v[komoku][1].to_f # 項目値(理想値＋現実値)
+      cr.gp_dy = v[komoku][2].to_f # GAP
+      cr.dy = v[komoku][3] # 曜日種別
+      # cr.cvr_dy = 1
+      cr.date = date
+    end
+
+    def hoge
+      puts 'hoge'
+      binding.pry
+      puts 'huga'
+    end
+
+
 
 end

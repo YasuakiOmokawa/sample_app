@@ -1,3 +1,31 @@
+begin
+  require 'awesome_print'
+  require 'hirb'
+rescue LoadError
+else
+  AwesomePrint.pry!
+end
+
+if defined? Hirb
+  # Slightly dirty hack to fully support in-session Hirb.disable/enable toggling
+  Hirb::View.instance_eval do
+    def enable_output_method
+      @output_method = true
+      @old_print = Pry.config.print
+      Pry.config.print = proc do |output, value|
+        Hirb::View.view_or_page_output(value) || @old_print.call(output, value)
+      end
+    end
+
+    def disable_output_method
+      Pry.config.print = @old_print
+      @output_method = nil
+    end
+  end
+
+  Hirb.enable
+end
+
 Pry.config.pager = false
 
 def Pry.set_color sym, color
@@ -22,6 +50,8 @@ if defined?(PryByebug)
   Pry.commands.alias_command 'n', 'next'
   Pry.commands.alias_command 'f', 'finish'
 end
+
+# テスト用読み込みコード
 
 load 'user_func.rb'
 load 'create_table.rb'

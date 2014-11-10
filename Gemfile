@@ -46,6 +46,8 @@ group :development, :test do
   gem 'pry-rescue'              # exception event handler
   gem 'hirb-unicode'            # hirb
   gem 'binding_of_caller'
+  gem 'awesome_print' # オブジェクトの見やすさを改善
+  gem 'hirb' # pry上でsql結果を整形
 end
 
 group :test do
