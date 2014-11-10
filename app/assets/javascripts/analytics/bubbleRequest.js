@@ -677,31 +677,31 @@ function sortAscValueForReverse(pvss) {
     if (a.usr_fltr > b.usr_fltr) return  1;
     if (a.usr_fltr < b.usr_fltr) return  -1;
   });
-  return pvss;
+  // return pvss;
 }
 
-function sortDescValueForReverse(pvss) {
-  pvss.sort(function(a, b) {
-    if (a['arr'][0] < b['arr'][0] ) return 1;
-    if (a['arr'][0] > b['arr'][0] ) return -1;
-    if (a.page < b.page) return  1;
-    if (a.page > b.page) return  -1;
-    if (a.dev_fltr < b.dev_fltr) return  1;
-    if (a.dev_fltr > b.dev_fltr) return  -1;
-    if (a.kwd_fltr < b.kwd_fltr) return  1;
-    if (a.kwd_fltr > b.kwd_fltr) return  -1;
-    if (a.usr_fltr < b.usr_fltr) return  1;
-    if (a.usr_fltr > b.usr_fltr) return  -1;
-  });
-  return pvss;
-}
+// function sortDescValueForReverse(pvss) {
+//   pvss.sort(function(a, b) {
+//     if (a['arr'][0] < b['arr'][0] ) return 1;
+//     if (a['arr'][0] > b['arr'][0] ) return -1;
+//     if (a.page < b.page) return  1;
+//     if (a.page > b.page) return  -1;
+//     if (a.dev_fltr < b.dev_fltr) return  1;
+//     if (a.dev_fltr > b.dev_fltr) return  -1;
+//     if (a.kwd_fltr < b.kwd_fltr) return  1;
+//     if (a.kwd_fltr > b.kwd_fltr) return  -1;
+//     if (a.usr_fltr < b.usr_fltr) return  1;
+//     if (a.usr_fltr > b.usr_fltr) return  -1;
+//   });
+//   return pvss;
+// }
 
-function exchangePickupedValue(pvss_asc, pvss_desc) {
-  for(var i=0; i < pvss_asc.length; i++) {
-    pvss_asc[i]['arr'][0] = pvss_desc[i]['arr'][0];
-  }
-  return pvss_asc;
-}
+// function exchangePickupedValue(pvss_asc, pvss_desc) {
+//   for(var i=0; i < pvss_asc.length; i++) {
+//     pvss_asc[i]['arr'][0] = pvss_desc[i]['arr'][0];
+//   }
+//   return pvss_asc;
+// }
 
 function reCalcPriority(no_pickuped) {
   for(var i=0; i < no_pickuped.length; i++) {
@@ -712,16 +712,31 @@ function reCalcPriority(no_pickuped) {
 function reverseKomoku(idxarr_all, komoku_name) {
 
   var pickuped = pickupValueForReverse(idxarr_all, komoku_name);
+
   var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
-  var asced_pickuped = sortAscValueForReverse(pickuped);
-  var desced_pickuped = sortDescValueForReverse(pickuped);
-  var exchanged_pickuped = exchangePickupedValue(asced_pickuped, desced_pickuped);
-  reCalcPriority(exchanged_pickuped);
-  Array.prototype.push.apply(no_pickuped, exchanged_pickuped);
+
+  sortAscValueForReverse(pickuped);
+  // var desced_pickuped = sortDescValueForReverse(pickuped);
+  // var exchanged_pickuped = exchangePickupedValue(asced_pickuped, desced_pickuped);
+
+  swapPickupedValue(pickuped);
+
+  reCalcPriority(pickuped);
+
+  Array.prototype.push.apply(no_pickuped, pickuped);
 
   return no_pickuped;
 }
 
+function swapPickupedValue(arr) {
+	var ar_len = arr.length;
+	var loop_times = (ar_len - (ar_len % 2)) / 2;
+	for (var i=0; i <= loop_times; i++) {
+		var sentou = arr[i]['arr'][0];
+		var ushiro = arr[(ar_len - 1) - i]['arr'][0];
+		arr[i] = ushiro, arr[(ar_len - 1) - i]['arr'][0] = sentou;
+	}
+}
 
 
 
