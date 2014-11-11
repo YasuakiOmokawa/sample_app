@@ -157,14 +157,14 @@ function setKwds(elem, userpath) {
 function setOpts(opts, kwd_opts) {
 
   var dev_opts = [ // デバイス
-    'pc',
-    'sphone',
-    'mobile',
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
   ];
 
   var usr_opts = [ // 訪問者
-    'new',
-    'repeat'
+    // 'new',
+    // 'repeat'
   ];
 
   for (var i = 0; i <= dev_opts.length; i++) {
@@ -729,14 +729,13 @@ function reverseKomoku(idxarr_all, komoku_name) {
 }
 
 function swapPickupedValue(arr) {
-	var ar_len = arr.length;
-	var loop_times = (ar_len - (ar_len % 2)) / 2;
-	for (var i=0; i <= loop_times; i++) {
-		var sentou = arr[i]['arr'][0];
-		var ushiro = arr[(ar_len - 1) - i]['arr'][0];
-		arr[i] = ushiro, arr[(ar_len - 1) - i]['arr'][0] = sentou;
-	}
+  var ar_len = arr.length;
+  var loop_times = (ar_len - (ar_len % 2)) / 2;
+  for (var i=0; i <= loop_times; i++) {
+    var sentou = arr[i]['arr'][0];
+    var ushiro = arr[(ar_len - 1) - i]['arr'][0];
+    arr[i]['arr'][0] = ushiro;
+    arr[(ar_len - 1) - i]['arr'][0] = sentou;
+  }
 }
-
-
 

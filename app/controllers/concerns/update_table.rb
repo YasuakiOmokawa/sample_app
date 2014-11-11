@@ -97,7 +97,7 @@ module UpdateTable
       tbl.sort_by{|a, b| (b['idx']) }.each do |date, per_date_value|
 
         set_data_of_calc_corr(per_date_value, cr, komoku, date)
-        binding.pry # ブレークポイントスイッチ
+        # binding.pry # ブレークポイントスイッチ
 
         # ページ相関の種類によってプロパティ値を変更
         chk_flg(cr, per_date_value, flg, komoku)
