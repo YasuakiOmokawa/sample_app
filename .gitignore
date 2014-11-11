@@ -19,3 +19,6 @@ doc/
 .secret
 vendor/bundle
 /.rsync_cache
+
+# ignore staging
+ast-app/
