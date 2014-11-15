@@ -1,16 +1,41 @@
-function createPlotArr(idxarr, arr) {
+function createGraphPlots(idxarr, arr) {
 
-  var plot_color = {}, tmp_arr = [];
+  var plot_color = {}, tmp_arr = [], soukan, soukan_percent;
 
   for (i=0; i < idxarr.length; i++) {
 
-    plot_color = setBubbleColor(idxarr[i]['arr'][0], idxarr[i]['arr'][1]);
+    soukan = IsZeroSoukan(idxarr[i]['arr'][1]);
+    soukan_percent = chgSoukanToPercent(soukan);
+
+    plot_color = setBubbleColor(idxarr[i]['arr'][0], soukan_percent);
 
     // x, y, radius, plot_color
-    tmp_arr[i] = [idxarr[i]['arr'][0], idxarr[i]['arr'][1], 1, plot_color];
+    tmp_arr[i] = [idxarr[i]['arr'][0], soukan_percent, 1, plot_color];
   }
 
   arr.push(tmp_arr);
+}
+
+function IsZeroSoukan(v) {
+  if (v == 0) {
+    return 1;
+  } else {
+    return v;
+  }
+}
+
+function chgSoukanToPercent(soukan_value) {
+  var from = new Date($("#from").val());
+  var to = new Date($("#to").val());
+  var d =  to - from;
+  var dms = 1000 * 60 * 60 * 24;
+  var base_days = Math.floor(d / dms);
+
+  if ((base_days - 1) <= 0) {
+    base_days = 1;
+  }
+
+  return percent = Math.floor( (soukan_value / base_days) * 100);
 }
 
 function headIdxarr(idxarr, limit) {
@@ -132,8 +157,8 @@ function addInfo(idxarr) {
     // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
     // 項目一覧へ表示する文字列
-    // ページ項目:データ指標：デバイス：ユーザー：絞り込み条件(あれば)
-    caption = text[0] + ':' + text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
+    // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
+    caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
 
     $('#legend1b').append(
       $('<tr>').append(
@@ -424,10 +449,14 @@ function plotGraphHome(arr, idxarr) {
 
         var text = $parents.attr('data-page').split(';;');
         // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
-        var b = setBubbleColor($parents.attr('data-gap'), $parents.attr('data-sokan'));
+
+        var soukan = IsZeroSoukan($parents.attr('data-sokan'));
+        var soukan_percent = chgSoukanToPercent(soukan);
+
+        var b = setBubbleColor($parents.attr('data-gap'), soukan_percent);
         var rearr = [
           [
-            [parseInt($parents.attr('data-gap')), parseInt($parents.attr('data-sokan')), 1, b]
+            [parseInt($parents.attr('data-gap')), parseInt(soukan_percent), 1, b]
           ]
         ];
         // console.log(rearr);

@@ -106,6 +106,7 @@ $(function() {
     closeOnEscape: false,
     autoOpen: false,
     draggable: false,
+    dialogClass: 'jquery-ui-dialog-form',
     open:function(event, ui){
 
       // 閉じるボタンを表示させない
@@ -116,6 +117,9 @@ $(function() {
 
       // 日付リンクから、期間設定をダイアログの入力ボックスへ転記
       addRangeToDatePicker();
+
+      // datepicker を表示させるため、初期focus を行う。
+      $( "div.jquery-ui-dialog-form" ).focus();
 
     },
     width: 400,
@@ -174,92 +178,92 @@ $(function() {
       $( "#dialog-form" ).dialog('open');
   });
 
-  // ログイン直後に表示する期間設定ダイアログ
-  $('#onlogin-dialog').dialog({
-    closeOnEscape: false,
-    autoOpen: false,
-    draggable: false,
-    dialogClass: 'jquery-ui-dialog-onlogin',
-    open:function(event, ui){
+  // // ログイン直後に表示する期間設定ダイアログ
+  // $('#onlogin-dialog').dialog({
+  //   closeOnEscape: false,
+  //   autoOpen: false,
+  //   draggable: false,
+  //   dialogClass: 'jquery-ui-dialog-onlogin',
+  //   open:function(event, ui){
 
-      // datepickerを設定
-      addDatepicker();
+  //     // datepickerを設定
+  //     addDatepicker();
 
-      // from , to の値をリセット
-      $('input.fromd').datepicker('setDate', null);
-      $('input.tod').datepicker('setDate', null);
+  //     // from , to の値をリセット
+  //     $('input.fromd').datepicker('setDate', null);
+  //     $('input.tod').datepicker('setDate', null);
 
-      // datepicker を表示させるため、初期focus を行う。
-      $( "div.jquery-ui-dialog-onlogin" ).focus();
-    },
-    width: 1000,
-    height: 300,
-    modal: true,
-  });
+  //     // datepicker を表示させるため、初期focus を行う。
+  //     $( "div.jquery-ui-dialog-onlogin" ).focus();
+  //   },
+  //   width: 1000,
+  //   height: 300,
+  //   modal: true,
+  // });
 
-  // ログイン直後ダイアログの設定ボタンをクリックした後の確認ダイアログ
-  $('#onlogin-dialog-confirm').dialog({
-    closeOnEscape: false,
-    autoOpen: false,
-    draggable: false,
-    dialogClass: 'jquery-ui-dialog-onlogin',
-    open:function(event, ui){
+  // // ログイン直後ダイアログの設定ボタンをクリックした後の確認ダイアログ
+  // $('#onlogin-dialog-confirm').dialog({
+  //   closeOnEscape: false,
+  //   autoOpen: false,
+  //   draggable: false,
+  //   dialogClass: 'jquery-ui-dialog-onlogin',
+  //   open:function(event, ui){
 
-      // 期間メッセージを表示
-      var f = $("#from").val();
-      var t = $("#to").val();
-      var msg = f + "～" + t + "　の期間で分析をします。"
-      $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
+  //     // 期間メッセージを表示
+  //     var f = $("#from").val();
+  //     var t = $("#to").val();
+  //     var msg = f + "～" + t + "　の期間で分析をします。"
+  //     $(".jquery-ui-dialog-onlogin p#confirm-msg").text(msg);
 
-    },
-    width: 1000,
-    height: 300,
-    modal: true,
-  });
+  //   },
+  //   width: 1000,
+  //   height: 300,
+  //   modal: true,
+  // });
 
-  // 分析開始ボタンの動作
-  $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
+  // // 分析開始ボタンの動作
+  // $( "div.jquery-ui-dialog-onlogin a#go" ).click(function() {
 
-    // 進捗状態の表示へ切り替え
-    var origin_content = addLoadingMortion();
+  //   // 進捗状態の表示へ切り替え
+  //   var origin_content = addLoadingMortion();
 
-    // 返り値データ
-    var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
+  //   // 返り値データ
+  //   var idxarr = [], arr = [], idxarr_all = [], arr_all = [];
 
-    // ホーム画面のページ項目名
-    var page_fltr_wds = [
-      "検索",
-      "直接入力/ブックマーク",
-      "その他ウェブサイト",
-      "ソーシャル",
-      "キャンペーン",
-      "全体"
-    ];
+  //   // ホーム画面のページ項目名
+  //   var page_fltr_wds = [
+  //     "検索",
+  //     "直接入力/ブックマーク",
+  //     "その他ウェブサイト",
+  //     "ソーシャル",
+  //     "キャンペーン",
+  //     "全体"
+  //   ];
 
-    // 全ページ種類のグラフを生成する関数
-    var pcntr = 0;
-    createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
-  });
+  //   // 全ページ種類のグラフを生成する関数
+  //   var pcntr = 0;
+  //   createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
+  // });
 
-  // 確認ダイアログを表示
-  $( "div.jquery-ui-dialog-onlogin a#start" ).click(function() {
+  // // 確認ダイアログを表示
+  // $( "div.jquery-ui-dialog-onlogin a#start" ).click(function() {
 
-    $('#onlogin-dialog-confirm').dialog('open');
+  //   $('#onlogin-dialog-confirm').dialog('open');
 
-    $('#onlogin-dialog').dialog('close');
+  //   $('#onlogin-dialog').dialog('close');
 
-    // datepicker の削除
-    $("input.fromd").datepicker("destroy");
-    $("input.tod").datepicker("destroy");
-  });
+  //   // datepicker の削除
+  //   $("input.fromd").datepicker("destroy");
+  //   $("input.tod").datepicker("destroy");
+  // });
 
-  // 期間修正ボタンの動作
-  $( "div.jquery-ui-dialog-onlogin a#cancel" ).click(function() {
+  // // 期間修正ボタンの動作
+  // $( "div.jquery-ui-dialog-onlogin a#cancel" ).click(function() {
 
-    $('#onlogin-dialog').dialog('open');
+  //   $('#onlogin-dialog').dialog('open');
 
-    $("#onlogin-dialog-confirm").dialog('close');
-  });
+  //   $("#onlogin-dialog-confirm").dialog('close');
+  // });
 });
 
 

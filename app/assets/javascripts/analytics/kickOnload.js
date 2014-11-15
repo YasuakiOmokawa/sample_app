@@ -3,21 +3,37 @@ $(window).load(function() {
 
   if ($('title').text().indexOf('ホーム') == 0) {
 
-    // キャッシュデータの取得
-    var cached_obj;
-    cached_obj = cacheResult(cached_obj, false, 'GET', 'zentai');
-
-    if (cached_obj) {
-
-      createBubbleWithParts(cached_obj);
-
-      markPageBtn('全体');
-
-    } else {
-
-      $( "#onlogin-dialog" ).dialog('open');
-
-    }
+    analyzeHomePerPage();
 
   }
 });
+
+function chkAnalyzePageOnLogin() {
+  var page_name;
+  if ( $('input[name="prev_page"]').val() ) {
+    page_name = addSpecialCharacters( $('input[name="prev_page"]').val() );
+  } else {
+    page_name = '全体';
+  }
+  return page_name;
+}
+
+function getAnalyzeTriggerAtHome(page_name) {
+    return trigger_btn = 'div#narrow a:contains(' + page_name + ')';
+}
+
+function kickAnalyzeTrigger(trigger_btn) {
+    // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、１秒待つ
+    //  おそらくターボリンクスのせい
+    setTimeout( function(){ $(trigger_btn).trigger('click'); }, 1000);
+}
+
+function analyzeHomePerPage() {
+
+  var page_name = chkAnalyzePageOnLogin();
+
+  var trigger_btn = getAnalyzeTriggerAtHome(page_name);
+
+  kickAnalyzeTrigger(trigger_btn);
+
+}

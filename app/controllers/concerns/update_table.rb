@@ -107,11 +107,11 @@ module UpdateTable
           # binding.pry # ブレークポイントスイッチ
 
           puts "差分を計算します。 日付：　#{cr.date} マイナス #{dy_bf_cr.date}  項目： #{komoku}"
-          dt_sbn, gp_sbn, cv_sbn, cvr_sbn = calc_sabun_of_calc_corr(cr, dy_bf_cr)
+          dt_sbn, gp_sbn, cv_sbn = calc_sabun_of_calc_corr(cr, dy_bf_cr)
 
           # binding.pry # ブレークポイントスイッチ
           # 相関ポイントの計算
-          pt = calc_soukan(komoku, gp_sbn, cvr_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
+          pt = calc_soukan(komoku, gp_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
           # binding.pry # ブレークポイントスイッチ
 
           unless flg == 'fvt'
@@ -143,18 +143,16 @@ module UpdateTable
     bf.dt_dy = cr.dt_dy
     bf.gp_dy = cr.gp_dy
     bf.cv_dy = cr.cv_dy
-    bf.cvr_dy = cr.cvr_dy
   end
 
   def calc_sabun_of_calc_corr(cr, bf)
     dt_sbn = cr.dt_dy - bf.dt_dy
     gp_sbn = cr.gp_dy - bf.gp_dy
     cv_sbn = cr.cv_dy - bf.cv_dy
-    cvr_sbn = cr.cvr_dy - bf.cvr_dy
     puts "項目の差分 is #{dt_sbn}, gap値の差分 is #{gp_sbn}, and CVの差分 is #{cv_sbn}"
     puts "当日の項目値 is #{cr.dt_dy}, 当日のCV is #{cr.cv_dy}, 当日のGAP値 is #{cr.gp_dy}"
     puts " "
-    return dt_sbn, gp_sbn, cv_sbn, cvr_sbn
+    return dt_sbn, gp_sbn, cv_sbn
   end
 
 
@@ -170,7 +168,7 @@ module UpdateTable
   end
 
   # 相関ポイントの計算
-  def calc_soukan(mtrcs, gp, cvr, cv, cv_dy, gp_dy, dt, dt_dy)
+  def calc_soukan(mtrcs, gp, cv, cv_dy, gp_dy, dt, dt_dy)
 
     shori = '相関ポイントの計算'
 

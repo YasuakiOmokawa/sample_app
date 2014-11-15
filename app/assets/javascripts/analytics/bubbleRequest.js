@@ -9,7 +9,7 @@ var bbl_shori_flg = 0;
 var prcnt_all_cntr = 0;
 
 // バブルチャート取得関数
-function callOwner(elem, robj) {
+function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
   console.log( 'ajax通信開始!');
 
@@ -29,9 +29,7 @@ function callOwner(elem, robj) {
   resetHome();
 
   // ページ個別のローディングであればローディングモーションを表示
-  if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
-    setLoadingMortion();
-  }
+  setLoadingMortion();
 
   // オプションキーワードを生成
   var kwd_opts = setKwds(elem, userpath);
@@ -41,6 +39,7 @@ function callOwner(elem, robj) {
 
   // キャッシュ用ユニーク文字数を格納
   var kwd_strgs = createCacheKeyNum(kwd_opts);
+  req_opts.kwd_strgs = kwd_strgs;
 
   // キャッシュ済データを取得
   var data;
@@ -50,7 +49,9 @@ function callOwner(elem, robj) {
   if (c_obj) {
 
     // データマージ
-    $.extend(true, robj, c_obj);
+    $.extend(true, shaped_idxarr, c_obj);
+    req_opts.getting_cached = true;
+
   } else {
 
     // ajax処理中
@@ -59,7 +60,7 @@ function callOwner(elem, robj) {
     var tmp_obj = {};
 
     // データリクエストを実行
-    callExecuter(elem, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs);
+    callExecuter(elem, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs);
   }
 }
 
@@ -208,7 +209,7 @@ function parseElem(elem) {
 }
 
 // バブルチャート用データのリクエスト（非同期）
-function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs) {
+function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs) {
 
   if (elm_txt == '直接入力/ブックマーク') {
     elm_txt = '直接入力ブックマーク';
@@ -308,28 +309,14 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
         console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
         console.log('ajax処理を継続します');
 
-        // 進捗を表示
-        if ($(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
+        // ページ個別の進捗を算出
+        var prcnt = calcProgress(opts_cntr, opts.length);
 
-          // ページ全体の進捗カウンタを進める
-          prcnt_all_cntr++;
-
-          // 進捗を算出
-          var prcnt_all = calcProgress(prcnt_all_cntr, 300);
-
-          // ダイアログに進捗を表示
-          displayProgress('.jquery-ui-dialog-onlogin div#onlogin-dialog-confirm div#monsterball', prcnt_all);
-        } else {
-
-          // ページ個別の進捗を算出
-          var prcnt = calcProgress(opts_cntr, opts.length);
-
-          // 画面に進捗を表示
-          displayProgress('#daemon tr:nth-child(3) td', prcnt);
-        }
+        // 画面に進捗を表示
+        displayProgress('#daemon tr:nth-child(3) td', prcnt);
 
         // ajax処理を再実行
-        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, robj, tmp_obj, kwd_strgs)
+        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs)
       } else {
 
         // リクエストを処理終了
@@ -342,12 +329,12 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, robj, tmp_obj, kwd_str
         $('#daemon tr:nth-child(3) td').text('complete!');
 
       // グラフ描画用のデータを最終マージ
-      $.extend(true, robj, tmp_obj);
+      $.extend(true, return_obj, tmp_obj);
 
-    // ページ全体ロードの時はデータをキャッシュさせない
-    if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
-      cacheResult(robj, true, 'POST', 'kobetsu', kwd_strgs, elm_txt);
-    }
+    // // ページ全体ロードの時はデータをキャッシュさせない
+    // if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
+    //   cacheResult(return_obj, true, 'POST', 'kobetsu', kwd_strgs, elm_txt);
+    // }
 
       }
     })
@@ -419,9 +406,7 @@ function markPageBtn(page) {
   $(h).replaceWith(y + $(h).html() + '</a>');
 
   // 選択したホームグラフのページ項目タグをdivへ変更
-  if (page == '直接入力ブックマーク') {
-    page = '直接入力/ブックマーク'
-  }
+
   var tag = 'div#narrow a:contains(' + page + ')';
   var id = '<div>';
   var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
@@ -431,146 +416,124 @@ function markPageBtn(page) {
 }
 
 // バブル作成用にページ下部のタブリンクに埋め込む関数
-function bubbleCreateAtTabLink(wd) {
+function bubbleCreateAtTabLink(page_name) {
 
-  // ajax二重リクエストの防止
   if (request) {
-    $("span#errormsg").html('只今処理の実行中です。');
+    $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
     return;
   }
 
   // 返り値データ
-  var idxarr = [], arr = [];
+  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
 
-  // wd引数から、表示するページ項目を取り出す
-  var elm_txt = parseElem(wd);
+  var elm_txt = parseElem(page_name);
 
-  createBubbleWithParts(idxarr);
+  createBubbleWithParts(shaped_idxarr, elm_txt);
 
-  createBubbleParts(elm_txt, idxarr);
+  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr);
 
+  shapeBubbleParts(idxarr, shaped_idxarr);
+
+  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
+}
+
+function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {
+  var timerID = setInterval( function() {
+    if (Object.keys(shaped_idxarr).length != 0){
+
+      if (req_opts.getting_cached != true) {
+        cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
+      }
+
+      clearInterval(timerID);
+      timerID = null;
+    }
+  }, 100);
 }
 
 // バブル作成用のパーツを生成する関数
-function createBubbleParts(wd, idxarr) {
+function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
 
-  // オブジェクト
-  var robj = {};
+  var return_obj = {};
 
-  // ajaxリクエストを実行
-  callOwner(wd, robj);
+  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr);
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-   if(Object.keys(robj).length != 0){
+   if(Object.keys(return_obj).length != 0){
 
-      // wd が直接入力ブックマーク の場合、スラッシュを削除
-      if (wd == '直接入力/ブックマーク') {
-        wd = wd.replace(/\//g, '');
-      }
+    var excepted_page_name = exceptSpecialCharacters(page_name);
 
-      // データ項目一覧セット
-      setDataidx(robj, wd, idxarr);
+    // データ項目一覧セット
+    setDataidx(return_obj, excepted_page_name, idxarr);
 
-      // ページ名のdivタグをグレーアウト
-      markPageBtn(wd);
-
-     clearInterval(timerID);
-     timerID = null;
-    }
+    clearInterval(timerID);
+    timerID = null;
+   }
   },100);
 }
 
-// 全ページ種類のグラフを生成する関数
-function createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content) {
-
-  // バブル用のパーツ作成
-  createBubbleParts(page_fltr_wds[pcntr], idxarr);
-
-  // 返り値データをポーリング
-  var timerID = setInterval( function(){
-   if(Object.keys(idxarr).length != 0){
-
-      // データマージ
-      Array.prototype.push.apply(idxarr_all, idxarr);
-
-      // データリセット
-      idxarr = [];
-
-      // increment counter
-      pcntr++;
-
-      // 全部のページ種類の分析が終わった？
-      if (pcntr >= 6) {
-
-        // バブルチャートを作成
-        createBubbleWithParts(idxarr_all);
-
-        setTimeout(function() {
-
-          afterCallWithPlotAll(origin_content);
-
-          var shaped_idxarr = [];
-
-          // 優先順位の降順、
-          // 　ページ名と項目名の昇順でソート
-          // > がマイナスリターン。。降順、< がプラスリターンで昇順
-          shaped_idxarr = sortIdxarr(idxarr_all);
-
-          // 項目を指定数分取り出す
-          shaped_idxarr = headIdxarr(idxarr_all, 30);
-
-          // 作成済みデータをキャッシュ
-          cacheResult(shaped_idxarr, true, 'POST', 'zentai');
-        }, 1000);
-
-      } else {
-
-        createBubbleAll(idxarr, idxarr_all, page_fltr_wds, pcntr, origin_content);
-      }
-
-     clearInterval(timerID);
-     timerID = null;
-    }
-  },100);
+function exceptSpecialCharacters(page_name) {
+  var changed;
+  changed = page_name.replace(/\//g, '');
+  return changed;
 }
 
-// 生成されたパーツを使ってバブルチャートを作成
-function createBubbleWithParts(idxarr) {
+function addSpecialCharacters(page_name) {
+  var changed;
+  if (page_name == '直接入力ブックマーク') {
+    changed = '直接入力/ブックマーク';
+  } else {
+    changed = page_name;
+  }
+  return changed;
+}
 
-  // 返り値データをポーリング
+
+function shapeBubbleParts(idxarr, shaped_idxarr) {
+
   var timerID = setInterval( function(){
-   if(Object.keys(idxarr).length != 0){
-
-      var shaped_idxarr = [];
+    if (Object.keys(idxarr).length != 0) {
 
       idxarr = reverseKomoku(idxarr, 'PV数');
-
       idxarr = reverseKomoku(idxarr, '訪問回数');
 
       // 優先順位の降順、
       // 　ページ名と項目名の昇順でソート
       // > がマイナスリターン。。降順、< がプラスリターンで昇順
-      shaped_idxarr = sortIdxarr(idxarr);
+      var sorted = sortIdxarr(idxarr);
 
       // 項目を指定数分取り出す
-      shaped_idxarr = headIdxarr(idxarr, 30);
+      var shaped = headIdxarr(sorted, 30);
 
-      // プロットデータの作成
+      $.extend(true, shaped_idxarr, shaped);
+
+      clearInterval(timerID);
+      timerID = null;
+    }
+  },100);
+}
+
+// 生成されたパーツを使ってバブルチャートを作成
+function createBubbleWithParts(idxarr, page_name) {
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+   if(Object.keys(idxarr).length != 0){
+
       var arr = [];
-      createPlotArr(shaped_idxarr, arr);
+      createGraphPlots(idxarr, arr);
 
       // バブルチャートを描画
-      plotGraphHome(arr, shaped_idxarr);
-
-      // 処理完了
-      $('.jquery-ui-dialog-onlogin div#onlogin-dialog-confirm div#monsterball').text('cpmplete!');
+      plotGraphHome(arr, idxarr);
 
       // 事後処理
       afterCall();
 
       // 期間表示ハイパーリンクを変更
       setRange();
+
+      markPageBtn(page_name);
 
       clearInterval(timerID);
       timerID = null;
@@ -677,31 +640,7 @@ function sortAscValueForReverse(pvss) {
     if (a.usr_fltr > b.usr_fltr) return  1;
     if (a.usr_fltr < b.usr_fltr) return  -1;
   });
-  // return pvss;
 }
-
-// function sortDescValueForReverse(pvss) {
-//   pvss.sort(function(a, b) {
-//     if (a['arr'][0] < b['arr'][0] ) return 1;
-//     if (a['arr'][0] > b['arr'][0] ) return -1;
-//     if (a.page < b.page) return  1;
-//     if (a.page > b.page) return  -1;
-//     if (a.dev_fltr < b.dev_fltr) return  1;
-//     if (a.dev_fltr > b.dev_fltr) return  -1;
-//     if (a.kwd_fltr < b.kwd_fltr) return  1;
-//     if (a.kwd_fltr > b.kwd_fltr) return  -1;
-//     if (a.usr_fltr < b.usr_fltr) return  1;
-//     if (a.usr_fltr > b.usr_fltr) return  -1;
-//   });
-//   return pvss;
-// }
-
-// function exchangePickupedValue(pvss_asc, pvss_desc) {
-//   for(var i=0; i < pvss_asc.length; i++) {
-//     pvss_asc[i]['arr'][0] = pvss_desc[i]['arr'][0];
-//   }
-//   return pvss_asc;
-// }
 
 function reCalcPriority(no_pickuped) {
   for(var i=0; i < no_pickuped.length; i++) {
@@ -716,8 +655,6 @@ function reverseKomoku(idxarr_all, komoku_name) {
   var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
 
   sortAscValueForReverse(pickuped);
-  // var desced_pickuped = sortDescValueForReverse(pickuped);
-  // var exchanged_pickuped = exchangePickupedValue(asced_pickuped, desced_pickuped);
 
   swapPickupedValue(pickuped);
 

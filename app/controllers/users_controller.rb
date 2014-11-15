@@ -268,8 +268,10 @@ class UsersController < ApplicationController
             Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
 
             # 分析完了メールを送信
-            user = User.find(params[:id])
-            UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
+            unless analyze_type == 'kobetsu'
+              user = User.find(params[:id])
+              UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
+            end
 
             return
           else
@@ -682,28 +684,28 @@ class UsersController < ApplicationController
             gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
           end
 
-          # 人気ページ相関のCV代入用
-          cls_name = 'CVFav' + rndm.to_s
-          # 4回までリトライできます
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
-          end
+          # # 人気ページ相関のCV代入用
+          # cls_name = 'CVFav' + rndm.to_s
+          # # 4回までリトライできます
+          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          #   @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
+          # end
 
-          # 人気ページ相関のGAP算出用
-          # 4回までリトライできます
-          fgap = ''
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
-          end
+          # # 人気ページ相関のGAP算出用
+          # # 4回までリトライできます
+          # fgap = ''
+          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          #   fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
+          # end
 
           ## ◆GAP算出
 
           # 人気ページテーブル用
           # 4回までリトライできます
-          pg_gap = ''
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
-          end
+          # pg_gap = ''
+          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          #   pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
+          # end
 
           # その他テーブル用
           # 4回までリトライできます
@@ -735,27 +737,27 @@ class UsersController < ApplicationController
           corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
 
           # 人気ページ
-          @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
+          # @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          # create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
 
-          # 人気ページCV代入
-          put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
+          # # 人気ページCV代入
+          # put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
 
-          # 人気ページGAP算出
-          put_favorite_table(fgap, @ftbl, flg = 'date')
-          calc_gap_for_graph(@ftbl, fmt_hsh)
+          # # 人気ページGAP算出
+          # put_favorite_table(fgap, @ftbl, flg = 'date')
+          # calc_gap_for_graph(@ftbl, fmt_hsh)
 
-          # 相関算出
-          fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
+          # # 相関算出
+          # fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
 
-          # top10 を抽出
-          fvt_corr = substr_fav(fvt_corr, @rank_arr)
+          # # top10 を抽出
+          # fvt_corr = substr_fav(fvt_corr, @rank_arr)
 
-          # jqplotへデータを渡すため、キーを変更
-          fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
+          # # jqplotへデータを渡すため、キーを変更
+          # fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
 
-          # 各相関をマージ
-          corr.merge!(fvt_corr)
+          # # 各相関をマージ
+          # corr.merge!(fvt_corr)
 
           # 曜日別GAPを抜き出す
           gap_day = pickup_gap_per_day(corr)
@@ -764,12 +766,12 @@ class UsersController < ApplicationController
           ## ◆GAP算出
 
           # 人気ページテーブル
-          @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          create_skeleton_favorite_table(@favorite, @s_ftbl)
-          put_favorite_table(pg_gap, @s_ftbl)
-          calc_gap_for_favorite(@s_ftbl)
-          fav_gap = substr_fav(@s_ftbl, @rank_arr)
-          fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
+          # @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          # create_skeleton_favorite_table(@favorite, @s_ftbl)
+          # put_favorite_table(pg_gap, @s_ftbl)
+          # calc_gap_for_favorite(@s_ftbl)
+          # fav_gap = substr_fav(@s_ftbl, @rank_arr)
+          # fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
 
           # その他テーブル
           skel = create_skeleton_bubble(mets_sa)
@@ -777,10 +779,10 @@ class UsersController < ApplicationController
           skel = calc_gap_for_common(skel)
 
           # 日別、人気ページ別gapをマージ
-          skel.merge!(fav_gap)
+          # skel.merge!(fav_gap)
           skel.merge!(gap_day)
 
-          # グラフ表示用に、gap値絶対値へ変換
+          # グラフ表示用に、gap値を絶対値へ変換
           change_gap_to_abs(skel)
 
           # pageviews, sessions, bounce_rate のgap値を項目値へ変更（グラフ表示の為）
@@ -802,8 +804,8 @@ class UsersController < ApplicationController
             end
           end
           mets_sh.merge!(hsh)
-          mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
-          mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
+          # mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
+          # mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
 
           homearr = concat(re_calced_skel, corr, mets_sh)
 
