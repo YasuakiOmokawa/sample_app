@@ -3,7 +3,9 @@ $(window).load(function() {
 
   if ($('title').text().indexOf('ホーム') == 0) {
 
-    analyzeHomePerPage();
+    // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、１秒待つ
+    //  おそらくターボリンクスのせい
+    setTimeout( function(){ analyzeHomePerPage(); }, 1000);
 
   }
 });
@@ -23,9 +25,7 @@ function getAnalyzeTriggerAtHome(page_name) {
 }
 
 function kickAnalyzeTrigger(trigger_btn) {
-    // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、１秒待つ
-    //  おそらくターボリンクスのせい
-    setTimeout( function(){ $(trigger_btn).trigger('click'); }, 1000);
+    $(trigger_btn).trigger('click');
 }
 
 function analyzeHomePerPage() {
