@@ -379,7 +379,6 @@ class UsersController < ApplicationController
       put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
 
       # GAP値をスケルトンへ挿入
-      # gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {}, @graphic_item) # 再訪問率をセッションベースにするためコメントアウト
       gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {})
       put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ])
       calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
@@ -401,11 +400,6 @@ class UsersController < ApplicationController
       @gap_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       create_skeleton_gap_table(@gap_table)
       gap = fetch_analytics_data('CommonForGap', @ga_profile, @cond, @cv_txt)
-
-      # 再訪問率を、一時的にセッションベースにするためコメントアウト
-      # gap_for_repeat = fetch_analytics_data('CommonRepeatForGap', @ga_profile, @cond, @cv_txt,
-      #   {:user_type.matches => 'Returning Visitor'} )
-      # put_common_for_gap(@gap_table, gap_for_repeat, all_sessions) # 再訪問率計算のためコメントアウト
 
       put_common_for_gap(@gap_table, gap, all_sessions)
       calc_gap_for_common(@gap_table)
