@@ -162,7 +162,8 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = '全体'
     @narrow_action = all_user_path
-    @partial = 'norender'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'norender'   # ページ毎の部分テンプレート
+    @bedroom_partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'all'
 
     render :layout => 'ganalytics', :action => 'show'
