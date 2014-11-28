@@ -30,7 +30,7 @@ class UsersController < ApplicationController
   #   # パラメータ個別設定
   #   @title = 'キャンペーン'
   #   @narrow_action = campaign_user_path
-  #   @partial = 'rsc'   # ページ毎の部分テンプレート
+  #   @partial = 'ref_and_social'   # ページ毎の部分テンプレート
   #   gon.div_page_tab = 'campaign'
 
   #   # ページ個別設定
@@ -47,7 +47,7 @@ class UsersController < ApplicationController
 
   #   if @narrow_tag == 'c' then
   #     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-  #     @partial = 'inpage'
+  #     @partial = 'landing'
   #   end
   #   @table_head = 'キャンペーン'
 
@@ -58,7 +58,7 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'ソーシャル'
     @narrow_action = social_user_path
-    @kitchen_partial = 'rsc'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'ref_and_social'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'social'
 
     # ページ個別設定
@@ -74,7 +74,7 @@ class UsersController < ApplicationController
     @categories["参照元"] = set_select_box(@social, 'l')
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'inpage'
+    @bedroom_partial = 'landing'
     @table_head = 'ソーシャル'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -84,7 +84,7 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'その他ウェブサイト'
     @narrow_action = referral_user_path
-    @kitchen_partial = 'rsc'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'ref_and_social'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'referral'
 
     # ページ個別設定
@@ -100,7 +100,7 @@ class UsersController < ApplicationController
     @categories["参照元"] = set_select_box(@referral, 'r')
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'inpage'
+    @bedroom_partial = 'landing'
     @table_head = '参照元'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -114,7 +114,7 @@ class UsersController < ApplicationController
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
     @kitchen_partial = 'norender'
-    @bedroom_partial = 'inpage'
+    @bedroom_partial = 'landing'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -129,11 +129,7 @@ class UsersController < ApplicationController
     @categories["検索ワード"] = set_select_box(@search, 's')
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'inpage'
-
-    # ページ個別設定
-    # if @narrow_tag == 's' then
-    # end
+    @bedroom_partial = 'landing'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -147,11 +143,9 @@ class UsersController < ApplicationController
     @title = 'ホーム'
     @narrow_action = user_path
     gon.narrow_action = user_path
-    @partial = 'norender'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'norender'   # ページ毎の部分テンプレート
+    @bedroom_partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
-
-    # gon.display_dialog_onlogin_flg = User.find(params[:id]).limitanalyzeall <=> Time.now
-    # gon.display_dialog_onlogin_flg = 1 if display_dialog_onlogin_flg.nil? || display_dialog_onlogin_flg == 1
 
     render json: {
       :homearr => @json,

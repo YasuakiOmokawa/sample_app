@@ -398,7 +398,7 @@ function afterCall() {
 function markPageBtn(page) {
   var h, y;
   h = $('div#narrow div');
-  if (h.html() != 'キャンペーン' ) {
+  if (h.html() != 'ソーシャル' ) {
     y = '<a href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
   } else {
     y = '<a id="ed" href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
