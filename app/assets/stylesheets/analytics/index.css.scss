@@ -117,20 +117,20 @@ ul {
 }
 ul li {
   float: left;
-  width: 12%;
-  min-width: 120px;
+  width: 14%;
+  min-width: 140px;
   text-align: center;
 }
 ul li#first {
   float: left;
-  width: 16%;
-  min-width: 160px;
+  width: 14%;
+  min-width: 140px;
   text-align: center;
 }
 ul li#last {
   float: left;
-  width: 12%;
-  min-width: 120px;
+  width: 16%;
+  min-width: 150px;
   text-align: center;
   border-right: none;
 }
@@ -165,7 +165,7 @@ ul br {
   position: fixed;
   top: 79px;
   width: 100%;
-  min-width: 1200px;
+  min-width: 1180px;
   padding: 10px 0;
   font-size: 12px;
   text-align: center;
@@ -175,7 +175,7 @@ ul br {
   z-index: 2;
 }
 #hallway a {
-  margin: 0 0 0 20px;
+  margin: 0 0 0 15px;
   font-size: 16px;
 }
 #hallway img {
@@ -184,7 +184,7 @@ ul br {
   vertical-align: bottom;
 }
 #hallway img.icon {
-  margin: 0 7px 0 35px;
+  margin: 0 7px 0 30px;
 }
 #hallway .ic {
   position: relative;
@@ -256,7 +256,7 @@ ul br {
   float: left;
   margin: 0 10px 0 0;
   padding: 15px 0;
-  width: 135px;
+  width: 164px;
   height: 100%;
   font-size: 12px;
   text-align: center;
@@ -269,7 +269,7 @@ ul br {
   float: right;
   margin: 0;
   padding: 15px 0;
-  width: 135px;
+  width: 164px;
   font-size: 12px;
   text-align: center;
   border: 1px solid #cccccc;
@@ -279,7 +279,7 @@ ul br {
   float: left;
   margin: 0 10px 0 0;
   padding: 15px 0;
-  width: 135px;
+  width: 164px;
   font-size: 12px;
   text-align: center;
   border: 1px solid #cccccc;
@@ -290,7 +290,7 @@ ul br {
   float: right;
   margin: 0;
   padding: 15px 0;
-  width: 135px;
+  width: 164px;
   height: 100%;
   font-size: 12px;
   text-align: center;
@@ -311,7 +311,7 @@ ul br {
   width: 250px;
   height: 100%;
   background-color: #f5f5f5;
-  overflow-y: scroll;
+  overflow: scroll;
 }
 #childroom #brick #bubble #info table {
   width: 90%;
@@ -334,11 +334,11 @@ ul br {
   margin: 0 0 10px 0;
 }
 #childroom #doll {
-  float: left;
-  width: 65%;
-  min-width: 650px;
-  margin: 5px 0 15px 0;
+  width: 100%;
+  min-width: 1000px;
+  margin: 5px 0 30px 0;
   overflow-x: scroll;
+  background-color: #cccccc;
 }
 #childroom #doll table {
   max-width: 1960px;
@@ -366,34 +366,6 @@ ul br {
   background-color: #808080;
   color: #ffffff;
 }
-#childroom #rattle {
-  float: right;
-  width: 34%;
-  margin: 5px 0 0 0;
-}
-#childroom #rattle table {
-  width: 100%;
-}
-#childroom #rattle td {
-  width: 25%;
-  padding: 5px 0;
-  text-align: center;
-  border: solid 1px #a9a9a9;
-}
-#childroom #rattle tr#line td {
-  padding: 3px 0;
-  background-color: #e8ecef;
-}
-#childroom #rattle td.row {
-  background-color: #e8ecef;
-}
-hr {
-  clear: both;
-  margin: 0;
-  padding: 10px 0;
-  border: 0;
-  border-top: solid 1px #cccccc;
-}
 #kitchen {
   float: left;
   width: 40%;
@@ -415,42 +387,47 @@ hr {
 #kitchen td.row {
   background-color: #e8ecef;
 }
-#kitchen p {
+#kitchen table#knf {
   width: 96%;
-  margin: 10px 0 25px 0;
-  text-align: center;
+  margin: 48px 0 0 0;
+  background-color: #ffffff;
 }
-#kitchen #knife {
-  width: 100%;
-  margin: 15px 0 0 0;
-}
-#kitchen #knife td {
-  width: 50%;
-}
-#kitchen #knife td.row {
-  background-color: #e8ecef;
-}
-#kitchen #board {
-  width: 100%;
-  margin: 38px 0 0 0;
-}
-#kitchen #board td {
-  width: 16%;
+#kitchen table#knf td {
+  width: 25%;
   padding: 5px 0;
   text-align: center;
   border: solid 1px #a9a9a9;
 }
-#kitchen #board table tr#line td {
+#kitchen table#knf tr#line td {
   padding: 3px 0;
   background-color: #e8ecef;
 }
-#kitchen #board td.row {
-  width: 52%;
+#kitchen table#knf td.row {
+  background-color: #e8ecef;
+}
+#kitchen table#search {
+  width: 96%;
+  background-color: #ffffff;
+}
+#kitchen table#search td {
+  width: 15%;
+  padding: 5px 0;
+  text-align: center;
+  border: solid 1px #a9a9a9;
+}
+#kitchen table#search tr#line td {
+  padding: 3px 0;
+  background-color: #e8ecef;
+}
+#kitchen table#search td.row {
+  width: 55%;
+  text-align: left;
+  text-indent: 10px;
   background-color: #ffffff;
 }
 #kitchen #dish {
   width: 100%;
-  margin: 38px 0 0 0;
+  margin: 0;
 }
 #kitchen #dish td {
   width: 25%;
@@ -463,12 +440,14 @@ hr {
   background-color: #e8ecef;
 }
 #kitchen #dish td.row {
-  width: 50%;
+  width: 75%;
+  text-align: left;
+  text-indent: 10px;
   background-color: #ffffff;
 }
 #kitchen #fork {
   width: 100%;
-  margin: 38px 0 0 0;
+  margin: 0;
 }
 #kitchen #fork td {
   width: 16%;
@@ -482,7 +461,6 @@ hr {
 }
 #kitchen #fork td.row {
   width: 52%;
-  background-color: #ffffff;
 }
 #kitchen #spoon {
   width: 100%;
@@ -500,6 +478,26 @@ hr {
 }
 #kitchen #spoon td.row {
   width: 50%;
+  background-color: #ffffff;
+}
+#kitchen table#cp {
+  width: 96%;
+  background-color: #ffffff;
+}
+#kitchen table#cp td {
+  width: 15%;
+  padding: 5px 0;
+  text-align: center;
+  border: solid 1px #a9a9a9;
+}
+#kitchen table#cp tr#line td {
+  padding: 3px 0;
+  background-color: #e8ecef;
+}
+#kitchen table#cp td.row {
+  width: 66%;
+  text-align: left;
+  text-indent: 10px;
   background-color: #ffffff;
 }
 #bedroom {
@@ -536,6 +534,30 @@ hr {
   width: 55%;
   background-color: #808080;
   color: #ffffff;
+}
+#bedroom #pillow {
+  width: 100%;
+  margin: 0;
+}
+#bedroom #pillow td {
+  width: 15%;
+  padding: 5px 0;
+  text-align: center;
+  border: solid 1px #a9a9a9;
+}
+#bedroom #pillow table tr#line td {
+  padding: 3px 0;
+  background-color: #e8ecef;
+}
+#bedroom #pillow td.row {
+  width: 70%;
+  text-align: left;
+  text-indent: 10px;
+  background-color: #ffffff;
+}
+#bedroom #pillow td.row p {
+  font-size: 10px;
+  color: #808080;
 }
 br {
   clear: both;

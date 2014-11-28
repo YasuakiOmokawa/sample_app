@@ -123,16 +123,17 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = '検索'
     @narrow_action = search_user_path
-    @partial = 'search'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'search'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'search'
     @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
     @categories["検索ワード"] = set_select_box(@search, 's')
 
+    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+    @bedroom_partial = 'inpage'
+
     # ページ個別設定
-    if @narrow_tag == 's' then
-      @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-      @partial = 'inpage'
-    end
+    # if @narrow_tag == 's' then
+    # end
 
     render :layout => 'ganalytics', :action => 'show'
   end
