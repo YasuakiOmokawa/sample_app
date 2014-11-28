@@ -114,7 +114,8 @@ class UsersController < ApplicationController
     gon.div_page_tab = 'direct'
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @partial = 'inpage'
+    @kitchen_partial = 'norender'
+    @bedroom_partial = 'inpage'
 
     render :layout => 'ganalytics', :action => 'show'
   end
