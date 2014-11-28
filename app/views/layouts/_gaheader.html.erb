@@ -14,13 +14,16 @@
   <li class="tab" id="direct"><a href="javascript:void(0)" name="<%= direct_user_path %>" class="db">直接入力<br>ブックマーク</a></li>
   <li class="tab" id="referral"><a href="javascript:void(0)" name="<%= referral_user_path %>" class="db">その他<br>ウェブサイト</a></li>
   <li class="tab" id="social"><a href="javascript:void(0)" name="<%= social_user_path %>">ソーシャル</a></li>
-  <li class="tab" id="campaign"><a href="javascript:void(0)" name="<%= campaign_user_path %>">キャンペーン</a></li>
+  <!-- <li class="tab" id="campaign"><a href="javascript:void(0)" name="<%= campaign_user_path %>">キャンペーン</a></li> -->
   <li class="tab" id="last"><a href="javascript:void(0)" name="<%= last_user_path %>">カスタマイズ</a></li><br>
 </ul>
 <div id="hallway">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
     <!-- Datepicker  -->
     <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>
+    &nbsp;&nbsp;&nbsp;<input type="checkbox" class="ic">&nbsp;or&nbsp;&nbsp;
+    <input type="checkbox" name="day_type" class="ic" value="weekdays">平日&nbsp;&nbsp;
+    <input type="checkbox" name="day_type" class="ic" value="not_weekdays">土日祝
     <!-- datepicker用のinput -->
     <input type="hidden" id="from" name="from" value="<%= @from.strftime("%Y/%m/%d") %>"/>
     <input type="hidden" id="to" name="to" value="<%= @to.strftime("%Y/%m/%d")  %>" />
@@ -32,16 +35,16 @@
     <span id='poverlay'>
       <%= image_tag 'device.png', :class => "icon" %>
       <input type="checkbox" name="device" class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
-      <input type="checkbox" name="device" class="ic" value="pc">パソコン&nbsp;&nbsp;
-      <input type="checkbox" name="device" class="ic" value="sphone">スマートフォン&nbsp;&nbsp;
-      <input type="checkbox" name="device" class="ic" value="mobile">モバイル
+      <input type="checkbox" name="device" class="ic" value="pc">PC&nbsp;&nbsp;
+      <input type="checkbox" name="device" class="ic" value="sphone">SP&nbsp;&nbsp;
+      <input type="checkbox" name="device" class="ic" value="mobile">MB
       <%= image_tag 'user.png' , :class => "icon" %>
       <input type="checkbox" name="visitor"class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
       <input type="checkbox" name="visitor"class="ic" value="new">新規&nbsp;&nbsp;
       <input type="checkbox" name="visitor"class="ic" value="repeat">リピーター
       <!-- ここはページによって挙動を変える -->
       <%= image_tag 'plus.png' , :class => "icon" %>
-      <%= select_tag 'narrow_select', grouped_options_for_select(@categories), :include_blank => true, :prompt => '選択してください' %>
+      <%= select_tag 'narrow_select', grouped_options_for_select(@categories), :include_blank => true, :prompt => '条件を設定' %>
       <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
     </span>
   </form>
@@ -58,26 +61,4 @@
     <input type="text" class="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
 </div>
 <!-- datepicker form dialog end -->
-
-<!-- onLogin dialog start -->
-<!-- <div id="onlogin-dialog">
-  <br/><br/><br/><br/><br/>
-  <p>期間を設定してください　　　　　　　　　　　　　</p>
-  <br/><br/>
-  <input type="text" class="fromd" name="fromd" readonly="readonly"  />&nbsp;～&nbsp;
-    <input type="text" class="tod" name="tod" readonly="readonly"  />
-    <a href="javascript:void(0)" id="start">設定</a>
-</div> -->
-<!-- onLogin dialog end -->
-
-<!-- onLogin confirm dialog start -->
-<!-- <div id="onlogin-dialog-confirm">
-  <br/><br/><br/><br/><br/>
-  <p id="confirm-msg"></p>
-  <br/><br/><br/>
-  <a href="javascript:void(0)" id="go">分析開始</a>
-  <a href="javascript:void(0)" id="cancel">期間修正</a>
-</div> -->
-<!-- onLogin confirm dialog end -->
-
 <!-- header_end -->

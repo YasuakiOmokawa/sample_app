@@ -54,7 +54,7 @@
       </tr>
     </table>
   </div>
-  <div id="rattle">
+<!--   <div id="rattle">
     <table>
       <tr id="line">
         <td>目標値</td><td class="row">曜日別</td><td>現状値</td><td>GAP</td>
@@ -73,54 +73,48 @@
       </tr>
     </table>
   </div>
-  <hr>
+  <hr> -->
 
   <div id="kitchen">
     <table>
-      <tr id="line">
-        <td>PV数</td><td>訪問回数</td><td>CV数</td><td>CV率</td>
+      <tr>
+        <td class="row">CV数</td><td><%= @common_table[@cv_txt.to_sym].to_f.round(1).to_s %></td>
+        <td class="row">CV率</td><td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
       </tr>
       <tr>
-          <td><%= @common_table[:pageviews].to_f.round(1).to_s %></td>
-          <td><%= @common_table[:sessions].to_f.round(1).to_s %></td>
-          <td><%= @common_table[@cv_txt.to_sym].to_f.round(1).to_s %></td>
-          <td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
+        <td class="row">PV数</td><td><%= @common_table[:pageviews].to_f.round(1).to_s %></td>
+        <td class="row">ユーザー</td><td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
+      </tr>
+        <td class="row">セッション</td><td><%= @common_table[:sessions].to_f.round(1).to_s %></td>
+        <td class="row">直帰率</td><td><%= @common_table[:bounce_rate].to_f.round(1).to_s %>%</td>
       </tr>
     </table>
-    <p>　</p>
-    <!-- <p>CVまでに必要な訪問回数：4.1回&nbsp;&nbsp;&nbsp;&nbsp;CVまでに要する期間：10.3日</p> -->
-    <table>
+
+    <table id="knf">
       <tr id="line">
         <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
       </tr>
       <tr>
-        <td class="markpv"><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
+        <td><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
         <td class="gap"><%= @gap_table[:pageviews_per_session][:gap].to_f.round(1).to_s %></td>
       </tr>
       <tr>
-        <td class="marktime"><%= @gap_table[:avg_session_duration][:good] %></td>
+        <td><%= @gap_table[:avg_session_duration][:good] %></td>
         <td class="row">平均滞在時間</td>
         <td><%= @gap_table[:avg_session_duration][:bad] %></td>
         <td class="gap"><%= @gap_table[:avg_session_duration][:gap] %></td>
       </tr>
       <tr>
-           <td class="marknew"><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規訪問率</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
-           <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
+        <td><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規ユーザー</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
+        <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
       </tr>
       <tr>
-          <td class="markrpt"><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">再訪問率</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
-      </tr>
+         <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピーター</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
+     </tr>
     </table>
-    <div id="knife">
-      <table>
-        <tr>
-          <td class="row">直帰率</td>
-            <td><%= @common_table[:bounce_rate].to_f.round(1).to_s %>%</td>
-        </tr>
-      </table>
-      <%= render @partial %>
-    </div>
+    <%= render @partial %>
   </div>
+
   <div id="bedroom">
     <table>
       <tr id="line">
@@ -140,9 +134,9 @@
       <%
           end
         end
-        # 人気ページ数が10に満たない場合、テーブルを埋める
-        if @favorite_table.size <= 11 # ← その他も含むので、maxは11になる
-          fpad_size = 11 - @favorite_table.size
+        # 人気ページ数が5に満たない場合、テーブルを埋める
+        if @favorite_table.size <= 6 # ← その他も含むので、maxは6になる
+          fpad_size = 6 - @favorite_table.size
           fpad_size.times {
       %>
         <tr>
