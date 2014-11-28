@@ -112,7 +112,7 @@
          <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピーター</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
      </tr>
     </table>
-    <%= render @kitchen_partial %>
+    <%= render partial: @kitchen_partial, locals: {search: @search, table_head: @table_head, rsc_table: @rsc_table} %>
   </div>
 
   <div id="bedroom">
@@ -156,6 +156,6 @@
         <td class="gap"><%= @favorite_table["その他"][:gap].to_f.round(1).to_s %>%</td>
       </tr>
     </table>
-    <%= render @bedroom_partial %>
+    <%= render partial: @bedroom_partial, locals: {in_table: @in_table } %>
   </div><br>
 </div>
