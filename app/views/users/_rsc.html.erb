@@ -3,14 +3,7 @@
 <div id="dish">
       <table>
         <tr id="line">
-        <%
-          if @title == 'ソーシャル' or @title == 'その他ウェブサイト' then
-            head = '参照元'
-          else
-            head = 'キャンペーン'
-          end
-        %>
-          <td><%= head %></td><td>セッション</td>
+          <td><%= @table_head %></td><td>セッション</td>
         </tr>
         <%
           cnt = 0
@@ -20,8 +13,6 @@
         <tr>
           <td class="row"><%= k %></td>
           <td><%= v[:good] %></td>
-<!--           <td><%= v[:bad] %></td>
-          <td class="gap"><%= v[:gap] %></td> -->
         </tr>
         <%
           if cnt >= 5 then break end
@@ -34,8 +25,6 @@
         <tr>
           <td class="row">-</td>
           <td>-</td>
-<!--           <td>-</td>
-          <td>-</td> -->
         </tr>
         <%
             }

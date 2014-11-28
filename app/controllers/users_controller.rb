@@ -26,38 +26,39 @@ class UsersController < ApplicationController
     render :layout => 'ganalytics'
   end
 
-  def campaign
-    # パラメータ個別設定
-    @title = 'キャンペーン'
-    @narrow_action = campaign_user_path
-    @partial = 'rsc'   # ページ毎の部分テンプレート
-    gon.div_page_tab = 'campaign'
+  # def campaign
+  #   # パラメータ個別設定
+  #   @title = 'キャンペーン'
+  #   @narrow_action = campaign_user_path
+  #   @partial = 'rsc'   # ページ毎の部分テンプレート
+  #   gon.div_page_tab = 'campaign'
 
-    # ページ個別設定
-    # gap値の分処理が複雑
-    dimend_key = :campaign
-    @campaign = Analytics.create_class('FetchKeywordForCam',
-        [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-    @rsc_table = create_skeleton_for_rsc(@campaign, dimend_key.to_s.to_snake_case)
-    gap = fetch_analytics_data('FetchKeywordForSocial', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
-    put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
-    calc_gap_for_common(@rsc_table)
+  #   # ページ個別設定
+  #   # gap値の分処理が複雑
+  #   dimend_key = :campaign
+  #   @campaign = Analytics.create_class('FetchKeywordForCam',
+  #       [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+  #   @rsc_table = create_skeleton_for_rsc(@campaign, dimend_key.to_s.to_snake_case)
+  #   gap = fetch_analytics_data('FetchKeywordForSocial', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
+  #   put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
+  #   calc_gap_for_common(@rsc_table)
 
-    @categories["キャンペーン"] = set_select_box(@campaign, 'c')
+  #   @categories["キャンペーン"] = set_select_box(@campaign, 'c')
 
-    if @narrow_tag == 'c' then
-      @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-      @partial = 'inpage'
-    end
+  #   if @narrow_tag == 'c' then
+  #     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+  #     @partial = 'inpage'
+  #   end
+  #   @table_head = 'キャンペーン'
 
-    render :layout => 'ganalytics', :action => 'show'
-  end
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
 
   def social
     # パラメータ個別設定
     @title = 'ソーシャル'
     @narrow_action = social_user_path
-    @partial = 'rsc'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'rsc'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'social'
 
     # ページ個別設定
@@ -72,10 +73,9 @@ class UsersController < ApplicationController
 
     @categories["参照元"] = set_select_box(@social, 'l')
 
-    if @narrow_tag == 'l' then
-      @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-      @partial = 'inpage'
-    end
+    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+    @bedroom_partial = 'inpage'
+    @table_head = 'ソーシャル'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -101,9 +101,7 @@ class UsersController < ApplicationController
 
     @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
     @bedroom_partial = 'inpage'
-
-    # if @narrow_tag == 'r' then
-    # end
+    @table_head = '参照元'
 
     render :layout => 'ganalytics', :action => 'show'
   end
