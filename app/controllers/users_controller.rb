@@ -84,7 +84,7 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'その他ウェブサイト'
     @narrow_action = referral_user_path
-    @partial = 'rsc'   # ページ毎の部分テンプレート
+    @kitchen_partial = 'rsc'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'referral'
 
     # ページ個別設定
@@ -99,10 +99,11 @@ class UsersController < ApplicationController
 
     @categories["参照元"] = set_select_box(@referral, 'r')
 
-    if @narrow_tag == 'r' then
-      @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-      @partial = 'inpage'
-    end
+    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+    @bedroom_partial = 'inpage'
+
+    # if @narrow_tag == 'r' then
+    # end
 
     render :layout => 'ganalytics', :action => 'show'
   end

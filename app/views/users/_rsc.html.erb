@@ -1,6 +1,8 @@
-<div id="fork">
+<br>
+<br>
+<div id="dish">
       <table>
-        <tbody><tr id="line">
+        <tr id="line">
         <%
           if @title == 'ソーシャル' or @title == 'その他ウェブサイト' then
             head = '参照元'
@@ -8,7 +10,7 @@
             head = 'キャンペーン'
           end
         %>
-          <td>目標値</td><td><%= head %></td><td>現状値</td><td>差</td>
+          <td><%= head %></td><td>セッション</td>
         </tr>
         <%
           cnt = 0
@@ -16,10 +18,10 @@
             cnt += 1
         %>
         <tr>
-          <td><%= v[:good] %></td>
           <td class="row"><%= k %></td>
-          <td><%= v[:bad] %></td>
-          <td class="gap"><%= v[:gap] %></td>
+          <td><%= v[:good] %></td>
+<!--           <td><%= v[:bad] %></td>
+          <td class="gap"><%= v[:gap] %></td> -->
         </tr>
         <%
           if cnt >= 5 then break end
@@ -30,14 +32,14 @@
             tpad_size.times {
         %>
         <tr>
-          <td>-</td>
           <td class="row">-</td>
           <td>-</td>
-          <td>-</td>
+<!--           <td>-</td>
+          <td>-</td> -->
         </tr>
         <%
             }
           end
         %>
-      </tbody></table>
+      </table>
     </div>
