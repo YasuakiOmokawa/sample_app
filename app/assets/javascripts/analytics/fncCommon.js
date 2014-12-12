@@ -170,13 +170,13 @@ $(document).ready(function() {
   });
 
   // 選択したページタブのタグをdiv へ変える
-  var tab = gon.div_page_tab;
-  var tag = 'li#' + tab + ' a';
-  var id = '<div>';
-  if ( $(tag).html().match(/<br>/) ) {
-    id = '<div id="db">';
-  }
-  $(tag).replaceWith(id + $(tag).html() + '</div>');
+  // var tab = gon.div_page_tab;
+  // var tag = 'li#' + tab + ' a';
+  // var id = '<div>';
+  // if ( $(tag).html().match(/<br>/) ) {
+  //   id = '<div id="db">';
+  // }
+  // $(tag).replaceWith(id + $(tag).html() + '</div>');
 
   // 各ページのタブへリンク付与
   $("li.tab a").click(function(){

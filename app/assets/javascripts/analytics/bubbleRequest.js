@@ -26,10 +26,10 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
   var opts_cntr = 0;
 
   // 表示項目のリセット
-  resetHome();
+  resetHome('div#gh');
 
-  // ページ個別のローディングであればローディングモーションを表示
-  setLoadingMortion();
+  // ローディングモーションを表示
+  setLoadingMortion('div#gh');
 
   // オプションキーワードを生成
   var kwd_opts = setKwds(elem, userpath);
@@ -65,9 +65,9 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 }
 
 // バブルチャートをオーバーレイ
-function addOverlay() {
+function addOverlay(dom) {
 
-  $('#gp').plainOverlay(
+  $(dom).plainOverlay(
     'show',
     {
       opacity: 0.2,
@@ -105,10 +105,12 @@ function createSpinner() {
 }
 
 // 表示項目のリセット
-function resetHome() {
+function resetHome(dom) {
 
-  $('#gp').replaceWith('<div id="gp" style="z-index: 1;"></div>');
-  $('#legend1b').empty();
+  var id = dom.split('#');
+
+  $(dom).replaceWith('<div id="' + id[1] + '" style="z-index: 1;"></div>');
+  // $('#legend1b').empty();
   $('#errormsg').empty();
 }
 
@@ -378,10 +380,10 @@ function callManager(flg) {
 }
 
 // 処理完了時のリセット処理
-function afterCall() {
+function afterCall(dom) {
   // ローディングアニメーションのリセット
-  $('#gp').plainOverlay('hide');
-  $('div#info').plainOverlay('hide');
+  $(dom).plainOverlay('hide');
+  // $('div#info').plainOverlay('hide');
 
   // リクエスト実行時のエラーメッセージ表示をリセット
   $('#errormsg').empty();
@@ -394,26 +396,56 @@ function afterCall() {
 
 }
 
-// ホームグラフのページ項目タグがdivになっていればリセットする
-function markPageBtn(page) {
-  var h, y;
-  h = $('div#narrow div');
-  if (h.html() != 'ソーシャル' ) {
-    y = '<a href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
-  } else {
-    y = '<a id="ed" href="javascript:void(0)" onclick="bubbleCreateAtTabLink($(this));" >';
-  }
-  $(h).replaceWith(y + $(h).html() + '</a>');
+function getMarkTarget(dom, page) {
+  return  target = dom + ' a.' + page;
+}
 
-  // 選択したホームグラフのページ項目タグをdivへ変更
+function addMarkTab(target, replace) {
+  $(target).after(replace);
+}
 
-  var tag = 'div#narrow a:contains(' + page + ')';
-  var id = '<div>';
-  var r_tag = $(tag).replaceWith(id + $(tag).html() + '</div>');
-  if (page == 'キャンペーン') {
-    $('div#narrow div').attr('id', 'ed');
+function createMarkTab(target) {
+  return replace = '<div class="' + $(target).attr('class') + '">' + $(target).html() + '</div>';
+}
+
+function isEndTab(page, target) {
+  if (page == 'social') {
+    end_target = target + ' div';
+    $(end_target).attr('id', 'ed');
   }
 }
+
+
+function hideSelectedTab(target) {
+  $(target).hide();
+}
+
+function removeAllMark(dom) {
+  var target = dom + ' div';
+  $(target).remove();
+}
+
+function showAllTab(dom) {
+  var target = dom + ' a';
+  $(target).show();
+}
+
+function TabMark(dom, page_name) {
+
+  var target = getMarkTarget(dom, page_name);
+  var tab = createMarkTab(target);
+
+  showAllTab(dom);
+
+  removeAllMark(dom);
+
+  addMarkTab(target, tab);
+
+  isEndTab(page_name, dom);
+
+  hideSelectedTab(target);
+}
+
 
 // バブル作成用にページ下部のタブリンクに埋め込む関数
 function bubbleCreateAtTabLink(page_name) {
@@ -462,10 +494,8 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
   var timerID = setInterval( function(){
    if(Object.keys(return_obj).length != 0){
 
-    var excepted_page_name = exceptSpecialCharacters(page_name);
-
     // データ項目一覧セット
-    setDataidx(return_obj, excepted_page_name, idxarr);
+    setDataidx(return_obj, page_name, idxarr);
 
     clearInterval(timerID);
     timerID = null;
@@ -473,11 +503,11 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
   },100);
 }
 
-function exceptSpecialCharacters(page_name) {
-  var changed;
-  changed = page_name.replace(/\//g, '');
-  return changed;
-}
+// function exceptSpecialCharacters(page_name) {
+//   var changed;
+//   changed = page_name.replace(/\//g, '');
+//   return changed;
+// }
 
 function addSpecialCharacters(page_name) {
   var changed;
@@ -495,8 +525,8 @@ function shapeBubbleParts(idxarr, shaped_idxarr) {
   var timerID = setInterval( function(){
     if (Object.keys(idxarr).length != 0) {
 
-      idxarr = reverseKomoku(idxarr, 'PV数');
-      idxarr = reverseKomoku(idxarr, '訪問回数');
+      // idxarr = reverseKomoku(idxarr, 'PV数');
+      // idxarr = reverseKomoku(idxarr, '訪問回数');
 
       // 優先順位の降順、
       // 　ページ名と項目名の昇順でソート
@@ -522,18 +552,20 @@ function createBubbleWithParts(idxarr, page_name) {
    if(Object.keys(idxarr).length != 0){
 
       var arr = [];
+      var dom = 'div#pnt';
       createGraphPlots(idxarr, arr);
 
       // バブルチャートを描画
       plotGraphHome(arr, idxarr);
 
       // 事後処理
-      afterCall();
+      afterCall('div#gh');
 
       // 期間表示ハイパーリンクを変更
       setRange();
 
-      markPageBtn(page_name);
+      // タブ関連
+      TabMark(dom, page_name);
 
       clearInterval(timerID);
       timerID = null;
@@ -556,20 +588,20 @@ function displayProgress(prgtarget, prcnt) {
   $(trgt).text(String(prcnt) + '%');
 }
 
-// ページ個別のモーションを設定
-function setLoadingMortion() {
+// ローディングモーションを設定
+function setLoadingMortion(dom) {
 
   // プログレススピナーを生成
   var spinner = createSpinner();
 
   // バブルチャートをオーバーレイ
-  addOverlay();
+  addOverlay(dom);
 
   // プログレススピナーを表示
   $('#guardian').append(spinner.el);
 
   // 項目一覧のオーバレイ
-  $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
+  // $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
 }
 
 // ダイアログへ全体進捗を表示

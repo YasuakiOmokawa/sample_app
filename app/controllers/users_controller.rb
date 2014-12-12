@@ -400,12 +400,11 @@ class UsersController < ApplicationController
 
       # ページ項目
       page = {
-        '全体' => {},
-        '検索' => {:medium.matches => 'organic'},
-        '直接入力ブックマーク' => {:medium.matches => '(none)'},
-        'その他ウェブサイト' => {:medium.matches => 'referral'},
-        'ソーシャル' => {:has_social_source_referral.matches => 'Yes'},
-        'キャンペーン' => {:campaign.does_not_match => '(not set)'},
+        'all' => {},
+        'search' => {:medium.matches => 'organic'},
+        'direct' => {:medium.matches => '(none)'},
+        'referral' => {:medium.matches => 'referral'},
+        'social' => {:has_social_source_referral.matches => 'Yes'},
       }
 
       # デバイス
@@ -442,10 +441,10 @@ class UsersController < ApplicationController
         # リクエストパラメータに応じてpageの項目を絞る
         wd = ' '
         if params[:act].present?
-          wd = params[:act].gsub(/\//, '')
+          wd = params[:act]
         else
-          # 初期値は全体
-          wd = '全体'
+          # 初期値はall
+          wd = 'all'
         end
         @page_fltr_wd = wd
         page.select!{ |k,v| k == wd }
@@ -497,48 +496,40 @@ class UsersController < ApplicationController
           # 絞り込みキーワードが指定されていない場合はキーワードを取得
           kwds = []
           case wd
-          when '検索'
+          when 'search'
             search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
-            search.sort_by{ |a|
+            aa = search.sort_by { |a|
               [ -(a.sessions.to_i),
                 -(a.adsense_ads_clicks.to_i),
                 -(a.adsense_ctr.to_f) ]
-            }.each do |t|
+            }
+            aa.each do |t|
                   kwds.push('s' + t.keyword)
                   if kwds.size >= 5 then break end
             end
-          when '直接入力ブックマーク'
+          when 'direct'
             direct = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-
-            direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }.each do |t|
+            aa = direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }
+            aa.each do |t|
                   kwds.push('f' + t.page_title)
                   if kwds.size >= 5 then break end
             end
-          when 'その他ウェブサイト'
+          when 'referral'
             dimend_key = :source
             referral = Analytics.create_class('FetchKeywordForRef',
                 [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-
-            referral.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
+            aa = referral.sort_by{ |a| -(a.cv.to_i ) }
+            aa.each do |t|
               kwds.push('r' + t.source)
               if kwds.size >= 5 then break end
             end
-          when 'ソーシャル'
+          when 'social'
             dimend_key = :socialNetwork
             social = Analytics.create_class('FetchKeywordForSoc',
                 [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-
-            social.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
+            aa = social.sort_by{ |a| -(a.cv.to_i ) }
+            aa.each do |t|
               kwds.push( 'l' + t.social_network)
-              if kwds.size >= 5 then break end
-            end
-          when 'キャンペーン'
-            dimend_key = :campaign
-            campaign = Analytics.create_class('FetchKeywordForCam',
-                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-
-            campaign.sort_by{ |a| -(a.cv.to_i ) }.each do |t|
-              kwds.push( 'c' + t.campaign)
               if kwds.size >= 5 then break end
             end
           end
@@ -576,10 +567,10 @@ class UsersController < ApplicationController
             @cvr_txt.classify.to_sym => 'CVR',
             :pageviews => 'PV数',
             :pageviewsPerSession => '平均PV数',
-            :sessions => '訪問回数',
+            :sessions => 'セッション',
             :avgSessionDuration => '平均滞在時間',
             :bounceRate => '直帰率',
-            :percentNewSessions => '新規訪問率',
+            :percentNewSessions => '新規ユーザー',
           }
           mets_ca = [] # アナリティクスAPIデータ取得用
           mets_sa = [] # データ構造構築用
@@ -591,7 +582,7 @@ class UsersController < ApplicationController
           end
           # アナリティクスAPIに用意されていないもの
           {
-            :repeat_rate => '再訪問率',
+            :repeat_rate => 'リピーター',
           }.each do |k, v|
             mets_sh[k] = v
             mets_sa.push(k)
@@ -615,7 +606,7 @@ class UsersController < ApplicationController
 
           # リトライ時のメッセージを指定
           exception_cb = Proc.new do |retries|
-            puts "API request retry: #{retries}"
+            logger.info("API request retry: #{retries}")
           end
 
           ### APIデータ取得部

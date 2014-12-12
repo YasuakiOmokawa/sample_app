@@ -15,13 +15,13 @@ function chkAnalyzePageOnLogin() {
   if ( $('input[name="prev_page"]').val() ) {
     page_name = addSpecialCharacters( $('input[name="prev_page"]').val() );
   } else {
-    page_name = '全体';
+    page_name = 'all';
   }
   return page_name;
 }
 
 function getAnalyzeTriggerAtHome(page_name) {
-    return trigger_btn = 'div#narrow a:contains(' + page_name + ')';
+    return trigger_btn = 'div#pnt a:contains(' + page_name + ')';
 }
 
 function kickAnalyzeTrigger(trigger_btn) {
@@ -32,8 +32,10 @@ function analyzeHomePerPage() {
 
   var page_name = chkAnalyzePageOnLogin();
 
-  var trigger_btn = getAnalyzeTriggerAtHome(page_name);
+  bubbleCreateAtTabLink(page_name);
 
-  kickAnalyzeTrigger(trigger_btn);
+  // var trigger_btn = getAnalyzeTriggerAtHome(page_name);
+
+  // kickAnalyzeTrigger(trigger_btn);
 
 }

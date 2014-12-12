@@ -235,8 +235,8 @@ var setDataidx = function(obj, wd, idxarr) {
   var arr = [];
   var cnt = 0;
   var fltr_wd = wd
-  var pagenm = 'li.tab > a:contains(' + fltr_wd + ')';   // ページ名（全体、検索、など）を取得
-  var pagelink = $(pagenm)[0].name;   // ページへのリンクを取得
+  var pagenm = 'div#pnt a.' + fltr_wd;   // ページ名（全体、検索、など）を取得
+  var pagelink = $(pagenm).attr('path');   // ページへのリンクを取得
 
   for (var i in homearr[fltr_wd]) {
 
@@ -438,7 +438,7 @@ function plotGraphHome(arr, idxarr) {
     });
 
     // jqplot描画
-    var graph = jQuery . jqplot('gp', arr, options);
+    var graph = jQuery . jqplot('gh', arr, options);
 
     // 項目一覧データをマウスオーバしたら該当データのみリプロットする。
     // 同時に、絞り込み項目も自動でセットさせる
