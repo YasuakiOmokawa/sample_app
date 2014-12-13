@@ -27,6 +27,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
   // 表示項目のリセット
   resetHome('div#gh');
+  resetHomeRanking('div#mfm ul');
 
   // ローディングモーションを表示
   setLoadingMortion('div#gh');
@@ -112,6 +113,10 @@ function resetHome(dom) {
   $(dom).replaceWith('<div id="' + id[1] + '" style="z-index: 1;"></div>');
   // $('#legend1b').empty();
   $('#errormsg').empty();
+}
+
+function resetHomeRanking(dom) {
+  $(dom).empty();
 }
 
 // ページ項目に合わせた絞り込みキーワードを取得する
@@ -534,7 +539,7 @@ function shapeBubbleParts(idxarr, shaped_idxarr) {
       var sorted = sortIdxarr(idxarr);
 
       // 項目を指定数分取り出す
-      var shaped = headIdxarr(sorted, 30);
+      var shaped = headIdxarr(sorted, 15);
 
       $.extend(true, shaped_idxarr, shaped);
 
@@ -564,7 +569,7 @@ function createBubbleWithParts(idxarr, page_name) {
       // 期間表示ハイパーリンクを変更
       setRange();
 
-      // タブ関連
+      // タブ関連処理
       TabMark(dom, page_name);
 
       clearInterval(timerID);

@@ -1,3 +1,5 @@
+function create
+
 function createGraphPlots(idxarr, arr) {
 
   var plot_color = {}, tmp_arr = [], soukan, soukan_percent;
@@ -50,7 +52,7 @@ function headIdxarr(idxarr, limit) {
 
     headed_obj[i] = idxarr[i];
 
-    // 表示件数の上限を30件に制限
+    // 表示件数の上限をlimit 件数へ制限
     if (i >= limit -1) {
       return headed_obj;
     }
@@ -59,21 +61,20 @@ function headIdxarr(idxarr, limit) {
 }
 
 // 項目一覧データにクリックイベントを追加
-function addClickEvtToInfo() {
+function addClickEvtToInfo(target) {
 
-  $('#legend1b tr td a').click(function(e) {
+  $(target).click(function(e) {
 
-      //要素の先祖要素で一番近いtdの
-      //data-page属性の値を加工する
-      var item = $(e.target).closest('td').data('page').split(';;');
-      console.log(item);
+      // var item = $(e.target).closest('td').data('page').split(';;');
+      var metrics = $(e.target).closest('li').data('metrics');
+      console.log(metrics);
 
       // グラフ項目と人気ページパラメータを設定
-      addNarrowParam( item, $('input[name="graphic_item"]'), $('#narrow_select') );
+      addNarrowParam( metrics, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 絞り込みチェックボックスの値を指定
-      var dp = $(e.target).closest('td').data('devfltr');
-      var up = $(e.target).closest('td').data('usrfltr');
+      var dp = $(e.target).closest('li').data('devfltr');
+      var up = $(e.target).closest('li').data('usrfltr');
 
       $.each([dp,up], function(i, val) {
         var type,n,m;
@@ -124,10 +125,10 @@ function addClickEvtToInfo() {
       }
 
       // 遷移先の強調項目を設定
-      $('input[name="red_item"]').val(item[1]);
+      $('input[name="red_item"]').val(metrics[1]);
 
       // 遷移先ページタブ情報を保持
-      var prev_page = String(item[0]);
+      var prev_page = String(metrics[0]);
       $('input[name="prev_page"]').val(prev_page);
 
       // ページ遷移
@@ -136,7 +137,7 @@ function addClickEvtToInfo() {
 }
 
 // 項目一覧へ要素を追記
-function addInfo(idxarr) {
+function addRanking(idxarr, target) {
 
   // 項目一覧へ表示する項目番号
   var counter = 0;
@@ -160,33 +161,30 @@ function addInfo(idxarr) {
     // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
     caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
 
-    $('#legend1b').append(
-      $('<tr>').append(
-        $('<td>')
-          .attr("class", "l")
-          .text(counter)
-        ).append(
-          $('<td>')
+    $(target)
+    .append(
+      $('<li>')
+        .attr({
+          "name": value['pagelink'],
+          // "class": "r",
+          'data-gap': value['arr'][0],
+          'data-sokan': value['arr'][1],
+          'data-metrics': text[1],
+          // 'data-page': value['arr'][3],
+          'data-devfltr': value['dev_fltr'],
+          'data-usrfltr': value['usr_fltr'],
+          'data-kwdfltr': value['kwd_fltr']
+        })
+      .append(
+        $('<a>')
           .attr({
-            "name": value['pagelink'],
-            "class": "r",
-            'data-gap': value['arr'][0],
-            'data-sokan': value['arr'][1],
-            'data-page': value['arr'][3],
-            'data-devfltr': value['dev_fltr'],
-            'data-usrfltr': value['usr_fltr'],
-            'data-kwdfltr': value['kwd_fltr']
+            "href": 'javascript:void(0)',
+            "title": counter,
           })
-          .append(
-            $('<a>')
-              .attr({
-                "href": 'javascript:void(0)',
-                "title": caption,
-              })
-              .text(caption)
-            )
+          .text(counter)
       )
     );
+
   });
 }
 
@@ -368,7 +366,6 @@ function plotGraphHome(arr, idxarr) {
 
     // バブル（散布図）チャート相関グラフ
     // x軸, y軸, 大きさ(radius), 項目名　の順に表示
-    // x ... GAP y ... 相関　で現す。
 
     // リプロット用にarr をグローバルオブジェクトとして確保
     arr_for_replot = $.extend(true, {}, arr);
@@ -420,10 +417,19 @@ function plotGraphHome(arr, idxarr) {
     };
 
     // 項目一覧へ要素を追記
-    addInfo(idxarr);
+    var target = 'div#mfm ul';
+    var ed_target = target + ' li:last';
+    var click_target = target + ' li a';
+    addRanking(idxarr, target);
+
+    // 項目の最後へタグ付与
+    $(ed_target).attr('id', 'ed');
+
+    // 項目一覧へ改行タグ付与
+    $(target).append('<br>');
 
     // 項目一覧データにクリックイベントを追加
-    addClickEvtToInfo();
+    addClickEvtToInfo(click_target);
 
     // jqplot描画後に実行する操作（jqplot描画前に書くこと）
     $.jqplot.postDrawHooks.push(function(graph) {
