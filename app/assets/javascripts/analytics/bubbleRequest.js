@@ -27,7 +27,6 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
   // 表示項目のリセット
   resetHome('div#gh');
-  resetHomeRanking('div#mfm ul');
 
   // ローディングモーションを表示
   setLoadingMortion('div#gh');

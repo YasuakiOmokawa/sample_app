@@ -26,3 +26,4 @@
 //= require turbolinks
 //= require jquery.spin
 //= require ./plainoverlay/jquery.plainoverlay
+//= require jquery.tooltipster.min.js

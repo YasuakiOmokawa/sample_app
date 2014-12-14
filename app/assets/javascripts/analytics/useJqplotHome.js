@@ -1,5 +1,3 @@
-function create
-
 function createGraphPlots(idxarr, arr) {
 
   var plot_color = {}, tmp_arr = [], soukan, soukan_percent;
@@ -12,10 +10,12 @@ function createGraphPlots(idxarr, arr) {
     plot_color = setBubbleColor(idxarr[i]['arr'][0], soukan_percent);
 
     // x, y, radius, plot_color
+    // tmp_arr[i] = [idxarr[i]['arr'][0], 30, 1, plot_color];
     tmp_arr[i] = [idxarr[i]['arr'][0], soukan_percent, 1, plot_color];
   }
 
   arr.push(tmp_arr);
+  // console.log(arr);
 }
 
 function IsZeroSoukan(v) {
@@ -164,22 +164,29 @@ function addRanking(idxarr, target) {
     $(target)
     .append(
       $('<li>')
-        .attr({
-          "name": value['pagelink'],
-          // "class": "r",
-          'data-gap': value['arr'][0],
-          'data-sokan': value['arr'][1],
-          'data-metrics': text[1],
-          // 'data-page': value['arr'][3],
-          'data-devfltr': value['dev_fltr'],
-          'data-usrfltr': value['usr_fltr'],
-          'data-kwdfltr': value['kwd_fltr']
-        })
+        // .attr({
+        //   "name": value['pagelink'],
+        //   // "class": "r",
+        //   'data-gap': value['arr'][0],
+        //   'data-sokan': value['arr'][1],
+        //   'data-metrics': text[1],
+        //   // 'data-page': value['arr'][3],
+        //   'data-devfltr': value['dev_fltr'],
+        //   'data-usrfltr': value['usr_fltr'],
+        //   'data-kwdfltr': value['kwd_fltr']
+        // })
       .append(
         $('<a>')
           .attr({
             "href": 'javascript:void(0)',
             "title": counter,
+            "name": value['pagelink'],
+            'data-gap': value['arr'][0],
+            'data-sokan': value['arr'][1],
+            'data-metrics': text[1],
+            'data-devfltr': value['dev_fltr'],
+            'data-usrfltr': value['usr_fltr'],
+            'data-kwdfltr': value['kwd_fltr']
           })
           .text(counter)
       )
@@ -370,6 +377,9 @@ function plotGraphHome(arr, idxarr) {
     // リプロット用にarr をグローバルオブジェクトとして確保
     arr_for_replot = $.extend(true, {}, arr);
 
+    // グラフ描画対象
+    var graph_position = 'gh';
+
     // グラフ描画オプション
     var options = {
       seriesDefaults: {
@@ -397,13 +407,13 @@ function plotGraphHome(arr, idxarr) {
         // 見栄えの問題で、max は101, min は -1 で調整
         xaxis: {
           // label: 'GAP',
-          min: -1,
-          max: 101,
+          min: 1,
+          max: 100,
         },
         yaxis: {
           // label: '相関',
-          min: -1,
-          max: 101,
+          min: 1,
+          max: 100,
         },
       },
       // 背景色に関する設定
@@ -420,6 +430,8 @@ function plotGraphHome(arr, idxarr) {
     var target = 'div#mfm ul';
     var ed_target = target + ' li:last';
     var click_target = target + ' li a';
+
+    resetHomeRanking(target);
     addRanking(idxarr, target);
 
     // 項目の最後へタグ付与
@@ -444,40 +456,80 @@ function plotGraphHome(arr, idxarr) {
     });
 
     // jqplot描画
-    var graph = jQuery . jqplot('gh', arr, options);
+    var graph = jQuery . jqplot(graph_position, arr, options);
 
-    // 項目一覧データをマウスオーバしたら該当データのみリプロットする。
+    // ブロック項目をホバーしたらプロットへデータ表示
     // 同時に、絞り込み項目も自動でセットさせる
-    $('#legend1b tr td.r a').hover(
+    $(click_target).hover(
       function() {
 
-        var $parents = $(this).parent('td.r');
-
-        var text = $parents.attr('data-page').split(';;');
-        // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
-
-        var soukan = IsZeroSoukan($parents.attr('data-sokan'));
+        var soukan = IsZeroSoukan($(this).attr('data-sokan'));
         var soukan_percent = chgSoukanToPercent(soukan);
+        console.log($(this).attr('data-gap'));
+        console.log(soukan_percent);
 
-        var b = setBubbleColor($parents.attr('data-gap'), soukan_percent);
-        var rearr = [
-          [
-            [parseInt($parents.attr('data-gap')), parseInt(soukan_percent), 1, b]
-          ]
-        ];
-        // console.log(rearr);
-        var addopt = { series: [] };
-        addopt.data = rearr;
-        graph.replot(addopt);
+        const GRAPH_HEIGHT = 446,
+          GRAPH_WIDTH = 0;
+        var x = graph.axes.xaxis.u2p($(this).attr('data-gap')), // convert x axis unita to pixels
+          y = graph.axes.yaxis.u2p(soukan_percent); // convert y axis unita to pixels
+
+          $('.tooltip')
+          .tooltipster({
+            content: $(
+              '<div id="box_r">'
+                + '<ul>'
+                + '<li>該当データ名</li>'
+                + '<li>曜日</li>'
+                + '<li>デバイス</li>'
+                + '<li>ユーザー</li>'
+                + '<li>絞り込み条件</li>'
+                + '</ul>'
+               + '</div>'
+            ),
+            position: 'top',
+            offsetX: x - GRAPH_WIDTH,
+            offsetY: GRAPH_HEIGHT - y,
+            speed: 0,
+          })
+          .tooltipster('show');
       },
       function() {
-        // 最後にフィルタしたグラフへ戻す
-        if (typeof(replotHomeflg) == "undefined") {
-          replotHomeflg = '全データを再表示';
-        }
-        replotHome(replotHomeflg, arr_for_replot);
+          $('.tooltip')
+          .tooltipster('hide')
+          .tooltipster('destroy');
       }
     );
+
+    // $('#legend1b tr td.r a').hover(
+    //   function() {
+
+    //     var $parents = $(this).parent('td.r');
+
+    //     var text = $parents.attr('data-page').split(';;');
+    //     // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
+
+    //     var soukan = IsZeroSoukan($parents.attr('data-sokan'));
+    //     var soukan_percent = chgSoukanToPercent(soukan);
+
+    //     var b = setBubbleColor($parents.attr('data-gap'), soukan_percent);
+    //     var rearr = [
+    //       [
+    //         [parseInt($parents.attr('data-gap')), parseInt(soukan_percent), 1, b]
+    //       ]
+    //     ];
+    //     // console.log(rearr);
+    //     var addopt = { series: [] };
+    //     addopt.data = rearr;
+    //     graph.replot(addopt);
+    //   },
+    //   function() {
+    //     // 最後にフィルタしたグラフへ戻す
+    //     if (typeof(replotHomeflg) == "undefined") {
+    //       replotHomeflg = '全データを再表示';
+    //     }
+    //     replotHome(replotHomeflg, arr_for_replot);
+    //   }
+    // );
 
     // ホームグラフをリプロットする
     var replotHome = function(wd, obj) {
