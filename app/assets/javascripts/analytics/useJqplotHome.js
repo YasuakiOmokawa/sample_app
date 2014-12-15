@@ -133,7 +133,7 @@ function addClickEvtToInfo(target) {
       console.log('prev_page : ' + prev_page);
 
       // ページ遷移
-      // evtsend($(e.target).closest('td'));
+      evtsend($(e.target).closest('td'));
   });
 }
 

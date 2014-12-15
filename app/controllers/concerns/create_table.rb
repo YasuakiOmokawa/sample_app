@@ -53,15 +53,19 @@ module CreateTable
     # 平日 .. 'day_on'
   def chk_day(h, a, b, d)
     if a.wday == 0
-      h[d][b] = [0, 0, 0, 'day_sun', 0]
+      h[d][b] = set_array_on_date('day_sun')
     elsif a.wday == 6
-      h[d][b] = [0, 0, 0, 'day_sat', 0]
+      h[d][b] = set_array_on_date('day_sat')
     elsif HolidayJapan.check(a)
-      h[d][b] = [0, 0, 0, 'day_hol', 0]
+      h[d][b] = set_array_on_date('day_hol')
     else
-      h[d][b] = [0, 0, 0, 'day_on', 0]
+      h[d][b] = set_array_on_date('day_on')
     end
     return h
+  end
+
+  def set_array_on_date(date_type)
+    [0, 0, 0, date_type, 0]
   end
 
   # 曜日別の値を出すテーブルを作成

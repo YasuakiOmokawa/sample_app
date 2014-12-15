@@ -82,56 +82,201 @@ module UpdateTable
     return tbl
   end
 
-  # バブル（散布図）チャートのために相関を出す
-  def calc_corr(tbl, col, cvr, flg = 'none')
+  def get_metrics(tbl, komoku)
+    tbl.map {|k, v| v[komoku][0].to_f + v[komoku][1].to_f}
+  end
+
+  def metrics_day_on(tbl, komoku)
+    tbl.select {|k, v| v[komoku][3] == 'day_on'}
+  end
+
+  def metrics_day_off(tbl, komoku)
+    tbl.reject {|k, v| v[komoku][3] == 'day_on'}
+  end
+
+  def get_cvs(tbl)
+    tbl.map {|k, v| v[:cv].to_f}
+  end
+
+  def cv_day_on(tbl)
+    tbl.select {|k, v| v[:pageviews][3] == 'day_on'}
+  end
+
+  def cv_day_off(tbl)
+    tbl.reject {|k, v| v[:pageviews][3] == 'day_on'}
+  end
+
+  def add_corr(r_hsh, komoku, corr)
+    r_hsh[komoku][:corr] = corr
+  end
+
+  def add_corr_sign(r_hsh, komoku, c)
+    r_hsh[komoku][:corr_sign] = c
+  end
+
+  def add_variation(r_hsh, komoku, vari)
+    r_hsh[komoku][:vari] = vari
+  end
+
+  def add_metrics_stddev(r_hsh, komoku, v)
+    r_hsh[komoku][:metrics_stddev] = v
+  end
+
+  def add_metrics_avg(r_hsh, komoku, v)
+    r_hsh[komoku][:metrics_avg] = v
+  end
+
+  def chk_not_a_number(target)
+    if target.nan?
+      0.0
+    else
+      target
+    end
+  end
+
+  def collect_bubble_metricses(tbl, komoku)
+    {
+      all_day_metrics: get_metrics(tbl, komoku),
+      day_on_metrics: get_metrics(metrics_day_on(tbl, komoku), komoku),
+      day_off_metrics: get_metrics(metrics_day_off(tbl, komoku), komoku),
+    }
+  end
+
+  def collect_bubble_cvs(tbl, komoku)
+    {
+      all_day_cvs: get_cvs(tbl),
+      day_on_cvs: get_cvs(cv_day_on(tbl)),
+      day_off_cvs: get_cvs(cv_day_off(tbl)),
+    }
+  end
+
+  def check_number_sign(n)
+    if n >= 0
+      'plus'
+    else
+      'minus'
+    end
+  end
+
+  def calc_corr(met, cv)
+    chk_not_a_number(met.corrcoef(cv))
+  end
+
+  def calc_corrs(h, i)
+    all_day_corr = calc_corr(h[:all_day_metrics], i[:all_day_cvs])
+    day_on_corr = calc_corr(h[:day_on_metrics], i[:day_on_cvs])
+    day_off_corr = calc_corr(h[:day_off_metrics], i[:day_off_cvs])
+
+    {
+      all_day_corr: all_day_corr.round(1).abs,
+      day_on_corr: day_on_corr.round(1).abs,
+      day_off_corr: day_off_corr.round(1).abs,
+      all_day_corr_sign: check_number_sign(all_day_corr),
+      day_on_corr_sign: check_number_sign(day_on_corr),
+      day_off_corr_sign: check_number_sign(day_off_corr),
+    }
+  end
+
+  def add_metrcs_day_on(mets)
+    hsh = {}
+    mets.each do |k, v|
+      key = day_on_komoku(k)
+      value = v[:jp_caption].to_s + ';;' + '平日'
+      hsh[key] = {jp_caption: value}
+    end
+    hsh
+  end
+
+  def add_metrcs_day_off(mets)
+    hsh = {}
+    mets.each do |k, v|
+      key = day_off_komoku(k)
+      value = v[:jp_caption].to_s + ';;' + '土日祝'
+      hsh[key] = {jp_caption: value}
+    end
+    hsh
+  end
+
+  def day_on_komoku(komoku)
+    (komoku.to_s + '__day_on').to_sym
+  end
+
+  def day_off_komoku(komoku)
+    (komoku.to_s + '__day_off').to_sym
+  end
+
+  def add_results(j, k, r_hsh, komoku)
+    komoku_day_on = day_on_komoku(komoku)
+    komoku_day_off = day_off_komoku(komoku)
+
+    add_corr(r_hsh, komoku, j[:all_day_corr])
+    add_corr(r_hsh, komoku_day_on, j[:day_on_corr])
+    add_corr(r_hsh, komoku_day_off, j[:day_off_corr])
+
+    add_variation(r_hsh, komoku, k[:all_day_variation])
+    add_variation(r_hsh, komoku_day_on, k[:day_on_variation])
+    add_variation(r_hsh, komoku_day_off, k[:day_off_variation])
+
+    add_metrics_stddev(r_hsh, komoku, k[:all_day_metrics_stddev])
+    add_metrics_stddev(r_hsh, komoku_day_on, k[:day_on_metrics_stddev])
+    add_metrics_stddev(r_hsh, komoku_day_off, k[:day_off_metrics_stddev])
+
+    add_metrics_avg(r_hsh, komoku, k[:all_day_metrics_avg])
+    add_metrics_avg(r_hsh, komoku_day_on, k[:day_on_metrics_avg])
+    add_metrics_avg(r_hsh, komoku_day_off, k[:day_off_metrics_avg])
+  end
+
+  def calc_variations(h)
+    {
+      all_day_variation: (h[:all_day_metrics].stddev.round(1) / h[:all_day_metrics].avg.round(1)).round(1),
+      day_on_variation: (h[:day_on_metrics].stddev.round(1) / h[:day_on_metrics].avg.round(1)).round(1),
+      day_off_variation: (h[:day_off_metrics].stddev.round(1) / h[:day_off_metrics].avg.round(1)).round(1),
+      all_day_metrics_stddev: h[:all_day_metrics].stddev.round(1),
+      day_on_metrics_stddev: h[:day_on_metrics].stddev.round(1),
+      day_off_metrics_stddev: h[:day_off_metrics].stddev.round(1),
+      all_day_metrics_avg: h[:all_day_metrics].avg.round(1),
+      day_on_metrics_avg: h[:day_on_metrics].avg.round(1),
+      day_off_metrics_avg: h[:day_off_metrics].avg.round(1),
+    }
+  end
+
+  def concat(tb, b, hsh)
+    arr = []
+    hsh.each do |k, v|
+      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 1, v ] )
+      puts "array push success! hash_key is #{k}, corr_name is #{v} "
+    end
+    return arr
+  end
+
+  def concat_data_for_bubble(datas, mets)
+    mets.each do |k, v|
+      datas[k][:jp_caption] = mets[k][:jp_caption]
+    end
+    datas
+  end
+
+  # バブル（散布図）チャートのために算出用データを出す
+  def generate_bubble_data(tbl, col)
     r_hsh = Hash.new{ |h,k| h[k] = {} }
-    per_day_nums = {} # 曜日種別の日数を保持
-    cr = Corr.new # 相関算出用に当日の値を格納
 
     # 項目別
     col.each do |komoku, i|
 
-      dy_bf_cr = DyBfCorr.new # 相関算出用に前日の値を格納
+      # 判別対象データを作成
+      h = collect_bubble_metricses(tbl, komoku)
+      i = collect_bubble_cvs(tbl, komoku)
 
-      # 日付別
-      tbl.sort_by{|a, b| (b['idx']) }.each do |date, per_date_value|
+      # 相関係数の算出
+      j = calc_corrs(h, i)
 
-        set_data_of_calc_corr(per_date_value, cr, komoku, date)
-        # binding.pry # ブレークポイントスイッチ
+      # 変動係数の算出
+      k = calc_variations(h)
 
-        # ページ相関の種類によってプロパティ値を変更
-        chk_flg(cr, per_date_value, flg, komoku)
+      # 各数値を返却
+      add_results(j, k, r_hsh, komoku)
 
-        # 前日と当日のデータが揃っていれば相関計算を開始
-        unless dy_bf_cr.gp_dy.nil?
-          # binding.pry # ブレークポイントスイッチ
-
-          puts "差分を計算します。 日付：　#{cr.date} マイナス #{dy_bf_cr.date}  項目： #{komoku}"
-          dt_sbn, gp_sbn, cv_sbn = calc_sabun_of_calc_corr(cr, dy_bf_cr)
-
-          # binding.pry # ブレークポイントスイッチ
-          # 相関ポイントの計算
-          pt = calc_soukan(komoku, gp_sbn, cv_sbn, cr.cv_dy, cr.gp_dy, dt_sbn, cr.dt_dy)
-          # binding.pry # ブレークポイントスイッチ
-
-          unless flg == 'fvt'
-            day_of_the_week_key = komoku.to_s + ' ' + cr.dy.to_s # 曜日別の項目数を格納するキー
-            counts_day_of_the_week(per_day_nums, day_of_the_week_key, cr.gp_dy, pt, r_hsh)
-          end
-
-          # 相関ポイント集計
-          count_corr_point(komoku, pt, r_hsh)
-        end
-        # binding.pickup_gap_per_day
-        dy_bf_cr.date = date
-        set_cr_to_dy_bf_cr_of_calc_corr(cr, dy_bf_cr)
-      end
-      # binding.pry # ブレークポイントスイッチ
     end
-
-    # 曜日別GAPの算出
-    calc_gap_per_day(per_day_nums, r_hsh)
-
     r_hsh
   rescue
     puts $!
@@ -310,17 +455,6 @@ module UpdateTable
     skel.each do |k, v|
       v[:gap] = - v[:gap]
     end
-  end
-
-
-  # バブル（散布図）チャートの総ギャップ値と相関を合わせた配列（jqplotへ渡す）
-  def concat(tb, b, hsh)
-    arr = []
-    hsh.each do |k, v|
-      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 1, v ] )
-      puts "array push success! hash_key is #{k}, corr_name is #{v} "
-    end
-    return arr
   end
 
   def substr_fav(dt, rank)

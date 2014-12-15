@@ -563,7 +563,7 @@ class UsersController < ApplicationController
           @cond[:filters].merge!(usr_opts[usr])        # 訪問者
 
           # データ項目
-          mets = {
+          metrcs = {
             @cvr_txt.classify.to_sym => 'CVR',
             :pageviews => 'PV数',
             :pageviewsPerSession => '平均PV数',
@@ -571,37 +571,22 @@ class UsersController < ApplicationController
             :avgSessionDuration => '平均滞在時間',
             :bounceRate => '直帰率',
             :percentNewSessions => '新規ユーザー',
+            :users => 'ユーザー',
           }
-          mets_ca = [] # アナリティクスAPIデータ取得用
-          mets_sa = [] # データ構造構築用
-          mets_sh = {} # jqplot用データ構築用
-          mets.each do |k, v|
-            mets_sh[k.to_s.to_snake_case.to_sym] = v
-            mets_ca.push(k)
-            mets_sa.push(k.to_s.to_snake_case.to_sym)
+          metrcs_camel_case_datas = [] # アナリティクスAPIデータ取得用
+          metrcs_snake_case_datas = [] # データ構造構築用
+          metrcs_for_graph_merge = {} # jqplot用データ構築用
+          metrcs.each do |k, v|
+            metrcs_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
+            metrcs_camel_case_datas.push(k)
+            metrcs_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
           end
           # アナリティクスAPIに用意されていないもの
           {
             :repeat_rate => 'リピーター',
           }.each do |k, v|
-            mets_sh[k] = v
-            mets_sa.push(k)
-          end
-
-          # 人気ページ用スケルトン作成
-          f_mt = [
-              (@cv_txt.classify + 's').to_sym,
-              :pageviews
-          ]
-          f_dm = [
-              :date,
-              :pageTitle,
-              :pagePath
-          ]
-          fmt_hsh = {}
-          @top_ten.each do |k, v|
-            key = v[0] + ";;" + v[1]
-            fmt_hsh[key] = v[2]
+            metrcs_for_graph_merge[k] = {jp_caption: v}
+            metrcs_snake_case_datas.push(k)
           end
 
           # リトライ時のメッセージを指定
@@ -610,8 +595,6 @@ class UsersController < ApplicationController
           end
 
           ### APIデータ取得部
-
-          ## ◆相関算出
 
           # クラス名を一意にするため、乱数を算出
           rndm = SecureRandom.hex(4)
@@ -624,140 +607,42 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
-          # 相関のGAP値算出用
+          # 指標値算出用
           # 4回までリトライできます
           gap = ''
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, mets_ca, :date)
+            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrcs_camel_case_datas, :date)
           end
-
-          # # 人気ページ相関のCV代入用
-          # cls_name = 'CVFav' + rndm.to_s
-          # # 4回までリトライできます
-          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          #   @cv_for_fav = Analytics.create_class(cls_name, f_mt, f_dm ).results(@ga_profile, @cond)
-          # end
-
-          # # 人気ページ相関のGAP算出用
-          # # 4回までリトライできます
-          # fgap = ''
-          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          #   fgap = fetch_analytics_data('PagesData', @ga_profile,@cond, @cv_txt, {}, f_mt, f_dm)
-          # end
-
-          ## ◆GAP算出
-
-          # 人気ページテーブル用
-          # 4回までリトライできます
-          # pg_gap = ''
-          # retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          #   pg_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
-          # end
-
-          # その他テーブル用
-          # 4回までリトライできます
-          sonota_gap = ''
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            sonota_gap = fetch_analytics_data('FetchSonota', @ga_profile,@cond, @cv_txt, {}, mets_ca, [])
-          end
-
 
           ### データ計算部
 
-          ## ◆相関算出
-
           # スケルトン作成
           @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          create_skeleton_for_graph(@gap_table_for_graph, @from, @to, mets_sh)
+          create_skeleton_for_graph(@gap_table_for_graph, @from, @to, metrcs_for_graph_merge)
 
-          # CV代入
+          # CV代入用
           put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
 
-          # 相関のGAPを算出
-          put_table_for_graph(gap, @gap_table_for_graph, mets_sa) # 項目の理想値、現実値をスケルトンへ代入
+          # 指標値の算出
+          put_table_for_graph(gap, @gap_table_for_graph, metrcs_snake_case_datas) # 項目の理想値、現実値をスケルトンへ代入
 
-          calc_gap_for_graph(@gap_table_for_graph, mets_sa) # スケルトンからGAP値を計算
+          calc_gap_for_graph(@gap_table_for_graph, metrcs_snake_case_datas) # スケルトンからGAP値を計算
 
-          # 相関算出
-          # 曜日別の計算をしているときは、ここでgap値も算出している
+          # バブルチャートに表示するデータを算出
+          bubble_datas = generate_bubble_data(@gap_table_for_graph, metrcs_snake_case_datas)
 
-          corr = calc_corr(@gap_table_for_graph, mets_sa, @cvr_txt.to_sym)
+          metrcs_for_graph_merge.delete(@cvr_txt.to_sym) #CVRは不要なので除去
 
-          # 人気ページ
-          # @ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          # create_skeleton_for_graph(@ftbl, @from, @to, fmt_hsh)
+          d_on_sh = add_metrcs_day_on(metrcs_for_graph_merge)
+          d_off_sh = add_metrcs_day_off(metrcs_for_graph_merge)
 
-          # # 人気ページCV代入
-          # put_cv_for_graph(@cv_for_fav, @ftbl, @cv_num, flg = 'fvt')
+          metrcs_for_graph_merge.merge!(d_on_sh)
+          metrcs_for_graph_merge.merge!(d_off_sh)
 
-          # # 人気ページGAP算出
-          # put_favorite_table(fgap, @ftbl, flg = 'date')
-          # calc_gap_for_graph(@ftbl, fmt_hsh)
-
-          # # 相関算出
-          # fvt_corr = calc_corr(@ftbl, fmt_hsh, @cvr_txt.to_sym, flg = 'fvt')
-
-          # # top10 を抽出
-          # fvt_corr = substr_fav(fvt_corr, @rank_arr)
-
-          # # jqplotへデータを渡すため、キーを変更
-          # fvt_corr = Hash[ fvt_corr.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
-
-          # # 各相関をマージ
-          # corr.merge!(fvt_corr)
-
-          # 曜日別GAPを抜き出す
-          gap_day = pickup_gap_per_day(corr)
-
-
-          ## ◆GAP算出
-
-          # 人気ページテーブル
-          # @s_ftbl = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          # create_skeleton_favorite_table(@favorite, @s_ftbl)
-          # put_favorite_table(pg_gap, @s_ftbl)
-          # calc_gap_for_favorite(@s_ftbl)
-          # fav_gap = substr_fav(@s_ftbl, @rank_arr)
-          # fav_gap = Hash[ fav_gap.map{ |k, v| ['fav_page' + '$$' + k.to_s, v] } ]
-
-          # その他テーブル
-          skel = create_skeleton_bubble(mets_sa)
-          put_common_for_gap(skel, sonota_gap)
-          skel = calc_gap_for_common(skel)
-
-          # 日別、人気ページ別gapをマージ
-          # skel.merge!(fav_gap)
-          skel.merge!(gap_day)
-
-          # グラフ表示用に、gap値を絶対値へ変換
-          change_gap_to_abs(skel)
-
-          # pageviews, sessions, bounce_rate のgap値を項目値へ変更（グラフ表示の為）
-          change_gap_to_komoku(skel)
-
-          # 数値をパーセンテージへ再計算
-          re_calced_skel = calc_num_to_pct(skel)
-
-          # jqplot用データ構築
-          # mets_sh の キーが、実際にグラフに渡される値
-          # mets_sh の値は、グラフの表示項目を示す
-          mets_sh.delete(@cvr_txt.to_sym) #CVRは不要
-          hsh = {}
-          mets_sh.each do |k, v|
-            {:day_off => '土日祝', :day_on => '平日'}.each do |c,d|
-              key = k.to_s + ' ' + c.to_s
-              val = v.to_s + ';;' + d.to_s
-              hsh[key] = val
-            end
-          end
-          mets_sh.merge!(hsh)
-          # mets_sh.merge!(Hash[ @rank_arr.map{ |k| ['fav_page' + '$$' + k, '人気ページ' + ';;' + k] } ])
-          # mets_sh.delete('fav_page$$その他') # 人気ページのその他は不要
-
-          homearr = concat(re_calced_skel, corr, mets_sh)
+          home_graph_data = concat_data_for_bubble(bubble_datas, metrcs_for_graph_merge)
 
           # ページ項目へ追加
-          p_hash[x][room] = homearr
+          p_hash[x][room] = home_graph_data
           logger.info("pages data set success!")
 
           # フィルタオプションのリセット
@@ -770,9 +655,6 @@ class UsersController < ApplicationController
         # ループ終了。jqplot へデータ渡す
         if shori != 0
           @json = p_hash.to_json
-
-          # 結果をキャッシュへ格納
-          # Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
         end
       end
     end
