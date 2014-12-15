@@ -65,33 +65,36 @@ function addClickEvtToInfo(target) {
 
   $(target).click(function(e) {
 
-      // var item = $(e.target).closest('td').data('page').split(';;');
-      var metrics = $(e.target).closest('li').data('metrics');
-      console.log(metrics);
+      var metrics = $(e.target).data('metrics');
+      console.log('metrics : ' + metrics);
 
       // グラフ項目と人気ページパラメータを設定
       addNarrowParam( metrics, $('input[name="graphic_item"]'), $('#narrow_select') );
 
       // 絞り込みチェックボックスの値を指定
-      var dp = $(e.target).closest('li').data('devfltr');
-      var up = $(e.target).closest('li').data('usrfltr');
+      var dp = $(e.target).data('devfltr');
+      var up = $(e.target).data('usrfltr');
+      console.log('dp : ' + dp);
+      console.log('up : ' + up);
+
 
       $.each([dp,up], function(i, val) {
         var type,n,m;
-        type = '#hallway input[value=' + val + ']';
+        type = 'form[name="narrowForm"] input[value=' + val + ']';
         n = $(type).attr("name");
-        m = '#hallway input[name=' + n + ']';
+        m = 'form[name="narrowForm"] input[name=' + n + ']';
         $(m).val([val]);
       });
 
       // 絞り込みキーワードの値を設定
-      var kp = $(e.target).closest('td').data('kwdfltr'); // キーワード
+      var kp = $(e.target).data('kwdfltr'); // キーワード
+      console.log('kp : ' + kp);
 
       if (kp != 'nokwd') {
         var flg; // どのページのキーワードか判別用
 
         // 遷移先の最後のアクション名を取得
-        var p = $(e.target).closest('td').attr("name");
+        var p = $(e.target).attr("name");
         p = p.split('/');
 
         // 遷移先を判別
@@ -108,9 +111,6 @@ function addClickEvtToInfo(target) {
           case 'social':
             flg = 'l';
             break;
-          case 'campaign':
-            flg = 'c';
-            break;
           default:
             flg = 'f';
         }
@@ -125,14 +125,15 @@ function addClickEvtToInfo(target) {
       }
 
       // 遷移先の強調項目を設定
-      $('input[name="red_item"]').val(metrics[1]);
+      $('input[name="red_item"]').val(metrics);
 
       // 遷移先ページタブ情報を保持
-      var prev_page = String(metrics[0]);
+      var prev_page = String(metrics);
       $('input[name="prev_page"]').val(prev_page);
+      console.log('prev_page : ' + prev_page);
 
       // ページ遷移
-      evtsend($(e.target).closest('td'));
+      // evtsend($(e.target).closest('td'));
   });
 }
 
@@ -155,7 +156,6 @@ function addRanking(idxarr, target) {
 
     // 絞り込み情報の追加
     text = value['arr'][3].split(';;');
-    // addNarrowParam( text, $('input[name="graphic_item"]'), $('#narrow_select') );
 
     // 項目一覧へ表示する文字列
     // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
@@ -164,17 +164,6 @@ function addRanking(idxarr, target) {
     $(target)
     .append(
       $('<li>')
-        // .attr({
-        //   "name": value['pagelink'],
-        //   // "class": "r",
-        //   'data-gap': value['arr'][0],
-        //   'data-sokan': value['arr'][1],
-        //   'data-metrics': text[1],
-        //   // 'data-page': value['arr'][3],
-        //   'data-devfltr': value['dev_fltr'],
-        //   'data-usrfltr': value['usr_fltr'],
-        //   'data-kwdfltr': value['kwd_fltr']
-        // })
       .append(
         $('<a>')
           .attr({
@@ -367,6 +356,48 @@ function kwdTnsltENtoJP (d) {
   return wd;
 }
 
+
+function getTooltipXaxisToPixels(a, graph) {
+  return x = graph.axes.xaxis.u2p(a.attr('data-gap')); // convert x axis unita to pixels
+}
+
+function getTooltipYaxisToPixels(a, graph) {
+  var soukan = IsZeroSoukan(a.attr('data-sokan'));
+  var soukan_percent = chgSoukanToPercent(soukan);
+  return y = graph.axes.yaxis.u2p(soukan_percent); // convert y axis unita to pixels
+}
+
+function showTooltip(target, x, y) {
+
+  const GRAPH_HEIGHT = 446;
+  const GRAPH_WIDTH = 0;
+
+  $(target)
+  .tooltipster({
+    content: $(
+      '<div id="box_r">'
+        + '<ul>'
+        + '<li>該当データ名</li>'
+        + '<li>曜日</li>'
+        + '<li>デバイス</li>'
+        + '<li>ユーザー</li>'
+        + '<li>絞り込み条件</li>'
+        + '</ul>'
+       + '</div>'
+    ),
+    position: 'top',
+    offsetX: x - GRAPH_WIDTH,
+    offsetY: GRAPH_HEIGHT - y,
+    speed: 0,
+  })
+  .tooltipster('show');
+}
+
+function hideTooltip(target) {
+  $(target)
+  .tooltipster('destroy');
+}
+
 // バブルチャートの生成(main function)
 function plotGraphHome(arr, idxarr) {
   jQuery( function() {
@@ -459,77 +490,18 @@ function plotGraphHome(arr, idxarr) {
     var graph = jQuery . jqplot(graph_position, arr, options);
 
     // ブロック項目をホバーしたらプロットへデータ表示
-    // 同時に、絞り込み項目も自動でセットさせる
+    var tooltip_target = '.tooltip';
     $(click_target).hover(
       function() {
+        var x = getTooltipXaxisToPixels($(this), graph);
+        var y = getTooltipYaxisToPixels($(this), graph);
 
-        var soukan = IsZeroSoukan($(this).attr('data-sokan'));
-        var soukan_percent = chgSoukanToPercent(soukan);
-        console.log($(this).attr('data-gap'));
-        console.log(soukan_percent);
-
-        const GRAPH_HEIGHT = 446,
-          GRAPH_WIDTH = 0;
-        var x = graph.axes.xaxis.u2p($(this).attr('data-gap')), // convert x axis unita to pixels
-          y = graph.axes.yaxis.u2p(soukan_percent); // convert y axis unita to pixels
-
-          $('.tooltip')
-          .tooltipster({
-            content: $(
-              '<div id="box_r">'
-                + '<ul>'
-                + '<li>該当データ名</li>'
-                + '<li>曜日</li>'
-                + '<li>デバイス</li>'
-                + '<li>ユーザー</li>'
-                + '<li>絞り込み条件</li>'
-                + '</ul>'
-               + '</div>'
-            ),
-            position: 'top',
-            offsetX: x - GRAPH_WIDTH,
-            offsetY: GRAPH_HEIGHT - y,
-            speed: 0,
-          })
-          .tooltipster('show');
+        showTooltip(tooltip_target, x, y);
       },
       function() {
-          $('.tooltip')
-          .tooltipster('hide')
-          .tooltipster('destroy');
+        hideTooltip(tooltip_target);
       }
     );
-
-    // $('#legend1b tr td.r a').hover(
-    //   function() {
-
-    //     var $parents = $(this).parent('td.r');
-
-    //     var text = $parents.attr('data-page').split(';;');
-    //     // [ gap, 相関, radius(バブルの大きさ), テキスト ] の配列を生成
-
-    //     var soukan = IsZeroSoukan($parents.attr('data-sokan'));
-    //     var soukan_percent = chgSoukanToPercent(soukan);
-
-    //     var b = setBubbleColor($parents.attr('data-gap'), soukan_percent);
-    //     var rearr = [
-    //       [
-    //         [parseInt($parents.attr('data-gap')), parseInt(soukan_percent), 1, b]
-    //       ]
-    //     ];
-    //     // console.log(rearr);
-    //     var addopt = { series: [] };
-    //     addopt.data = rearr;
-    //     graph.replot(addopt);
-    //   },
-    //   function() {
-    //     // 最後にフィルタしたグラフへ戻す
-    //     if (typeof(replotHomeflg) == "undefined") {
-    //       replotHomeflg = '全データを再表示';
-    //     }
-    //     replotHome(replotHomeflg, arr_for_replot);
-    //   }
-    // );
 
     // ホームグラフをリプロットする
     var replotHome = function(wd, obj) {

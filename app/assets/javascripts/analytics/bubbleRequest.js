@@ -387,7 +387,6 @@ function callManager(flg) {
 function afterCall(dom) {
   // ローディングアニメーションのリセット
   $(dom).plainOverlay('hide');
-  // $('div#info').plainOverlay('hide');
 
   // リクエスト実行時のエラーメッセージ表示をリセット
   $('#errormsg').empty();
@@ -604,8 +603,6 @@ function setLoadingMortion(dom) {
   // プログレススピナーを表示
   $('#guardian').append(spinner.el);
 
-  // 項目一覧のオーバレイ
-  // $('div#info').plainOverlay('show', {opacity: 0.2, progress: false});
 }
 
 // ダイアログへ全体進捗を表示
