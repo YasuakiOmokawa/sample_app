@@ -53,31 +53,6 @@ var tickFormatter = function (format, val) {
     }
 }
 
-// hh:mm:ss 時間のフォーマットを秒数へ
-// var timeTonum = function(val) {
-
-//   var hms = val.split(':');
-//   var sec = parseInt(hms[2]) + parseInt(hms[1]) * 60 + parseInt(hms[0]) * 3600;
-//   if (hms[0].substr(0,1) == '-') {
-//     sec = -sec;
-//   }
-//   return sec;
-// }
-
-// y軸の目盛りを数値へ関数
-// var setYgridnum = function(format, val) {
-//   switch(format) {
-//       case 'percent':
-//       case 'number':
-//         return parseFloat(val);
-//       case 'time': {
-//         val = timeTonum(val);
-//         return val;
-//       }
-//       default: return val;
-//     }
-// }
-
 // Y軸の目盛りを再設定
 var resetYtick = function(val) {
 
@@ -284,7 +259,7 @@ jQuery( function() {
   });
 
   // ★jqplot描画
-  var squareBar = jQuery . jqplot( 'square', arr, options);
+  var squareBar = jQuery . jqplot( 'gh', arr, options);
 
   // グラフのy座標へ水平線を設定
   var yticks = $('.jqplot-y2axis-tick'), tick, dt;

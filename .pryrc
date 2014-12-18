@@ -72,8 +72,3 @@ include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
      @cv_num = 1                                                     # CV種類
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
-      @categories = {}
-      @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
-      @top_ten = top10(@favorite)
-      @rank_arr = seikei_rank(@top_ten)
-

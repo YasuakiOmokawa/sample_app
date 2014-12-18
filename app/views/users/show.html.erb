@@ -1,124 +1,83 @@
 <div id="childroom">
-  <!-- grapha_st -->
-  <div id="brick">
+  <div id="mfm_d">
+  <div id="bk"><a href="index.html"><%= image_tag 'back.png', :class => "icon" %>グラフに戻る</a></div>
     <%
       option = @graphic_item.to_sym
       graphic_hash = {
         "PV数" => :pageviews,
-        "訪問回数" => :sessions,
+        "セッション" => :sessions,
+        "ユーザー" => :users,
         "平均PV数" => :pageviews_per_session,
-        "新規訪問率" => :percent_new_sessions,
         "平均滞在時間" => :avg_session_duration,
-        "再訪問率" => :repeat_rate,
+        "新規ユーザー" => :percent_new_sessions,
+        "リピーター" => :repeat_rate,
         "直帰率" => :bounce_rate,
       }
     %>
-    <div id="circle"><span id="yellow">■</span><%= graphic_hash.key(option) %><span id="blue">―</span>CV数</div>
-    <div id="triangle">
+  <div id="tb">
     <%= select_tag('graphicselect', options_for_select( graphic_hash, option)) %>
+
+    <div id="gh" style="z-index: 1;"></div><br>
+
+    <div id="num">
+      <table>
+          <tr id="day">
+          <td class="cont"></td>
+          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+            <td data-dflg=<%= v[@graphic_item][3] %>><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="cont">指標値</td>
+          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+            <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][0] %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="cont">CV数</td>
+          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
+            <td><%= v[:cv].to_i %></td>
+          <% end %>
+        </tr>
+      </table>
     </div>
-    <div id="square" style="z-index: 1;"></div>
-  </div>
-  <!-- grapha_end -->
-  <div id="doll">
-    <table>
-      <tr id="line">
-        <td class="row"></td>
-        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td data-dflg=<%= v[@graphic_item][3] %>><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
-        <% end %>
-      </tr>
-      <tr>
-        <td class="row">目標値</td>
-        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][0] %></td>
-        <% end %>
-      </tr>
-      <tr>
-        <td class="row">現状値</td>
-        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][1] %></td>
-        <% end %>
-      </tr>
-      <tr>
-        <td class="row">GAP</td>
-        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td class="gap" data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][2] %></td>
-        <% end %>
-      </tr>
-      <tr id="cv">
-        <td class="row">CV</td>
-        <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-          <td><%= v[:cv].to_i %></td>
-        <% end %>
-      </tr>
-    </table>
-  </div>
-<!--   <div id="rattle">
-    <table>
-      <tr id="line">
-        <td>目標値</td><td class="row">曜日別</td><td>現状値</td><td>GAP</td>
-      </tr>
-      <tr>
-          <td><%= @value_table_by_days[:day_on][:good] %></td>
-          <td class="row">平日</td>
-          <td><%= @value_table_by_days[:day_on][:bad] %></td>
-          <td class="gap"><%= @value_table_by_days[:day_on][:gap] %></td>
-      </tr>
-      <tr>
-          <td><%= @value_table_by_days[:day_off][:good] %></td>
-          <td class="row">土日祝</td>
-          <td><%= @value_table_by_days[:day_off][:bad] %></td>
-          <td class="gap"><%= @value_table_by_days[:day_off][:gap] %></td>
-      </tr>
-    </table>
-  </div>
-  <hr> -->
-
-  <div id="kitchen">
-    <table>
-      <tr>
-        <td class="row">CV数</td><td><%= @common_table[@cv_txt.to_sym].to_f.round(1).to_s %></td>
-        <td class="row">CV率</td><td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
-      </tr>
-      <tr>
-        <td class="row">PV数</td><td><%= @common_table[:pageviews].to_f.round(1).to_s %></td>
-        <td class="row">ユーザー</td><td><%= @common_table[@cvr_txt.to_sym].to_f.round(1).to_s %>%</td>
-      </tr>
-        <td class="row">セッション</td><td><%= @common_table[:sessions].to_f.round(1).to_s %></td>
-        <td class="row">直帰率</td><td><%= @common_table[:bounce_rate].to_f.round(1).to_s %>%</td>
-      </tr>
-    </table>
-
-    <table id="knf">
-      <tr id="line">
-        <td>目標値</td><td>項目名</td><td>現状値</td><td>差</td>
-      </tr>
-      <tr>
-        <td><%= @gap_table[:pageviews_per_session][:good].to_f.round(1).to_s %></td><td class="row">平均PV数</td><td><%= @gap_table[:pageviews_per_session][:bad].to_f.round(1).to_s %></td>
-        <td class="gap"><%= @gap_table[:pageviews_per_session][:gap].to_f.round(1).to_s %></td>
-      </tr>
-      <tr>
-        <td><%= @gap_table[:avg_session_duration][:good] %></td>
-        <td class="row">平均滞在時間</td>
-        <td><%= @gap_table[:avg_session_duration][:bad] %></td>
-        <td class="gap"><%= @gap_table[:avg_session_duration][:gap] %></td>
-      </tr>
-      <tr>
-        <td><%= @gap_table[:percent_new_sessions][:good].to_f.round(1).to_s %>%</td><td class="row">新規ユーザー</td><td><%= @gap_table[:percent_new_sessions][:bad] .to_f.round(1).to_s%>%</td>
-        <td class="gap"><%= @gap_table[:percent_new_sessions][:gap] .to_f.round(1).to_s%>%</td>
-      </tr>
-      <tr>
-         <td><%= @gap_table[:repeat_rate][:good].to_f.round(1).to_s %>%</td><td class="row">リピーター</td><td><%= @gap_table[:repeat_rate][:bad] .to_f.round(1).to_s%>%</td><td class="gap"><%= @gap_table[:repeat_rate][:gap] .to_f.round(1).to_s%>%</td>
-     </tr>
-    </table>
-    <%= render partial: @kitchen_partial, locals: {search: @search, table_head: @table_head, rsc_table: @rsc_table} %>
   </div>
 
-  <div id="bedroom">
+  <div id="ltfm">
     <table>
-      <tr id="line">
-        <td>目標値</td><td class="row">人気ページ</td><td>現状値</td><td>差</td>
+      <tr id="tpc">
+        <td class="cont"></td><td><div class="lt">平均値</div><div class="rt">（標準偏差）</div></td><td>目標値</td>
+      </tr>
+      <tr>
+        <td class="cont">PV数</td><td><div class="lt">23.2</div><div class="rt">（±20.4）</div></td><td>43.6</td>
+      </tr>
+      <tr>
+        <td class="cont">セッション</td><td><div class="lt">11.3</div><div class="rt">（±3.6）</div></td><td>14.9</td>
+      </tr>
+      <tr>
+        <td class="cont">ユーザー</td><td><div class="lt">5.2</div><div class="rt">（±3.1）</div></td><td>8.3</td>
+      </tr>
+      <tr>
+        <td class="cont">平均PV数</td><td><div class="lt">3.6</div><div class="rt">（±1.4）</div></td><td>5.0</td>
+      </tr>
+      <tr>
+        <td class="cont">平均滞在時間</td><td><div class="lt">01:13</div><div class="rt">（±00:52）</div></td><td>02:05</td>
+      </tr>
+      <tr>
+        <td class="cont">新規ユーザー</td><td><div class="lt">47.3%</div><div class="rt">（±7.3%）</div></td><td>54.6%</td>
+      </tr>
+      <tr>
+        <td class="cont">リピーター</td><td><div class="lt">52.7%</div><div class="rt">（±4.6%）</div></td><td>57.3%</td>
+      <tr>
+        <td class="cont">直帰率</td><td><div class="lt">66.2%</div><div class="rt">（±13.2%）</div></td><td>53.0%</td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="rtfm">
+    <table>
+      <tr id="tpc">
+        <td>理想値</td><td class="page">人気ページ</td><td>現状値</td><td>GAP値</td>
       </tr>
       <%
         @favorite_table.sort_by{ |k, v| v[:index].to_i}.each do |k, v|
@@ -127,9 +86,9 @@
       %>
         <tr>
           <td><%= v[:good].to_f.round(1).to_s %>%</td>
-          <td class="row"><%= truncate(title, :length => 30) %><p><%= page %></p></td>
+          <td class="page"><%= truncate(title, :length => 30) %><div><%= page %></div></td>
           <td><%= v[:bad].to_f.round(1).to_s %>%</td>
-          <td class="gap"><%= v[:gap].to_f.round(1).to_s %>%</td>
+          <td><%= v[:gap].to_f.round(1).to_s %>%</td>
         </tr>
       <%
           end
@@ -141,7 +100,7 @@
       %>
         <tr>
           <td>-</td>
-          <td class="row">-<p>-</p></td>
+          <td class="page">-<div>-</div></td>
           <td>-</td>
           <td>-</td>
         </tr>
@@ -149,13 +108,42 @@
           }
         end
       %>
-      <tr id="other">
+
+<!--       <tr id="other">
         <td><%= @favorite_table["その他"][:good].to_f.round(1).to_s %>%</td>
         <td class="row">その他</td>
         <td><%= @favorite_table["その他"][:bad].to_f.round(1).to_s %>%</td>
         <td class="gap"><%= @favorite_table["その他"][:gap].to_f.round(1).to_s %>%</td>
-      </tr>
+      </tr> -->
     </table>
+    <br>
+
+    <div id="lp">
+      <table>
+        <tr id="tpc">
+          <td class="page">ランディングページ</td><td>直帰率</td><td>平均滞在時間</td>
+        </tr>
+        <tr>
+          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+        </tr>
+        <tr>
+          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+        </tr>
+        <tr>
+          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+        </tr>
+        <tr>
+          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+        </tr>
+        <tr>
+          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+        </tr>
+      </table>
+    </div>
+  </div><br>
+  </div>
+
+
     <%= render partial: @bedroom_partial, locals: {in_table: @in_table } %>
   </div><br>
 </div>

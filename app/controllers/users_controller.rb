@@ -297,12 +297,13 @@ class UsersController < ApplicationController
       end
       # 絞り込みセレクトボックス項目を生成
       # ページ共通セレクトボックス(人気ページ)
-      @categories = {}
-      @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, @cond)
-      @top_ten = top10(@favorite)
-      @rank_arr = seikei_rank(@top_ten)
+      # @categories = {}
+      # gb_cnd = Ganalytics::Garb::Cond.new(@cond)
+      # @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, gb_cnd.sort_favorite)
+      # @head_favorite_table = head_favorite_table(@favorite, 5)
+      # @favorite_rank = seikei_rank(@head_favorite_table)
 
-      @categories["人気ページ"] = set_select_box(@favorite, 'f')
+      # @categories["人気ページ"] = set_select_box(@favorite, 'f')
 
       # 遷移元ページタブを保存
       gon.prev_page = params[:prev_page].presence
@@ -311,83 +312,112 @@ class UsersController < ApplicationController
 
     def create_common_table
 
-      # ◆ページ共通のテーブルを生成
-
-      # pv数 ~ 直帰率（ギャップなしデータ）
-      @common_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
-      create_skeleton(@common_table, @cv_txt, @cvr_txt)
-      @common = Analytics.create_class('Common',
-        [
-          (@cv_txt.classify + 's').to_sym,
-          @cvr_txt.classify.to_sym,
-          :sessions,
-          :pageviews,
-          :bounceRate
-        ] ).results(@ga_profile,@cond)
-      put_common(@common_table, @common)
 
-      all_sessions = @common_table[:sessions] # 共通ギャップ値テーブルの総セッション数の取得（再訪問率計算用)
+      @graphic_item = :avg_session_duration
+      metrics_camel_case_datas = [] # アナリティクスAPIデータ取得用
+      metrics_snake_case_datas = [] # データ構造構築用
+      metrics_for_graph_merge = {} # jqplot用データ構築用
+      get_metricses.each do |k, v|
+        metrics_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
+        metrics_camel_case_datas.push(k)
+        metrics_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
+      end
+      # アナリティクスAPIに用意されていないもの
+      get_metrics_not_ga.each do |k, v|
+        metrics_for_graph_merge[k] = {jp_caption: v}
+        metrics_snake_case_datas.push(k)
+      end
 
-      # グラフテーブル
-      @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      columns_for_graph = [@graphic_item] # セレクトボックスから選んだグラフの種類
-      create_skeleton_for_graph(@gap_table_for_graph, @from, @to, columns_for_graph)
+      ### APIデータ取得部
+
+      # リトライ時のメッセージを指定
+      exception_cb = Proc.new do |retries|
+        logger.info("API request retry: #{retries}")
+      end
+
+      ### APIデータ取得部
+
+      # クラス名を一意にするため、乱数を算出
+      rndm = SecureRandom.hex(4)
+
+      # ソート条件追加用クラス
+      gc = Ganalytics::Garb::Cond.new(@cond)
+
+      # 指標値テーブルへCV代入用
+      cls_name = 'CVForGraphSkeleton' + rndm.to_s
+      # 4回までリトライできます
+      retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+        @cv_for_graph = Analytics.create_class(cls_name,
+          [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+      end
+
+      # 指標値算出用
+      # 4回までリトライできます
+      gap = ''
+      retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+        gap = fetch_analytics_data('Fetch', @ga_profile, @cond, @cv_txt, {}, metrics_camel_case_datas, :date)
+      end
+
+      # 人気ページ用
+      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, gc.sort_favorite_for_calc, @cv_txt)
+      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, gc.sort_favorite_for_skelton)
+
+      # ランディングページ用
+      land_gap = fetch_analytics_data('FetchKeywordForLanding', @ga_profile, gc.sort_landing_for_calc, @cv_txt)
+      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, gc.sort_landing_for_skelton)
+
+      # 全てのセッション(GAP値等計算用)
+      ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond).total_results
+      tmp_all_session = ga_result.results[0].sessions.to_i if ga_result > 0
+      all_session = guard_for_zero_division(tmp_all_session)
+
+      ### データ計算部
+
+      # グラフ表示用および指標値用テーブル
+      @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
 
       # CV値挿入
-      @cv_for_graph = Analytics.create_class('CVForGraphSkeleton',
-        [ (@cv_txt.classify + 's').to_sym ], [:date] ).results(@ga_profile,@cond)
-      put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
+      put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
 
       # GAP値をスケルトンへ挿入
-      gap = fetch_analytics_data('GapDataForGraph', @ga_profile, @cond, @cv_txt, {})
-      put_table_for_graph(gap, @gap_table_for_graph, [ @graphic_item ])
-      calc_gap_for_graph(@gap_table_for_graph, columns_for_graph)
+      put_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
+      calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas)
 
-      # グラフ表示プログラムへ渡すCVデータのハッシュを作成
-      @hash_for_graph = Hash.new{ |h,k| h[k] = {} }
-      create_array_for_graph(@hash_for_graph, @gap_table_for_graph, @graphic_item)
-      gon.hash_for_graph = @hash_for_graph
+      # 指標値テーブルへ表示するデータを算出
+      @desire_datas = generate_bubble_data(@table_for_graph, metrics_snake_case_datas)
+      calc_desire_datas(desire_datas) # 目標値の算出
 
-      # 曜日別テーブル
-      @value_table_by_days = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      create_table_by_days(@value_table_by_days, @gap_table_for_graph, @graphic_item)
+      # グラフ表示プログラムへ渡すデータを作成
+      @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
+      create_data_for_graph_display(@data_for_graph_display, @table_for_graph, @graphic_item)
+      gon.data_for_graph_display = @data_for_graph_display
 
-      # グラフ値フォーマット設定(グラフテーブル生成の最後にやんないと表示が崩れる)
-      format = check_format_graph(@graphic_item)
-      change_format(@gap_table_for_graph, @graphic_item, format)
-
-      # 平均PV数 ~ 再訪問率テーブル（ギャップありデータ）
-      @gap_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      create_skeleton_gap_table(@gap_table)
-      gap = fetch_analytics_data('CommonForGap', @ga_profile, @cond, @cv_txt)
-
-      put_common_for_gap(@gap_table, gap, all_sessions)
-      calc_gap_for_common(@gap_table)
-
-      # 時間のフォーマットを変更
-      [:good, :bad, :gap].each do |t|
-
-        # ギャップテーブル
-        @gap_table[:avg_session_duration][t] = chg_time(@gap_table[:avg_session_duration][t])
-
-        # 曜日別テーブル
-        if @graphic_item == :avg_session_duration
-          [:day_on, :day_off].each do |s|
-            @value_table_by_days[s][t] = chg_time(@value_table_by_days[s][t])
-          end
-        end
-      end
+      display_format = check_format_graph(@graphic_item)
+      change_format(@table_for_graph, @graphic_item, display_format)
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      create_skeleton_favorite_table(@favorite, @favorite_table)
-      gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile,@cond, @cv_txt)
-      put_favorite_table(gap, @favorite_table)
+
+      cved_session = guard_for_zero_division(all_session - fav_gap['bad'].results.map { |t| t.sessions }.sum)
+      not_cved_session = guard_for_zero_division(all_session - fav_gap['good'].results.map { |t| t.sessions }.sum)
+
+      create_skeleton_favorite_table(fav_for_skel, @favorite_table)
+      put_favorite_table_for_skelton(fav_gap, @favorite_table)
+
+      calc_percent_for_favorite_table(cved_session, @favorite_table, :good)
+      calc_percent_for_favorite_table(not_cved_session, @favorite_table, :bad)
       calc_gap_for_favorite(@favorite_table)
-      # top10 を抽出
-      @favorite_table = substr_fav(@favorite_table, @rank_arr)
+
+      # ランディングページテーブル
+      @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+
+      create_skeleton_landing_table(land_for_skel, @landing_table)
+      put_landing_table_for_skelton(land_gap, @landing_table)
+      calc_gap_for_favorite(@landing_table)
+
     end
 
     def create_home
@@ -562,31 +592,19 @@ class UsersController < ApplicationController
           @cond[:filters].merge!(dev_opts[dev])       # デバイス
           @cond[:filters].merge!(usr_opts[usr])        # 訪問者
 
-          # データ項目
-          metrcs = {
-            @cvr_txt.classify.to_sym => 'CVR',
-            :pageviews => 'PV数',
-            :pageviewsPerSession => '平均PV数',
-            :sessions => 'セッション',
-            :avgSessionDuration => '平均滞在時間',
-            :bounceRate => '直帰率',
-            :percentNewSessions => '新規ユーザー',
-            :users => 'ユーザー',
-          }
-          metrcs_camel_case_datas = [] # アナリティクスAPIデータ取得用
-          metrcs_snake_case_datas = [] # データ構造構築用
-          metrcs_for_graph_merge = {} # jqplot用データ構築用
-          metrcs.each do |k, v|
-            metrcs_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
-            metrcs_camel_case_datas.push(k)
-            metrcs_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
+          # データ指標
+          metrics_camel_case_datas = [] # アナリティクスAPIデータ取得用
+          metrics_snake_case_datas = [] # データ構造構築用
+          metrics_for_graph_merge = {} # jqplot用データ構築用
+          get_metricses.each do |k, v|
+            metrics_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
+            metrics_camel_case_datas.push(k)
+            metrics_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
           end
           # アナリティクスAPIに用意されていないもの
-          {
-            :repeat_rate => 'リピーター',
-          }.each do |k, v|
-            metrcs_for_graph_merge[k] = {jp_caption: v}
-            metrcs_snake_case_datas.push(k)
+          get_metrics_not_ga.each do |k, v|
+            metrics_for_graph_merge[k] = {jp_caption: v}
+            metrics_snake_case_datas.push(k)
           end
 
           # リトライ時のメッセージを指定
@@ -611,35 +629,35 @@ class UsersController < ApplicationController
           # 4回までリトライできます
           gap = ''
           retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrcs_camel_case_datas, :date)
+            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrics_camel_case_datas, :date)
           end
 
           ### データ計算部
 
           # スケルトン作成
-          @gap_table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          create_skeleton_for_graph(@gap_table_for_graph, @from, @to, metrcs_for_graph_merge)
+          @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
 
           # CV代入用
-          put_cv_for_graph(@cv_for_graph, @gap_table_for_graph, @cv_num)
+          put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
 
           # 指標値の算出
-          put_table_for_graph(gap, @gap_table_for_graph, metrcs_snake_case_datas) # 項目の理想値、現実値をスケルトンへ代入
+          put_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas) # 項目の理想値、現実値をスケルトンへ代入
 
-          calc_gap_for_graph(@gap_table_for_graph, metrcs_snake_case_datas) # スケルトンからGAP値を計算
+          calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
           # バブルチャートに表示するデータを算出
-          bubble_datas = generate_bubble_data(@gap_table_for_graph, metrcs_snake_case_datas)
+          bubble_datas = generate_bubble_data(@table_for_graph, metrics_snake_case_datas)
 
-          metrcs_for_graph_merge.delete(@cvr_txt.to_sym) #CVRは不要なので除去
+          d_on_sh = add_metrics_day_on(metrics_for_graph_merge)
+          d_off_sh = add_metrics_day_off(metrics_for_graph_merge)
 
-          d_on_sh = add_metrcs_day_on(metrcs_for_graph_merge)
-          d_off_sh = add_metrcs_day_off(metrcs_for_graph_merge)
+          metrics_for_graph_merge.merge!(d_on_sh)
+          metrics_for_graph_merge.merge!(d_off_sh)
 
-          metrcs_for_graph_merge.merge!(d_on_sh)
-          metrcs_for_graph_merge.merge!(d_off_sh)
+          home_graph_data = concat_data_for_bubble(bubble_datas, metrics_for_graph_merge)
 
-          home_graph_data = concat_data_for_bubble(bubble_datas, metrcs_for_graph_merge)
+          # home_graph_data = delete_metrics(home_graph_data, @cvr_txt.to_sym) #CVRは不要なので除去
 
           # ページ項目へ追加
           p_hash[x][room] = home_graph_data

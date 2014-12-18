@@ -1,5 +1,15 @@
 module CreateTable
 
+  # グラフテーブルからグラフ表示プログラム用の配列を出力
+  def create_data_for_graph_display(hash, table, param)
+    table.sort_by{ |a, b| b[:idx] }.each do |k, v|
+      date =  k.to_i
+      metrics = v[param][0] + v[param][1]
+      hash[date] = [ metrics, v[:cv].to_i ]
+    end
+    hash
+  end
+
     # ギャップ値なしテーブルスケルトン作成
   def create_skeleton(h, cv, cvr)
       h[:sessions] = 0
@@ -109,22 +119,29 @@ module CreateTable
   # 人気ページテーブルを生成
   def create_skeleton_favorite_table(data, table)
     cnt = 0
-    data.sort_by{ |a, b| a.pageviews.to_i}.reverse.each do |k|
-      cnt = cnt + 1
+    data.each do |k|
+      cnt += 1
       key = k.page_title + ";;" + k.page_path
       table[key][:index] = cnt
       [:good, :bad, :gap].each do |s|
         table[key][s] = 0
       end
-
-      if cnt >= 10 then break end
-
     end
-    table["その他"][:index] = cnt + 1
-    [:good, :bad, :gap].each do |s|
-      table["その他"][s] = 0
+    table
+  end
+
+  # ランディングページテーブルを作成
+  def create_skeleton_landing_table(data, table)
+    cnt = 0
+    data.each do |k|
+      cnt += 1
+      key = k.page_title + ";;" + k.landing_page_path
+      table[key][:index] = cnt
+      [:good, :bad, :gap].each do |s|
+        table[key][s] = 0
+      end
     end
-    return table
+    table
   end
 
   # referral, social, campaign 個別テーブルを生成

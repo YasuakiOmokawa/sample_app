@@ -64,6 +64,28 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
   }
 }
 
+// バブル作成用にページ下部のタブリンクに埋め込む関数
+function bubbleCreateAtTabLink(page_name) {
+
+  if (request) {
+    $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
+    return;
+  }
+
+  // 返り値データ
+  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
+
+  var elm_txt = parseElem(page_name);
+
+  createBubbleWithParts(shaped_idxarr, elm_txt);
+
+  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr);
+
+  shapeBubbleParts(idxarr, shaped_idxarr);
+
+  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
+}
+
 // バブルチャートをオーバーレイ
 function addOverlay(dom) {
 
@@ -447,29 +469,6 @@ function TabMark(dom, page_name) {
   isEndTab(page_name, dom);
 
   hideSelectedTab(target);
-}
-
-
-// バブル作成用にページ下部のタブリンクに埋め込む関数
-function bubbleCreateAtTabLink(page_name) {
-
-  if (request) {
-    $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
-    return;
-  }
-
-  // 返り値データ
-  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
-
-  var elm_txt = parseElem(page_name);
-
-  createBubbleWithParts(shaped_idxarr, elm_txt);
-
-  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr);
-
-  shapeBubbleParts(idxarr, shaped_idxarr);
-
-  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
 }
 
 function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {

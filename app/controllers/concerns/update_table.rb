@@ -1,5 +1,23 @@
 module UpdateTable
 
+  def calc_desire_datas(tbl)
+    tbl.each do |k, v|
+      if tbl[k][:corr_sign] == 'plus'
+       tbl[k][:desire] = tbl[k][:metrics_avg] + tbl[k][:metrics_stddev]
+     else
+       tbl[k][:desire] = (tbl[k][:metrics_avg] - tbl[k][:metrics_stddev]).round(1)
+      end
+    end
+    tbl
+  end
+
+  def calc_percent_for_favorite_table(ssn, table, data_type)
+    table.each do |k, v|
+      table[k][data_type] = (table[k][data_type] / ssn * 100).round(1) if table[k][data_type] >0
+    end
+    table
+  end
+
   # 共通ギャップ値テーブルのGAP値を計算
   def calc_gap_for_common(table)
     table.each do |k, v|
@@ -51,7 +69,7 @@ module UpdateTable
       str = "-" + str
     end
 
-    logger.info("converted time is " + str)
+    puts "converted time is " + str
     return str
   end
 
@@ -177,7 +195,7 @@ module UpdateTable
     }
   end
 
-  def add_metrcs_day_on(mets)
+  def add_metrics_day_on(mets)
     hsh = {}
     mets.each do |k, v|
       key = day_on_komoku(k)
@@ -187,7 +205,7 @@ module UpdateTable
     hsh
   end
 
-  def add_metrcs_day_off(mets)
+  def add_metrics_day_off(mets)
     hsh = {}
     mets.each do |k, v|
       key = day_off_komoku(k)
@@ -212,6 +230,10 @@ module UpdateTable
     add_corr(r_hsh, komoku, j[:all_day_corr])
     add_corr(r_hsh, komoku_day_on, j[:day_on_corr])
     add_corr(r_hsh, komoku_day_off, j[:day_off_corr])
+
+    add_corr_sign(r_hsh, komoku, j[:all_day_corr_sign])
+    add_corr_sign(r_hsh, komoku_day_on, j[:day_on_corr_sign])
+    add_corr_sign(r_hsh, komoku_day_off, j[:day_off_corr_sign])
 
     add_variation(r_hsh, komoku, k[:all_day_variation])
     add_variation(r_hsh, komoku_day_on, k[:day_on_variation])
@@ -240,15 +262,6 @@ module UpdateTable
     }
   end
 
-  def concat(tb, b, hsh)
-    arr = []
-    hsh.each do |k, v|
-      arr.push( [ tb[k][:gap].to_i, b[k][:corr].to_i, 1, v ] )
-      puts "array push success! hash_key is #{k}, corr_name is #{v} "
-    end
-    return arr
-  end
-
   def concat_data_for_bubble(datas, mets)
     mets.each do |k, v|
       datas[k][:jp_caption] = mets[k][:jp_caption]
@@ -256,12 +269,20 @@ module UpdateTable
     datas
   end
 
+  def delete_metrics(datas, m)
+    [m, day_on_komoku(m), day_off_komoku(m)].each do |t|
+      datas.delete(t)
+    end
+    datas
+  end
+
+
   # バブル（散布図）チャートのために算出用データを出す
   def generate_bubble_data(tbl, col)
     r_hsh = Hash.new{ |h,k| h[k] = {} }
 
     # 項目別
-    col.each do |komoku, i|
+    col.each do |komoku, jp|
 
       # 判別対象データを作成
       h = collect_bubble_metricses(tbl, komoku)

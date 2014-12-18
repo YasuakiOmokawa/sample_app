@@ -1,5 +1,14 @@
 module UserFunc
 
+  def guard_for_zero_division(value)
+    if value.nil? or value <= 0
+      1
+    else
+      value
+    end
+  end
+
+
   # 理想値、現状値を取得
   def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil, dimensions = nil)
 
@@ -16,16 +25,14 @@ module UserFunc
 
       if metrics.nil?
         hash[k] = Analytics.const_get(name).results(prof, c)
-      elsif metrics == :repeat_rate then
-        c[:filters] = c[:filters].merge( { :user_type.matches => 'Returning Visitor' })
-        p c[:filters]
+      elsif metrics == [:repeat_rate] then
 
         # クラス名を一意にするため、乱数を算出
         rndm = SecureRandom.hex(4)
         name = name + rndm.to_s
 
         hash[k] = Analytics.create_class(name,
-          [ :sessions ],
+          [ :sessions, :percent_new_sessions ],
           [:date]).results(prof, c)
       elsif dimensions.nil?
 
@@ -62,15 +69,6 @@ module UserFunc
     return p
   end
 
-  # グラフテーブルからグラフ表示プログラム用の配列を出力
-  def create_array_for_graph(hash, table, param)
-    table.sort_by{ |a, b| b[:idx].to_i }.each do |k, v|
-      date =  k.to_i
-      param = param.to_sym
-      hash[date] = [ v[param][2], v[:cv].to_i ]
-    end
-    return hash
-  end
 end
 
 module StringUtils
@@ -200,18 +198,30 @@ module ParamUtils
   end
 
   # 人気ページテーブル用にtop10 生成
-  def top10(dt)
-    r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    cntr = 0
-    dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-      cntr += 1
-      r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
-      if cntr >= 10 then break end
-    end
-    cntr = cntr + 1
-    r_hsh[cntr] = ['その他', '']
-    return r_hsh
-  end
+  # def top10(dt)
+  #   r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+  #   cntr = 0
+  #   dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
+  #     cntr += 1
+  #     r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
+  #     if cntr >= 10 then break end
+  #   end
+  #   cntr = cntr + 1
+  #   r_hsh[cntr] = ['その他', '']
+  #   return r_hsh
+  # end
+
+  # 人気ページ用に上位タイトルを切り出す
+  # def head_favorite_table(data, limit)
+  #   r_hsh = Hash.new { |h,k| h[k] = {}}
+  #   cntr = 0
+  #   data.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
+  #     cntr += 1
+  #     r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
+  #     if cntr >= limit then break end
+  #   end
+  #   r_hsh
+  # end
 
   # ユニークキーを取得する
   def create_cache_key(analyze_type)
@@ -225,6 +235,25 @@ module ParamUtils
       uniq = uniq + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
     end
     uniq
+  end
+
+  # データ指標の取得
+  def get_metricses
+    {
+      :pageviews => 'PV数',
+      :pageviewsPerSession => '平均PV数',
+      :sessions => 'セッション',
+      :avgSessionDuration => '平均滞在時間',
+      :bounceRate => '直帰率',
+      :percentNewSessions => '新規ユーザー',
+      :users => 'ユーザー',
+    }
+  end
+
+  def get_metrics_not_ga
+    {
+      :repeat_rate => 'リピーター',
+    }
   end
 
 end

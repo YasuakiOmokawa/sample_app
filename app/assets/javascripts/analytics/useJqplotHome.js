@@ -1,47 +1,48 @@
 function createGraphPlots(idxarr, arr) {
 
-  var plot_color = {}, tmp_arr = [], soukan, soukan_percent;
+  var plot_color = {}, tmp_arr = [];
 
   for (i=0; i < idxarr.length; i++) {
-
-    soukan = IsZeroSoukan(idxarr[i]['arr'][1]);
-    soukan_percent = chgSoukanToPercent(soukan);
-
-    plot_color = setBubbleColor(idxarr[i]['arr'][0], soukan_percent);
+    plot_color = setInitialBubbleColor();
 
     // x, y, radius, plot_color
-    // tmp_arr[i] = [idxarr[i]['arr'][0], 30, 1, plot_color];
-    tmp_arr[i] = [idxarr[i]['arr'][0], soukan_percent, 1, plot_color];
+    tmp_arr[i] = [ isVariationOverLimit(idxarr[i]['vari']) , idxarr[i]['corr'], 1, plot_color];
   }
-
   arr.push(tmp_arr);
-  // console.log(arr);
 }
 
-function IsZeroSoukan(v) {
-  if (v == 0) {
+function isVariationOverLimit(vari) {
+  const VARIATION_LIMIT = 1;
+  if (vari > VARIATION_LIMIT) {
     return 1;
   } else {
     return v;
   }
 }
 
-function chgSoukanToPercent(soukan_value) {
-  var from = new Date($("#from").val());
-  var to = new Date($("#to").val());
-  var d =  to - from;
-  var dms = 1000 * 60 * 60 * 24;
-  var base_days = Math.floor(d / dms);
+// function IsZeroSoukan(v) {
+//   if (v == 0) {
+//     return 1;
+//   } else {
+//     return v;
+//   }
+// }
 
-  if ((base_days - 1) <= 0) {
-    base_days = 1;
-  }
+// function chgSoukanToPercent(soukan_value) {
+//   var from = new Date($("#from").val());
+//   var to = new Date($("#to").val());
+//   var d =  to - from;
+//   var dms = 1000 * 60 * 60 * 24;
+//   var base_days = Math.floor(d / dms);
 
-  return percent = Math.floor( (soukan_value / base_days) * 100);
-}
+//   if ((base_days - 1) <= 0) {
+//     base_days = 1;
+//   }
+
+//   return percent = Math.floor( (soukan_value / base_days) * 100);
+// }
 
 function headIdxarr(idxarr, limit) {
-
   var headed_obj = [];
 
   if (idxarr.length < limit) {
@@ -155,11 +156,11 @@ function addRanking(idxarr, target) {
     counter = counter + 1;
 
     // 絞り込み情報の追加
-    text = value['arr'][3].split(';;');
+    // text = value['arr'][3].split(';;');
 
     // 項目一覧へ表示する文字列
     // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
-    caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
+    // caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
 
     $(target)
     .append(
@@ -169,13 +170,18 @@ function addRanking(idxarr, target) {
           .attr({
             "href": 'javascript:void(0)',
             "title": counter,
-            "name": value['pagelink'],
-            'data-gap': value['arr'][0],
-            'data-sokan': value['arr'][1],
-            'data-metrics': text[1],
+            'data-corr': value['corr'],
+            'data-corr-sign': value['corr_sign'],
+            'data-metrics': value['jp_metrics'],
+            'data-day-type': value['day_type'],
+            'data-metrics-avg': value['metrics_avg'],
+            'data-metrics-stddev': value['metrics_stddev'],
+            'data-vari': value['vari'],
             'data-devfltr': value['dev_fltr'],
             'data-usrfltr': value['usr_fltr'],
-            'data-kwdfltr': value['kwd_fltr']
+            'data-kwdfltr': value['kwd_fltr'],
+            "name": value['pagelink'],
+            'data-page': value['page']
           })
           .text(counter)
       )
@@ -194,13 +200,17 @@ function sortIdxarr(idxarr) {
     if (a.pri < b.pri) return  1;
     if (a.page > b.page) return  1;
     if (a.page < b.page) return  -1;
-    if (a.name > b.name) return  1;
-    if (a.name < b.name) return  -1;
+    if (a.jp_metrics > b.jp_metrics) return  1;
+    if (a.jp_metrics < b.jp_metrics) return  -1;
   });
   return idxarr;
 }
 
 // バブル色の指定
+function setInitialBubbleColor() {
+  return {color: '#7f7f7f'}
+}
+
 var setBubbleColor = function(x, y) {
     var label;
     var x = parseInt(x);
@@ -224,41 +234,42 @@ var setBubbleColor = function(x, y) {
 // データ項目一覧の設定
 var setDataidx = function(obj, wd, idxarr) {
 
-  var homearr = $.extend(true, {}, obj); // 参照渡しだとバグる。
-  // var idxarr = [];
-  var arr = [];
-  var cnt = 0;
-  var fltr_wd = wd
-  var pagenm = 'div#pnt a.' + fltr_wd;   // ページ名（全体、検索、など）を取得
-  var pagelink = $(pagenm).attr('path');   // ページへのリンクを取得
+  var homearr = $.extend(true, {}, obj), // 参照渡しだとバグる。
+    fltr_wd = wd,
+    pagenm = 'div#pnt a.' + fltr_wd,   // ページ名（全体、検索、など）を取得
+    pagelink = $(pagenm).attr('path'),   // ページへのリンクを取得
+    tmp_obj = {};
 
   for (var i in homearr[fltr_wd]) {
 
     // 絞り込みオプションの取り出し
-    var fltr = String(i).split('::');    // デバイス::訪問者::キーワード
-    var dev_fltr = fltr[0];
-    var usr_fltr = fltr[1];
-    var kwd_fltr = fltr[2];
+    var fltr = String(i).split('::'),    // デバイス::訪問者::キーワード
+      dev_fltr = fltr[0],
+      usr_fltr = fltr[1],
+      kwd_fltr = fltr[2],
+      tmp = homearr[fltr_wd][i];
 
-    arr.push( homearr[fltr_wd][i] );
-    arr[cnt].forEach( function(value) {
-      var nm = value[3].split(';;');
-      value[3] = fltr_wd + ';;' + value[3];
+    for (var j in tmp) {
+      var
+        ar = {},
+        pri = tmp[j].corr + tmp[j].vari,
+        jp = tmp[j].jp_caption.split(';;');
 
-      // GAPと相関の合計値が高いものほど優先度を高くする。
-      var ar = {};
-      var pri = value[0] + value[1];
       ar['pri'] = pri;
-      ar['arr'] = value;
-      ar['name'] = nm[0];
+      ar['corr'] = tmp[j].corr;
+      ar['corr_sign'] = tmp[j].corr_sign;
+      ar['jp_metrics'] = jp[0];
+      ar['day_type'] = jp[1];
+      ar['metrics_avg'] = tmp[j].metrics_avg;
+      ar['metrics_stddev'] = tmp[j].metrics_stddev;
+      ar['vari'] = tmp[j].vari;
       ar['dev_fltr'] = dev_fltr;
       ar['usr_fltr'] = usr_fltr;
       ar['kwd_fltr'] = kwd_fltr;
       ar['page'] = fltr_wd;
       ar['pagelink'] = pagelink;
       idxarr.push(ar);
-    });
-    cnt += 1
+    }
   }
 }
 
@@ -437,14 +448,14 @@ function plotGraphHome(arr, idxarr) {
       axes: {
         // 見栄えの問題で、max は101, min は -1 で調整
         xaxis: {
-          // label: 'GAP',
-          min: 1,
-          max: 100,
+          // label: '変動係数',
+          min: 0.0,
+          max: 1.0,
         },
         yaxis: {
-          // label: '相関',
-          min: 1,
-          max: 100,
+          // label: '相関係数',
+          min: 0.0,
+          max: 1.0,
         },
       },
       // 背景色に関する設定
