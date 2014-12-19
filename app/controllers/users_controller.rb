@@ -315,7 +315,6 @@ class UsersController < ApplicationController
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
 
-      @graphic_item = :avg_session_duration
       metrics_camel_case_datas = [] # アナリティクスAPIデータ取得用
       metrics_snake_case_datas = [] # データ構造構築用
       metrics_for_graph_merge = {} # jqplot用データ構築用
@@ -387,16 +386,24 @@ class UsersController < ApplicationController
       calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas)
 
       # 指標値テーブルへ表示するデータを算出
-      @desire_datas = generate_bubble_data(@table_for_graph, metrics_snake_case_datas)
+
+      # @day_type = 'day_off'
+      @desire_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
       calc_desire_datas(desire_datas) # 目標値の算出
+
+      graph_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
+      d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
+      @details_graph_data = concat_data_for_graph(graph_datas, d_hsh)
+
 
       # グラフ表示プログラムへ渡すデータを作成
       @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
       create_data_for_graph_display(@data_for_graph_display, @table_for_graph, @graphic_item)
-      gon.data_for_graph_display = @data_for_graph_display
 
       display_format = check_format_graph(@graphic_item)
       change_format(@table_for_graph, @graphic_item, display_format)
+
+       gon.data_for_graph_display = @data_for_graph_display
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -474,7 +481,7 @@ class UsersController < ApplicationController
           wd = params[:act]
         else
           # 初期値はall
-          wd = 'all'
+         wd = 'all'
         end
         @page_fltr_wd = wd
         page.select!{ |k,v| k == wd }
@@ -647,17 +654,10 @@ class UsersController < ApplicationController
           calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
           # バブルチャートに表示するデータを算出
-          bubble_datas = generate_bubble_data(@table_for_graph, metrics_snake_case_datas)
-
-          d_on_sh = add_metrics_day_on(metrics_for_graph_merge)
-          d_off_sh = add_metrics_day_off(metrics_for_graph_merge)
-
-          metrics_for_graph_merge.merge!(d_on_sh)
-          metrics_for_graph_merge.merge!(d_off_sh)
-
-          home_graph_data = concat_data_for_bubble(bubble_datas, metrics_for_graph_merge)
-
-          # home_graph_data = delete_metrics(home_graph_data, @cvr_txt.to_sym) #CVRは不要なので除去
+         # @day_type = 'day_off'
+          bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
+          d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
+          home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 
           # ページ項目へ追加
           p_hash[x][room] = home_graph_data

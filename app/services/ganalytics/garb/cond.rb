@@ -39,8 +39,7 @@ module Ganalytics
           sort: :sessions.desc
           })
       end
-
     end
-    gc = Cond.new(@cond)
+    # gc = Cond.new(@cond)
   end
 end
