@@ -72,6 +72,32 @@
         <td class="cont">直帰率</td><td><div class="lt">66.2%</div><div class="rt">（±13.2%）</div></td><td>53.0%</td>
       </tr>
     </table>
+
+    <%= render partial: @details_partial, locals: {in_table: @in_table } %>
+
+    <br>
+    <div id="db">
+      <table>
+        <tr>
+          <td  rowspan="2" class="contm">参<br>照<br>元<br>①</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
+        </tr>
+        <tr>
+          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
+        </tr>
+        <tr>
+          <td  rowspan="2" class="contm">参<br>照<br>元<br>②</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
+        </tr>
+        <tr>
+          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
+        </tr>
+        <tr>
+          <td  rowspan="2" class="contm">参<br>照<br>元<br>③</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
+        </tr>
+        <tr>
+          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
   <div id="rtfm">
@@ -143,7 +169,5 @@
   </div><br>
   </div>
 
-
-    <%= render partial: @bedroom_partial, locals: {in_table: @in_table } %>
   </div><br>
 </div>

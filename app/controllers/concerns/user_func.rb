@@ -8,6 +8,15 @@ module UserFunc
     end
   end
 
+  def komoku_day_type(komoku, day_type)
+    if day_type == 'day_on'
+      (komoku.to_s + '__day_on').to_sym
+    elsif day_type == 'day_off'
+      (komoku.to_s + '__day_off').to_sym
+    else
+      komoku
+    end
+  end
 
   # 理想値、現状値を取得
   def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil, dimensions = nil)

@@ -12,7 +12,6 @@ module InsertTable
   end
 
   # 共通ギャップ値テーブルへ値を代入
-  # def put_common_for_gap(tbl, data, all = nil)
   def put_common_for_gap(tbl, data, all = nil)
     ['good', 'bad'].each do |t|
       if data[t].total_results != 0 then
@@ -46,6 +45,47 @@ module InsertTable
     return tbl
   end
 
+  # def pick_value(d, date, item, komoku, value)
+
+  #   if (komoku.nil? and value.nil?) and (d[komoku] == value and d[:date] == date)
+  #     res = d[item].to_f.round(1)
+  #   else
+  #     res = 0
+  #   end
+  #   binding.pry
+  #   res
+  # end
+
+  def put_table_for_special(data, tbl, item, second_komoku, second_value)
+    {'good' => 0, 'bad' => 1}.each do |k, v|
+      data[k].each do |d|
+        date = d.date.to_s
+        item.each do |t|
+          if d[second_komoku] == second_value
+            tbl[date][t][v] = d[t].to_f.round(1)
+          end
+        end
+      end unless data[k].total_results == 0
+    end
+    tbl
+  end
+
+  def put_table_for_graph(data, tbl, item)
+    {'good' => 0, 'bad' => 1}.each do |k, v|
+      data[k].each do |d|
+        date = d.date.to_s
+        item.each do |t|
+          if t == 'repeat_rate'.to_sym then
+            tbl[date][t][v] = calc_repeat_rate(d)
+          else
+            tbl[date][t][v] = d[t].to_f.round(1)
+          end
+        end
+      end unless data[k].total_results == 0
+    end
+    tbl
+  end
+
   def calc_repeat_rate(d)
     # 再訪問率をセッションベースで計算(100 - 新規訪問率) 単位：%
     if d[:sessions].to_i > 0
@@ -56,43 +96,29 @@ module InsertTable
   end
 
   # グラフ値テーブルへ値を代入
-  def put_table_for_graph(data, tbl, item, all = nil)
-    {'good' => 0, 'bad' => 1}.each do |k, v|
-      if data[k].total_results != 0 then
-        data[k].each do |d|
-          date = d.date
-          item.each do |t|
-            if t == 'repeat_rate'.to_sym then
-              tbl[date][t][v] = calc_repeat_rate(d)
-            else
-              tbl[date][t][v] = d[t].to_f.round(1)
-            end
-          end
-        end
-      end
-    end
-  return tbl
-  end
+  # def put_table_for_graph(data, tbl, item)
+  #   {'good' => 0, 'bad' => 1}.each do |k, v|
+  #     data[k].each do |d|
+  #       date = d.date
+  #       item.each do |t|
+  #         if t == 'repeat_rate'.to_sym then
+  #           tbl[date][t][v] = calc_repeat_rate(d)
+  #         else
+  #           tbl[date][t][v] = d[t].to_f.round(1)
+  #         end
+  #       end
+  #     end unless data[k].total_results == 0
+  #   end
+  # return tbl
+  # end
 
   # グラフ値テーブルへcv値を代入
-  def put_cv_for_graph(data, table, cv_num, flg = 'none')
-    if data.total_results != 0 then
-      data.each do |d|
-        date = d.date
-        case flg
-        when 'fvt' then # 人気ページ相関テーブルの場合
-          key = d.page_title + ";;" + d.page_path
-          unless table[date][key].nil?
-            # table[date][key][4] = '1'
-            table[date][key][4] = d[('goal' + cv_num.to_s + '_completions').to_sym]
-            # puts "value is setted. " + table[date][key][4].to_s
-          end
-        else
-          table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
-        end
-      end
-    end
-    return table
+  def put_cv_for_graph(data, table, cv_num)
+    data.each do |d|
+      date = d.date
+      table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
+    end unless data.total_results == 0
+    table
   end
 
   def put_favorite_table_for_skelton(data, table)
@@ -106,6 +132,19 @@ module InsertTable
         end
       end
     end
+    table
+  end
+
+  def put_landing_table(data, table)
+
+    idx = 0
+    data.sort_by{ |a| [ -(a.bounce_rate.to_f), -(a.avg_session_duration.to_f) ]}.each do |t|
+      table[idx][:landing_page_path] = t.landing_page_path
+      table[idx][:page_title] = t.page_title
+      table[idx][:bounce_rate] = t.bounce_rate
+      table[idx][:avg_session_duration] = chg_time(t.avg_session_duration)
+      idx += 1
+    end unless data.total_results == 0
     table
   end
 
@@ -189,27 +228,26 @@ module InsertTable
   #   return tbl
   # end
 
-  # 人気ページ_トータルのPV数を取得
-  def c_total(dt)
-    total = 0
-    dt.each do |s|
-      total += s.pageviews.to_i
-    end
-    puts "total pv is #{total}"
-    return total
-  end
+  # # 人気ページ_トータルのPV数を取得
+  # def c_total(dt)
+  #   total = 0
+  #   dt.each do |s|
+  #     total += s.pageviews.to_i
+  #   end
+  #   puts "total pv is #{total}"
+  #   return total
+  # end
 
-  # referral, social, campaign 個別テーブルへデータ代入
-  def put_rsc_table(tbl, data, cv, key)
-    ['good', 'bad'].each do |t|
-      if data[t].total_results != 0 then
-        data[t].each do |s|
-          tbl[s.send(key)][t.to_sym] = s.send(cv)
-        end
-      end
-    end
-    return tbl
-  end
-
+  # # referral, social, campaign 個別テーブルへデータ代入
+  # def put_rsc_table(tbl, data, cv, key)
+  #   ['good', 'bad'].each do |t|
+  #     if data[t].total_results != 0 then
+  #       data[t].each do |s|
+  #         tbl[s.send(key)][t.to_sym] = s.send(cv)
+  #       end
+  #     end
+  #   end
+  #   return tbl
+  # end
 
 end

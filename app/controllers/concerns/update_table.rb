@@ -193,6 +193,18 @@ module UpdateTable
     puts $@
   end
 
+  def head_special(table, limit)
+    res = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    cnt = 0
+
+    table.sort_by { |a, b| [-(b[:corr]) ] }.each do |k, v|
+      res[k.to_s] = table[k]
+      cnt += 1
+      break if cnt >= limit
+    end
+    res
+  end
+
   # def get_metrics(tbl, komoku)
   #   tbl.map {|k, v| v[komoku][0].to_f + v[komoku][1].to_f}
   # end

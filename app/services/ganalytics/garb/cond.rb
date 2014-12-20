@@ -4,42 +4,33 @@ module Ganalytics
 
     class Cond
 
-      def initialize(cond)
-        @cond = cond
+      attr_reader :res
+
+      def initialize(cnd, cv)
+        @res = {}
+        @cv = cv
+        @res[:filters] = cnd[:filters].dup
+        @res[:start_date] = cnd[:start_date].dup
+        @res[:end_date] = cnd[:end_date].dup
       end
 
-      def cved_session(cv)
-        @cond.merge( @cond[:filters] = { cv.to_sym.send(:gte) => 1 } )
+      def cved!
+        @res[:filters].merge!( { @cv.to_sym.send(:gte) => 1 } )
+        self
       end
 
-      def sort_favorite_for_calc
-        @cond.merge({
-          limit: 100,
-          sort: :sessions.desc
+      def limit!(n)
+        @res.merge!({limit: n})
+        self
+      end
+
+      def sort_desc!(k)
+        @res.merge!({
+          sort: k.desc
           })
-      end
-
-      def sort_landing_for_calc
-        @cond.merge({
-          limit: 100,
-          sort: :bounceRate.desc
-          })
-      end
-
-      def sort_landing_for_skelton
-        @cond.merge({
-          limit: 5,
-          sort: :bounceRate.desc
-          })
-      end
-
-      def sort_favorite_for_skelton
-        @cond.merge({
-          limit: 5,
-          sort: :sessions.desc
-          })
+        self
       end
     end
-    # gc = Cond.new(@cond)
+    # Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res
   end
 end

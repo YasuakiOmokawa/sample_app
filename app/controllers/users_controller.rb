@@ -9,45 +9,72 @@ class UsersController < ApplicationController
   require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :last]
+  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign]
   before_action :correct_user,   only: [:edit, :update]
   before_action :admin_user,      only: :destroy
-  before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign, :last]
+  before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
-  prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign, :last]
+  prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
 
-  def last
-    # パラメータ個別設定
-    @title = 'カスタマイズ'
-    @narrow_action = last_user_path
-    @partial = 'norender'   # ページ毎の部分テンプレート
-    gon.div_page_tab = 'last'
+  # def last
+  #   # パラメータ個別設定
+  #   @title = 'カスタマイズ'
+  #   @narrow_action = last_user_path
+  #   @partial = 'norender'   # ページ毎の部分テンプレート
+  #   gon.div_page_tab = 'last'
 
-    render :layout => 'ganalytics'
-  end
+  #   render :layout => 'ganalytics'
+  # end
 
   def social
     # パラメータ個別設定
     @title = 'ソーシャル'
     @narrow_action = social_user_path
-    @kitchen_partial = 'ref_and_social'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'social'
+
+    @day_type = 'day_on'
+    special = :socialNetwork
+    # データ取得部
+    soc_source = Analytics.create_class('Soc',
+      [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
+
+    soc_gap = fetch_analytics_data('Fetch',
+      @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
+      @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
+
+    # 計算部
+    soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    tmp_soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_for_soc(soc_source, tmp_soc_table, @from, @to, [:sessions])
+
+    soc_source.each do |k|
+      src = k.send(special.to_s.to_snake_case).to_sym
+      str_src = k.send(special.to_s.to_snake_case).to_s
+      type_komoku = komoku_day_type(:sessions, @day_type)
+      put_cv_for_graph(@cv_for_graph, tmp_soc_table[src], @cv_num)
+      put_table_for_special(soc_gap, tmp_soc_table[src], [:sessions], special.to_s.to_snake_case, str_src)
+      soc_table[src] = calc_desire_datas(
+        generate_graph_data(tmp_soc_table[src], [:sessions], @day_type))[type_komoku]
+    end
+
+    # 相関係数の高い順にソート
+    head_special(soc_table, 3)
+
+    @categories["参照元"] = set_select_box(soc_source, 'l')
+
+    @in_table = soc_table
+    @details_partial = 'details'
 
     # ページ個別設定
     # gap値の分処理が複雑
-    dimend_key = :socialNetwork
-    @social = Analytics.create_class('FetchKeywordForSoc',
-        [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-    @rsc_table = create_skeleton_for_rsc(@social, dimend_key.to_s.to_snake_case)
-    gap = fetch_analytics_data('FetchKeywordForSocial', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
-    put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
-    calc_gap_for_common(@rsc_table)
-
-    @categories["参照元"] = set_select_box(@social, 'l')
-
-    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'landing'
-    @table_head = 'ソーシャル'
+    # dimend_key = :socialNetwork
+    # @social = Analytics.create_class('FetchKeywordForSoc',
+    #     [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+    # @rsc_table = create_skeleton_for_rsc(@social, dimend_key.to_s.to_snake_case)
+    # gap = fetch_analytics_data('FetchKeywordForSocial', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
+    # put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
+    # calc_gap_for_common(@rsc_table)
+    # @table_head = 'ソーシャル'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -56,24 +83,51 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'その他ウェブサイト'
     @narrow_action = referral_user_path
-    @kitchen_partial = 'ref_and_social'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'referral'
+
+    @day_type = 'day_on'
+    special = :source
+    # データ取得部
+    ref_source = Analytics.create_class('Ref',
+      [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
+
+    ref_gap = fetch_analytics_data('Fetch',
+      @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
+      @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
+
+    # 計算部
+    ref_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    tmp_ref_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    create_skeleton_for_ref(ref_source, tmp_ref_table, @from, @to, [:sessions])
+
+    ref_source.each do |k|
+      src = k.send(special).to_sym
+      str_src = k.send(special).to_s
+      type_komoku = komoku_day_type(:sessions, @day_type)
+      put_cv_for_graph(@cv_for_graph, tmp_ref_table[src], @cv_num)
+      put_table_for_special(ref_gap, tmp_ref_table[src], [:sessions], special, str_src)
+      ref_table[src] = calc_desire_datas(
+        generate_graph_data(tmp_ref_table[src], [:sessions], @day_type))[type_komoku]
+    end
+
+    # 相関係数の高い順にソート
+    head_special(ref_table, 3)
+
+    @categories["参照元"] = set_select_box(ref_source, 'r')
+
+    @in_table = ref_table
+    @details_partial = 'detals'
 
     # ページ個別設定
     # gap値の分処理が複雑
-    dimend_key = :source
-    @referral = Analytics.create_class('FetchKeywordForRef',
-        [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-    @rsc_table = create_skeleton_for_rsc(@referral, dimend_key.to_s.to_snake_case)
-    gap = fetch_analytics_data('FetchKeywordForReferral', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
-    put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
-    calc_gap_for_common(@rsc_table)
-
-    @categories["参照元"] = set_select_box(@referral, 'r')
-
-    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'landing'
-    @table_head = '参照元'
+    # dimend_key = :source
+    # @referral = Analytics.create_class('FetchKeywordForRef',
+    #     [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
+    # @rsc_table = create_skeleton_for_rsc(@referral, dimend_key.to_s.to_snake_case)
+    # gap = fetch_analytics_data('FetchKeywordForReferral', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
+    # put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
+    # calc_gap_for_common(@rsc_table)
+    # @table_head = '参照元'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -84,9 +138,9 @@ class UsersController < ApplicationController
     @narrow_action = direct_user_path
     gon.div_page_tab = 'direct'
 
-    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @kitchen_partial = 'norender'
-    @bedroom_partial = 'landing'
+    # @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+    # @kitchen_partial = 'norender'
+    @details_partial = 'norender'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -95,13 +149,12 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = '検索'
     @narrow_action = search_user_path
-    @kitchen_partial = 'search'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'search'
-    @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
-    @categories["検索ワード"] = set_select_box(@search, 's')
+    # @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
+    # @categories["検索ワード"] = set_select_box(@search, 's')
 
-    @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    @bedroom_partial = 'landing'
+    # @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+    @details_partial = 'norender'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -115,8 +168,7 @@ class UsersController < ApplicationController
     @title = 'ホーム'
     @narrow_action = user_path
     gon.narrow_action = user_path
-    @kitchen_partial = 'norender'   # ページ毎の部分テンプレート
-    @bedroom_partial = 'norender'   # ページ毎の部分テンプレート
+    @details_partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
 
     render json: {
@@ -134,8 +186,7 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = '全体'
     @narrow_action = all_user_path
-    @kitchen_partial = 'norender'   # ページ毎の部分テンプレート
-    @bedroom_partial = 'norender'   # ページ毎の部分テンプレート
+    @details_partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'all'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -341,9 +392,6 @@ class UsersController < ApplicationController
       # クラス名を一意にするため、乱数を算出
       rndm = SecureRandom.hex(4)
 
-      # ソート条件追加用クラス
-      gc = Ganalytics::Garb::Cond.new(@cond)
-
       # 指標値テーブルへCV代入用
       cls_name = 'CVForGraphSkeleton' + rndm.to_s
       # 4回までリトライできます
@@ -360,12 +408,12 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, gc.sort_favorite_for_calc, @cv_txt)
-      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, gc.sort_favorite_for_skelton)
+      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(100).sort_desc!(:sessions).res, @cv_txt)
+      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res)
 
       # ランディングページ用
-      land_gap = fetch_analytics_data('FetchKeywordForLanding', @ga_profile, gc.sort_landing_for_calc, @cv_txt)
-      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, gc.sort_landing_for_skelton)
+      # land_gap = fetch_analytics_data('FetchKeywordForLanding', @ga_profile, gc.sort_landing_for_calc, @cv_txt)
+      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).cved!.res)
 
       # 全てのセッション(GAP値等計算用)
       ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond).total_results
@@ -419,11 +467,12 @@ class UsersController < ApplicationController
       calc_gap_for_favorite(@favorite_table)
 
       # ランディングページテーブル
+      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
       @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-
-      create_skeleton_landing_table(land_for_skel, @landing_table)
-      put_landing_table_for_skelton(land_gap, @landing_table)
-      calc_gap_for_favorite(@landing_table)
+      @landing_table = put_landing_table(land_for_skel, @landing_table)
+      # create_skeleton_landing_table(land_for_skel, @landing_table)
+      # put_landing_table_for_skelton(land_gap, @landing_table)
+      # calc_gap_for_favorite(@landing_table)
 
     end
 

@@ -41,15 +41,34 @@ module CreateTable
     return rhsh
   end
 
+  def create_skeleton_for_ref(data, hsh, from, to, clm)
+    data.each do |z|
+      tmp = Hash.new { |h,k| h[k] = {} }
+      hsh[z.source.to_sym] = create_skeleton_for_graph(tmp, from, to, clm)
+    end unless data.total_results == 0
+    hsh
+  end
+
+  def create_skeleton_for_soc(data, hsh, from, to, clm)
+    data.each do |z|
+      tmp = Hash.new { |h,k| h[k] = {} }
+      hsh[z.social_network.to_sym] = create_skeleton_for_graph(tmp, from, to, clm)
+    end unless data.total_results == 0
+    hsh
+  end
+
+
   # グラフ値テーブルスケルトンを作成
   def create_skeleton_for_graph(hsh, from, to, clm)
     idx = 1
     (from..to).each do |t|
       dts = t.to_s.gsub( /-/, "" )
+      d_type = chk_day(t)
+
       clm.each do |u, i|
-        chk_day(hsh, t, u, dts)
         hsh[dts][:cv] = 0
         hsh[dts]["idx"] = idx
+        hsh[dts][u] =set_array_on_date(d_type)
       end
       idx += 1
     end
@@ -61,17 +80,16 @@ module CreateTable
     # wday 6 .. sat, 'day_sat'
     # 祝日 .. 'day_hol'
     # 平日 .. 'day_on'
-  def chk_day(h, a, b, d)
+  def chk_day(a)
     if a.wday == 0
-      h[d][b] = set_array_on_date('day_sun')
+      'day_sun'
     elsif a.wday == 6
-      h[d][b] = set_array_on_date('day_sat')
+      'day_sat'
     elsif HolidayJapan.check(a)
-      h[d][b] = set_array_on_date('day_hol')
+      'day_hol'
     else
-      h[d][b] = set_array_on_date('day_on')
+      'day_on'
     end
-    return h
   end
 
   def set_array_on_date(date_type)

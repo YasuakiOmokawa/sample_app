@@ -52,7 +52,8 @@ class Analytics
   class FetchKeywordForLanding
     extend Garb::Model
     metrics :bounceRate,
-                  :sessions
+                  :sessions,
+                  :avgSessionDuration
     dimensions :landingPagePath,
                       :pageTitle
   end
