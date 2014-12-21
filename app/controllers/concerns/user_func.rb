@@ -75,7 +75,7 @@ module UserFunc
     else
       p = "number"
     end
-    return p
+    p
   end
 
 end
@@ -162,6 +162,16 @@ module ParamUtils
     end
   end
 
+  def chk_num_charactor(cnt)
+    if cnt == 1
+      '①'
+    elsif cnt == 2
+      '②'
+    elsif cnt == 3
+      '③'
+    end
+  end
+
   # セレクトボックスの生成
   def set_select_box(data, tag)
     tg = tag.to_s
@@ -186,8 +196,8 @@ module ParamUtils
       end
     when 'r'
       cntr += 1
-      data.each do |w|
-        arr.push([ w.source, w.source.to_s + tg ])
+      data.each do |k, w|
+        arr.push([ w[:cap], w[:value].to_s + tg ])
         if cntr >= 5 then break end
       end
     when 'l'

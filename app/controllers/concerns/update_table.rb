@@ -3,7 +3,7 @@ module UpdateTable
   def calc_desire_datas(tbl)
     tbl.each do |k, v|
       if tbl[k][:corr_sign] == 'plus'
-       tbl[k][:desire] = tbl[k][:metrics_avg] + tbl[k][:metrics_stddev]
+       tbl[k][:desire] = (tbl[k][:metrics_avg] + tbl[k][:metrics_stddev]).round(1)
      else
        tbl[k][:desire] = (tbl[k][:metrics_avg] - tbl[k][:metrics_stddev]).round(1)
       end
@@ -69,28 +69,38 @@ module UpdateTable
       str = "-" + str
     end
 
-    puts "converted time is " + str
-    return str
+    # puts "converted time is " + str
+    str
   end
 
-  # グラフ値テーブルのフォーマットを変更
-  def change_format(table, item, format)
-    table.each do |k, v|
-      (0..2).each do |t|
-        value = v[item][t]
-        case format
-        when "time" then
-          str = chg_time(value)
-        when "percent" then
-          str = value.to_f.round(1).to_s + '%'
-        when "number" then
-          str = value.to_f.round(1).to_s
-        end
-        v[item][t] = str
-      end
-    end
-    return table
+  def chg_percent(value)
+    value.to_f.round(1).to_s + '%'
   end
+
+  def format_value(format, value)
+    case format
+    when "time" then
+      chg_time(value)
+    when "percent" then
+      chg_percent(value)
+    when "number" then
+      value.to_f.round(1).to_s
+    end
+  end
+
+  def change_format_for_desire(table, format, value)
+    table[:metrics_avg] = format_value(format, value[:metrics_avg])
+    table[:metrics_stddev] = format_value(format, value[:metrics_stddev])
+    table[:desire] = format_value(format, value[:desire])
+    table
+  end
+
+  def change_format_for_graph_table(table, format, value)
+    # binding.pry
+    table[0] = format_value(format, value)
+    table
+  end
+
 
   # 人気ページテーブルのギャップ値を計算
   def calc_gap_for_favorite(tbl)
@@ -176,7 +186,8 @@ module UpdateTable
 
     # 項目別
     col.each do |komoku, jp|
-      df = Statistics::DayFactory.new(tbl, komoku, type).ship_out
+
+      df = Statistics::DayFactory.new(tbl, komoku, type).data
       rs = Statistics::ResultSet.new(df)
 
       rs.set_corr

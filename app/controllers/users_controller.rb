@@ -32,7 +32,6 @@ class UsersController < ApplicationController
     @narrow_action = social_user_path
     gon.div_page_tab = 'social'
 
-    @day_type = 'day_on'
     special = :socialNetwork
     # データ取得部
     soc_source = Analytics.create_class('Soc',
@@ -57,24 +56,18 @@ class UsersController < ApplicationController
         generate_graph_data(tmp_soc_table[src], [:sessions], @day_type))[type_komoku]
     end
 
-    # 相関係数の高い順にソート
-    head_special(soc_table, 3)
+    @in_table = head_special(soc_table, 3)     # 相関係数の高い順にソート
 
-    @categories["参照元"] = set_select_box(soc_source, 'l')
+    ar = []
+    cnt = 1
+    @in_table.each do |k, v|
+      cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
+      ar.push( [cap, k.to_s + 'l'] )
+      cnt += 1
+    end
+    @categories = ar
 
-    @in_table = soc_table
     @details_partial = 'details'
-
-    # ページ個別設定
-    # gap値の分処理が複雑
-    # dimend_key = :socialNetwork
-    # @social = Analytics.create_class('FetchKeywordForSoc',
-    #     [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-    # @rsc_table = create_skeleton_for_rsc(@social, dimend_key.to_s.to_snake_case)
-    # gap = fetch_analytics_data('FetchKeywordForSocial', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
-    # put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
-    # calc_gap_for_common(@rsc_table)
-    # @table_head = 'ソーシャル'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -85,7 +78,6 @@ class UsersController < ApplicationController
     @narrow_action = referral_user_path
     gon.div_page_tab = 'referral'
 
-    @day_type = 'day_on'
     special = :source
     # データ取得部
     ref_source = Analytics.create_class('Ref',
@@ -110,24 +102,18 @@ class UsersController < ApplicationController
         generate_graph_data(tmp_ref_table[src], [:sessions], @day_type))[type_komoku]
     end
 
-    # 相関係数の高い順にソート
-    head_special(ref_table, 3)
+    @in_table = head_special(ref_table, 3)     # 相関係数の高い順にソート
 
-    @categories["参照元"] = set_select_box(ref_source, 'r')
+    ar = []
+    cnt = 1
+    @in_table.each do |k, v|
+      cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
+      ar.push( [cap, k.to_s + 'r'] )
+      cnt += 1
+    end
+    @categories = ar
 
-    @in_table = ref_table
-    @details_partial = 'detals'
-
-    # ページ個別設定
-    # gap値の分処理が複雑
-    # dimend_key = :source
-    # @referral = Analytics.create_class('FetchKeywordForRef',
-    #     [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-    # @rsc_table = create_skeleton_for_rsc(@referral, dimend_key.to_s.to_snake_case)
-    # gap = fetch_analytics_data('FetchKeywordForReferral', @ga_profile, @cond, @cv_txt, {}, (@cv_txt.classify + 's').to_sym, dimend_key)
-    # put_rsc_table(@rsc_table, gap, @cv_txt, dimend_key.to_s.to_snake_case)
-    # calc_gap_for_common(@rsc_table)
-    # @table_head = '参照元'
+    @details_partial = 'details'
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -183,7 +169,6 @@ class UsersController < ApplicationController
   end
 
   def all
-    # パラメータ個別設定
     @title = '全体'
     @narrow_action = all_user_path
     @details_partial = 'norender'   # ページ毎の部分テンプレート
@@ -257,6 +242,7 @@ class UsersController < ApplicationController
       @to = params[:to].presence || Date.today
       @from = set_date_format(@from) if params[:from].present?
       @to = set_date_format(@to) if params[:to].present?
+
 
       # ajaxリクエストの判定
       if request.xhr?
@@ -346,9 +332,9 @@ class UsersController < ApplicationController
         @narrow_word.slice!(-1)
         set_narrow_word(@narrow_word, @cond, @narrow_tag) # 絞り込んだキーワード
       end
-      # 絞り込みセレクトボックス項目を生成
+      # 絞り込みセレクトボックス
+      @categories = {}
       # ページ共通セレクトボックス(人気ページ)
-      # @categories = {}
       # gb_cnd = Ganalytics::Garb::Cond.new(@cond)
       # @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, gb_cnd.sort_favorite)
       # @head_favorite_table = head_favorite_table(@favorite, 5)
@@ -358,6 +344,10 @@ class UsersController < ApplicationController
 
       # 遷移元ページタブを保存
       gon.prev_page = params[:prev_page].presence
+
+      # 日付タイプを設定
+      @day_type = params[:day_type].presence || 'all_day'
+      gon.radio_day = @day_type
 
     end
 
@@ -415,12 +405,15 @@ class UsersController < ApplicationController
       # land_gap = fetch_analytics_data('FetchKeywordForLanding', @ga_profile, gc.sort_landing_for_calc, @cv_txt)
       land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).cved!.res)
 
-      # 全てのセッション(GAP値等計算用)
-      ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond).total_results
-      tmp_all_session = ga_result.results[0].sessions.to_i if ga_result > 0
+      # 全てのセッション(人気ページGAP値等計算用)
+      ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
+      tmp_all_session = ga_result.results[0].sessions.to_i if ga_result.total_results > 0
       all_session = guard_for_zero_division(tmp_all_session)
 
       ### データ計算部
+
+       # グラフデータテーブルへ表示する指標値
+      @desire_caption =  metrics_for_graph_merge[@graphic_item][:jp_caption]
 
       # グラフ表示用および指標値用テーブル
       @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -434,28 +427,36 @@ class UsersController < ApplicationController
       calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas)
 
       # 指標値テーブルへ表示するデータを算出
-
-      # @day_type = 'day_off'
-      @desire_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
+      desire_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
       calc_desire_datas(desire_datas) # 目標値の算出
 
-      graph_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
+      # 日本語データを追加
       d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
-      @details_graph_data = concat_data_for_graph(graph_datas, d_hsh)
-
+      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh)
 
       # グラフ表示プログラムへ渡すデータを作成
       @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
       create_data_for_graph_display(@data_for_graph_display, @table_for_graph, @graphic_item)
+      gon.data_for_graph_display = @data_for_graph_display
 
-      display_format = check_format_graph(@graphic_item)
-      change_format(@table_for_graph, @graphic_item, display_format)
+      # グラフテーブルへ渡すデータを作成
+      @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
+      create_data_for_graph_display(@data_for_graph_table, @table_for_graph, @graphic_item)
 
-       gon.data_for_graph_display = @data_for_graph_display
+      ## フォーマット変更
+
+        # 目標値データへ
+        @details_desire_datas.each do |k, v|
+          change_format_for_desire(@details_desire_datas[k], check_format_graph(k).to_s, v)
+        end
+
+        # グラフテーブルへ
+        @data_for_graph_table.each do |k, v|
+          change_format_for_graph_table(@data_for_graph_table[k], check_format_graph(@graphic_item), v[0] )
+        end
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-
       cved_session = guard_for_zero_division(all_session - fav_gap['bad'].results.map { |t| t.sessions }.sum)
       not_cved_session = guard_for_zero_division(all_session - fav_gap['good'].results.map { |t| t.sessions }.sum)
 
@@ -703,7 +704,6 @@ class UsersController < ApplicationController
           calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
           # バブルチャートに表示するデータを算出
-         # @day_type = 'day_off'
           bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
           d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
           home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)

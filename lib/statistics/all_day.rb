@@ -38,5 +38,21 @@ module Statistics
     def get_variation
       (get_stddev / get_avg).round(1)
     end
+
+    def chk_not_a_number(target)
+      if target.nan?
+        0.0
+      else
+        target
+      end
+    end
+
+    def check_number_sign(n)
+      if n >= 0
+        'plus'
+      else
+        'minus'
+      end
+    end
   end
 end

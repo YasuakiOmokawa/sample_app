@@ -1,3 +1,38 @@
+function overlayNarrow(title) {
+  var postfix = ' | AST';
+
+  switch (title) {
+    case 'ホーム' + postfix:
+
+        {
+          height: '42px',
+          cursor: 'auto',
+          top: '-14px',
+          'min-width': '1200px',
+          'background-color': 'white',
+          width: '100%',
+        }
+
+      $('span#home-overlay').plainOverlay('show',
+        {
+          progress: false,
+          show: handler(csses)
+        }
+      );
+      break;
+    case '全体' + postfix:
+    case '検索' + postfix:
+    case '直接入力/ブックマーク' + postfix:
+      $('span#select-overlay').plainOverlay('show',
+        {
+          progress: false,
+          show: handler(title)
+        }
+      );
+      break;
+    }
+}
+
 // 要素の表示、非表示を判定する
 $.fn.isVisible = function() {
     return $.expr.filters.visible(this[0]);
@@ -6,7 +41,7 @@ $.fn.isVisible = function() {
 // チェックボックスのふるまいをラジオボタンと同じする
 function likeRadio(obj) {
   var n = obj.attr("name");
-  var m = '#hallway input[name=' + n + ']';
+  var m = 'input[name=' + n + ']';
   var objs = $(m);
   var f = objs, cnt = 0;
   for(var i=0;i<f.length;i++ ){
@@ -23,11 +58,11 @@ function likeRadio(obj) {
 
 // 指定した要素をフォーム送信ボタンをクリックしたときと同じ動作にする
 var evtset = function (at) {
-  $('#hallway > form').attr("action", at.attr("name"));
+  $('form[name="narrowForm"]').attr("action", at.attr("name"));
   console.log(at);
 }
 var evtsend = function (at) {
-  $('#hallway > form').attr("action", at.attr("name"));
+  $('form[name="narrowForm"]').attr("action", at.attr("name"));
   $('a#set').trigger('click');
 }
 
@@ -69,38 +104,34 @@ $(window).resize(function() {
 
 $(document).ready(function() {
 
-  // ホーム画面の時のみ、絞り込み機能を日付以外オーバレイする
-  if ($('title').text().indexOf('ホーム') == 0) {
-    $('span#poverlay').plainOverlay('show',
-      {
-        progress: false,
-        show: handler
-      }
-    );
-  }
+  // ページタイトルに応じて、絞り込み要素をフィルタする
+  overlayNarrow($('title').text());
 
-  // CVの選択のセレクトボックスを選択したときのイベント
+  // CVの選択のプルダウンを選択したときのイベント
   $('select#cvselect').change(function() {
       $('input[name="cv_num"]').val($(this).val());
   });
 
-  // グラフに表示する項目のセレクトボックスを選択したときのイベント
+  // グラフに表示する項目のプルダウンを選択したときのイベント
   $('select#graphicselect').change(function() {
     $('input[name="graphic_item"]').val($(this).val());
     $('a#set').trigger('click');
   });
 
-  // タイトルがカスタマイズの時の独自処理を追加
-  if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
-    $('div#hallway').hide();
-    $('div#footer').attr("id", 'footer_custom');
-  }
+  // // タイトルがカスタマイズの時の独自処理を追加
+  // if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
+  //   $('div#hallway').hide();
+  //   $('div#footer').attr("id", 'footer_custom');
+  // }
 
-  // 訪問者、デバイス毎にチェックボックスの複数選択を抑止
-  $('form [name=device]').click(function() {
+  // 種類ごとにチェックボックスの複数選択を抑止
+  $('input[name=device]').click(function() {
     likeRadio($(this));
   });
-  $('form [name=visitor]').click(function() {
+  $('input[name=visitor]').click(function() {
+    likeRadio($(this));
+  });
+  $('input[name=day_type]').click(function() {
     likeRadio($(this));
   });
 
@@ -191,10 +222,12 @@ $(document).ready(function() {
   // ラジオボタンの選択値を保持
   var rdo_dev = gon.radio_device
   var rdo_vst = gon.radio_visitor
+  var rdo_day = gon.radio_day
   $('input[name="device"]').val([rdo_dev]);
   $('input[name="visitor"]').val([rdo_vst]);
+  $('input[name="day_type"]').val([rdo_day]);
 
-  // セレクトボックスの選択値を保持
+  // プルダウンの選択値を保持
   var nrw_wd = gon.narrow_word
   $('select[name="narrow_select"]').val(nrw_wd);
 
@@ -250,7 +283,7 @@ $(document).ready(function() {
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
 
-  // セレクトボックスの色を変更
+  // プルダウン未選択時の文字色を薄めに変更
   var dColor = '#999999';
   var fColor = '#000000';
   if ( $('#narrow_select').val() == "" ){

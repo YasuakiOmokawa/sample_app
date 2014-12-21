@@ -2,6 +2,8 @@ module Statistics
 
   class DayFactory
 
+    attr_reader :data
+
     def initialize(days_data, komoku, day_type)
       @days_data = days_data
       @komoku = komoku
@@ -14,10 +16,6 @@ module Statistics
       elsif day_type == 'day_off'
         @data = Statistics::DayOff.new(@days_data, @komoku)
       end
-    end
-
-    def ship_out
-      @data
     end
   end
 

@@ -1,23 +1,27 @@
 // マイナス値があるか判定するフラグ
 var chk_minus = 0;
 
+function setDateFormat(data) {
+  // ゼロパディングを許可しない
+  date = Number(data.substr(4, 2)).toString() + "/" + Number(data.substr(6, 2)).toString();
+  return date;
+}
+
 // コントローラから渡されたパラメータをグラフ描画用の配列に加工
-var setArr = function(hash) {
-    var arr_gap = [], arr_cv = [], dts;
-    for (var i in hash) {
-      dts = i.toString();
-      dts = String(Number(dts.substr(4, 2)))
-        + "/" + String(Number(dts.substr(6, 2)));
-      arr_gap.push( [ dts, gon.hash_for_graph[i][0] ]);
+var setArr = function(data) {
+    var arr_metrics = [], arr_cv = [], dts;
+    for (var i in data) {
+      dts = setDateFormat(i.toString());
 
-      // gap値にマイナスがあるか判定
-      if ( String(gon.hash_for_graph[i][0]).indexOf('-') == 0 ) {
-        chk_minus = 1;
-      }
+      arr_metrics.push( [ dts, gon.data_for_graph_display[i][0] ]);
+      arr_cv.push( [ dts, gon.data_for_graph_display[i][1] ]);
 
-      arr_cv.push( [ dts, gon.hash_for_graph[i][1] ]);
+      // // gap値にマイナスがあるか判定
+      // if ( String(gon.data_for_graph_display[i][0]).indexOf('-') == 0 ) {
+      //   chk_minus = 1;
+      // }
     };
-    arr.push(arr_gap, arr_cv);
+    arr.push(arr_metrics, arr_cv);
 }
 
 // 表示する値の種類によって、グラフのY軸（左側）のフォーマットを変更
@@ -105,15 +109,8 @@ var resetXbgc = function(nm, dt, yval) {
   return data;
 }
 
-// 実験コード：　マイナスデータを表示させたい場合
-// gon.hash_for_graph[20121205][0] = -12;
-// gon.hash_for_graph[20121205][1] = 10;
-// gon.hash_for_graph[20121210][0] = -70;
-// gon.hash_for_graph[20121210][1] = 40;
-
-
 var arr = [];
-setArr(gon.hash_for_graph);
+setArr(gon.data_for_graph_display);
 
 // グラフのオプション
 var options = {
@@ -123,7 +120,7 @@ var options = {
     },
     axesDefaults: {
         tickOptions: {
-          fontSize: '9.5pt',
+          fontSize: '8.5pt',
           fontFamily: 'ヒラギノ角ゴ Pro W3'
         },
     },
@@ -165,7 +162,7 @@ var options = {
             numberTicks: 11,
             pad: 1,
             tickOptions: {
-              // GAP値は自作関数でフォーマットする
+              // 自作関数でフォーマットする
               formatter: tickFormatter,
               showGridline: false,
             },
@@ -196,12 +193,13 @@ var options = {
 // グラフのフォーマット設定は自作関数で行う
 options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
-// gap値にマイナスがあれば、y軸の目盛りの数を変更
-if (chk_minus == 1) {
-  options.axes.yaxis.numberTicks = 10;
-  options.axes.y2axis.numberTicks = 10;
-}
+// // gap値にマイナスがあれば、y軸の目盛りの数を変更
+// if (chk_minus == 1) {
+//   options.axes.yaxis.numberTicks = 10;
+//   options.axes.y2axis.numberTicks = 10;
+// }
 
+// メイン処理
 jQuery( function() {
 
   // 再描画用のオプション
@@ -274,8 +272,7 @@ jQuery( function() {
     // y軸を再設定
     dt = resetYtick(tick);
     tickopt.canvasOverlay.objects.push(dt);
- }
- // jqplot再描画
- squareBar.replot(tickopt);
-
-} );
+  }
+  // jqplot再描画
+  squareBar.replot(tickopt);
+});

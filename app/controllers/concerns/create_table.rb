@@ -5,7 +5,12 @@ module CreateTable
     table.sort_by{ |a, b| b[:idx] }.each do |k, v|
       date =  k.to_i
       metrics = v[param][0] + v[param][1]
-      hash[date] = [ metrics, v[:cv].to_i ]
+      day_type = v[param][3]
+      hash[date] = [
+        metrics,
+        v[:cv].to_i,
+        day_type
+      ]
     end
     hash
   end

@@ -16,31 +16,9 @@ function isVariationOverLimit(vari) {
   if (vari > VARIATION_LIMIT) {
     return 1;
   } else {
-    return v;
+    return vari;
   }
 }
-
-// function IsZeroSoukan(v) {
-//   if (v == 0) {
-//     return 1;
-//   } else {
-//     return v;
-//   }
-// }
-
-// function chgSoukanToPercent(soukan_value) {
-//   var from = new Date($("#from").val());
-//   var to = new Date($("#to").val());
-//   var d =  to - from;
-//   var dms = 1000 * 60 * 60 * 24;
-//   var base_days = Math.floor(d / dms);
-
-//   if ((base_days - 1) <= 0) {
-//     base_days = 1;
-//   }
-
-//   return percent = Math.floor( (soukan_value / base_days) * 100);
-// }
 
 function headIdxarr(idxarr, limit) {
   var headed_obj = [];
@@ -155,13 +133,6 @@ function addRanking(idxarr, target) {
 
     counter = counter + 1;
 
-    // 絞り込み情報の追加
-    // text = value['arr'][3].split(';;');
-
-    // 項目一覧へ表示する文字列
-    // データ指標：デバイス：ユーザー：絞り込み条件(あれば)
-    // caption = text[1] + ':' + devTnsltENtoJP(value['dev_fltr']) + ':' + usrTnsltENtoJP(value['usr_fltr']) + ':' + kwdTnsltENtoJP(value['kwd_fltr']);
-
     $(target)
     .append(
       $('<li>')
@@ -181,7 +152,8 @@ function addRanking(idxarr, target) {
             'data-usrfltr': value['usr_fltr'],
             'data-kwdfltr': value['kwd_fltr'],
             "name": value['pagelink'],
-            'data-page': value['page']
+            'data-page': value['page'],
+            'class': 'data-contains'
           })
           .text(counter)
       )
@@ -189,6 +161,27 @@ function addRanking(idxarr, target) {
 
   });
 }
+
+function paddingRankBox(base_target) {
+  var target = base_target + ' li'
+  var box_size = $(target).length;
+  var padding_number = 15 - box_size;
+
+  // 指定回数処理を行う
+  $.each(new Array(padding_number),function(i){
+    box_size += 1;
+    $(base_target)
+      .append(
+        $('<li>')
+        .append(
+          $('<a>')
+            .text('　')
+            // .css({'background-color': '#adadad'})
+        )
+      );
+  });
+}
+
 
 // 優先順位の降順、
 // 　ページ名と項目名の昇順でソート
@@ -367,15 +360,12 @@ function kwdTnsltENtoJP (d) {
   return wd;
 }
 
-
 function getTooltipXaxisToPixels(a, graph) {
-  return x = graph.axes.xaxis.u2p(a.attr('data-gap')); // convert x axis unita to pixels
+  return x = graph.axes.xaxis.u2p(isVariationOverLimit( a.attr('data-vari') )); // convert x axis unita to pixels
 }
 
 function getTooltipYaxisToPixels(a, graph) {
-  var soukan = IsZeroSoukan(a.attr('data-sokan'));
-  var soukan_percent = chgSoukanToPercent(soukan);
-  return y = graph.axes.yaxis.u2p(soukan_percent); // convert y axis unita to pixels
+  return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
 }
 
 function showTooltip(target, x, y) {
@@ -471,10 +461,11 @@ function plotGraphHome(arr, idxarr) {
     // 項目一覧へ要素を追記
     var target = 'div#mfm ul';
     var ed_target = target + ' li:last';
-    var click_target = target + ' li a';
+    var click_target = target + ' li a.data-contains';
 
     resetHomeRanking(target);
     addRanking(idxarr, target);
+    paddingRankBox(target);
 
     // 項目の最後へタグ付与
     $(ed_target).attr('id', 'ed');

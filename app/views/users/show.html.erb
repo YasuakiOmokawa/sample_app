@@ -23,20 +23,20 @@
       <table>
           <tr id="day">
           <td class="cont"></td>
-          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-            <td data-dflg=<%= v[@graphic_item][3] %>><%= k[4, 2].to_i %>/<%= k[6, 2].to_i %></td>
+          <% @data_for_graph_table.each do |k, v| %>
+            <td data-dflg=<%= v[2] %>><%= k.to_s[4, 2].to_i %>/<%= k.to_s[6, 2].to_i %></td>
           <% end %>
         </tr>
         <tr>
-          <td class="cont">指標値</td>
-          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-            <td data-day=<%= v[@graphic_item][3] %>><%= v[@graphic_item][0] %></td>
+          <td class="cont"><%= @desire_caption %></td>
+          <% @data_for_graph_table.each do |k, v| %>
+            <td data-day=<%= v[2] %>><%= v[0] %></td>
           <% end %>
         </tr>
         <tr>
           <td class="cont">CV数</td>
-          <% @gap_table_for_graph.sort_by{ |a, v| v["idx"].to_i }.each do |k, v| %>
-            <td><%= v[:cv].to_i %></td>
+          <% @data_for_graph_table.each do |k, v| %>
+            <td data-day=<%= v[2] %>><%= v[1] %></td>
           <% end %>
         </tr>
       </table>
@@ -48,56 +48,42 @@
       <tr id="tpc">
         <td class="cont"></td><td><div class="lt">平均値</div><div class="rt">（標準偏差）</div></td><td>目標値</td>
       </tr>
+      <%
+        if @day_type == 'day_on'
+          postfix = '__day_on'
+        elsif @day_type == 'day_off'
+          postfix = '__day_off'
+        else
+          postfix = ''
+        end
+
+        ddd = @details_desire_datas
+      %>
       <tr>
-        <td class="cont">PV数</td><td><div class="lt">23.2</div><div class="rt">（±20.4）</div></td><td>43.6</td>
+        <td class="cont">PV数</td><td><div class="lt"><%= ddd[('pageviews' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('pageviews' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('pageviews' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">セッション</td><td><div class="lt">11.3</div><div class="rt">（±3.6）</div></td><td>14.9</td>
+        <td class="cont">セッション</td><td><div class="lt"><%= ddd[('sessions' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('sessions' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('sessions' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">ユーザー</td><td><div class="lt">5.2</div><div class="rt">（±3.1）</div></td><td>8.3</td>
+        <td class="cont">ユーザー</td><td><div class="lt"><%= ddd[('users' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('users' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('users' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">平均PV数</td><td><div class="lt">3.6</div><div class="rt">（±1.4）</div></td><td>5.0</td>
+        <td class="cont">平均PV数</td><td><div class="lt"><%= ddd[('pageviews_per_session' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('pageviews_per_session' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('pageviews_per_session' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">平均滞在時間</td><td><div class="lt">01:13</div><div class="rt">（±00:52）</div></td><td>02:05</td>
+        <td class="cont">平均滞在時間</td><td><div class="lt"><%= ddd[('avg_session_duration' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('avg_session_duration' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('avg_session_duration' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">新規ユーザー</td><td><div class="lt">47.3%</div><div class="rt">（±7.3%）</div></td><td>54.6%</td>
+        <td class="cont">新規ユーザー</td><td><div class="lt"><%= ddd[('percent_new_sessions' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('percent_new_sessions' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('percent_new_sessions' + postfix).to_sym][:desire] %></td>
       </tr>
       <tr>
-        <td class="cont">リピーター</td><td><div class="lt">52.7%</div><div class="rt">（±4.6%）</div></td><td>57.3%</td>
+        <td class="cont">リピーター</td><td><div class="lt"><%= ddd[('repeat_rate' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('repeat_rate' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('repeat_rate' + postfix).to_sym][:desire] %></td>
       <tr>
-        <td class="cont">直帰率</td><td><div class="lt">66.2%</div><div class="rt">（±13.2%）</div></td><td>53.0%</td>
+        <td class="cont">直帰率</td><td><div class="lt"><%= ddd[('bounce_rate' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('bounce_rate' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('bounce_rate' + postfix).to_sym][:desire] %></td>
       </tr>
     </table>
-
-    <%= render partial: @details_partial, locals: {in_table: @in_table } %>
-
-    <br>
-    <div id="db">
-      <table>
-        <tr>
-          <td  rowspan="2" class="contm">参<br>照<br>元<br>①</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
-        </tr>
-        <tr>
-          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
-        </tr>
-        <tr>
-          <td  rowspan="2" class="contm">参<br>照<br>元<br>②</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
-        </tr>
-        <tr>
-          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
-        </tr>
-        <tr>
-          <td  rowspan="2" class="contm">参<br>照<br>元<br>③</td><td class="conts" colspan="3">http://senk-inc.co.jp</td>
-        </tr>
-        <tr>
-          <td class="conts">セッション</td><td><div class="lt">1,232</div><div class="rt">（±435）</div></td><td>1,687</td>
-        </tr>
-      </table>
-    </div>
+    <%= render partial: @details_partial, locals: {in_table: @in_table, special: @special } %>
   </div>
 
   <div id="rtfm">
@@ -106,23 +92,22 @@
         <td>理想値</td><td class="page">人気ページ</td><td>現状値</td><td>GAP値</td>
       </tr>
       <%
-        @favorite_table.sort_by{ |k, v| v[:index].to_i}.each do |k, v|
-          if k != "その他"
-            title,page = k.split(";;")
+        @favorite_table.each do |k, v|
+          # if k != "その他"
+          title,page = k.split(";;")
       %>
         <tr>
-          <td><%= v[:good].to_f.round(1).to_s %>%</td>
-          <td class="page"><%= truncate(title, :length => 30) %><div><%= page %></div></td>
-          <td><%= v[:bad].to_f.round(1).to_s %>%</td>
-          <td><%= v[:gap].to_f.round(1).to_s %>%</td>
+          <td><%= v[:good] %>%</td>
+          <td class="page"><%= truncate(title, :length => 20) %><div><%= truncate(page, :length => 20) %></div></td>
+          <td><%= v[:bad] %>%</td>
+          <td><%= v[:gap] %>%</td>
         </tr>
       <%
-          end
         end
         # 人気ページ数が5に満たない場合、テーブルを埋める
-        if @favorite_table.size <= 6 # ← その他も含むので、maxは6になる
-          fpad_size = 6 - @favorite_table.size
-          fpad_size.times {
+        if @favorite_table.size < 5
+          padding_size = 5 - @favorite_table.size
+          padding_size.times {
       %>
         <tr>
           <td>-</td>
@@ -134,36 +119,34 @@
           }
         end
       %>
-
-<!--       <tr id="other">
-        <td><%= @favorite_table["その他"][:good].to_f.round(1).to_s %>%</td>
-        <td class="row">その他</td>
-        <td><%= @favorite_table["その他"][:bad].to_f.round(1).to_s %>%</td>
-        <td class="gap"><%= @favorite_table["その他"][:gap].to_f.round(1).to_s %>%</td>
-      </tr> -->
     </table>
     <br>
-
     <div id="lp">
       <table>
         <tr id="tpc">
           <td class="page">ランディングページ</td><td>直帰率</td><td>平均滞在時間</td>
         </tr>
+        <%
+          @landing_table.each do |k,v|
+        %>
         <tr>
-          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+          <td><%= truncate(v[:page_title], :length => 25) %><div><%= truncate(v[:landing_page_path], :length => 25) %></div></td>
+          <td><%= v[:bounce_rate] %></td><td><%= v[:avg_session_duration] %></td>
         </tr>
+        <%
+          end
+
+          lpad_size = 5 - @landing_table.size
+          if lpad_size >= 1
+            lpad_size.times {
+        %>
         <tr>
-          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
+          <td>-<div>-</div></td><td>-</td><td>-</td>
         </tr>
-        <tr>
-          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
-        </tr>
-        <tr>
-          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
-        </tr>
-        <tr>
-          <td>株式会社先駈ホームページ<div>/index/html</div></td><td>54.3%</td><td>02:42</td>
-        </tr>
+        <%
+            }
+          end
+        %>
       </table>
     </div>
   </div><br>

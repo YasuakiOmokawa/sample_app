@@ -29,10 +29,4 @@ module Statistics
       @result[@data.komoku][:metrics_avg] = @data.get_avg
     end
   end
-  # result_set = ResultSet.new(day_on)
-  # result_set.set_corr
-  # result_set.set_corr_sign
-  # result_set.set_variation
-  # result_set.set_metrics_stddev
-  # result_set.set_metrics_avg
 end

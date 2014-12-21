@@ -141,7 +141,7 @@ module InsertTable
     data.sort_by{ |a| [ -(a.bounce_rate.to_f), -(a.avg_session_duration.to_f) ]}.each do |t|
       table[idx][:landing_page_path] = t.landing_page_path
       table[idx][:page_title] = t.page_title
-      table[idx][:bounce_rate] = t.bounce_rate
+      table[idx][:bounce_rate] = chg_percent(t.bounce_rate)
       table[idx][:avg_session_duration] = chg_time(t.avg_session_duration)
       idx += 1
     end unless data.total_results == 0
