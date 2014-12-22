@@ -248,7 +248,7 @@ module ParamUtils
     # ユーザ単位で一意にするため指定
     usrid = params[:id].to_s
 
-    uniq = usrid + params[:from].to_s + params[:to].to_s + analyze_type
+    uniq = usrid + params[:from].to_s + params[:to].to_s + analyze_type + params[:day_type]
 
     if analyze_type == 'kobetsu'
       uniq = uniq + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s

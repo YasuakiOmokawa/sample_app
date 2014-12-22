@@ -333,7 +333,7 @@ class UsersController < ApplicationController
         set_narrow_word(@narrow_word, @cond, @narrow_tag) # 絞り込んだキーワード
       end
       # 絞り込みセレクトボックス
-      @categories = {}
+      @categories = []
       # ページ共通セレクトボックス(人気ページ)
       # gb_cnd = Ganalytics::Garb::Cond.new(@cond)
       # @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, gb_cnd.sort_favorite)
@@ -348,7 +348,7 @@ class UsersController < ApplicationController
       # 日付タイプを設定
       @day_type = params[:day_type].presence || 'all_day'
       gon.radio_day = @day_type
-
+      # binding.pry
     end
 
     def create_common_table
@@ -595,7 +595,7 @@ class UsersController < ApplicationController
                   if kwds.size >= 5 then break end
             end
           when 'direct'
-            direct = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
+            direct = Analytics::FetchKeywordForLanding.results(@ga_profile, @cond)
             aa = direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }
             aa.each do |t|
                   kwds.push('f' + t.page_title)

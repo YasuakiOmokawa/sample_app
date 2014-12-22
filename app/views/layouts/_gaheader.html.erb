@@ -12,7 +12,7 @@
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
     <!-- Datepicker  -->
     <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>
-    &nbsp;&nbsp;&nbsp;<input type="checkbox" name="day_type" class="ic" value="all_day">&nbsp;or&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;<input type="checkbox" name="day_type" class="ic" value="all_day" checked>&nbsp;or&nbsp;&nbsp;
     <input type="checkbox" name="day_type" class="ic" value="day_on">平日&nbsp;&nbsp;
     <input type="checkbox" name="day_type" class="ic" value="day_off">土日祝
     <!-- datepicker用のinput -->

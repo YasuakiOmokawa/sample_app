@@ -1,9 +1,13 @@
-function overlayNarrow(title) {
-  var postfix = ' | AST';
+var HomeOverlay = new function() {
+  var self = function HomeOverlay() {
 
-  switch (title) {
-    case 'ホーム' + postfix:
+  };
 
+  self.prototype = {
+    constructor: self
+
+    ,handler: function handler() {
+      $('div.plainoverlay').css(
         {
           height: '42px',
           cursor: 'auto',
@@ -12,25 +16,92 @@ function overlayNarrow(title) {
           'background-color': 'white',
           width: '100%',
         }
+      );
+    }
 
+    ,overlayNarrow: function overlayNarrow(fn) {
       $('span#home-overlay').plainOverlay('show',
         {
           progress: false,
-          show: handler(csses)
+          show: fn.handler
         }
       );
+    }
+
+    ,hello: function hello() {
+      console.log('hello!');
+    }
+  };
+
+  return self;
+};
+
+var SelectOverlay = new function() {
+  var self = function SelectOverlay() {
+
+  };
+
+  self.prototype = {
+    constructor: self
+
+    ,handler: function handler() {
+      $('div.plainoverlay').css(
+        {
+          height: '42px',
+          cursor: 'auto',
+          top: '-14px',
+          'width': '250px',
+          'background-color': 'white',
+          width: '100%',
+        }
+      );
+    }
+
+    ,overlayNarrow: function overlayNarrow(fn) {
+      $('span#select-overlay').plainOverlay('show',
+        {
+          progress: false,
+          show: fn.handler
+        }
+      );
+    }
+
+    ,hello: function hello() {
+      console.log('hello!');
+    }
+  };
+
+  return self;
+};
+
+function overlayFactory(title) {
+ var postfix = ' | AST';
+
+  switch (title) {
+    case 'ホーム' + postfix:
+      return new HomeOverlay();
       break;
     case '全体' + postfix:
     case '検索' + postfix:
     case '直接入力/ブックマーク' + postfix:
-      $('span#select-overlay').plainOverlay('show',
-        {
-          progress: false,
-          show: handler(title)
-        }
-      );
+      return new SelectOverlay();
       break;
     }
+}
+
+// ブラウザのウインドウがリサイズされた場合、ホーム画面のオーバーレイcssを更新するイベント
+function overlayOnResize(klass) {
+  var timer = false;
+
+  $(window).resize(function() {
+      if (timer !== false) {
+          clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+          // オーバーレイcssの再設定
+          klass.handler();
+      }, 200);
+  });
 }
 
 // 要素の表示、非表示を判定する
@@ -76,36 +147,14 @@ var setRange = function setRange() {
   $('a#jrange').html(txt2);
 }
 
-// ホーム画面の絞り込み箇所のオーバーレイcssを再設定するコード
-function handler(event) {
-  $('div.plainoverlay').css(
-    {
-      height: '42px',
-      cursor: 'auto',
-      top: '-14px',
-      'min-width': '1200px',
-      'background-color': 'white',
-      width: '100%',
-    }
-  );
-}
-
-// ブラウザのウインドウがリサイズされた場合、ホーム画面のオーバーレイcssを更新するイベント
-var timer = false;
-$(window).resize(function() {
-    if (timer !== false) {
-        clearTimeout(timer);
-    }
-    timer = setTimeout(function() {
-        // オーバーレイcssの再設定
-        handler();
-    }, 200);
-});
-
 $(document).ready(function() {
 
   // ページタイトルに応じて、絞り込み要素をフィルタする
-  overlayNarrow($('title').text());
+  var ol = overlayFactory($('title').text());
+  if (typeof ol != "undefined") {
+    ol.overlayNarrow(ol);
+    overlayOnResize(ol);
+  }
 
   // CVの選択のプルダウンを選択したときのイベント
   $('select#cvselect').change(function() {
@@ -146,7 +195,7 @@ $(document).ready(function() {
   $('a#set').click(function(){
 
     // スピナーの実装
-    if ( $('#entrance.spinner').length <= 0) {
+    if ( $('#hd div.spinner').length <= 0) {
       var opts = {
         lines: 13, // The number of lines to draw
         length: 4, // The length of each line
@@ -163,7 +212,7 @@ $(document).ready(function() {
         className: 'spinner', // The CSS class to assign to the spinner
         zIndex: 2e9, // The z-index (defaults to 2000000000)
       };
-      var target = $('#entrance');
+      var target = $('#hd');
       var spinner = new Spinner(opts).spin();
       target.append(spinner.el);
       $('.spinner').css('margin-top', 2);

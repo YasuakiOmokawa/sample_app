@@ -156,11 +156,13 @@ function setKwds(elem, userpath) {
     async: false,
     dataType: 'json',
     data: {
+      // ホーム画面で絞り込める項目のみを記載
       from : $('#from').val(),
       to : $('#to').val(),
       cv_num : $('input[name="cv_num"]').val(),
       shori : $('input[name="shori"]').val(),
       act : elem, // 取得するページ項目
+      day_type : $('input[name="day_type"]:checked').val(),
     }
   })
 
@@ -272,6 +274,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
           dev : dev,                 // デバイス
           usr : usr,                   // 訪問者
           kwd : kwd,                 // キーワード
+          day_type : $('input[name="day_type"]:checked').val(),
         },
         error: function(xhr, ajaxOptions, thrownError) {
 

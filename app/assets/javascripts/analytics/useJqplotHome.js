@@ -44,18 +44,16 @@ function addClickEvtToInfo(target) {
 
   $(target).click(function(e) {
 
+      // グラフ項目を設定
       var metrics = $(e.target).data('metrics');
-      console.log('metrics : ' + metrics);
-
-      // グラフ項目と人気ページパラメータを設定
-      addNarrowParam( metrics, $('input[name="graphic_item"]'), $('#narrow_select') );
+      addGraphicItem( metrics, $('input[name="graphic_item"]') );
+      console.log('graphic_item ' + $('input[name="graphic_item"]').val());
 
       // 絞り込みチェックボックスの値を指定
       var dp = $(e.target).data('devfltr');
       var up = $(e.target).data('usrfltr');
       console.log('dp : ' + dp);
       console.log('up : ' + up);
-
 
       $.each([dp,up], function(i, val) {
         var type,n,m;
@@ -66,10 +64,10 @@ function addClickEvtToInfo(target) {
       });
 
       // 絞り込みキーワードの値を設定
-      var kp = $(e.target).data('kwdfltr'); // キーワード
-      console.log('kp : ' + kp);
+      var kwd = $(e.target).data('kwdfltr');
+      console.log('kwd : ' + kwd);
 
-      if (kp != 'nokwd') {
+      if (kwd != 'nokwd') {
         var flg; // どのページのキーワードか判別用
 
         // 遷移先の最後のアクション名を取得
@@ -95,7 +93,7 @@ function addClickEvtToInfo(target) {
         }
 
         // 遷移先のキーワードとページ情報を設定
-        var n_wd = kp + flg;
+        var n_wd = kwd + flg;
         $('#narrow_select')
           .append($('<option>')
             .html(" ")
@@ -112,8 +110,16 @@ function addClickEvtToInfo(target) {
       console.log('prev_page : ' + prev_page);
 
       // ページ遷移
-      evtsend($(e.target).closest('td'));
+      evtsend($(e.target));
   });
+}
+
+function chkDayType(d) {
+  if (typeof d === 'undefined') {
+    return '全日';
+  } else {
+    return d;
+  }
 }
 
 // 項目一覧へ要素を追記
@@ -133,6 +139,8 @@ function addRanking(idxarr, target) {
 
     counter = counter + 1;
 
+    var day_type = chkDayType(value['day_type']);
+
     $(target)
     .append(
       $('<li>')
@@ -144,7 +152,7 @@ function addRanking(idxarr, target) {
             'data-corr': value['corr'],
             'data-corr-sign': value['corr_sign'],
             'data-metrics': value['jp_metrics'],
-            'data-day-type': value['day_type'],
+            'data-day-type': day_type,
             'data-metrics-avg': value['metrics_avg'],
             'data-metrics-stddev': value['metrics_stddev'],
             'data-vari': value['vari'],
@@ -153,7 +161,7 @@ function addRanking(idxarr, target) {
             'data-kwdfltr': value['kwd_fltr'],
             "name": value['pagelink'],
             'data-page': value['page'],
-            'class': 'data-contains'
+            'class': 'data-contents'
           })
           .text(counter)
       )
@@ -181,7 +189,6 @@ function paddingRankBox(base_target) {
       );
   });
 }
-
 
 // 優先順位の降順、
 // 　ページ名と項目名の昇順でソート
@@ -283,7 +290,7 @@ var replotdata = function(allarr, wd) {
 }
 
 // グラフ項目と人気ページ項目の絞り込みパラメータを設定
-function addNarrowParam(data,  graph, narrow) {
+function addGraphicItem(data, graph) {
 
   var option; // 項目名（オプション）
   var a;
@@ -310,11 +317,6 @@ function addNarrowParam(data,  graph, narrow) {
       break;
     case '再訪問率':
       graph.val('repeat_rate');
-      break;
-    case '人気ページ':
-      narrow.append($('<option>').html(" ").val(data[2] + 'f'));
-      narrow.val( data[2] + 'f');
-      graph.val('pageviews');
       break;
   }
 }
@@ -368,7 +370,7 @@ function getTooltipYaxisToPixels(a, graph) {
   return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
 }
 
-function showTooltip(target, x, y) {
+function showTooltip(target, x, y, contents) {
 
   const GRAPH_HEIGHT = 446;
   const GRAPH_WIDTH = 0;
@@ -378,11 +380,11 @@ function showTooltip(target, x, y) {
     content: $(
       '<div id="box_r">'
         + '<ul>'
-        + '<li>該当データ名</li>'
-        + '<li>曜日</li>'
-        + '<li>デバイス</li>'
-        + '<li>ユーザー</li>'
-        + '<li>絞り込み条件</li>'
+        + '<li>' + contents.data('metrics') + '</li>'
+        + '<li>' + contents.data('day-type') + '</li>'
+        + '<li>' + contents.data('devfltr') + '</li>'
+        + '<li>' + contents.data('usrfltr') + '</li>'
+        + '<li>' + contents.data('kwdfltr') + '</li>'
         + '</ul>'
        + '</div>'
     ),
@@ -461,7 +463,7 @@ function plotGraphHome(arr, idxarr) {
     // 項目一覧へ要素を追記
     var target = 'div#mfm ul';
     var ed_target = target + ' li:last';
-    var click_target = target + ' li a.data-contains';
+    var click_target = target + ' li a.data-contents';
 
     resetHomeRanking(target);
     addRanking(idxarr, target);
@@ -498,10 +500,10 @@ function plotGraphHome(arr, idxarr) {
         var x = getTooltipXaxisToPixels($(this), graph);
         var y = getTooltipYaxisToPixels($(this), graph);
 
-        showTooltip(tooltip_target, x, y);
+        showTooltip(tooltip_target, x, y, $(this));
       },
       function() {
-        hideTooltip(tooltip_target);
+        // hideTooltip(tooltip_target);
       }
     );
 

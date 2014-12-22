@@ -1,8 +1,7 @@
 // マイナス値があるか判定するフラグ
 var chk_minus = 0;
 
-function setDateFormat(data) {
-  // ゼロパディングを許可しない
+function zeroSuppressedDateFormat(data) {
   date = Number(data.substr(4, 2)).toString() + "/" + Number(data.substr(6, 2)).toString();
   return date;
 }
@@ -11,7 +10,7 @@ function setDateFormat(data) {
 var setArr = function(data) {
     var arr_metrics = [], arr_cv = [], dts;
     for (var i in data) {
-      dts = setDateFormat(i.toString());
+      dts = zeroSuppressedDateFormat(i.toString());
 
       arr_metrics.push( [ dts, gon.data_for_graph_display[i][0] ]);
       arr_cv.push( [ dts, gon.data_for_graph_display[i][1] ]);
@@ -120,7 +119,7 @@ var options = {
     },
     axesDefaults: {
         tickOptions: {
-          fontSize: '8.5pt',
+          fontSize: '9pt',
           fontFamily: 'ヒラギノ角ゴ Pro W3'
         },
     },
@@ -143,7 +142,7 @@ var options = {
         xaxis: {
             renderer: jQuery . jqplot . CategoryAxisRenderer,
             tickOptions: {
-              fontSize: '9pt',
+              fontSize: '6.5pt',
               showGridline: false,
               // 項目の延長線は削除（なんかヒゲみたいで嫌）
               markSize: 0
@@ -192,6 +191,14 @@ var options = {
 
 // グラフのフォーマット設定は自作関数で行う
 options.axes.yaxis.tickOptions.formatString = gon.format_string;
+
+function setYaxisLimit(options, format) {
+  if (format === 'percent') {
+    options.axes.yaxis.min = 0;
+    options.axes.yaxis.max = 100;
+  }
+  return options;
+}
 
 // // gap値にマイナスがあれば、y軸の目盛りの数を変更
 // if (chk_minus == 1) {
@@ -256,8 +263,8 @@ jQuery( function() {
 
   });
 
-  // ★jqplot描画
-  var squareBar = jQuery . jqplot( 'gh', arr, options);
+    // ★jqplot描画
+  var squareBar = jQuery . jqplot( 'gh', arr, setYaxisLimit(options, gon.format_string));
 
   // グラフのy座標へ水平線を設定
   var yticks = $('.jqplot-y2axis-tick'), tick, dt;

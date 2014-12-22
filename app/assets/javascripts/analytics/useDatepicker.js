@@ -152,10 +152,10 @@ $(function() {
 
             // ページ遷移直後は全体ページ、
             // バブル描画後は描画されたページの項目を格納
-            var wd = $('div#narrow div').text() === 'undefined' ? '全体' : $('div#narrow div').text();
+            var key = $('#pnt div').attr('class') === 'undefined' ? 'all' : $('#pnt div').attr('class');
 
             // ページ下部のタブリンクに埋め込んでいる関数を流用
-            bubbleCreateAtTabLink(wd);
+            bubbleCreateAtTabLink(key);
 
           } else {
 
