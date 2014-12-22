@@ -1,6 +1,6 @@
 <div id="childroom">
   <div id="mfm_d">
-  <div id="bk"><a href="index.html"><%= image_tag 'back.png', :class => "icon" %>グラフに戻る</a></div>
+    <div id="bk"><a href="javascript:void(0)" name=<%= user_path %>><%= image_tag 'back.png', :class => "icon" %>グラフに戻る</a></div>
     <%
       option = @graphic_item.to_sym
       graphic_hash = {

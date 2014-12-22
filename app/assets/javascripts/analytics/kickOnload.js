@@ -13,29 +13,30 @@ $(window).load(function() {
 function chkAnalyzePageOnLogin() {
   var page_name;
   if ( $('input[name="prev_page"]').val() ) {
-    page_name = addSpecialCharacters( $('input[name="prev_page"]').val() );
+    page_name = $('input[name="prev_page"]').val();
   } else {
-    page_name = 'all';
+    page_name = '.all';
   }
   return page_name;
 }
 
 function getAnalyzeTriggerAtHome(page_name) {
-    return trigger_btn = 'div#pnt a:contains(' + page_name + ')';
+    // return trigger_btn = 'div#pnt a:contains(' + page_name + ')';
+    return trigger_btn = $('div#pnt').find(page_name);
 }
 
 function kickAnalyzeTrigger(trigger_btn) {
-    $(trigger_btn).trigger('click');
+    trigger_btn.trigger('click');
 }
 
 function analyzeHomePerPage() {
 
   var page_name = chkAnalyzePageOnLogin();
 
-  bubbleCreateAtTabLink(page_name);
+  // bubbleCreateAtTabLink(page_name);
 
-  // var trigger_btn = getAnalyzeTriggerAtHome(page_name);
+  var trigger_btn = getAnalyzeTriggerAtHome(page_name);
 
-  // kickAnalyzeTrigger(trigger_btn);
+  kickAnalyzeTrigger(trigger_btn);
 
 }

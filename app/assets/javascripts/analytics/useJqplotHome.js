@@ -47,7 +47,7 @@ function addClickEvtToInfo(target) {
       // グラフ項目を設定
       var metrics = $(e.target).data('metrics');
       addGraphicItem( metrics, $('input[name="graphic_item"]') );
-      console.log('graphic_item ' + $('input[name="graphic_item"]').val());
+      console.log('graphic_item : ' + $('input[name="graphic_item"]').val());
 
       // 絞り込みチェックボックスの値を指定
       var dp = $(e.target).data('devfltr');
@@ -292,30 +292,29 @@ var replotdata = function(allarr, wd) {
 // グラフ項目と人気ページ項目の絞り込みパラメータを設定
 function addGraphicItem(data, graph) {
 
-  var option; // 項目名（オプション）
-  var a;
-  var item = data[1]; // 項目名
-
-  switch (item) {
+  switch (data) {
     case 'PV数':
       graph.val('pageviews');
       break;
     case '平均PV数':
       graph.val('pageviews_per_session');
       break;
-    case '訪問回数':
+    case 'セッション':
       graph.val('sessions');
       break;
     case '直帰率':
       graph.val('bounce_rate');
       break;
-    case '新規訪問率':
+    case '新規ユーザー':
       graph.val('percent_new_sessions');
+      break;
+    case 'ユーザー':
+      graph.val('users');
       break;
     case '平均滞在時間':
       graph.val('avg_session_duration');
       break;
-    case '再訪問率':
+    case 'リピーター':
       graph.val('repeat_rate');
       break;
   }
@@ -489,7 +488,6 @@ function plotGraphHome(arr, idxarr) {
       }
     });
 
-    // jqplot描画
     var graph = jQuery . jqplot(graph_position, arr, options);
 
     // ブロック項目をホバーしたらプロットへデータ表示

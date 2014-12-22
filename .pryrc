@@ -65,7 +65,7 @@ include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
         @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
         @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
       @from = set_date_format('2014/11/21')
-      @to = set_date_format('2014/12/21')
+      @to = set_date_format('2014/11/22')
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      @graphic_item  = ('pageviews').to_sym
      @cv_num = 1                                                     # CV種類

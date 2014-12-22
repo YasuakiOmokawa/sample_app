@@ -36,7 +36,7 @@ module Statistics
     end
 
     def get_variation
-      (get_stddev / get_avg).round(1)
+      chk_not_a_number( (get_stddev / get_avg).round(1) )
     end
 
     def chk_not_a_number(target)

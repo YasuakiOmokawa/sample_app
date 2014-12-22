@@ -156,6 +156,17 @@ $(document).ready(function() {
     overlayOnResize(ol);
   }
 
+  // グラフへ戻るを選択したときのイベント
+  $('#bk a').click(function() {
+    var act = $('form[name="narrowForm"]').attr('action');
+    var acts = act.split('/');
+    var acts_class = '.' + acts[3];
+
+    $('input[name="shori"]').val(0);
+    $('input[name="prev_page"]').val(acts_class);
+    evtsend($(this));
+  });
+
   // CVの選択のプルダウンを選択したときのイベント
   $('select#cvselect').change(function() {
       $('input[name="cv_num"]').val($(this).val());
@@ -166,12 +177,6 @@ $(document).ready(function() {
     $('input[name="graphic_item"]').val($(this).val());
     $('a#set').trigger('click');
   });
-
-  // // タイトルがカスタマイズの時の独自処理を追加
-  // if ( $(this).attr("title").indexOf('カスタマイズ') != -1 ) {
-  //   $('div#hallway').hide();
-  //   $('div#footer').attr("id", 'footer_custom');
-  // }
 
   // 種類ごとにチェックボックスの複数選択を抑止
   $('input[name=device]').click(function() {
@@ -226,16 +231,6 @@ $(document).ready(function() {
     }
   });
 
-  // GAP値がマイナスなら赤色にする
-  // $('td.gap').each(function() {
-  //   var str = $(this).text();
-  //   if( str.substr(0,1) == "-" ) {
-  //     $(this).css("color", "red");
-  //   // } else {
-  //   //   $(this).css("color", "black");
-  //   }
-  // });
-
   // 曜日ごとに背景色を変更
   // 土。。薄い青　日、祝。。　薄い赤
   $('td[data-day]').each(function() {
@@ -257,16 +252,6 @@ $(document).ready(function() {
   //   id = '<div id="db">';
   // }
   // $(tag).replaceWith(id + $(tag).html() + '</div>');
-
-  // 各ページのタブへリンク付与
-  $("li.tab a").click(function(){
-
-    // ホーム画面に戻るときはプロット処理を実行させない
-    if ($(this).text() == 'ホーム') {
-      $('input[name="shori"]').val('0');
-    }
-    evtsend($(this));
-  });
 
   // ラジオボタンの選択値を保持
   var rdo_dev = gon.radio_device
@@ -321,14 +306,18 @@ $(document).ready(function() {
   }
 
   // グラフ表示項目の選択値を保持
-  var grh_fmt = gon.graphic_item
+  var grh_fmt = gon.graphic_item;
   $('select[name="graphicselect"]').val(grh_fmt);
   $('input[name="graphic_item"]').val(grh_fmt);
 
   // CV種類の選択値を保持
-  var cv = gon.cv_num
+  var cv = gon.cv_num;
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
+
+  // 遷移元ページの情報を保持
+  var prev_page = gon.prev_page;
+  $('input[name="prev_page"]').val(prev_page);
 
   // プルダウン未選択時の文字色を薄めに変更
   var dColor = '#999999';
@@ -350,5 +339,10 @@ $(document).ready(function() {
       }
   });
 
+    // ホーム画面の最初に空グラフを描画
+  if ($('title').text().indexOf('ホーム') == 0) {
+    var dummy = [ [0,0,1,{color: '#FFFFFF'}] ];
+    plotGraphHome(dummy, []);
+  }
 
 });

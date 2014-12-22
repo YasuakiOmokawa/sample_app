@@ -508,23 +508,6 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
   },100);
 }
 
-// function exceptSpecialCharacters(page_name) {
-//   var changed;
-//   changed = page_name.replace(/\//g, '');
-//   return changed;
-// }
-
-function addSpecialCharacters(page_name) {
-  var changed;
-  if (page_name == '直接入力ブックマーク') {
-    changed = '直接入力/ブックマーク';
-  } else {
-    changed = page_name;
-  }
-  return changed;
-}
-
-
 function shapeBubbleParts(idxarr, shaped_idxarr) {
 
   var timerID = setInterval( function(){
