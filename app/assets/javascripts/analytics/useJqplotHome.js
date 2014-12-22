@@ -213,8 +213,8 @@ function setInitialBubbleColor() {
 
 var setBubbleColor = function(x, y) {
     var label;
-    var x = parseInt(x);
-    var y = parseInt(y);
+    var x = Number(x);
+    var y = Number(y);
 
     if (x >= 0.5 && y >= 0.50) {
         label = {color: '#c00000'};
