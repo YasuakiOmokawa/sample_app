@@ -287,37 +287,35 @@ $(document).ready(function() {
     switch (String(i)) {
       case 'PV数':
         // 数値
-        $('#kitchen table tr:nth-child(2) td:first').css("color", "red");
+        $('#ltfm table tr:nth-child(2) td:nth-child(1)').css("color", "red");
+        break;
+      case 'セッション':
+        // 数値
+        $('#ltfm table tr:nth-child(3) td:nth-child(1)').css("color", "red");
+        break;
+      case 'ユーザー':
+        // 数値
+        $('#ltfm table tr:nth-child(4) td:nth-child(1)').css("color", "red");
         break;
       case '平均PV数':
         // 目標値
-        $('#kitchen table tr td.markpv').css("color", "red");
-        break;
-      case '訪問回数':
-        // 数値
-        $('#kitchen table tr:nth-child(2) td:nth-child(2)').css("color", "red");
-        break;
-      case '直帰率':
-        // 数値
-        $('#knife table tr td:nth-child(2)').css("color", "red");
-        break;
-      case '新規訪問率':
-        // 目標値
-        $('#kitchen table tr td.marknew').css("color", "red");
+        $('#ltfm table tr:nth-child(5) td:nth-child(1)').css("color", "red");
         break;
       case '平均滞在時間':
         // 目標値
-        $('#kitchen table tr td.marktime').css("color", "red");
+        $('#ltfm table tr:nth-child(6) td:nth-child(1)').css("color", "red");
         break;
-      case '再訪問率':
+      case '新規ユーザー':
         // 目標値
-        $('#kitchen table tr td.markrpt').css("color", "red");
+        $('#ltfm table tr:nth-child(7) td:nth-child(1)').css("color", "red");
         break;
-      case '人気ページ':
+      case 'リピーター':
         // 目標値
-        var w = $('#narrow_select').val();
-        var kwd = w.substr(0, w.length - 1);
-        $('#bedroom table tbody tr:contains(' + kwd + ') td:first').css("color", "red");
+        $('#ltfm table tr:nth-child(8) td:nth-child(1)').css("color", "red");
+        break;
+      case '直帰率':
+        // 数値
+        $('#ltfm table tr:nth-child(9) td:nth-child(1)').css("color", "red");
         break;
       }
   }

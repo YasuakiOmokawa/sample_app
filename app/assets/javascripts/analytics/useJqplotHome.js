@@ -208,7 +208,7 @@ function sortIdxarr(idxarr) {
 
 // バブル色の指定
 function setInitialBubbleColor() {
-  return {color: '#7f7f7f'}
+  return {color: '#7f7f7f'};
 }
 
 var setBubbleColor = function(x, y) {
@@ -216,17 +216,17 @@ var setBubbleColor = function(x, y) {
     var x = parseInt(x);
     var y = parseInt(y);
 
-    if (x >= 51 && y >= 51) {
+    if (x >= 0.5 && y >= 0.50) {
         label = {color: '#c00000'};
-        // console.log('color is red');
+        console.log('color is red');
     }
-    else if ( (x <= 50 && y >= 51) || (x >= 51 && y <= 50) ) {
+    else if ( (x >= 0.5 && y <= 0.5) || (x <= 0.5 && y >= 0.5) ) {
         label = {color: '#ffc000'};
-        // console.log('color is yellow');
+        console.log('color is yellow');
     }
-    else if (x <= 50 && y <= 50) {
+    else if (x <= 0.5 && y <= 0.5) {
         label = {color: '#0070c0'};
-        // console.log('color is blue');
+        console.log('color is blue');
     }
     return label;
 }
@@ -322,7 +322,7 @@ function addGraphicItem(data, graph) {
 }
 
 // 項目一覧に表示する流入元データを日本語へ変換(デバイス)
-function devTnsltENtoJP (d) {
+function devTnsltENtoJP(d) {
 
   // 変換表
   var options = {
@@ -337,7 +337,7 @@ function devTnsltENtoJP (d) {
 }
 
 // 項目一覧に表示する流入元データを日本語へ変換(訪問者)
-function usrTnsltENtoJP (d) {
+function usrTnsltENtoJP(d) {
 
   // 変換表
   var options = {
@@ -350,12 +350,11 @@ function usrTnsltENtoJP (d) {
   return wd;
 }
 
-// キーワードがnokwdの場合は半角ブランクへ変換
-function kwdTnsltENtoJP (d) {
+function kwdTnsltENtoJP(d) {
 
   var wd;
   if (d === 'nokwd' ) {
-    wd = ' ';
+    wd = 'キーワードなし';
   } else {
     wd = d;
   }
@@ -382,9 +381,9 @@ function showTooltip(target, x, y, contents) {
         + '<ul>'
         + '<li>' + contents.data('metrics') + '</li>'
         + '<li>' + contents.data('day-type') + '</li>'
-        + '<li>' + contents.data('devfltr') + '</li>'
-        + '<li>' + contents.data('usrfltr') + '</li>'
-        + '<li>' + contents.data('kwdfltr') + '</li>'
+        + '<li>' + devTnsltENtoJP(contents.data('devfltr')) + '</li>'
+        + '<li>' + usrTnsltENtoJP(contents.data('usrfltr')) + '</li>'
+        + '<li>' + kwdTnsltENtoJP(contents.data('kwdfltr')) + '</li>'
         + '</ul>'
        + '</div>'
     ),
@@ -501,28 +500,35 @@ function plotGraphHome(arr, idxarr) {
         var y = getTooltipYaxisToPixels($(this), graph);
 
         showTooltip(tooltip_target, x, y, $(this));
+        replotHome($(this));
       },
       function() {
-        // hideTooltip(tooltip_target);
+        hideTooltip(tooltip_target);
+        replot_options = {series: []};
+        replot_options.data = arr_for_replot;
+        graph.replot(replot_options);
       }
     );
 
     // ホームグラフをリプロットする
-    var replotHome = function(wd, obj) {
+    var replotHome = function(target) {
 
-      var addopt = { series: [] };
+      var origin_arr = $.extend(true, {}, arr_for_replot); // 参照渡しだとバグる。
+      var p_color = setBubbleColor(target.data('vari'), target.data('corr'));
+      var addopt = [isVariationOverLimit(target.data('vari')), target.data('corr'), 1, p_color];
+      var add_options = {series: []};
 
-      if (wd == '全データを再表示') {
-        addopt.data = obj;
-      }
+      origin_arr[0].push(addopt);
+      add_options.data = origin_arr;
+
+      // ツールチップ枠の色の変更
+      $('.tooltipster-default').css('border-color', p_color.color);
+      $('.tooltipster-default .tooltipster-arrow .tooltipster-arrow-border').css('border-color', p_color.color);
 
       // 再描画を実行
       // jqplot の replot関数は、追加のオプションを設定すると
       // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
-      graph.replot(addopt);
-
-      // フィルタした処理の内容を記録(グローバル)
-      replotHomeflg = wd;
+      graph.replot(add_options);
     }
   });
 }

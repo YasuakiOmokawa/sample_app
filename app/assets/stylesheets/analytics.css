@@ -13,5 +13,4 @@
  *= require jquery.ui.dialog
  *= require_tree ./jqplot
  *= require_tree ./analytics
- *= require tooltipster
 */
