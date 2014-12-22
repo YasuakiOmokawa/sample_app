@@ -385,7 +385,7 @@ class UsersController < ApplicationController
       # 指標値テーブルへCV代入用
       cls_name = 'CVForGraphSkeleton' + rndm.to_s
       # 4回までリトライできます
-      retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+      Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
         @cv_for_graph = Analytics.create_class(cls_name,
           [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
       end
@@ -393,7 +393,7 @@ class UsersController < ApplicationController
       # 指標値算出用
       # 4回までリトライできます
       gap = ''
-      retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+      Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
         gap = fetch_analytics_data('Fetch', @ga_profile, @cond, @cv_txt, {}, metrics_camel_case_datas, :date)
       end
 
@@ -677,7 +677,7 @@ class UsersController < ApplicationController
           # CV代入用
           cls_name = 'CVForGraphSkeleton' + rndm.to_s
           # 4回までリトライできます
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             @cv_for_graph = Analytics.create_class(cls_name,
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
@@ -685,7 +685,7 @@ class UsersController < ApplicationController
           # 指標値算出用
           # 4回までリトライできます
           gap = ''
-          retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrics_camel_case_datas, :date)
           end
 
