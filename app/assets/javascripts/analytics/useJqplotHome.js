@@ -6,13 +6,15 @@ function createGraphPlots(idxarr, arr) {
     plot_color = setInitialBubbleColor();
 
     // x, y, radius, plot_color
-    tmp_arr[i] = [ isVariationOverLimit(idxarr[i]['vari']) , idxarr[i]['corr'], 1, plot_color];
+    var x = Number(isVariationOverLimit(idxarr[i]['vari']));
+    var y = Number(idxarr[i]['corr']);
+    tmp_arr[i] = [  x, y, 1, plot_color];
   }
   arr.push(tmp_arr);
 }
 
 function isVariationOverLimit(vari) {
-  const VARIATION_LIMIT = 1;
+  var VARIATION_LIMIT = 1;
   if (vari > VARIATION_LIMIT) {
     return 1;
   } else {
@@ -370,8 +372,8 @@ function getTooltipYaxisToPixels(a, graph) {
 
 function showTooltip(target, x, y, contents) {
 
-  const GRAPH_HEIGHT = 446;
-  const GRAPH_WIDTH = 0;
+  var GRAPH_HEIGHT = 446;
+  var GRAPH_WIDTH = 0;
 
   $(target)
   .tooltipster({

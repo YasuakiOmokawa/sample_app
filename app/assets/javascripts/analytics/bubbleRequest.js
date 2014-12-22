@@ -188,14 +188,14 @@ function setKwds(elem, userpath) {
 function setOpts(opts, kwd_opts) {
 
   var dev_opts = [ // デバイス
-    // 'pc',
-    // 'sphone',
-    // 'mobile',
+    'pc',
+    'sphone',
+    'mobile',
   ];
 
   var usr_opts = [ // 訪問者
-    // 'new',
-    // 'repeat'
+    'new',
+    'repeat'
   ];
 
   for (var i = 0; i <= dev_opts.length; i++) {
