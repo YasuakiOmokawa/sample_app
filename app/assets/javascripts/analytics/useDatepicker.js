@@ -68,12 +68,12 @@ function addDatepicker() {
       var dte = calc(selectedDate, '+', 31);
       var opt = fmt(dte);
       $( "#from" ).val(selectedDate);
-      $( "input.tod" ).datepicker( "option",
-        {
-          minDate: selectedDate,
-          maxDate: opt
-        }
-      );
+      // $( "input.tod" ).datepicker( "option",
+      //   {
+      //     minDate: selectedDate,
+      //     maxDate: opt
+      //   }
+      // );
     }
   });
 
@@ -89,12 +89,12 @@ function addDatepicker() {
       var dte = calc(selectedDate, '-', 31);
       var opt = fmt(dte);
       $( "#to" ).val(selectedDate);
-      $( "input.fromd" ).datepicker( "option",
-        {
-          minDate: opt,
-          maxDate: selectedDate
-        }
-      );
+      // $( "input.fromd" ).datepicker( "option",
+      //   {
+      //     minDate: opt,
+      //     maxDate: selectedDate
+      //   }
+      // );
     }
   });
 }
