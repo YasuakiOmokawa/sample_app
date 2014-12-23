@@ -6,8 +6,8 @@ function createGraphPlots(idxarr, arr) {
     plot_color = setInitialBubbleColor();
 
     // x, y, radius, plot_color
-    var x = Number(isVariationOverLimit(idxarr[i]['vari']));
-    var y = Number(idxarr[i]['corr']);
+    var x = isVariationOverLimit(idxarr[i]['vari']);
+    var y = idxarr[i]['corr'];
     tmp_arr[i] = [  x, y, 1, plot_color];
   }
   arr.push(tmp_arr);

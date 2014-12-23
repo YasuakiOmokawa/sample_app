@@ -68,12 +68,12 @@ function addDatepicker() {
       var dte = calc(selectedDate, '+', 31);
       var opt = fmt(dte);
       $( "#from" ).val(selectedDate);
-      // $( "input.tod" ).datepicker( "option",
-      //   {
-      //     minDate: selectedDate,
-      //     maxDate: opt
-      //   }
-      // );
+      $( "input.tod" ).datepicker( "option",
+        {
+          minDate: selectedDate,
+          // maxDate: opt
+        }
+      );
     }
   });
 
@@ -89,12 +89,12 @@ function addDatepicker() {
       var dte = calc(selectedDate, '-', 31);
       var opt = fmt(dte);
       $( "#to" ).val(selectedDate);
-      // $( "input.fromd" ).datepicker( "option",
-      //   {
-      //     minDate: opt,
-      //     maxDate: selectedDate
-      //   }
-      // );
+      $( "input.fromd" ).datepicker( "option",
+        {
+          // minDate: opt,
+          maxDate: selectedDate
+        }
+      );
     }
   });
 }
@@ -147,19 +147,10 @@ $(function() {
           $("input.fromd").datepicker("destroy");
           $("input.tod").datepicker("destroy");
 
-          // ホーム画面の判別
-          if ($('title').text().indexOf('ホーム') == 0) {
-
-            // ページ遷移直後は全体ページ、
-            // バブル描画後は描画されたページの項目を格納
-            var key = $('#pnt div').attr('class') === 'undefined' ? 'all' : $('#pnt div').attr('class');
-
-            // ページ下部のタブリンクに埋め込んでいる関数を流用
+          if (isTitleHome()) {
+            var key = isTargetClicked(getClickedAnalyzeTrigger());
             bubbleCreateAtTabLink(key);
-
           } else {
-
-            // ホーム画面でないときは非ajaxリクエストを実行
             $('a#set').trigger('click');
           }
       },

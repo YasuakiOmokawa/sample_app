@@ -59,13 +59,13 @@ load 'insert_table.rb'
 load 'update_table.rb'
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
-      @user = User.find(1)
+      @user = User.find(3)
       analyticsservice = AnalyticsService.new
       @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
         @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
         @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
       @from = set_date_format('2014/11/21')
-      @to = set_date_format('2014/11/22')
+      @to = set_date_format('2014/11/27')
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      @graphic_item  = ('pageviews').to_sym
      @cv_num = 1                                                     # CV種類

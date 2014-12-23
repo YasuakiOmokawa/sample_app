@@ -7,4 +7,5 @@ Rails.application.config.assets.precompile += %w[
   usedatepicker.js
   kickonload.js
   fnccommon.js
+  homefnc.js
 ]

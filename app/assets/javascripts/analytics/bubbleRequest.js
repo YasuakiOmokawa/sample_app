@@ -8,6 +8,23 @@ var bbl_shori_flg = 0;
 // ページ全体ローディング中のカウンタ
 var prcnt_all_cntr = 0;
 
+// デバイス
+function getDevOpts() {
+  return [
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
+  ];
+}
+
+// 訪問者
+function getUsrOpts() {
+  return [
+    // 'new',
+    // 'repeat'
+  ];
+}
+
 // バブルチャート取得関数
 function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
@@ -187,16 +204,9 @@ function setKwds(elem, userpath) {
 // パラメータの全ての組み合わせを網羅した配列を作る
 function setOpts(opts, kwd_opts) {
 
-  var dev_opts = [ // デバイス
-    'pc',
-    'sphone',
-    'mobile',
-  ];
+  var dev_opts = getDevOpts();
 
-  var usr_opts = [ // 訪問者
-    'new',
-    'repeat'
-  ];
+  var usr_opts = getUsrOpts();
 
   for (var i = 0; i <= dev_opts.length; i++) {
     for (var j = 0; j <= usr_opts.length; j++) {

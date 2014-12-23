@@ -1,3 +1,37 @@
+function setEventOnChangeCVName() {
+  $('select#cvselect').change(function() {
+      $('input[name="cv_num"]').val($(this).val());
+
+      if (isTitleHome()) {
+        var key = isTargetClicked(getClickedAnalyzeTrigger());
+        bubbleCreateAtTabLink(key);
+      } else {
+        $('a#set').trigger('click');
+      }
+  });
+}
+
+function isTitleHome() {
+  if ($('title').text().indexOf('ホーム') == 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getClickedAnalyzeTrigger() {
+  return $('#pnt div').attr('class');
+}
+
+function isTargetClicked(target) {
+
+  if (typeof target === 'undefined') {
+    return 'all';
+  } else {
+    return target;
+  }
+}
+
 var HomeOverlay = new function() {
   var self = function HomeOverlay() {
 
@@ -167,10 +201,7 @@ $(document).ready(function() {
     evtsend($(this));
   });
 
-  // CVの選択のプルダウンを選択したときのイベント
-  $('select#cvselect').change(function() {
-      $('input[name="cv_num"]').val($(this).val());
-  });
+  setEventOnChangeCVName();
 
   // グラフに表示する項目のプルダウンを選択したときのイベント
   $('select#graphicselect').change(function() {
@@ -243,15 +274,6 @@ $(document).ready(function() {
       $(this).css("background-color", "#EEFFFF");
     }
   });
-
-  // 選択したページタブのタグをdiv へ変える
-  // var tab = gon.div_page_tab;
-  // var tag = 'li#' + tab + ' a';
-  // var id = '<div>';
-  // if ( $(tag).html().match(/<br>/) ) {
-  //   id = '<div id="db">';
-  // }
-  // $(tag).replaceWith(id + $(tag).html() + '</div>');
 
   // ラジオボタンの選択値を保持
   var rdo_dev = gon.radio_device
@@ -338,11 +360,5 @@ $(document).ready(function() {
         $('#narrow_select').css('color', fColor);
       }
   });
-
-    // ホーム画面の最初に空グラフを描画
-  if ($('title').text().indexOf('ホーム') == 0) {
-    var dummy = [ [0,0,1,{color: '#FFFFFF'}] ];
-    plotGraphHome(dummy, []);
-  }
 
 });
