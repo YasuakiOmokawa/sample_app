@@ -54,10 +54,12 @@ function addClickEvtToInfo(target) {
       // 絞り込みチェックボックスの値を指定
       var dp = $(e.target).data('devfltr');
       var up = $(e.target).data('usrfltr');
+      var dayp = $(e.target).data('day-type');
       console.log('dp : ' + dp);
       console.log('up : ' + up);
+      console.log('dayp : ' + dayp);
 
-      $.each([dp,up], function(i, val) {
+      $.each([dp,up,dayp], function(i, val) {
         var type,n,m;
         type = 'form[name="narrowForm"] input[value=' + val + ']';
         n = $(type).attr("name");
@@ -141,7 +143,7 @@ function addRanking(idxarr, target) {
 
     counter = counter + 1;
 
-    var day_type = chkDayType(value['day_type']);
+    var day_type_jp = chkDayType(value['day_type_jp']);
 
     $(target)
     .append(
@@ -154,7 +156,8 @@ function addRanking(idxarr, target) {
             'data-corr': value['corr'],
             'data-corr-sign': value['corr_sign'],
             'data-metrics': value['jp_metrics'],
-            'data-day-type': day_type,
+            'data-day-type-jp': day_type_jp,
+            'data-day-type': value['day_type'],
             'data-metrics-avg': value['metrics_avg'],
             'data-metrics-stddev': value['metrics_stddev'],
             'data-vari': value['vari'],
@@ -185,7 +188,7 @@ function paddingRankBox(base_target) {
         $('<li>')
         .append(
           $('<a>')
-            .text('　')
+            .text('-')
             // .css({'background-color': '#adadad'})
         )
       );
@@ -245,10 +248,11 @@ var setDataidx = function(obj, wd, idxarr) {
   for (var i in homearr[fltr_wd]) {
 
     // 絞り込みオプションの取り出し
-    var fltr = String(i).split('::'),    // デバイス::訪問者::キーワード
+    var fltr = String(i).split('::'),    // デバイス::訪問者::キーワード::日付タイプ
       dev_fltr = fltr[0],
       usr_fltr = fltr[1],
       kwd_fltr = fltr[2],
+      day_type = fltr[3],
       tmp = homearr[fltr_wd][i];
 
     for (var j in tmp) {
@@ -261,7 +265,8 @@ var setDataidx = function(obj, wd, idxarr) {
       ar['corr'] = tmp[j].corr;
       ar['corr_sign'] = tmp[j].corr_sign;
       ar['jp_metrics'] = jp[0];
-      ar['day_type'] = jp[1];
+      ar['day_type_jp'] = jp[1];
+      ar['day_type'] = day_type;
       ar['metrics_avg'] = tmp[j].metrics_avg;
       ar['metrics_stddev'] = tmp[j].metrics_stddev;
       ar['vari'] = tmp[j].vari;
@@ -381,7 +386,7 @@ function showTooltip(target, x, y, contents) {
       '<div id="box_r">'
         + '<ul>'
         + '<li>' + contents.data('metrics') + '</li>'
-        + '<li>' + contents.data('day-type') + '</li>'
+        + '<li>' + contents.data('day-type-jp') + '</li>'
         + '<li>' + devTnsltENtoJP(contents.data('devfltr')) + '</li>'
         + '<li>' + usrTnsltENtoJP(contents.data('usrfltr')) + '</li>'
         + '<li>' + kwdTnsltENtoJP(contents.data('kwdfltr')) + '</li>'

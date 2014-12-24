@@ -26,7 +26,7 @@ function getUsrOpts() {
 }
 
 // バブルチャート取得関数
-function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, finish) {
+function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
 
   console.log( 'ajax通信開始!');
 
@@ -69,6 +69,8 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, finish) {
     // データマージ
     $.extend(true, shaped_idxarr, c_obj);
     req_opts.getting_cached = true;
+    fin_tag.shaped_idxarr_fin = true;
+    fin_tag.idxarr_fin = true;
 
   } else {
 
@@ -78,7 +80,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, finish) {
     var tmp_obj = {};
 
     // データリクエストを実行
-    callExecuter(elem, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs);
+    callExecuter(elem, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts);
   }
 }
 
@@ -227,7 +229,7 @@ function parseElem(elem) {
 }
 
 // バブルチャート用データのリクエスト（非同期）
-function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs) {
+function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts) {
 
   if (elm_txt == '直接入力/ブックマーク') {
     elm_txt = '直接入力ブックマーク';
@@ -335,7 +337,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         displayProgress('#daemon tr:nth-child(3) td', prcnt);
 
         // ajax処理を再実行
-        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs)
+        callExecuter(page_fltr_wd, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts)
       } else {
 
         // リクエストを処理終了
@@ -350,7 +352,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         // グラフ描画用のデータを最終マージ
         $.extend(true, return_obj, tmp_obj);
 
-        finish = true;
+        req_opts.finished = true;
 
     // // ページ全体ロードの時はデータをキャッシュさせない
     // if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
@@ -472,27 +474,26 @@ function bubbleCreateAtTabLink(page_name) {
   }
 
   // 返り値データ
-  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
-  var idxarr_fin = [], arr = [], shaped_idxarr_fin = [];
+  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {}, fin_tag = {};
   var elm_txt = parseElem(page_name);
 
-  createBubbleWithParts(shaped_idxarr, elm_txt);
+  createBubbleWithParts(shaped_idxarr, elm_txt, fin_tag);
 
-  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr, idxarr_fin);
+  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr, fin_tag);
 
-  shapeBubbleParts(idxarr, shaped_idxarr idxarr_fin);
+  shapeBubbleParts(idxarr, shaped_idxarr, fin_tag);
 
-  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
+  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag);
 }
 
-function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {
+function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag) {
   var timerID = setInterval( function() {
-    if (Object.keys(shaped_idxarr).length != 0){
-
-      if (req_opts.getting_cached != true) {
-        cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
+    if (typeof fin_tag.shaped_idxarr_fin != "undefined") {
+      if (Object.keys(shaped_idxarr).length != 0){
+        if (req_opts.getting_cached != true) {
+          cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
+        }
       }
-
       clearInterval(timerID);
       timerID = null;
     }
@@ -500,25 +501,26 @@ function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {
 }
 
 // バブル作成用のパーツを生成する関数
-function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, idxarr_fin) {
+function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, fin_tag) {
 
-  var return_obj = {}, finish;
+  var return_obj = {};
 
-  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr, finish);
+  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr, fin_tag);
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-  if(finish == true) {
+  if( typeof req_opts.finished != 'undefined') {
 
     if(Object.keys(return_obj).length != 0){
       // データ項目一覧セット
       setDataidx(return_obj, page_name, idxarr);
     } else {
-      var 
-      $.extend(true, idxarr_fin, [1]);
       afterCall('div#gh');
       $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
+      plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
     }
+
+    fin_tag.idxarr_fin = true;
 
     clearInterval(timerID);
     timerID = null;
@@ -526,20 +528,23 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, idxarr_fi
   },100);
 }
 
-function shapeBubbleParts(idxarr, shaped_idxarr, idxarr_fin) {
+function shapeBubbleParts(idxarr, shaped_idxarr, fin_tag) {
 
   var timerID = setInterval( function(){
-    if (Object.keys(idxarr).length != 0) {
+    if ( typeof fin_tag.idxarr_fin != 'undefined') {
+      if (Object.keys(idxarr).length != 0) {
+        // 優先順位の降順、
+        // 　ページ名と項目名の昇順でソート
+        // > がマイナスリターン。。降順、< がプラスリターンで昇順
+        var sorted = sortIdxarr(idxarr);
 
-      // 優先順位の降順、
-      // 　ページ名と項目名の昇順でソート
-      // > がマイナスリターン。。降順、< がプラスリターンで昇順
-      var sorted = sortIdxarr(idxarr);
+        // 項目を指定数分取り出す
+        var shaped = headIdxarr(sorted, 15);
 
-      // 項目を指定数分取り出す
-      var shaped = headIdxarr(sorted, 15);
+        $.extend(true, shaped_idxarr, shaped);
+      }
 
-      $.extend(true, shaped_idxarr, shaped);
+      fin_tag.shaped_idxarr_fin = true;
 
       clearInterval(timerID);
       timerID = null;
@@ -548,31 +553,31 @@ function shapeBubbleParts(idxarr, shaped_idxarr, idxarr_fin) {
 }
 
 // 生成されたパーツを使ってバブルチャートを作成
-function createBubbleWithParts(idxarr, page_name) {
+function createBubbleWithParts(idxarr, page_name, fin_tag) {
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-   if(Object.keys(idxarr).length != 0){
+    if ( typeof fin_tag.idxarr_fin != 'undefined') {
+      if(Object.keys(idxarr).length != 0){
 
-      var arr = [];
-      var dom = 'div#pnt';
-      createGraphPlots(idxarr, arr);
+        var arr = [];
+        var dom = 'div#pnt';
+        createGraphPlots(idxarr, arr);
 
-      // バブルチャートを描画
-      plotGraphHome(arr, idxarr);
+        // バブルチャートを描画
+        plotGraphHome(arr, idxarr);
 
-      // 事後処理
-      afterCall('div#gh');
+        // 事後処理
+        afterCall('div#gh');
 
-      // 期間表示ハイパーリンクを変更
-      setRange();
+        // 期間表示ハイパーリンクを変更
+        setRange();
 
-      // タブ関連処理
-      TabMark(dom, page_name);
-
+        // タブ関連処理
+        TabMark(dom, page_name);
+      }
       clearInterval(timerID);
       timerID = null;
-
     }
   },100);
 }
