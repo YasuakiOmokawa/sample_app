@@ -26,7 +26,7 @@ function getUsrOpts() {
 }
 
 // バブルチャート取得関数
-function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
+function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, finish) {
 
   console.log( 'ajax通信開始!');
 
@@ -43,6 +43,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
   var opts_cntr = 0;
 
   // 表示項目のリセット
+  $('#errormsg').empty();
   resetHome('div#gh');
 
   // ローディングモーションを表示
@@ -79,28 +80,6 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
     // データリクエストを実行
     callExecuter(elem, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs);
   }
-}
-
-// バブル作成用にページ下部のタブリンクに埋め込む関数
-function bubbleCreateAtTabLink(page_name) {
-
-  if (request) {
-    $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
-    return;
-  }
-
-  // 返り値データ
-  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
-
-  var elm_txt = parseElem(page_name);
-
-  createBubbleWithParts(shaped_idxarr, elm_txt);
-
-  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr);
-
-  shapeBubbleParts(idxarr, shaped_idxarr);
-
-  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
 }
 
 // バブルチャートをオーバーレイ
@@ -178,8 +157,7 @@ function setKwds(elem, userpath) {
       to : $('#to').val(),
       cv_num : $('input[name="cv_num"]').val(),
       shori : $('input[name="shori"]').val(),
-      act : elem, // 取得するページ項目
-      day_type : $('input[name="day_type"]:checked').val(),
+      act : elem // 取得するページ項目
     }
   })
 
@@ -284,7 +262,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
           dev : dev,                 // デバイス
           usr : usr,                   // 訪問者
           kwd : kwd,                 // キーワード
-          day_type : $('input[name="day_type"]:checked').val(),
+          // day_type : $('input[name="day_type"]:checked').val(),
         },
         error: function(xhr, ajaxOptions, thrownError) {
 
@@ -369,8 +347,10 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         // ローディング完了テキストを表示
         $('#daemon tr:nth-child(3) td').text('complete!');
 
-      // グラフ描画用のデータを最終マージ
-      $.extend(true, return_obj, tmp_obj);
+        // グラフ描画用のデータを最終マージ
+        $.extend(true, return_obj, tmp_obj);
+
+        finish = true;
 
     // // ページ全体ロードの時はデータをキャッシュさせない
     // if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
@@ -453,7 +433,6 @@ function isEndTab(page, target) {
   }
 }
 
-
 function hideSelectedTab(target) {
   $(target).hide();
 }
@@ -484,6 +463,28 @@ function TabMark(dom, page_name) {
   hideSelectedTab(target);
 }
 
+// バブル作成用にページ下部のタブリンクに埋め込む関数
+function bubbleCreateAtTabLink(page_name) {
+
+  if (request) {
+    $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
+    return;
+  }
+
+  // 返り値データ
+  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {};
+  var idxarr_fin = [], arr = [], shaped_idxarr_fin = [];
+  var elm_txt = parseElem(page_name);
+
+  createBubbleWithParts(shaped_idxarr, elm_txt);
+
+  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr, idxarr_fin);
+
+  shapeBubbleParts(idxarr, shaped_idxarr idxarr_fin);
+
+  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr);
+}
+
 function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {
   var timerID = setInterval( function() {
     if (Object.keys(shaped_idxarr).length != 0){
@@ -499,18 +500,25 @@ function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr) {
 }
 
 // バブル作成用のパーツを生成する関数
-function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
+function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, idxarr_fin) {
 
-  var return_obj = {};
+  var return_obj = {}, finish;
 
-  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr);
+  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr, finish);
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-   if(Object.keys(return_obj).length != 0){
+  if(finish == true) {
 
-    // データ項目一覧セット
-    setDataidx(return_obj, page_name, idxarr);
+    if(Object.keys(return_obj).length != 0){
+      // データ項目一覧セット
+      setDataidx(return_obj, page_name, idxarr);
+    } else {
+      var 
+      $.extend(true, idxarr_fin, [1]);
+      afterCall('div#gh');
+      $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
+    }
 
     clearInterval(timerID);
     timerID = null;
@@ -518,13 +526,10 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
   },100);
 }
 
-function shapeBubbleParts(idxarr, shaped_idxarr) {
+function shapeBubbleParts(idxarr, shaped_idxarr, idxarr_fin) {
 
   var timerID = setInterval( function(){
     if (Object.keys(idxarr).length != 0) {
-
-      // idxarr = reverseKomoku(idxarr, 'PV数');
-      // idxarr = reverseKomoku(idxarr, '訪問回数');
 
       // 優先順位の降順、
       // 　ページ名と項目名の昇順でソート
@@ -601,106 +606,106 @@ function setLoadingMortion(dom) {
 }
 
 // ダイアログへ全体進捗を表示
-function addLoadingMortion() {
+// function addLoadingMortion() {
 
-  // 元のコンテンツを保存
-  var origin_content = $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html();
+//   // 元のコンテンツを保存
+//   var origin_content = $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html();
 
-  // プログレススピナーを生成
-  var spinner = createSpinner();
+//   // プログレススピナーを生成
+//   var spinner = createSpinner();
 
-  // ボタンを消去
-  $(".jquery-ui-dialog-onlogin a")
-    .remove();
+//   // ボタンを消去
+//   $(".jquery-ui-dialog-onlogin a")
+//     .remove();
 
-  // プログレススピナーを表示
-  $(".jquery-ui-dialog-onlogin p#confirm-msg")
-    .empty()
-    .append(spinner.el);
+//   // プログレススピナーを表示
+//   $(".jquery-ui-dialog-onlogin p#confirm-msg")
+//     .empty()
+//     .append(spinner.el);
 
-  // ローディング中のメッセージを生成
-  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm")
-    .append('<br/><br/>')
-    .append('<div id="pokemon">分析中 ...</div>')
-    .append('<br/><br/>')
-    .append('<div id="monsterball"></div>');
+//   // ローディング中のメッセージを生成
+//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm")
+//     .append('<br/><br/>')
+//     .append('<div id="pokemon">分析中 ...</div>')
+//     .append('<br/><br/>')
+//     .append('<div id="monsterball"></div>');
 
-  return origin_content;
-}
+//   return origin_content;
+// }
 
-function afterCallWithPlotAll(origin_content) {
-  // バブルチャートをaddしたダイアログを閉じる
-  $("#onlogin-dialog-confirm").dialog('close');
+// function afterCallWithPlotAll(origin_content) {
+//   // バブルチャートをaddしたダイアログを閉じる
+//   $("#onlogin-dialog-confirm").dialog('close');
 
-  // ダイアログの内容を元に戻す
-  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html("");
-  $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html(origin_content);
+//   // ダイアログの内容を元に戻す
+//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html("");
+//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html(origin_content);
 
-  // 進捗カウンタをリセット
-  prcnt_all_cntr = 0;
-}
+//   // 進捗カウンタをリセット
+//   prcnt_all_cntr = 0;
+// }
 
 
-function pickupValueForReverse(idxarr_all, item_name) {
-  var pvss = $.grep(idxarr_all, function(item, index) {
-    return item.name == item_name;
-  });
-  return pvss;
-}
+// function pickupValueForReverse(idxarr_all, item_name) {
+//   var pvss = $.grep(idxarr_all, function(item, index) {
+//     return item.name == item_name;
+//   });
+//   return pvss;
+// }
 
-function noPickupValueForReverse(idxarr_all, item_name) {
-  var pvss = $.grep(idxarr_all, function(item, index) {
-    return item.name != item_name;
-  });
-  return pvss;
-}
+// function noPickupValueForReverse(idxarr_all, item_name) {
+//   var pvss = $.grep(idxarr_all, function(item, index) {
+//     return item.name != item_name;
+//   });
+//   return pvss;
+// }
 
-function sortAscValueForReverse(pvss) {
-  pvss.sort(function(a, b) {
-    if (a['arr'][0] > b['arr'][0] ) return 1;
-    if (a['arr'][0] < b['arr'][0] ) return -1;
-    if (a.page > b.page) return  1;
-    if (a.page < b.page) return  -1;
-    if (a.dev_fltr > b.dev_fltr) return  1;
-    if (a.dev_fltr < b.dev_fltr) return  -1;
-    if (a.kwd_fltr > b.kwd_fltr) return  1;
-    if (a.kwd_fltr < b.kwd_fltr) return  -1;
-    if (a.usr_fltr > b.usr_fltr) return  1;
-    if (a.usr_fltr < b.usr_fltr) return  -1;
-  });
-}
+// function sortAscValueForReverse(pvss) {
+//   pvss.sort(function(a, b) {
+//     if (a['arr'][0] > b['arr'][0] ) return 1;
+//     if (a['arr'][0] < b['arr'][0] ) return -1;
+//     if (a.page > b.page) return  1;
+//     if (a.page < b.page) return  -1;
+//     if (a.dev_fltr > b.dev_fltr) return  1;
+//     if (a.dev_fltr < b.dev_fltr) return  -1;
+//     if (a.kwd_fltr > b.kwd_fltr) return  1;
+//     if (a.kwd_fltr < b.kwd_fltr) return  -1;
+//     if (a.usr_fltr > b.usr_fltr) return  1;
+//     if (a.usr_fltr < b.usr_fltr) return  -1;
+//   });
+// }
 
-function reCalcPriority(no_pickuped) {
-  for(var i=0; i < no_pickuped.length; i++) {
-    no_pickuped[i].pri = no_pickuped[i]['arr'][0] + no_pickuped[i]['arr'][1];
-  }
-}
+// function reCalcPriority(no_pickuped) {
+//   for(var i=0; i < no_pickuped.length; i++) {
+//     no_pickuped[i].pri = no_pickuped[i]['arr'][0] + no_pickuped[i]['arr'][1];
+//   }
+// }
 
-function reverseKomoku(idxarr_all, komoku_name) {
+// function reverseKomoku(idxarr_all, komoku_name) {
 
-  var pickuped = pickupValueForReverse(idxarr_all, komoku_name);
+//   var pickuped = pickupValueForReverse(idxarr_all, komoku_name);
 
-  var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
+//   var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
 
-  sortAscValueForReverse(pickuped);
+//   sortAscValueForReverse(pickuped);
 
-  swapPickupedValue(pickuped);
+//   swapPickupedValue(pickuped);
 
-  reCalcPriority(pickuped);
+//   reCalcPriority(pickuped);
 
-  Array.prototype.push.apply(no_pickuped, pickuped);
+//   Array.prototype.push.apply(no_pickuped, pickuped);
 
-  return no_pickuped;
-}
+//   return no_pickuped;
+// }
 
-function swapPickupedValue(arr) {
-  var ar_len = arr.length;
-  var loop_times = (ar_len - (ar_len % 2)) / 2;
-  for (var i=0; i <= loop_times; i++) {
-    var sentou = arr[i]['arr'][0];
-    var ushiro = arr[(ar_len - 1) - i]['arr'][0];
-    arr[i]['arr'][0] = ushiro;
-    arr[(ar_len - 1) - i]['arr'][0] = sentou;
-  }
-}
+// function swapPickupedValue(arr) {
+//   var ar_len = arr.length;
+//   var loop_times = (ar_len - (ar_len % 2)) / 2;
+//   for (var i=0; i <= loop_times; i++) {
+//     var sentou = arr[i]['arr'][0];
+//     var ushiro = arr[(ar_len - 1) - i]['arr'][0];
+//     arr[i]['arr'][0] = ushiro;
+//     arr[(ar_len - 1) - i]['arr'][0] = sentou;
+//   }
+// }
 

@@ -515,6 +515,13 @@ class UsersController < ApplicationController
         'all' => {}
       }
 
+      # 日付タイプ
+      day_opts = %w(
+        all_day
+        day_on
+        day_off
+      )
+
       # 全体分析の完了したタイムスタンプを保持
       if params[:analyzeallcomplete].present?
         User.find(params[:id]).update_attribute(:limitanalyzeall, Time.now + 1.hour)
@@ -682,6 +689,21 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
+          # スケルトン作成
+          @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
+
+          # CV代入
+          put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
+
+          # CV個数が分析対象に満たない場合、コントローラを抜ける
+          d = Statistics::Day.new(@table_for_graph)
+          day_opts.delete('day_on') if d.count_cves(d.day_on) < 3
+          day_opts.delete('day_off') if d.count_cves(d.day_off) < 3
+          day_opts.delete('all_day') if d.count_cves(d.data) < 3
+          return if day_opts.blank?
+
+
           # 指標値算出用
           # 4回までリトライできます
           gap = ''
@@ -691,12 +713,12 @@ class UsersController < ApplicationController
 
           ### データ計算部
 
-          # スケルトン作成
-          @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-          create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
+          # # スケルトン作成
+          # @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          # create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
 
-          # CV代入用
-          put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
+          # # CV代入用
+          # put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
 
           # 指標値の算出
           put_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas) # 項目の理想値、現実値をスケルトンへ代入
@@ -704,13 +726,16 @@ class UsersController < ApplicationController
           calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
           # バブルチャートに表示するデータを算出
-          bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
-          d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
-          home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
+          day_opts.each do |day_type|
+            bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, day_type)
+            d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
+            home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 
-          # ページ項目へ追加
-          p_hash[x][room] = home_graph_data
-          logger.info("pages data set success!")
+            # ページ項目へ追加
+            day_room = room +  '::' + day_type
+            p_hash[x][day_room] = home_graph_data
+            logger.info("pages data set success!")
+          end
 
           # フィルタオプションのリセット
           logger.info("filters option reset start. now is #{@cond}")

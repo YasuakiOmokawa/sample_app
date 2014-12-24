@@ -127,12 +127,12 @@ module UpdateTable
   end
 
   def metrics_day_type_jp_caption(day_type, metricses)
-    if @day_type == 'day_on'
+    if day_type == 'day_on'
       d_hsh = add_metrics_day_on(metricses)
     # metricses.merge!(d_on_sh)
-    elsif @day_type == 'day_off'
+    elsif day_type == 'day_off'
       d_hsh = add_metrics_day_off(metricses)
-    elsif @day_type == 'all_day'
+    elsif day_type == 'all_day'
     # metricses.merge!(d_off_sh)
       d_hsh = metricses
     end

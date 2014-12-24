@@ -216,6 +216,39 @@ module ParamUtils
     return arr
   end
 
+  # ユニークキーを取得する
+  def create_cache_key(analyze_type)
+
+    # ユーザ単位で一意にするため指定
+    usrid = params[:id].to_s
+
+    uniq = usrid + params[:from].to_s + params[:to].to_s + analyze_type
+
+    if analyze_type == 'kobetsu'
+      uniq += params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
+    end
+    uniq
+  end
+
+  # データ指標の取得
+  def get_metricses
+    {
+      :pageviews => 'PV数',
+      :pageviewsPerSession => '平均PV数',
+      :sessions => 'セッション',
+      :avgSessionDuration => '平均滞在時間',
+      :bounceRate => '直帰率',
+      :percentNewSessions => '新規ユーザー',
+      :users => 'ユーザー',
+    }
+  end
+
+  def get_metrics_not_ga
+    {
+      :repeat_rate => 'リピーター',
+    }
+  end
+
   # 人気ページテーブル用にtop10 生成
   # def top10(dt)
   #   r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
@@ -241,38 +274,4 @@ module ParamUtils
   #   end
   #   r_hsh
   # end
-
-  # ユニークキーを取得する
-  def create_cache_key(analyze_type)
-
-    # ユーザ単位で一意にするため指定
-    usrid = params[:id].to_s
-
-    uniq = usrid + params[:from].to_s + params[:to].to_s + analyze_type + params[:day_type]
-
-    if analyze_type == 'kobetsu'
-      uniq = uniq + params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
-    end
-    uniq
-  end
-
-  # データ指標の取得
-  def get_metricses
-    {
-      :pageviews => 'PV数',
-      :pageviewsPerSession => '平均PV数',
-      :sessions => 'セッション',
-      :avgSessionDuration => '平均滞在時間',
-      :bounceRate => '直帰率',
-      :percentNewSessions => '新規ユーザー',
-      :users => 'ユーザー',
-    }
-  end
-
-  def get_metrics_not_ga
-    {
-      :repeat_rate => 'リピーター',
-    }
-  end
-
 end

@@ -73,7 +73,8 @@ module CreateTable
       clm.each do |u, i|
         hsh[dts][:cv] = 0
         hsh[dts]["idx"] = idx
-        hsh[dts][u] =set_array_on_date(d_type)
+        hsh[dts][:day_type] = d_type
+        hsh[dts][u] = set_array_on_date(d_type)
       end
       idx += 1
     end
