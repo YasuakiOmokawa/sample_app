@@ -46,6 +46,9 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
   $('#errormsg').empty();
   resetHome('div#gh');
 
+  // // タブ関連処理
+  // TabMark(dom, page_name);
+
   // ローディングモーションを表示
   setLoadingMortion('div#gh', req_opts);
 
@@ -69,6 +72,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
     // データマージ
     $.extend(true, shaped_idxarr, c_obj);
     req_opts.getting_cached = true;
+    req_opts.finished = true;
     fin_tag.shaped_idxarr_fin = true;
     fin_tag.idxarr_fin = true;
 
@@ -481,6 +485,9 @@ function bubbleCreateAtTabLink(page_name) {
   // ページ名（日本語名）
   req_opts.jp_page_name = $('#pnt').find(element_class).text();
 
+  // タブ関連処理
+  TabMark('div#pnt', element);
+
   createBubbleWithParts(shaped_idxarr, element, fin_tag);
 
   createBubbleParts(element, idxarr, req_opts, shaped_idxarr, fin_tag);
@@ -493,15 +500,20 @@ function bubbleCreateAtTabLink(page_name) {
 function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag) {
   var timerID = setInterval( function() {
     if (typeof fin_tag.shaped_idxarr_fin != "undefined") {
-      if (Object.keys(shaped_idxarr).length != 0){
-        if (req_opts.getting_cached != true) {
-          cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
+      if (req_opts.getting_cached != true) {
+        if (Object.keys(shaped_idxarr).length == 0){
+          shaped_idxarr = $.extend(true, {}, {notcv: 'notcv'});
         }
+        cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
       }
       clearInterval(timerID);
       timerID = null;
     }
   }, 100);
+}
+
+function displayNotConversion() {
+  $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
 }
 
 // バブル作成用のパーツを生成する関数
@@ -513,22 +525,29 @@ function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, fin_tag) 
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
-  if( typeof req_opts.finished != 'undefined') {
+    if( typeof req_opts.finished != 'undefined') {
 
-    if(Object.keys(return_obj).length != 0){
-      // データ項目一覧セット
-      setDataidx(return_obj, page_name, idxarr);
-    } else {
-      afterCall('div#gh');
-      $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
-      plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
+
+      if ( Object.keys(return_obj).length != 0 || typeof shaped_idxarr.notcv != 'undefined') {
+
+        if ( Object.keys(return_obj).length != 0) {
+          // データ項目一覧セット
+          setDataidx(return_obj, page_name, idxarr);
+        } else {
+          addWhenNotCV();
+        }
+
+        if (typeof shaped_idxarr.notcv != 'undefined') {
+          addWhenNotCV();
+        }
+      }
+
+
     }
-
     fin_tag.idxarr_fin = true;
 
     clearInterval(timerID);
     timerID = null;
-   }
   },100);
 }
 
@@ -556,29 +575,36 @@ function shapeBubbleParts(idxarr, shaped_idxarr, fin_tag) {
   },100);
 }
 
+function addWhenNotCV() {
+  afterCall('div#gh');
+  plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
+  displayNotConversion();
+}
+
 // 生成されたパーツを使ってバブルチャートを作成
-function createBubbleWithParts(idxarr, page_name, fin_tag) {
+function createBubbleWithParts(shaped_idxarr, page_name, fin_tag) {
 
   // 返り値データをポーリング
   var timerID = setInterval( function(){
     if ( typeof fin_tag.idxarr_fin != 'undefined') {
-      if(Object.keys(idxarr).length != 0){
+      if(Object.keys(shaped_idxarr).length != 0){
+        // if (typeof shaped_idxarr.notcv === 'undefined') {
 
-        var arr = [];
-        var dom = 'div#pnt';
-        createGraphPlots(idxarr, arr);
+          var arr = [];
+          createGraphPlots(shaped_idxarr, arr);
 
-        // バブルチャートを描画
-        plotGraphHome(arr, idxarr);
+          // バブルチャートを描画
+          plotGraphHome(arr, shaped_idxarr);
 
-        // 事後処理
-        afterCall('div#gh');
+          // 事後処理
+          afterCall('div#gh');
 
-        // 期間表示ハイパーリンクを変更
-        setRange();
+          // コンバージョンチェック処理
+          // addWhenNotCV(arr);
 
-        // タブ関連処理
-        TabMark(dom, page_name);
+          // 期間表示ハイパーリンクを変更
+          setRange();
+        // }
       }
       clearInterval(timerID);
       timerID = null;
