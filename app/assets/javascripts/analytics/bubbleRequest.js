@@ -11,17 +11,17 @@ var prcnt_all_cntr = 0;
 // デバイス
 function getDevOpts() {
   return [
-    'pc',
-    'sphone',
-    'mobile',
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    'new',
-    'repeat'
+    // 'new',
+    // 'repeat'
   ];
 }
 
@@ -47,7 +47,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
   resetHome('div#gh');
 
   // ローディングモーションを表示
-  setLoadingMortion('div#gh');
+  setLoadingMortion('div#gh', req_opts);
 
   // オプションキーワードを生成
   var kwd_opts = setKwds(elem, userpath);
@@ -85,14 +85,18 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
 }
 
 // バブルチャートをオーバーレイ
-function addOverlay(dom) {
+function addOverlay(dom, req_opts) {
 
   $(dom).plainOverlay(
     'show',
     {
       opacity: 0.2,
       progress: function() {
-        var target = $('<div id="guardian"></div><table id="daemon"><tr><td>分析中 ...</td></tr><tr><td>　</td></tr><tr><td></td></tr></table>');
+        var target = $('<div id="guardian"></div>'
+            + '<div id="daemon">'
+                + '　　　　　　　　　　　<br>' // 位置調整のため、jp_page_name より大きい全角空白を詰める
+                + req_opts.jp_page_name + '<br>分析中<br><span></span>'
+            + '</div>');
         return target;
       }
   });
@@ -231,10 +235,6 @@ function parseElem(elem) {
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts) {
 
-  if (elm_txt == '直接入力/ブックマーク') {
-    elm_txt = '直接入力ブックマーク';
-  }
-
   // ajaxリクエストの生成
   if (bbl_shori_flg == 1) {
 
@@ -334,7 +334,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         var prcnt = calcProgress(opts_cntr, opts.length);
 
         // 画面に進捗を表示
-        displayProgress('#daemon tr:nth-child(3) td', prcnt);
+        displayProgress('#daemon span', prcnt);
 
         // ajax処理を再実行
         callExecuter(page_fltr_wd, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts)
@@ -347,7 +347,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         console.log('ページ絞り込み名 :' + page_fltr_wd);
 
         // ローディング完了テキストを表示
-        $('#daemon tr:nth-child(3) td').text('complete!');
+        $('#daemon span').text('complete!');
 
         // グラフ描画用のデータを最終マージ
         $.extend(true, return_obj, tmp_obj);
@@ -475,15 +475,19 @@ function bubbleCreateAtTabLink(page_name) {
 
   // 返り値データ
   var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {}, fin_tag = {};
-  var elm_txt = parseElem(page_name);
+  var element = parseElem(page_name);
+  var element_class = '.' + element;
 
-  createBubbleWithParts(shaped_idxarr, elm_txt, fin_tag);
+  // ページ名（日本語名）
+  req_opts.jp_page_name = $('#pnt').find(element_class).text();
 
-  createBubbleParts(elm_txt, idxarr, req_opts, shaped_idxarr, fin_tag);
+  createBubbleWithParts(shaped_idxarr, element, fin_tag);
+
+  createBubbleParts(element, idxarr, req_opts, shaped_idxarr, fin_tag);
 
   shapeBubbleParts(idxarr, shaped_idxarr, fin_tag);
 
-  cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag);
+  cacheShapedBubbleParts(req_opts, element, shaped_idxarr, fin_tag);
 }
 
 function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag) {
@@ -597,120 +601,16 @@ function displayProgress(prgtarget, prcnt) {
 }
 
 // ローディングモーションを設定
-function setLoadingMortion(dom) {
+function setLoadingMortion(dom, req_opts) {
 
   // プログレススピナーを生成
   var spinner = createSpinner();
 
   // バブルチャートをオーバーレイ
-  addOverlay(dom);
+  addOverlay(dom, req_opts);
 
   // プログレススピナーを表示
   $('#guardian').append(spinner.el);
 
 }
-
-// ダイアログへ全体進捗を表示
-// function addLoadingMortion() {
-
-//   // 元のコンテンツを保存
-//   var origin_content = $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html();
-
-//   // プログレススピナーを生成
-//   var spinner = createSpinner();
-
-//   // ボタンを消去
-//   $(".jquery-ui-dialog-onlogin a")
-//     .remove();
-
-//   // プログレススピナーを表示
-//   $(".jquery-ui-dialog-onlogin p#confirm-msg")
-//     .empty()
-//     .append(spinner.el);
-
-//   // ローディング中のメッセージを生成
-//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm")
-//     .append('<br/><br/>')
-//     .append('<div id="pokemon">分析中 ...</div>')
-//     .append('<br/><br/>')
-//     .append('<div id="monsterball"></div>');
-
-//   return origin_content;
-// }
-
-// function afterCallWithPlotAll(origin_content) {
-//   // バブルチャートをaddしたダイアログを閉じる
-//   $("#onlogin-dialog-confirm").dialog('close');
-
-//   // ダイアログの内容を元に戻す
-//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html("");
-//   $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").html(origin_content);
-
-//   // 進捗カウンタをリセット
-//   prcnt_all_cntr = 0;
-// }
-
-
-// function pickupValueForReverse(idxarr_all, item_name) {
-//   var pvss = $.grep(idxarr_all, function(item, index) {
-//     return item.name == item_name;
-//   });
-//   return pvss;
-// }
-
-// function noPickupValueForReverse(idxarr_all, item_name) {
-//   var pvss = $.grep(idxarr_all, function(item, index) {
-//     return item.name != item_name;
-//   });
-//   return pvss;
-// }
-
-// function sortAscValueForReverse(pvss) {
-//   pvss.sort(function(a, b) {
-//     if (a['arr'][0] > b['arr'][0] ) return 1;
-//     if (a['arr'][0] < b['arr'][0] ) return -1;
-//     if (a.page > b.page) return  1;
-//     if (a.page < b.page) return  -1;
-//     if (a.dev_fltr > b.dev_fltr) return  1;
-//     if (a.dev_fltr < b.dev_fltr) return  -1;
-//     if (a.kwd_fltr > b.kwd_fltr) return  1;
-//     if (a.kwd_fltr < b.kwd_fltr) return  -1;
-//     if (a.usr_fltr > b.usr_fltr) return  1;
-//     if (a.usr_fltr < b.usr_fltr) return  -1;
-//   });
-// }
-
-// function reCalcPriority(no_pickuped) {
-//   for(var i=0; i < no_pickuped.length; i++) {
-//     no_pickuped[i].pri = no_pickuped[i]['arr'][0] + no_pickuped[i]['arr'][1];
-//   }
-// }
-
-// function reverseKomoku(idxarr_all, komoku_name) {
-
-//   var pickuped = pickupValueForReverse(idxarr_all, komoku_name);
-
-//   var no_pickuped = noPickupValueForReverse(idxarr_all, komoku_name);
-
-//   sortAscValueForReverse(pickuped);
-
-//   swapPickupedValue(pickuped);
-
-//   reCalcPriority(pickuped);
-
-//   Array.prototype.push.apply(no_pickuped, pickuped);
-
-//   return no_pickuped;
-// }
-
-// function swapPickupedValue(arr) {
-//   var ar_len = arr.length;
-//   var loop_times = (ar_len - (ar_len % 2)) / 2;
-//   for (var i=0; i <= loop_times; i++) {
-//     var sentou = arr[i]['arr'][0];
-//     var ushiro = arr[(ar_len - 1) - i]['arr'][0];
-//     arr[i]['arr'][0] = ushiro;
-//     arr[(ar_len - 1) - i]['arr'][0] = sentou;
-//   }
-// }
 

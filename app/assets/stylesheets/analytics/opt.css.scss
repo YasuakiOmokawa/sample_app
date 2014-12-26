@@ -34,21 +34,13 @@ span#errormsg {
   font-weight: bold;
 }
 
-// ホーム画面の項目一覧が長すぎたら文字列を省略表示する
-div#info #legend1b tr td.r {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  -webkit-text-overflow: ellipsis; /* Safari */
-  -o-text-overflow: ellipsis; /* Opera */
-}
-
 // ホーム画面のローディング画面メッセージ
-table#daemon {
+#daemon {
+  text-align: center;
   font-type: inherit;
-  font-size: 19px;
-  margin-left: -45px;
-  margin-top: 65px;
+  font-size: 17px;
+  margin-left: -90px;
+  margin-top: 45px;
 }
 
 // ログイン直後ダイアログ関連

@@ -590,24 +590,24 @@ class UsersController < ApplicationController
           # 絞り込みキーワードが指定されていない場合はキーワードを取得
           kwds = []
           case wd
-          when 'search'
-            search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
-            aa = search.sort_by { |a|
-              [ -(a.sessions.to_i),
-                -(a.adsense_ads_clicks.to_i),
-                -(a.adsense_ctr.to_f) ]
-            }
-            aa.each do |t|
-                  kwds.push('s' + t.keyword)
-                  if kwds.size >= 5 then break end
-            end
-          when 'direct'
-            direct = Analytics::FetchKeywordForLanding.results(@ga_profile, @cond)
-            aa = direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }
-            aa.each do |t|
-                  kwds.push('f' + t.page_title)
-                  if kwds.size >= 5 then break end
-            end
+          # when 'search'
+          #   search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
+          #   aa = search.sort_by { |a|
+          #     [ -(a.sessions.to_i),
+          #       -(a.adsense_ads_clicks.to_i),
+          #       -(a.adsense_ctr.to_f) ]
+          #   }
+          #   aa.each do |t|
+          #         kwds.push('s' + t.keyword)
+          #         if kwds.size >= 5 then break end
+          #   end
+          # when 'direct'
+          #   direct = Analytics::FetchKeywordForLanding.results(@ga_profile, @cond)
+          #   aa = direct.sort_by{ |a| [ -(a.sessions.to_f), -(a.bounce_rate.to_f) ] }
+          #   aa.each do |t|
+          #         kwds.push('f' + t.page_title)
+          #         if kwds.size >= 5 then break end
+          #   end
           when 'referral'
             dimend_key = :source
             referral = Analytics.create_class('FetchKeywordForRef',
