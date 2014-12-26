@@ -481,6 +481,9 @@ function bubbleCreateAtTabLink(page_name) {
   // ページ名（日本語名）
   req_opts.jp_page_name = $('#pnt').find(element_class).text();
 
+  // タブ関連処理
+  TabMark('div#pnt', element);
+
   createBubbleWithParts(shaped_idxarr, element, fin_tag);
 
   createBubbleParts(element, idxarr, req_opts, shaped_idxarr, fin_tag);
@@ -565,7 +568,6 @@ function createBubbleWithParts(idxarr, page_name, fin_tag) {
       if(Object.keys(idxarr).length != 0){
 
         var arr = [];
-        var dom = 'div#pnt';
         createGraphPlots(idxarr, arr);
 
         // バブルチャートを描画
@@ -577,8 +579,6 @@ function createBubbleWithParts(idxarr, page_name, fin_tag) {
         // 期間表示ハイパーリンクを変更
         setRange();
 
-        // タブ関連処理
-        TabMark(dom, page_name);
       }
       clearInterval(timerID);
       timerID = null;
