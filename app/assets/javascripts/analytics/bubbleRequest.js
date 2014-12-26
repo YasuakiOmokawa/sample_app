@@ -134,7 +134,6 @@ function resetHome(dom) {
   var id = dom.split('#');
 
   $(dom).replaceWith('<div id="' + id[1] + '" style="z-index: 1;"></div>');
-  // $('#legend1b').empty();
   $('#errormsg').empty();
 }
 
@@ -425,6 +424,7 @@ function addMarkTab(target, replace) {
 }
 
 function createMarkTab(target) {
+  // return replace = '<div>' + $(target).html() + '</div>';
   return replace = '<div class="' + $(target).attr('class') + '">' + $(target).html() + '</div>';
 }
 
@@ -476,7 +476,7 @@ function bubbleCreateAtTabLink(page_name) {
   // 返り値データ
   var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {}, fin_tag = {};
   var element = parseElem(page_name);
-  var element_class = '.' + element;
+  var element_class = 'a.' + element;
 
   // ページ名（日本語名）
   req_opts.jp_page_name = $('#pnt').find(element_class).text();
