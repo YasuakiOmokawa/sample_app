@@ -614,8 +614,8 @@ class UsersController < ApplicationController
                 [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
             aa = referral.sort_by{ |a| -(a.cv.to_i ) }
             aa.each do |t|
-              kwds.push('r' + t.source)
-              if kwds.size >= 5 then break end
+              kwds.push('r' + t.source) if t.cv.to_i >= 1
+              if kwds.size >= 3 then break end
             end
           when 'social'
             dimend_key = :socialNetwork
@@ -623,8 +623,8 @@ class UsersController < ApplicationController
                 [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
             aa = social.sort_by{ |a| -(a.cv.to_i ) }
             aa.each do |t|
-              kwds.push( 'l' + t.social_network)
-              if kwds.size >= 5 then break end
+              kwds.push( 'l' + t.social_network) if t.cv.to_i >= 1
+              if kwds.size >= 3 then break end
             end
           end
 

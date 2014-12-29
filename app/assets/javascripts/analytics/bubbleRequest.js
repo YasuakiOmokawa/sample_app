@@ -26,21 +26,16 @@ function getUsrOpts() {
 }
 
 // バブルチャート取得関数
-function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
+function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
   console.log( 'ajax通信開始!');
 
   // ページ遷移先の設定
-  var userpath = gon.narrow_action;
-
-  // バブルチャート取得用のオプション配列
-  var opts = [];
-
-  // バブルチャート取得用のオプション
-  var dev, usr, kwd;
-
-  // オプション配列用のカウンタ
-  var opts_cntr = 0;
+  var
+    userpath = gon.narrow_action,
+    opts = [],
+    dev, usr, kwd,
+    opts_cntr = 0;
 
   // 表示項目のリセット
   $('#errormsg').empty();
@@ -68,9 +63,8 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr, fin_tag) {
 
     // データマージ
     $.extend(true, shaped_idxarr, c_obj);
-    req_opts.getting_cached = true;
-    fin_tag.shaped_idxarr_fin = true;
-    fin_tag.idxarr_fin = true;
+    req_opts.cache_get = true;
+    req_opts.finished = true;
 
   } else {
 
@@ -268,8 +262,8 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         error: function(xhr, ajaxOptions, thrownError) {
 
           // 内部エラーが発生したら表示
-          if (xhr.status == 500) {
-            $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+          if (xhr.status == 500 || xhr.status == 503) {
+            $("span#errormsg").html('サーバーが一時的に応答不能となっています。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
             return;
           }
 
@@ -296,10 +290,6 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
       });
     }).promise();
   }
-
-  // 並列リクエストだとアナリティクスAPIの割り当て制限エラーに引っ掛かるので逐次リクエストへ変更。
-  // ⇒ 2014/10/19 GAアカウントの所有数だけ並列でリクエストを実施することで、API制限を回避。
-  // ⇒ 2014/10/25 API制限回避できず。直列方式へ再度変更
 
   if (request) {
 
@@ -353,11 +343,6 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
 
         req_opts.finished = true;
 
-    // // ページ全体ロードの時はデータをキャッシュさせない
-    // if (! $(".jquery-ui-dialog-onlogin div#onlogin-dialog-confirm").isVisible()) {
-    //   cacheResult(return_obj, true, 'POST', 'kobetsu', kwd_strgs, elm_txt);
-    // }
-
       }
     })
 
@@ -379,12 +364,9 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
 
     // ajax通信終了時に常に呼び出される処理
     .always(function() {
-
       // リクエスト処理が終了した場合に実行される
       if (bbl_shori_flg == 2) {
-
         console.log( 'ajax通信終了!');
-
       }
     });
   }
@@ -474,9 +456,12 @@ function bubbleCreateAtTabLink(page_name) {
   }
 
   // 返り値データ
-  var idxarr = [], arr = [], shaped_idxarr = [], req_opts = {}, fin_tag = {};
-  var element = parseElem(page_name);
-  var element_class = 'a.' + element;
+  var
+    idxarr = [],
+    shaped_idxarr = [],
+    req_opts = {},
+    element = parseElem(page_name);
+    element_class = 'a.' + element;
 
   // ページ名（日本語名）
   req_opts.jp_page_name = $('#pnt').find(element_class).text();
@@ -484,22 +469,78 @@ function bubbleCreateAtTabLink(page_name) {
   // タブ関連処理
   TabMark('div#pnt', element);
 
-  createBubbleWithParts(shaped_idxarr, element, fin_tag);
+  createBubbleWithParts(shaped_idxarr, element, req_opts);
 
-  createBubbleParts(element, idxarr, req_opts, shaped_idxarr, fin_tag);
+  createBubbleParts(element, idxarr, req_opts, shaped_idxarr);
 
-  shapeBubbleParts(idxarr, shaped_idxarr, fin_tag);
+  shapeBubbleParts(idxarr, shaped_idxarr, req_opts);
 
-  cacheShapedBubbleParts(req_opts, element, shaped_idxarr, fin_tag);
+  cacheShapedBubbleParts(req_opts, element, shaped_idxarr, req_opts);
 }
 
-function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag) {
-  var timerID = setInterval( function() {
-    if (typeof fin_tag.shaped_idxarr_fin != "undefined") {
-      if (Object.keys(shaped_idxarr).length != 0){
-        if (req_opts.getting_cached != true) {
-          cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm_txt);
+// 生成されたパーツを使ってバブルチャートを作成
+function createBubbleWithParts(shaped_idxarr, page_name, req_opts) {
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+    if (Object.keys(shaped_idxarr).length != 0) {
+      if (shaped_idxarr[0] != 'not_cved') {
+        var plots = [];
+
+        createGraphPlots(shaped_idxarr, plots);
+        plotGraphHome(plots, shaped_idxarr);
+        afterCall('div#gh');
+        setRange();
+      } else {
+        addWhenNotCved();
+      }
+      clearInterval(timerID);
+      timerID = null;
+    }
+
+  },100);
+}
+
+// バブル作成用のパーツを生成する関数
+function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr) {
+
+  var return_obj = {};
+
+  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr);
+
+  // 返り値データをポーリング
+  var timerID = setInterval( function(){
+    if( typeof req_opts.finished != 'undefined') {
+
+      if(Object.keys(return_obj).length != 0){
+        // データ項目一覧セット
+        setDataidx(return_obj, page_name, idxarr);
+      } else {
+        if (req_opts.cache_get != true) {
+          shaped_idxarr.push('not_cved');
         }
+      }
+      clearInterval(timerID);
+      timerID = null;
+   }
+  },100);
+}
+
+function shapeBubbleParts(idxarr, shaped_idxarr, req_opts) {
+  var timerID = setInterval( function(){
+    if (Object.keys(idxarr).length != 0) {
+      $.extend(true, shaped_idxarr, headIdxarr(sortIdxarr(idxarr), 15));
+      clearInterval(timerID);
+      timerID = null;
+    }
+  },100);
+}
+
+function cacheShapedBubbleParts(req_opts, elm, shaped_idxarr, req_opts) {
+  var timerID = setInterval( function() {
+    if (Object.keys(shaped_idxarr).length != 0) {
+      if (req_opts.cache_get != true) {
+        cacheResult(shaped_idxarr, true, 'POST', 'kobetsu', req_opts.kwd_strgs, elm);
       }
       clearInterval(timerID);
       timerID = null;
@@ -507,83 +548,10 @@ function cacheShapedBubbleParts(req_opts, elm_txt, shaped_idxarr, fin_tag) {
   }, 100);
 }
 
-// バブル作成用のパーツを生成する関数
-function createBubbleParts(page_name, idxarr, req_opts, shaped_idxarr, fin_tag) {
-
-  var return_obj = {};
-
-  requestPartsData(page_name, return_obj, req_opts, shaped_idxarr, fin_tag);
-
-  // 返り値データをポーリング
-  var timerID = setInterval( function(){
-  if( typeof req_opts.finished != 'undefined') {
-
-    if(Object.keys(return_obj).length != 0){
-      // データ項目一覧セット
-      setDataidx(return_obj, page_name, idxarr);
-    } else {
-      afterCall('div#gh');
-      $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
-      plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
-    }
-
-    fin_tag.idxarr_fin = true;
-
-    clearInterval(timerID);
-    timerID = null;
-   }
-  },100);
-}
-
-function shapeBubbleParts(idxarr, shaped_idxarr, fin_tag) {
-
-  var timerID = setInterval( function(){
-    if ( typeof fin_tag.idxarr_fin != 'undefined') {
-      if (Object.keys(idxarr).length != 0) {
-        // 優先順位の降順、
-        // 　ページ名と項目名の昇順でソート
-        // > がマイナスリターン。。降順、< がプラスリターンで昇順
-        var sorted = sortIdxarr(idxarr);
-
-        // 項目を指定数分取り出す
-        var shaped = headIdxarr(sorted, 15);
-
-        $.extend(true, shaped_idxarr, shaped);
-      }
-
-      fin_tag.shaped_idxarr_fin = true;
-
-      clearInterval(timerID);
-      timerID = null;
-    }
-  },100);
-}
-
-// 生成されたパーツを使ってバブルチャートを作成
-function createBubbleWithParts(idxarr, page_name, fin_tag) {
-
-  // 返り値データをポーリング
-  var timerID = setInterval( function(){
-    if ( typeof fin_tag.idxarr_fin != 'undefined') {
-      if(Object.keys(idxarr).length != 0){
-
-        var arr = [];
-        createGraphPlots(idxarr, arr);
-
-        // バブルチャートを描画
-        plotGraphHome(arr, idxarr);
-
-        // 事後処理
-        afterCall('div#gh');
-
-        // 期間表示ハイパーリンクを変更
-        setRange();
-
-      }
-      clearInterval(timerID);
-      timerID = null;
-    }
-  },100);
+function addWhenNotCved() {
+  afterCall('div#gh');
+  $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
+  plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
 }
 
 // ローディング進捗の計算
