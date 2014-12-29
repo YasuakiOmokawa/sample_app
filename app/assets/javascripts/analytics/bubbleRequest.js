@@ -87,8 +87,11 @@ function addOverlay(dom, req_opts) {
       opacity: 0.2,
       progress: function() {
         var target = $('<div id="guardian"></div>'
-            + '<div id="daemon">'
-                + '　　　　　　　　　　　<br>' // 位置調整のため、jp_page_name より大きい全角空白を詰める
+            + '<div id="daemon" style="white-space:pre;">'
+                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                + '<br>' // 位置調整のため、jp_page_name より大きい全角空白を詰める
                 + req_opts.jp_page_name + '<br>分析中<br><span></span>'
             + '</div>');
         return target;
