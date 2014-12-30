@@ -346,19 +346,10 @@ class UsersController < ApplicationController
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
 
-      metrics_camel_case_datas = [] # アナリティクスAPIデータ取得用
-      metrics_snake_case_datas = [] # データ構造構築用
-      metrics_for_graph_merge = {} # jqplot用データ構築用
-      get_metricses.each do |k, v|
-        metrics_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
-        metrics_camel_case_datas.push(k)
-        metrics_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
-      end
-      # アナリティクスAPIに用意されていないもの
-      get_metrics_not_ga.each do |k, v|
-        metrics_for_graph_merge[k] = {jp_caption: v}
-        metrics_snake_case_datas.push(k)
-      end
+      metrics = Metrics.new()
+      metrics_camel_case_datas = metrics.garb_parameter
+      metrics_snake_case_datas = metrics.garb_result
+      metrics_for_graph_merge = metrics.jp_caption
 
       ### APIデータ取得部
 
@@ -629,19 +620,10 @@ class UsersController < ApplicationController
           @cond[:filters].merge!(usr_opts[usr])        # 訪問者
 
           # データ指標
-          metrics_camel_case_datas = [] # アナリティクスAPIデータ取得用
-          metrics_snake_case_datas = [] # データ構造構築用
-          metrics_for_graph_merge = {} # jqplot用データ構築用
-          get_metricses.each do |k, v|
-            metrics_for_graph_merge[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
-            metrics_camel_case_datas.push(k)
-            metrics_snake_case_datas.push(k.to_s.to_snake_case.to_sym)
-          end
-          # アナリティクスAPIに用意されていないもの
-          get_metrics_not_ga.each do |k, v|
-            metrics_for_graph_merge[k] = {jp_caption: v}
-            metrics_snake_case_datas.push(k)
-          end
+          metrics = Metrics.new()
+          metrics_camel_case_datas = metrics.garb_parameter
+          metrics_snake_case_datas = metrics.garb_result
+          metrics_for_graph_merge = metrics.jp_caption
 
           # リトライ時のメッセージを指定
           exception_cb = Proc.new do |retries|

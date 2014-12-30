@@ -20,9 +20,36 @@ class Metrics < ActiveRecord::Base
     @ga.keys
   end
 
-  def garb_result
-    @ga.to_snake_case.to_sym
+  def snake_garb_parameter
+    garb_parameter.map{ |t| t.to_s.to_snake_case.to_sym }
   end
 
+  def not_ga_keys
+    @not_ga.keys
+  end
+
+  def garb_result
+    snake_garb_parameter.concat(not_ga_keys)
+  end
+
+  def jp_caption
+    jp_caption_ga.merge(jp_caption_not_ga)
+  end
+
+  def jp_caption_ga
+    hsh = {}
+    @ga.each do |k, v|
+      hsh[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
+    end
+    hsh
+  end
+
+  def jp_caption_not_ga
+    hsh = {}
+    @not_ga.each do |k, v|
+      hsh[k.to_s.to_snake_case.to_sym] = {jp_caption: v}
+    end
+    hsh
+  end
 
 end
