@@ -290,6 +290,7 @@ GEM
       rack
       raindrops (~> 0.7)
     uuidtools (2.1.4)
+    wdm (0.1.0)
     websocket (1.0.7)
     will_paginate (3.0.4)
     xpath (2.0.0)
@@ -350,4 +351,5 @@ DEPENDENCIES
   turbolinks (= 1.1.1)
   uglifier (= 2.1.1)
   unicorn
+  wdm (>= 0.1.0)
   will_paginate (= 3.0.4)

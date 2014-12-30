@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141019044737) do
+ActiveRecord::Schema.define(version: 20141230034907) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -43,6 +43,11 @@ ActiveRecord::Schema.define(version: 20141019044737) do
   end
 
   add_index "gaprojects", ["userid"], name: "index_gaprojects_on_userid", using: :btree
+
+  create_table "metrics", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "secrets", force: true do |t|
     t.text     "secret"

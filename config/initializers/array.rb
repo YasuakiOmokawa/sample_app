@@ -10,10 +10,10 @@ class Array
     [s, n]
   end
 
-  def sum
-    s, n = self.sum_with_number
-    s
-  end
+  # def sum
+  #   s, n = self.sum_with_number
+  #   s
+  # end
 
   def avg
     s, n = self.sum_with_number

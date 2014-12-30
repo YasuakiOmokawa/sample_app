@@ -35,5 +35,17 @@ module SampleApp
 
     # Unicorn のロギングを有効化
     config.logger = Logger.new(STDOUT)
+
+    # Rspec用
+    config.generators do |g|
+        g.test_framework :rspec,
+            fixtures: true,
+            view_specs: false,
+            helper_specs: false,
+            routing_specs: false,
+            controller_specs: true,
+            request_specs: false
+        g.fixture_replacement :factory_girl, dir: "spec/factories"
+    end
   end
 end

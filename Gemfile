@@ -49,6 +49,7 @@ group :development, :test do
   gem 'binding_of_caller'
   gem 'awesome_print' # オブジェクトの見やすさを改善
   gem 'hirb' # pry上でsql結果を整形
+  gem 'wdm', '>= 0.1.0' # avoid polling for changes on windows
 end
 
 group :test do
