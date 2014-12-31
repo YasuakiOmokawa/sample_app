@@ -70,7 +70,7 @@ module InsertTable
     tbl
   end
 
-  def put_table_for_graph(data, tbl, item)
+  def put_metrics_data_to_table_for_graph(data, tbl, item)
     {'good' => 0, 'bad' => 1}.each do |k, v|
       data[k].each do |d|
         date = d.date.to_s
@@ -113,7 +113,7 @@ module InsertTable
   # end
 
   # グラフ値テーブルへcv値を代入
-  def put_cv_for_graph(data, table, cv_num)
+  def put_cv_data_to_table_for_graph(data, table, cv_num)
     data.each do |d|
       date = d.date
       table[date][:cv] = d[('goal' + cv_num.to_s + '_completions').to_sym]
