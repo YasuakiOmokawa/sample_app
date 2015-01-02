@@ -233,6 +233,10 @@ module ParamUtils
     res
   end
 
+  def group_by_year_and_month(data)
+    data.group_by{|k, v| k.to_s[0..5]}.map{|k, v| k}
+  end
+
   # 人気ページテーブル用にtop10 生成
   # def top10(dt)
   #   r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言

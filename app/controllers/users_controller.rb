@@ -324,13 +324,6 @@ class UsersController < ApplicationController
       end
       # 絞り込みセレクトボックス
       @categories = []
-      # ページ共通セレクトボックス(人気ページ)
-      # gb_cnd = Ganalytics::Garb::Cond.new(@cond)
-      # @favorite = Analytics::FetchKeywordForPages.results(@ga_profile, gb_cnd.sort_favorite)
-      # @head_favorite_table = head_favorite_table(@favorite, 5)
-      # @favorite_rank = seikei_rank(@head_favorite_table)
-
-      # @categories["人気ページ"] = set_select_box(@favorite, 'f')
 
       # 遷移元ページタブを保存
       gon.prev_page = params[:prev_page].presence
@@ -338,7 +331,6 @@ class UsersController < ApplicationController
       # 日付タイプを設定
       @day_type = params[:day_type].presence || 'all_day'
       gon.radio_day = @day_type
-      # binding.pry
     end
 
     def create_common_table
@@ -383,7 +375,6 @@ class UsersController < ApplicationController
       fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res)
 
       # ランディングページ用
-      # land_gap = fetch_analytics_data('FetchKeywordForLanding', @ga_profile, gc.sort_landing_for_calc, @cv_txt)
       land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).cved!.res)
 
       # 全てのセッション(人気ページGAP値等計算用)
@@ -417,7 +408,12 @@ class UsersController < ApplicationController
 
       # グラフ表示プログラムへ渡すデータを作成
       @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
+      ym = group_by_year_and_month(@table_for_graph)
+
       create_data_for_graph_display(@data_for_graph_display, @table_for_graph, @graphic_item)
+      if chk_monthly?(ym) == true
+        @data_for_graph_display = create_monthly_summary_data_for_graph_display(@data_for_graph_display, ym, @graphic_item)
+      end
       gon.data_for_graph_display = @data_for_graph_display
 
       # グラフテーブルへ渡すデータを作成

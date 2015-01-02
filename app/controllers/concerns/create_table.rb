@@ -1,6 +1,13 @@
 module CreateTable
 
-  # グラフテーブルからグラフ表示プログラム用の配列を出力
+  def chk_monthly?(ym)
+    if ym.size >= 2
+      true
+    else
+      false
+    end
+  end
+
   def create_data_for_graph_display(hash, table, param)
     table.sort_by{ |a, b| b[:idx] }.each do |k, v|
       date =  k.to_i
@@ -15,7 +22,35 @@ module CreateTable
     hash
   end
 
-    # ギャップ値なしテーブルスケルトン作成
+  def create_monthly_summary_data_for_graph_display(data, ym, format)
+    tmp = Hash.new{ |h,k| h[k] = {} }
+    ym.each do |t|
+      tmp[t.to_i] = [
+        set_data_for_format(select_metrics(data, t), format),
+        set_data_for_format(select_cves(data, t), format)
+      ]
+    end
+    tmp
+  end
+
+  def select_metrics(data, t)
+    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[0]}
+  end
+
+  def select_cves(data, t)
+    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[1]}
+  end
+
+  def set_data_for_format(data, format)
+    case format
+    when :pageviews, :pageviews_per_session, :sessions, :users
+      data.sum.to_f.round(1)
+    when :avg_session_duration, :bounce_rate, :percent_new_sessions, :repeat_rate
+      data.avg.to_f.round(1)
+    end
+  end
+
+  # ギャップ値なしテーブルスケルトン作成
   def create_skeleton(h, cv, cvr)
       h[:sessions] = 0
       h[:pageviews] = 0
