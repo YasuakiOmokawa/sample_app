@@ -77,7 +77,19 @@ module UserFunc
     end
     p
   end
+
 end
+
+# module StringUtils
+#   def to_snake_case
+#     self.gsub(/::/, '/').
+#       gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+#       gsub(/([a-z\d])([A-Z])/,'\1_\2').
+#       tr("-", "_").
+#       downcase
+#   end
+# end
+# String.send :include, StringUtils
 
 module ParamUtils
 
@@ -166,20 +178,42 @@ module ParamUtils
     arr = []
     cntr = 0
     case tg
+    when 'f'
+      # 人気ページテーブルと同じ順番
+      data.sort_by{ |a| a.pageviews.to_i}.reverse.each do |w|
+        cntr += 1
+        arr.push([ w.page_title, w.page_title.to_s + tg ])
+        if cntr >= 10 then break end
+      end
+    when 's'
+      cntr += 1
+      data.sort_by{ |a|
+        [ -(a.sessions.to_i),
+          -(a.adsense_ads_clicks.to_i),
+          -(a.adsense_ctr.to_f) ] }.each do |w|
+        arr.push([ w.keyword, w.keyword.to_s + tg ])
+        if cntr >= 5 then break end
+      end
     when 'r'
       cntr += 1
       data.each do |k, w|
         arr.push([ w[:cap], w[:value].to_s + tg ])
-        if cntr >= 3 then break end
+        if cntr >= 5 then break end
       end
     when 'l'
       cntr += 1
       data.each do |w|
         arr.push([ w.social_network, w.social_network.to_s + tg ])
-        if cntr >= 3 then break end
+        if cntr >= 5 then break end
+      end
+    when 'c'
+      cntr += 1
+      data.each do |w|
+        arr.push([ w.campaign, w.campaign.to_s + tg ])
+        if cntr >= 5 then break end
       end
     end
-    arr
+    return arr
   end
 
   # ユニークキーを取得する
@@ -213,24 +247,6 @@ module ParamUtils
     {
       :repeat_rate => 'リピーター',
     }
-  end
-
-  def get_day_types
-    %w(
-      all_day
-      day_on
-      day_off
-    )
-  end
-
-  def get_analyzable_day_types(table)
-    res = get_day_types
-    get_day_types.each do |t|
-      d = Statistics::DayFactory.new(table, :sessions, t).data
-      res.delete(t) if d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum) < 0.43
-      # puts "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}"
-    end
-    res
   end
 
   # 人気ページテーブル用にtop10 生成

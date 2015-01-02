@@ -40,7 +40,7 @@ class UsersController < ApplicationController
       src = k.send(special.to_s.to_snake_case).to_sym
       str_src = k.send(special.to_s.to_snake_case).to_s
       type_komoku = komoku_day_type(:sessions, @day_type)
-      put_cv_data_to_table_for_graph(@cv_for_graph, tmp_soc_table[src], @cv_num)
+      put_cv_for_graph(@cv_for_graph, tmp_soc_table[src], @cv_num)
       put_table_for_special(soc_gap, tmp_soc_table[src], [:sessions], special.to_s.to_snake_case, str_src)
       soc_table[src] = calc_desire_datas(
         generate_graph_data(tmp_soc_table[src], [:sessions], @day_type))[type_komoku]
@@ -86,7 +86,7 @@ class UsersController < ApplicationController
       src = k.send(special).to_sym
       str_src = k.send(special).to_s
       type_komoku = komoku_day_type(:sessions, @day_type)
-      put_cv_data_to_table_for_graph(@cv_for_graph, tmp_ref_table[src], @cv_num)
+      put_cv_for_graph(@cv_for_graph, tmp_ref_table[src], @cv_num)
       put_table_for_special(ref_gap, tmp_ref_table[src], [:sessions], special, str_src)
       ref_table[src] = calc_desire_datas(
         generate_graph_data(tmp_ref_table[src], [:sessions], @day_type))[type_komoku]
@@ -401,10 +401,10 @@ class UsersController < ApplicationController
       create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
 
       # CV値挿入
-      put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
+      put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
 
       # GAP値をスケルトンへ挿入
-      put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
+      put_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
       calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas)
 
       # 指標値テーブルへ表示するデータを算出
@@ -495,6 +495,13 @@ class UsersController < ApplicationController
         'repeat' => { :user_type.matches => 'Returning Visitor' },
         'all' => {}
       }
+
+      # 日付タイプ
+      day_opts = %w(
+        all_day
+        day_on
+        day_off
+      )
 
       # 全体分析の完了したタイムスタンプを保持
       if params[:analyzeallcomplete].present?
@@ -594,7 +601,7 @@ class UsersController < ApplicationController
           return
         end
         @page_fltr_kwd = kwd
-        logger.info('設定されたキーワードは ' + kwd)
+        logger.info('setted keyword is ' + kwd)
 
         # キャッシュ済のデータがあればコントローラを抜ける
         return if @json.present?
@@ -636,26 +643,44 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
-          # 指標値算出用
-          # 4回までリトライできます
-          gap = ''
-          Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrics_camel_case_datas, :date)
-          end
-
-          ### データ計算部
-
+          # スケルトン作成
           @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
           create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
-          put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
-          put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
 
-          unless get_analyzable_day_types(@table_for_graph).blank?
+          # CV代入
+          put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
+
+          # CV個数が分析対象に満たない場合、コントローラを抜ける
+          d = Statistics::Day.new(@table_for_graph)
+          day_opts.delete('day_on') if d.count_cves(d.day_on) < 3
+          day_opts.delete('day_off') if d.count_cves(d.day_off) < 3
+          day_opts.delete('all_day') if d.count_cves(d.data) < 3
+
+          unless day_opts.blank?
+
+            # 指標値算出用
+            # 4回までリトライできます
+            gap = ''
+            Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+              gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrics_camel_case_datas, :date)
+            end
+
+            ### データ計算部
+
+            # # スケルトン作成
+            # @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+            # create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
+
+            # # CV代入用
+            # put_cv_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
+
+            # 指標値の算出
+            put_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas) # 項目の理想値、現実値をスケルトンへ代入
 
             calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
             # バブルチャートに表示するデータを算出
-            get_analyzable_day_types(@table_for_graph).each do |day_type|
+            day_opts.each do |day_type|
               bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, day_type)
               d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
               home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
@@ -673,7 +698,7 @@ class UsersController < ApplicationController
 
           end
         }
-        return if get_analyzable_day_types(@table_for_graph).blank?
+        return if day_opts.blank?
 
         # ループ終了。jqplot へデータ渡す
         if shori != 0
