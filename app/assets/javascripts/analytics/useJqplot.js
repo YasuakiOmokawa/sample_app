@@ -1,6 +1,3 @@
-// マイナス値があるか判定するフラグ
-var chk_minus = 0;
-
 function zeroSuppressedDateFormat(data) {
   date = Number(data.substr(4, 2)).toString() + "/" + Number(data.substr(6, 2)).toString();
   return date;
@@ -15,10 +12,6 @@ var setArr = function(data) {
       arr_metrics.push( [ dts, gon.data_for_graph_display[i][0] ]);
       arr_cv.push( [ dts, gon.data_for_graph_display[i][1] ]);
 
-      // // gap値にマイナスがあるか判定
-      // if ( String(gon.data_for_graph_display[i][0]).indexOf('-') == 0 ) {
-      //   chk_minus = 1;
-      // }
     };
     arr.push(arr_metrics, arr_cv);
 }
