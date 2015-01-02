@@ -3,11 +3,20 @@ function zeroSuppressedDateFormat(data) {
   return date;
 }
 
+function zeroSuppressedDateFormatMonthly(data) {
+  date = Number(data.substr(0, 4)).toString() + "/" + Number(data.substr(4, 2)).toString();
+  return date;
+}
+
 // コントローラから渡されたパラメータをグラフ描画用の配列に加工
 var setArr = function(data) {
     var arr_metrics = [], arr_cv = [], dts;
     for (var i in data) {
-      dts = zeroSuppressedDateFormat(i.toString());
+      if (i.toString().length == 8) {
+        dts = zeroSuppressedDateFormat(i.toString());
+      } else {
+        dts = zeroSuppressedDateFormatMonthly(i.toString());
+      }
 
       arr_metrics.push( [ dts, gon.data_for_graph_display[i][0] ]);
       arr_cv.push( [ dts, gon.data_for_graph_display[i][1] ]);
@@ -193,12 +202,6 @@ function setYaxisLimit(options, format) {
   return options;
 }
 
-// // gap値にマイナスがあれば、y軸の目盛りの数を変更
-// if (chk_minus == 1) {
-//   options.axes.yaxis.numberTicks = 10;
-//   options.axes.y2axis.numberTicks = 10;
-// }
-
 // メイン処理
 jQuery( function() {
 
@@ -238,13 +241,6 @@ jQuery( function() {
         } else if (name == 'day_sat') {
           $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
         }
-
-        // 32日以上データがあるなら平日は非表示にする　← 2014/9/3 指定期間を1か月に限定したのでコメントアウト
-        // if ( $('.jqplot-xaxis-tick').length >= 32 ) {
-        //   if (name == 'day_on') {
-        //     $( $('.jqplot-xaxis-tick')[i] ).text('');
-        //   }
-        // }
 
       }
 

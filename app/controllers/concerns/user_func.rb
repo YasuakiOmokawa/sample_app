@@ -129,24 +129,16 @@ module ParamUtils
       opt[:filters].merge!( {:medium.matches => 'referral'} )
     when 'social'
       opt[:filters].merge!( {:has_social_source_referral.matches => 'Yes'} )
-    when 'campaign'
-      opt[:filters].merge!( {:campaign.does_not_match => '(not set)'} )
     end
   end
 
   # 絞り込みキーワードの設定
   def set_narrow_word(wd, opt, tag)
     case tag
-    when 'f'
-      opt[:filters].merge!( {:page_title.matches => wd } )
-    when 's'
-      opt[:filters].merge!( {:keyword.matches => wd } )
     when 'r'
       opt[:filters].merge!( {:source.matches => wd } )
     when 'l'
       opt[:filters].merge!( {:social_network.matches => wd } )
-    when 'c'
-      opt[:filters].merge!( {:campaign.matches => wd } )
     end
   end
 
@@ -228,7 +220,7 @@ module ParamUtils
     get_day_types.each do |t|
       d = Statistics::DayFactory.new(table, :sessions, t).data
       res.delete(t) if d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum) < 0.43
-      # puts "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}"
+      logger.info( "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}")
     end
     res
   end
@@ -236,30 +228,4 @@ module ParamUtils
   def group_by_year_and_month(data)
     data.group_by{|k, v| k.to_s[0..5]}.map{|k, v| k}
   end
-
-  # 人気ページテーブル用にtop10 生成
-  # def top10(dt)
-  #   r_hsh = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-  #   cntr = 0
-  #   dt.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-  #     cntr += 1
-  #     r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
-  #     if cntr >= 10 then break end
-  #   end
-  #   cntr = cntr + 1
-  #   r_hsh[cntr] = ['その他', '']
-  #   return r_hsh
-  # end
-
-  # 人気ページ用に上位タイトルを切り出す
-  # def head_favorite_table(data, limit)
-  #   r_hsh = Hash.new { |h,k| h[k] = {}}
-  #   cntr = 0
-  #   data.sort_by{ |a| a.pageviews.to_i}.reverse.each do |t|
-  #     cntr += 1
-  #     r_hsh[cntr] = [t.page_title, t.page_path, t.pageviews]
-  #     if cntr >= limit then break end
-  #   end
-  #   r_hsh
-  # end
 end

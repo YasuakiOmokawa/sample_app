@@ -43,9 +43,9 @@ module CreateTable
 
   def set_data_for_format(data, format)
     case format
-    when :pageviews, :pageviews_per_session, :sessions, :users
+    when :pageviews, :sessions, :users
       data.sum.to_f.round(1)
-    when :avg_session_duration, :bounce_rate, :percent_new_sessions, :repeat_rate
+    when :avg_session_duration, :bounce_rate, :percent_new_sessions, :repeat_rate, :pageviews_per_session
       data.avg.to_f.round(1)
     end
   end

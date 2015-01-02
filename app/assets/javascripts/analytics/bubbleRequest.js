@@ -553,7 +553,7 @@ function cacheShapedBubbleParts(req_opts, elm, shaped_idxarr, req_opts) {
 
 function addWhenNotCved() {
   afterCall('div#gh');
-  $("span#errormsg").html('コンバージョンした日数が３日以上ある期間を指定して再実行してください。');
+  $("span#errormsg").html('分析対象のデータが足りません。コンバージョン数の多い期間を指定して再実行してください。');
   plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
 }
 

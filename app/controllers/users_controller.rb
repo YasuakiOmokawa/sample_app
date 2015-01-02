@@ -114,8 +114,6 @@ class UsersController < ApplicationController
     @narrow_action = direct_user_path
     gon.div_page_tab = 'direct'
 
-    # @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
-    # @kitchen_partial = 'norender'
     @details_partial = 'norender'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -126,10 +124,6 @@ class UsersController < ApplicationController
     @title = '検索'
     @narrow_action = search_user_path
     gon.div_page_tab = 'search'
-    # @search = Analytics::FetchKeywordForSearch.results(@ga_profile, @cond)
-    # @categories["検索ワード"] = set_select_box(@search, 's')
-
-    # @in_table = Analytics::FetchKeywordForDetail.results(@ga_profile, @cond)
     @details_partial = 'norender'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -434,8 +428,8 @@ class UsersController < ApplicationController
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      cved_session = guard_for_zero_division(all_session - fav_gap['bad'].results.map { |t| t.sessions }.sum)
-      not_cved_session = guard_for_zero_division(all_session - fav_gap['good'].results.map { |t| t.sessions }.sum)
+      cved_session = guard_for_zero_division(all_session - fav_gap['bad'].results.map { |t| t.sessions.to_i }.sum)
+      not_cved_session = guard_for_zero_division(all_session - fav_gap['good'].results.map { |t| t.sessions.to_i }.sum)
 
       create_skeleton_favorite_table(fav_for_skel, @favorite_table)
       put_favorite_table_for_skelton(fav_gap, @favorite_table)
@@ -448,9 +442,6 @@ class UsersController < ApplicationController
       land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
       @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       @landing_table = put_landing_table(land_for_skel, @landing_table)
-      # create_skeleton_landing_table(land_for_skel, @landing_table)
-      # put_landing_table_for_skelton(land_gap, @landing_table)
-      # calc_gap_for_favorite(@landing_table)
 
     end
 
@@ -561,22 +552,19 @@ class UsersController < ApplicationController
           kwds = []
           case wd
           when 'referral'
-            dimend_key = :source
-            referral = Analytics.create_class('FetchKeywordForRef',
-                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-            aa = referral.sort_by{ |a| -(a.cv.to_i ) }
-            aa.each do |t|
-              kwds.push('r' + t.source) if t.cv.to_i >= 1
-              if kwds.size >= 3 then break end
+            special = :source
+            ref_source = Analytics.create_class('Ref',
+              [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+            ref_source.each do |t|
+              kwds.push('r' + t.source)
             end
           when 'social'
-            dimend_key = :socialNetwork
-            social = Analytics.create_class('FetchKeywordForSoc',
-                [ @cv_txt ], [ dimend_key ] ).results(@ga_profile, @cond)
-            aa = social.sort_by{ |a| -(a.cv.to_i ) }
-            aa.each do |t|
-              kwds.push( 'l' + t.social_network) if t.cv.to_i >= 1
-              if kwds.size >= 3 then break end
+            special = :socialNetwork
+            # データ取得部
+            soc_source = Analytics.create_class('Soc',
+              [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+            soc_source.each do |t|
+              kwds.push( 'l' + t.social_network)
             end
           end
 
