@@ -215,7 +215,7 @@ module ParamUtils
     )
   end
 
-  # REFERENCE_VALUE = 0.42
+  # REFERENCE_VALUE = 0.43
   REFERENCE_VALUE = 0.0
   def get_analyzable_day_types(table)
     res = get_day_types

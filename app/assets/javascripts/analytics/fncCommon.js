@@ -41,7 +41,7 @@ var HomeOverlay = new function() {
     constructor: self
 
     ,handler: function handler() {
-      $('div.plainoverlay').css(
+      $('form div.plainoverlay').css(
         {
           height: '42px',
           cursor: 'auto',
@@ -79,7 +79,7 @@ var SelectOverlay = new function() {
     constructor: self
 
     ,handler: function handler() {
-      $('div.plainoverlay').css(
+      $('form div.plainoverlay').css(
         {
           height: '42px',
           cursor: 'auto',
