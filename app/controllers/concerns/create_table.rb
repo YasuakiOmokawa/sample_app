@@ -27,7 +27,8 @@ module CreateTable
     ym.each do |t|
       tmp[t.to_i] = [
         set_data_for_format(select_metrics(data, t), format),
-        set_data_for_format(select_cves(data, t), format)
+        set_data_for_format(select_cves(data, t), format),
+        'day_on'
       ]
     end
     tmp

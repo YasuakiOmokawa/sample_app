@@ -10,7 +10,7 @@ function zeroSuppressedDateFormatMonthly(data) {
 
 // コントローラから渡されたパラメータをグラフ描画用の配列に加工
 var setArr = function(data) {
-    var arr_metrics = [], arr_cv = [], dts;
+    var arr_metrics = [], arr_cv = [], dts, arr = [];
     for (var i in data) {
       if (i.toString().length == 8) {
         dts = zeroSuppressedDateFormat(i.toString());
@@ -18,11 +18,12 @@ var setArr = function(data) {
         dts = zeroSuppressedDateFormatMonthly(i.toString());
       }
 
-      arr_metrics.push( [ dts, gon.data_for_graph_display[i][0] ]);
-      arr_cv.push( [ dts, gon.data_for_graph_display[i][1] ]);
+      arr_metrics.push( [ dts, data[i][0], data[i][2]]);
+      arr_cv.push( [ dts, data[i][1], data[i][2]]);
 
     };
     arr.push(arr_metrics, arr_cv);
+    return arr;
 }
 
 // 表示する値の種類によって、グラフのY軸（左側）のフォーマットを変更
@@ -110,8 +111,16 @@ var resetXbgc = function(nm, dt, yval) {
   return data;
 }
 
-var arr = [];
-setArr(gon.data_for_graph_display);
+
+function setYaxisLimit(options, format) {
+  if (format === 'percent') {
+    options.axes.yaxis.min = 0;
+    options.axes.yaxis.max = 100;
+  }
+  return options;
+}
+
+var graph_data = setArr(gon.data_for_graph_display);
 
 // グラフのオプション
 var options = {
@@ -194,14 +203,6 @@ var options = {
 // グラフのフォーマット設定は自作関数で行う
 options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
-function setYaxisLimit(options, format) {
-  if (format === 'percent') {
-    options.axes.yaxis.min = 0;
-    options.axes.yaxis.max = 100;
-  }
-  return options;
-}
-
 // メイン処理
 jQuery( function() {
 
@@ -220,25 +221,23 @@ jQuery( function() {
       $('.jqplot-axis.jqplot-x2axis').hide();
 
       // x軸（日付）の処理
-      var ymax_value = $('.jqplot-y2axis-tick').last().text(); // 土日祝の背景を塗りつぶすときに使う
+      var y2max_value = $('.jqplot-y2axis-tick').last().text(); // 土日祝の背景を塗りつぶすときに使う
+
       for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
 
-        var text = $( $('.jqplot-xaxis-tick')[i] ).text();
-        var date = 'td[data-dflg]:contains(' + String(text) + ')';
-        var name = $(date).attr("data-dflg");
-        var dt;
-        // console.log(name);
+        var day_type = graph_data[0][i][2];
+        var background_graph_color;
 
         // 土曜日の部分背景を青、日祝なら赤に変更
-        if (name != 'day_on') {
-          dt = resetXbgc(name, i, ymax_value);
-          tickopt.canvasOverlay.objects.push(dt);
+        if (day_type != 'day_on') {
+          background_graph_color = resetXbgc(day_type, i, y2max_value);
+          tickopt.canvasOverlay.objects.push(background_graph_color);
         }
 
         // 土曜日なら文字列を青、日祝なら文字列を赤に変更
-        if (name == 'day_sun' || name == 'day_hol') {
+        if (day_type == 'day_sun' || day_type == 'day_hol') {
           $( $('.jqplot-xaxis-tick')[i] ).css("color", "red");
-        } else if (name == 'day_sat') {
+        } else if (day_type == 'day_sat') {
           $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
         }
 
@@ -253,7 +252,7 @@ jQuery( function() {
   });
 
     // ★jqplot描画
-  var squareBar = jQuery . jqplot( 'gh', arr, setYaxisLimit(options, gon.format_string));
+  var squareBar = jQuery . jqplot( 'gh', graph_data, setYaxisLimit(options, gon.format_string));
 
   // グラフのy座標へ水平線を設定
   var yticks = $('.jqplot-y2axis-tick'), tick, dt;

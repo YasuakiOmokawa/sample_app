@@ -634,12 +634,13 @@ class UsersController < ApplicationController
           put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
           put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
 
-          unless get_analyzable_day_types(@table_for_graph).blank?
+          analyze_day_types = get_analyzable_day_types(@table_for_graph)
+          unless analyze_day_types.blank?
 
             calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
             # バブルチャートに表示するデータを算出
-            get_analyzable_day_types(@table_for_graph).each do |day_type|
+            analyze_day_types.each do |day_type|
               bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, day_type)
               d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
               home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)

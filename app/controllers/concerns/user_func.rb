@@ -215,12 +215,14 @@ module ParamUtils
     )
   end
 
+  # REFERENCE_VALUE = 0.42
+  REFERENCE_VALUE = 0.0
   def get_analyzable_day_types(table)
     res = get_day_types
     get_day_types.each do |t|
       d = Statistics::DayFactory.new(table, :sessions, t).data
-      res.delete(t) if d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum) < 0.43
-      logger.info( "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}")
+      res.delete(t) unless d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum) >= REFERENCE_VALUE
+      puts "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}"
     end
     res
   end

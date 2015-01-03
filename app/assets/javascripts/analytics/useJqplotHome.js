@@ -189,7 +189,6 @@ function paddingRankBox(base_target) {
         .append(
           $('<a>')
             .text('-')
-            // .css({'background-color': '#adadad'})
         )
       );
   });
@@ -360,7 +359,7 @@ function kwdTnsltENtoJP(d) {
 
   var wd;
   if (d === 'nokwd' ) {
-    wd = 'キーワードなし';
+    wd = '参照元なし';
   } else {
     wd = d;
   }
@@ -389,7 +388,7 @@ function showTooltip(target, x, y, contents) {
         + '<li>' + contents.data('day-type-jp') + '</li>'
         + '<li>' + devTnsltENtoJP(contents.data('devfltr')) + '</li>'
         + '<li>' + usrTnsltENtoJP(contents.data('usrfltr')) + '</li>'
-        + '<li>' + kwdTnsltENtoJP(contents.data('kwdfltr')) + '</li>'
+        + '<li id="keyword">' + kwdTnsltENtoJP(contents.data('kwdfltr')) + '</li>'
         + '</ul>'
        + '</div>'
     ),
@@ -399,6 +398,22 @@ function showTooltip(target, x, y, contents) {
     speed: 0,
   })
   .tooltipster('show');
+
+  removeKeywordForPageName();
+}
+
+function removeKeywordForPageName() {
+  switch (getAnalyzedPageName()) {
+    case 'all':
+    case 'search':
+    case 'direct':
+      $(".tooltipster-content #box_r ul li#keyword").remove();
+    break;
+  }
+}
+
+function getAnalyzedPageName() {
+  return $('#pnt div').attr('class');
 }
 
 function hideTooltip(target) {
