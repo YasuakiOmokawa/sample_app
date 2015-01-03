@@ -3,7 +3,7 @@ function setEventOnChangeCVName() {
       $('input[name="cv_num"]').val($(this).val());
 
       if (isTitleHome()) {
-        var key = isTargetClicked(getClickedAnalyzeTrigger());
+        var key = isTargetClicked(getAnalyzedPageName());
         bubbleCreateAtTabLink(key);
       } else {
         $('a#set').trigger('click');
@@ -19,7 +19,7 @@ function isTitleHome() {
   }
 }
 
-function getClickedAnalyzeTrigger() {
+function getAnalyzedPageName() {
   return $('#pnt div').attr('class');
 }
 
@@ -181,16 +181,7 @@ var setRange = function setRange() {
   $('a#jrange').html(txt2);
 }
 
-$(document).ready(function() {
-
-  // ページタイトルに応じて、絞り込み要素をフィルタする
-  var ol = overlayFactory($('title').text());
-  if (typeof ol != "undefined") {
-    ol.overlayNarrow(ol);
-    overlayOnResize(ol);
-  }
-
-  // グラフへ戻るを選択したときのイベント
+function clickOnBackToHome() {
   $('#bk a').click(function() {
     var act = $('form[name="narrowForm"]').attr('action');
     var acts = act.split('/');
@@ -200,6 +191,18 @@ $(document).ready(function() {
     $('input[name="prev_page"]').val(acts_class);
     evtsend($(this));
   });
+}
+
+$(document).ready(function() {
+
+  // ページタイトルに応じて、絞り込み要素をフィルタする
+  var ol = overlayFactory($('title').text());
+  if (typeof ol != "undefined") {
+    ol.overlayNarrow(ol);
+    overlayOnResize(ol);
+  }
+
+  clickOnBackToHome();
 
   setEventOnChangeCVName();
 
@@ -294,35 +297,35 @@ $(document).ready(function() {
     switch (String(i)) {
       case 'PV数':
         // 数値
-        $('#ltfm table tr:nth-child(2) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(2) td:nth-child(1)').css("color", "red");
         break;
       case 'セッション':
         // 数値
-        $('#ltfm table tr:nth-child(3) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(3) td:nth-child(1)').css("color", "red");
         break;
       case 'ユーザー':
         // 数値
-        $('#ltfm table tr:nth-child(4) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(4) td:nth-child(1)').css("color", "red");
         break;
       case '平均PV数':
         // 目標値
-        $('#ltfm table tr:nth-child(5) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(5) td:nth-child(1)').css("color", "red");
         break;
       case '平均滞在時間':
         // 目標値
-        $('#ltfm table tr:nth-child(6) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(6) td:nth-child(1)').css("color", "red");
         break;
       case '新規ユーザー':
         // 目標値
-        $('#ltfm table tr:nth-child(7) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(7) td:nth-child(1)').css("color", "red");
         break;
       case 'リピーター':
         // 目標値
-        $('#ltfm table tr:nth-child(8) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(8) td:nth-child(1)').css("color", "red");
         break;
       case '直帰率':
         // 数値
-        $('#ltfm table tr:nth-child(9) td:nth-child(1)').css("color", "red");
+        $('#ltfm table#highlight tr:nth-child(9) td:nth-child(1)').css("color", "red");
         break;
       }
   }

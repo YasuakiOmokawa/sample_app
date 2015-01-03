@@ -412,10 +412,6 @@ function removeKeywordForPageName() {
   }
 }
 
-function getAnalyzedPageName() {
-  return $('#pnt div').attr('class');
-}
-
 function hideTooltip(target) {
   $(target)
   .tooltipster('destroy');

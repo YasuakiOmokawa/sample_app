@@ -148,7 +148,7 @@ $(function() {
           $("input.tod").datepicker("destroy");
 
           if (isTitleHome()) {
-            var key = isTargetClicked(getClickedAnalyzeTrigger());
+            var key = isTargetClicked(getAnalyzedPageName());
             bubbleCreateAtTabLink(key);
           } else {
             $('a#set').trigger('click');

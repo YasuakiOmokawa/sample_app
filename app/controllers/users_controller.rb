@@ -56,7 +56,6 @@ class UsersController < ApplicationController
       cnt += 1
     end
     @categories = ar
-
     @details_partial = 'details'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -102,7 +101,6 @@ class UsersController < ApplicationController
       cnt += 1
     end
     @categories = ar
-
     @details_partial = 'details'
 
     render :layout => 'ganalytics', :action => 'show'
@@ -548,7 +546,8 @@ class UsersController < ApplicationController
           # キャッシュ済のデータがあればコントローラを抜ける
           return if @json.present?
 
-          # 絞り込みキーワードが指定されていない場合はキーワードを取得
+          puts "絞り込み条件が指定されていません。絞り込み条件を取得します"
+          @cond[:filters].merge!(page.values[0])
           kwds = []
           case wd
           when 'referral'
@@ -567,6 +566,7 @@ class UsersController < ApplicationController
               kwds.push( 'l' + t.social_network)
             end
           end
+          @cond[:filters] = {}
 
           # キーワード配列を格納
           @json = kwds.to_json
