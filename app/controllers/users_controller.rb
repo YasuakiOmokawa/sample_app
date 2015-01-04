@@ -587,6 +587,7 @@ class UsersController < ApplicationController
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
 
         # パラレル処理は考えていないが、一応残しておく（API制限がもしかしたら外れるかも。。）
+        analyze_day_types = []
         Parallel.map(page, :in_threads=>1) { |x, z|
 
           room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
