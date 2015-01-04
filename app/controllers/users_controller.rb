@@ -658,7 +658,7 @@ class UsersController < ApplicationController
 
           end
         }
-        return if get_analyzable_day_types(@table_for_graph).blank?
+        return if analyze_day_types.blank?
 
         # ループ終了。jqplot へデータ渡す
         if shori != 0
