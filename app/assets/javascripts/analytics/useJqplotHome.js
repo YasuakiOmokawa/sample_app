@@ -46,75 +46,71 @@ function addClickEvtToInfo(target) {
 
   $(target).click(function(e) {
 
-      // グラフ項目を設定
-      var metrics = $(e.target).data('metrics');
-      addGraphicItem( metrics, $('input[name="graphic_item"]') );
-      console.log('graphic_item : ' + $('input[name="graphic_item"]').val());
+    var target_action = getTargetAction(e);
+    var target_action_array = target_action.split('/');
 
-      // 絞り込みチェックボックスの値を指定
-      var dp = $(e.target).data('devfltr');
-      var up = $(e.target).data('usrfltr');
-      var dayp = $(e.target).data('day-type');
-      console.log('dp : ' + dp);
-      console.log('up : ' + up);
-      console.log('dayp : ' + dayp);
+    // グラフ項目を設定
+    var metrics = $(e.target).data('metrics');
+    addGraphicItem( metrics, $('input[name="graphic_item"]') );
+    console.log('graphic_item : ' + $('input[name="graphic_item"]').val());
 
-      $.each([dp,up,dayp], function(i, val) {
-        var type,n,m;
-        type = 'form[name="narrowForm"] input[value=' + val + ']';
-        n = $(type).attr("name");
-        m = 'form[name="narrowForm"] input[name=' + n + ']';
-        $(m).val([val]);
-      });
+    // 絞り込みチェックボックスの値を指定
+    var dp = $(e.target).data('devfltr');
+    var up = $(e.target).data('usrfltr');
+    var dayp = $(e.target).data('day-type');
+    console.log('dp : ' + dp);
+    console.log('up : ' + up);
+    console.log('dayp : ' + dayp);
 
-      // 絞り込みキーワードの値を設定
-      var kwd = $(e.target).data('kwdfltr');
-      console.log('kwd : ' + kwd);
+    $.each([dp,up,dayp], function(i, val) {
+      var type,n,m;
+      type = 'form[name="narrowForm"] input[value=' + val + ']';
+      n = $(type).attr("name");
+      m = 'form[name="narrowForm"] input[name=' + n + ']';
+      $(m).val([val]);
+    });
 
-      if (kwd != 'nokwd') {
-        var flg; // どのページのキーワードか判別用
+    // 絞り込みキーワードの値を設定
+    var kwd = $(e.target).data('kwdfltr');
+    console.log('kwd : ' + kwd);
 
-        // 遷移先の最後のアクション名を取得
-        var p = $(e.target).attr("name");
-        p = p.split('/');
+    if (kwd != 'nokwd') {
+      var flg; // どのページのキーワードか判別用
 
-        // 遷移先を判別
-        switch (p[3]) {
-          case 'search':
-            flg = 's';
-            break;
-          case 'direct':
-            flg = 'f';
-            break;
-          case 'referral':
-            flg = 'r';
-            break;
-          case 'social':
-            flg = 'l';
-            break;
-          default:
-            flg = 'f';
-        }
+      // 遷移先の最後のアクション名を取得
+      var action_name = target_action_array[3];
 
-        // 遷移先のキーワードとページ情報を設定
-        var n_wd = kwd + flg;
-        $('#narrow_select')
-          .append($('<option>')
-            .html(" ")
-            .val(n_wd)
-          ).val(n_wd);
+      // 遷移先を判別
+      switch (action_name) {
+        case 'referral':
+          flg = 'r';
+          break;
+        case 'social':
+          flg = 'l';
+          break;
       }
 
-      // 遷移先の強調項目を設定
-      $('input[name="red_item"]').val(metrics);
+      // 遷移先のキーワードとページ情報を設定
+      var n_wd = kwd + flg;
+      $('#narrow_select')
+        .append($('<option>')
+          .html(" ")
+          .val(n_wd)
+        ).val(n_wd);
+    }
 
-      // 遷移先ページタブ情報を保持
-      var prev_page = String(metrics);
-      $('input[name="prev_page"]').val(prev_page);
-      console.log('prev_page : ' + prev_page);
+    // 遷移先の強調項目を設定
+    $('input[name="red_item"]').val(metrics);
 
-      // ページ遷移
-      evtsend($(e.target));
+    // 遷移先ページタブ情報を保持
+    var action_class = '.' + target_action_array[3];
+    $('input[name="prev_page"]').val('home');
+    console.log('prev_page : ' + 'home');
+    // $('input[name="prev_page"]').val(action_class);
+    // console.log('prev_page : ' + action_class);
+
+    // ページ遷移
+    evtsend($(e.target));
   });
 }
 

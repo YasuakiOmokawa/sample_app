@@ -181,16 +181,30 @@ var setRange = function setRange() {
   $('a#jrange').html(txt2);
 }
 
-function clickOnBackToHome() {
-  $('#bk a').click(function() {
+function getTargetAction(e) {
+  return $(e.target).attr("name");
+}
+
+function backToHome(e) {
+  if ( $('input[name="prev_page"]').val() == 'home' ) {
     var act = $('form[name="narrowForm"]').attr('action');
     var acts = act.split('/');
     var acts_class = '.' + acts[3];
 
     $('input[name="shori"]').val(0);
     $('input[name="prev_page"]').val(acts_class);
-    evtsend($(this));
+    evtsend(e);
+  }
+}
+
+function setBackToHome() {
+  $('#bk a').click(function() {
+    backToHome($(this));
   });
+}
+
+function triggerBackToHome() {
+  $('#bk a').trigger('click');
 }
 
 $(document).ready(function() {
@@ -202,9 +216,11 @@ $(document).ready(function() {
     overlayOnResize(ol);
   }
 
-  clickOnBackToHome();
+  setBackToHome();
 
   setEventOnChangeCVName();
+
+  // checkBeforeUnload();
 
   // グラフに表示する項目のプルダウンを選択したときのイベント
   $('select#graphicselect').change(function() {
@@ -263,6 +279,15 @@ $(document).ready(function() {
     if( e.keyCode == 27 ) {
       $('.spinner').remove();
     }
+
+    // alt+←, backspace でのブラウザバックを抑止
+    if( e.altKey && e.keyCode == 37 || e.keyCode == 8) {
+      if ( $('input[name="prev_page"]').val() == 'home' ) {
+        triggerBackToHome();
+        return false;
+      }
+    }
+
   });
 
   // 曜日ごとに背景色を変更
