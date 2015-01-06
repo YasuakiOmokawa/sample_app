@@ -102,13 +102,6 @@ function addClickEvtToInfo(target) {
     // 遷移先の強調項目を設定
     $('input[name="red_item"]').val(metrics);
 
-    // 遷移先ページタブ情報を保持
-    var action_class = '.' + target_action_array[3];
-    $('input[name="prev_page"]').val('home');
-    console.log('prev_page : ' + 'home');
-    // $('input[name="prev_page"]').val(action_class);
-    // console.log('prev_page : ' + action_class);
-
     // ページ遷移
     evtsend($(e.target));
   });

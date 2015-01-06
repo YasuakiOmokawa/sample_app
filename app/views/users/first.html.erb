@@ -4,14 +4,13 @@
     <div id="gh" style="z-index: 1;"></div>
     <span class="tooltip"></span>
     <div id="pnt">
-      <a href="javascript:void(0)" class="all" path=<%= all_user_path %> onclick="bubbleCreateAtTabLink($(this).attr('class'));" >全体</a>
-      <a href="javascript:void(0)" class="search" path=<%= search_user_path %> onclick="bubbleCreateAtTabLink($(this).attr('class'));" >検索</a>
-      <a href="javascript:void(0)" class="direct" path=<%= direct_user_path %> onclick="bubbleCreateAtTabLink($(this).attr('class'));" >直接入力/ブックマーク</a>
-      <a href="javascript:void(0)" class="referral" path=<%= referral_user_path %> onclick="bubbleCreateAtTabLink($(this).attr('class'));" >その他ウェブサイト</a>
-      <a id="ed" href="javascript:void(0)" class="social" path=<%= social_user_path %> onclick="bubbleCreateAtTabLink($(this).attr('class'));" >ソーシャル</a>
+      <a href="#all" class="all" path=<%= all_user_path %> >全体</a>
+      <a href="#search" class="search" path=<%= search_user_path %> >検索</a>
+      <a href="#direct" class="direct" path=<%= direct_user_path %> >直接入力/ブックマーク</a>
+      <a href="#referral" class="referral" path=<%= referral_user_path %> >その他ウェブサイト</a>
+      <a id="ed" href="#social" class="social" path=<%= social_user_path %>  >ソーシャル</a>
     </div>
     <span id="errormsg"></span>
     <br>
   </div>
 </div>
-

@@ -317,9 +317,6 @@ class UsersController < ApplicationController
       # 絞り込みセレクトボックス
       @categories = []
 
-      # 遷移元ページタブを保存
-      gon.prev_page = params[:prev_page].presence
-
       # 日付タイプを設定
       @day_type = params[:day_type].presence || 'all_day'
       gon.radio_day = @day_type

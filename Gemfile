@@ -32,6 +32,7 @@ gem 'friendly_id' # URL表記をわかりやすくする
 gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
+gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'

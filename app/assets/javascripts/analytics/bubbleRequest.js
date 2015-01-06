@@ -585,3 +585,11 @@ function setLoadingMortion(dom, req_opts) {
 
 }
 
+$(document).ready(function() {
+
+  $('#pnt a').click(function() {
+    var hash = this.hash;
+    var page = hash.slice(1);
+    bubbleCreateAtTabLink(page);
+  });
+});

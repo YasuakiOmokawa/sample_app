@@ -185,16 +185,20 @@ function getTargetAction(e) {
   return $(e.target).attr("name");
 }
 
-function backToHome(e) {
-  if ( $('input[name="prev_page"]').val() == 'home' ) {
-    var act = $('form[name="narrowForm"]').attr('action');
-    var acts = act.split('/');
-    var acts_class = '.' + acts[3];
+function getFormAction() {
+  return $('form[name="narrowForm"]').attr('action');
+}
 
-    $('input[name="shori"]').val(0);
-    $('input[name="prev_page"]').val(acts_class);
-    evtsend(e);
-  }
+function setFormAction(ref) {
+  $('form[name="narrowForm"]').attr("action", ref);
+}
+
+function backToHome(e) {
+  var acts = getFormAction().split('/');
+  var act_ref = e.attr("name") + "#" + acts[3];
+  $('input[name="shori"]').val(0);
+  setFormAction(act_ref);
+  $('a#set').trigger('click');
 }
 
 function setBackToHome() {
@@ -206,6 +210,11 @@ function setBackToHome() {
 function triggerBackToHome() {
   $('#bk a').trigger('click');
 }
+
+$(document).bind('keydown', 'esc', function() {
+  alert('esc pressed');
+  $('.spinner').remove();
+});
 
 $(document).ready(function() {
 
@@ -219,8 +228,6 @@ $(document).ready(function() {
   setBackToHome();
 
   setEventOnChangeCVName();
-
-  // checkBeforeUnload();
 
   // グラフに表示する項目のプルダウンを選択したときのイベント
   $('select#graphicselect').change(function() {
@@ -272,22 +279,6 @@ $(document).ready(function() {
       target.append(spinner.el);
       $('.spinner').css('margin-top', 2);
     }
-  });
-
-  // escボタンを押したとき、プログレススピナーをキャンセルする
-  $(window).keydown(function(e){
-    if( e.keyCode == 27 ) {
-      $('.spinner').remove();
-    }
-
-    // alt+←, backspace でのブラウザバックを抑止
-    if( e.altKey && e.keyCode == 37 || e.keyCode == 8) {
-      if ( $('input[name="prev_page"]').val() == 'home' ) {
-        triggerBackToHome();
-        return false;
-      }
-    }
-
   });
 
   // 曜日ごとに背景色を変更
@@ -364,10 +355,6 @@ $(document).ready(function() {
   var cv = gon.cv_num;
   $('select[name="cvselect"]').val(cv);
   $('input[name="cv_num"]').val(cv);
-
-  // 遷移元ページの情報を保持
-  var prev_page = gon.prev_page;
-  $('input[name="prev_page"]').val(prev_page);
 
   // プルダウン未選択時の文字色を薄めに変更
   var dColor = '#999999';
