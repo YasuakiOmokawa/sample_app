@@ -613,6 +613,20 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
+          # # ボトルネック算出用
+          # bottle_metrics = metrics_camel_case_datas.dup
+          # bottle_metrics.push((@cv_txt.classify + 's').to_sym)
+          # cls_name = 'CollectDataForCalcBottleNeck' + rndm.to_s
+          # # 4回までリトライできます
+          # Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          #   @cv_for_graph_hourly = Analytics.create_class(cls_name,
+          #     bottle_metrics, [:dateHour] ).results(@ga_profile,@cond)
+          # end
+
+          # # 標準偏差の獲得
+          # @cv_for_graph_hourly.map{|t| t.pageviews.to_f}.corrcoef(@cv_for_graph_hourly.map{|t| t.send(@cv_txt).to_f })
+
+
           # 指標値算出用
           # 4回までリトライできます
           gap = ''
