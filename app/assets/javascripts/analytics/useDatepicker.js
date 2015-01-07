@@ -127,7 +127,7 @@ $(function() {
       addRangeToDatePicker();
 
       // datepicker を表示させるため、初期focus を行う。
-      $( "div.jquery-ui-dialog-form" ).focus();
+      $("div.jquery-ui-dialog-form").focus();
 
     },
     width: 400,

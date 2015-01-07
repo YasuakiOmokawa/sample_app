@@ -142,6 +142,7 @@ function addRanking(idxarr, target) {
           .attr({
             "href": 'javascript:void(0)',
             "title": counter,
+            'data-pri': value['pri'],
             'data-corr': value['corr'],
             'data-corr-sign': value['corr_sign'],
             'data-metrics': value['jp_metrics'],
@@ -163,6 +164,12 @@ function addRanking(idxarr, target) {
 
   });
 }
+
+// 順位ブロックの優先度計算が正しいかどうかのテストコード
+// $('#mfm ul li a').each(function() {
+//   var res = Number($(this).data('corr')) * 2 + isVariationOverLimit($(this).data('vari'));
+//   console.log('pri: ' + $(this).data('pri') + ' res: ' + res);
+// });
 
 function paddingRankBox(base_target) {
   var target = base_target + ' li'
@@ -224,6 +231,10 @@ var setBubbleColor = function(x, y) {
     return label;
 }
 
+function calcPriority(obj) {
+  return obj.corr * 2 + isVariationOverLimit(obj.vari);
+}
+
 // データ項目一覧の設定
 var setDataidx = function(obj, wd, idxarr) {
 
@@ -246,8 +257,8 @@ var setDataidx = function(obj, wd, idxarr) {
     for (var j in tmp) {
       var
         ar = {},
-        pri = tmp[j].corr + tmp[j].vari,
         jp = tmp[j].jp_caption.split(';;');
+      var pri = calcPriority(tmp[j]);
 
       ar['pri'] = pri;
       ar['corr'] = tmp[j].corr;
