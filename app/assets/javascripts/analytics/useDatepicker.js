@@ -1,3 +1,11 @@
+function isLocationHash() {
+  if (location.hash) {
+    return location.hash;
+  } else {
+    return "#all";
+  }
+}
+
 // 日付計算
 var calc = function(datestr, p, day) {
   var dt = new Date(datestr);
@@ -148,7 +156,7 @@ $(function() {
           $("input.tod").datepicker("destroy");
 
           if (isTitleHome()) {
-            var hash = location.hash;
+            var hash = isLocationHash();
             var page = hash.slice(1);
             bubbleCreateAtTabLink(page);
           } else {
