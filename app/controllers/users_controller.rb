@@ -231,52 +231,46 @@ class UsersController < ApplicationController
 
         @req_str = request.fullpath.to_s
 
-        logger.info('req path is ' + @req_str)
+        logger.info('リクエストパラメータのフルパスは以下です。')
+        logger.info(@req_str)
 
-        # キャッシュを取得する(キーワード数)
         cached_item = Rails.cache.read(@req_str)
+        logger.info('キャッシュされたキーワードデータが読み込まれました。') unless cached_item.nil?
 
         # キャッシュ読み書き(バブル用データ)
         if params[:analyze_type].present?
 
-          analyze_type = params[:analyze_type].to_s
-
-          uniq = create_cache_key(analyze_type)
+          memcache_graph_key = create_cache_key(params[:analyze_type].to_s)
 
           if params[:r_obj].present?
 
-            puts 'set data for cache'
+            logger.info( 'グラフ用データをキャッシュします。')
+            caching_graph_data = params[:r_obj].to_s
 
-            # 格納用データオブジェクト
-            s_txt = params[:r_obj].to_s
-
-            # 結果をキャッシュへ格納してコントローラを抜ける
-            # キャッシュの保持時間は1h
-            Rails.cache.write(uniq, s_txt, expires_in: 1.hour, compress: true)
+            Rails.cache.write(memcache_graph_key, caching_graph_data, expires_in: 1.hour, compress: true)
 
             # 分析完了メールを送信
-            unless analyze_type == 'kobetsu'
-              user = User.find(params[:id])
-              UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
-            end
+            # unless analyze_type == 'kobetsu'
+            #   user = User.find(params[:id])
+            #   UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
+            # end
 
             return
           else
 
-            puts 'getting cached data'
-
-            # データを読み込む
-            cached_item = Rails.cache.read(uniq)
+            logger.info( 'キャッシュされたグラフデータを読み込みます。')
+            cached_item = Rails.cache.read(memcache_graph_key)
           end
         end
 
         # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
         if cached_item.present?
-          puts 'cached_item is ' + cached_item
+          logger.info( '読み込まれたキャッシュデータは次の通りです。')
+          logger.info( cached_item)
           @json = cached_item
           return
         else
-          puts 'no cached_item'
+          logger.info( 'リクエストされたキーに紐づいているキャッシュデータはありません。')
         end
       end
 
@@ -525,14 +519,13 @@ class UsersController < ApplicationController
         kwd = ''
         if params[:kwd].present?
 
-          logger.info('parameter keyword is ' + kwd)
+          logger.info('パラメータで渡されたキーワード: ' + kwd)
           # キーワードがnokwdでない場合
           if params[:kwd].to_s != 'nokwd'
 
             kwd = params[:kwd].to_s
             p = kwd.slice!(0)
 
-            # ページ項目の判定と、絞り込みキーワードの設定
             set_narrow_word(kwd, @cond, p)
           else
             kwd = 'nokwd'
@@ -543,7 +536,7 @@ class UsersController < ApplicationController
           # キャッシュ済のデータがあればコントローラを抜ける
           return if @json.present?
 
-          puts "絞り込み条件が指定されていません。絞り込み条件を取得します"
+          logger.info( "絞り込み条件が指定されていません。絞り込み条件を取得します")
           @cond[:filters].merge!(page.values[0])
           kwds = []
           case wd
@@ -569,11 +562,13 @@ class UsersController < ApplicationController
           @json = kwds.to_json
 
           # 結果をキャッシュへ格納
+          logger.info( "絞り込み条件を取得しました。キャッシュへ登録します。")
           Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
 
           # コントローラを抜ける
           return
         end
+
         @page_fltr_kwd = kwd
         logger.info('設定されたキーワードは ' + kwd)
 

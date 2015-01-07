@@ -16,8 +16,8 @@ var cacheResult = function(data, async, type, analyzetype, kwdslen, elm_txt) {
     r_obj : JSON.stringify(data),          // バブルチャート用キャッシュ対象データ
     from : $('#from').val(),
     to : $('#to').val(),
-    analyze_type : analyzetype,             // 全体分析か個別分析か
-    day_type : $('input[name="day_type"]:checked').val()
+    analyze_type : analyzetype             // 全体分析か個別分析か
+    // day_type : $('input[name="day_type"]:checked').val()
   };
 
   if (analyzetype == 'kobetsu') {

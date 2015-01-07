@@ -212,8 +212,9 @@ function triggerBackToHome() {
 }
 
 $(document).bind('keydown', 'esc', function() {
-  alert('esc pressed');
+  // alert('esc pressed');
   $('.spinner').remove();
+  return false;
 });
 
 $(document).ready(function() {
