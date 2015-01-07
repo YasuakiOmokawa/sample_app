@@ -265,8 +265,8 @@ class UsersController < ApplicationController
 
         # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
         if cached_item.present?
-          logger.info( '読み込まれたキャッシュデータは次の通りです。')
-          logger.info( cached_item)
+          logger.info( 'キャッシュデータが読み込まれました。')
+          # logger.info( cached_item)
           @json = cached_item
           return
         else
