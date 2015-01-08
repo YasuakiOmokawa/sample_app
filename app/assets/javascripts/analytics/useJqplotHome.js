@@ -6,7 +6,7 @@ function createGraphPlots(idxarr, arr) {
     plot_color = setInitialBubbleColor();
 
     // x, y, radius, plot_color
-    var x = isVariationOverLimit(idxarr[i]['vari']);
+    var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
     tmp_arr[i] = [  x, y, 1, plot_color];
   }
@@ -165,12 +165,6 @@ function addRanking(idxarr, target) {
   });
 }
 
-// 順位ブロックの優先度計算が正しいかどうかのテストコード
-// $('#mfm ul li a').each(function() {
-//   var res = Number($(this).data('corr')) * 2 + isVariationOverLimit($(this).data('vari'));
-//   console.log('pri: ' + $(this).data('pri') + ' res: ' + res);
-// });
-
 function paddingRankBox(base_target) {
   var target = base_target + ' li'
   var box_size = $(target).length;
@@ -215,24 +209,26 @@ var setBubbleColor = function(x, y) {
     var label;
     var x = Number(x);
     var y = Number(y);
+    var YREFERENCE = 1.0
+    var XREFERENCE = 0.5
 
-    if (x >= 0.5 && y >= 0.50) {
+    if (x >= XREFERENCE && y >= YREFERENCE) {
         label = {color: '#c00000'};
         console.log('color is red');
     }
-    else if ( (x >= 0.5 && y <= 0.5) || (x <= 0.5 && y >= 0.5) ) {
+    else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
         label = {color: '#ffc000'};
         console.log('color is yellow');
     }
-    else if (x <= 0.5 && y <= 0.5) {
+    else if (x <= XREFERENCE && y <= YREFERENCE) {
         label = {color: '#0070c0'};
         console.log('color is blue');
     }
     return label;
 }
 
-function calcPriority(obj) {
-  return obj.corr * 2 + isVariationOverLimit(obj.vari);
+function calcCorrPri(data) {
+  return data * 2;
 }
 
 // データ項目一覧の設定
@@ -258,17 +254,16 @@ var setDataidx = function(obj, wd, idxarr) {
       var
         ar = {},
         jp = tmp[j].jp_caption.split(';;');
-      var pri = calcPriority(tmp[j]);
 
-      ar['pri'] = pri;
-      ar['corr'] = tmp[j].corr;
+      ar['corr'] = calcCorrPri(tmp[j].corr);
+      ar['vari'] = isVariationOverLimit(tmp[j].vari);
+      ar['pri'] = ar['corr'] + ar['vari'];
       ar['corr_sign'] = tmp[j].corr_sign;
       ar['jp_metrics'] = jp[0];
       ar['day_type_jp'] = jp[1];
       ar['day_type'] = day_type;
       ar['metrics_avg'] = tmp[j].metrics_avg;
       ar['metrics_stddev'] = tmp[j].metrics_stddev;
-      ar['vari'] = tmp[j].vari;
       ar['dev_fltr'] = dev_fltr;
       ar['usr_fltr'] = usr_fltr;
       ar['kwd_fltr'] = kwd_fltr;
@@ -367,7 +362,7 @@ function kwdTnsltENtoJP(d) {
 }
 
 function getTooltipXaxisToPixels(a, graph) {
-  return x = graph.axes.xaxis.u2p(isVariationOverLimit( a.attr('data-vari') )); // convert x axis unita to pixels
+  return x = graph.axes.xaxis.u2p(a.attr('data-vari')); // convert x axis unita to pixels
 }
 
 function getTooltipYaxisToPixels(a, graph) {
@@ -463,7 +458,7 @@ function plotGraphHome(arr, idxarr) {
         yaxis: {
           // label: '相関係数',
           min: 0.0,
-          max: 1.0,
+          max: 2.0,
         },
       },
       // 背景色に関する設定
@@ -531,7 +526,7 @@ function plotGraphHome(arr, idxarr) {
 
       var origin_arr = $.extend(true, {}, arr_for_replot); // 参照渡しだとバグる。
       var p_color = setBubbleColor(target.data('vari'), target.data('corr'));
-      var addopt = [isVariationOverLimit(target.data('vari')), target.data('corr'), 1, p_color];
+      var addopt = [target.data('vari'), target.data('corr'), 1, p_color];
       var add_options = {series: []};
 
       origin_arr[0].push(addopt);

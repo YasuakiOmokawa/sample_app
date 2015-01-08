@@ -355,7 +355,7 @@ class UsersController < ApplicationController
 
       # 人気ページ用
       cved_data = Analytics.create_class('CvedSession',
-        [:sessions, (@cv_txt.classify + 's').to_sym], [:pagePath]).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).cved!.res)
+        [:sessions], [:pagePath]).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).cved!.res)
       fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
       fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
 
