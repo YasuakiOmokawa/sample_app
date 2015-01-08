@@ -354,11 +354,13 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(100).sort_desc!(:sessions).res, @cv_txt)
-      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res)
+      cved_data = Analytics.create_class('CvedSession',
+        [:sessions, (@cv_txt.classify + 's').to_sym], [:pagePath]).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).cved!.res)
+      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
+      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
 
       # ランディングページ用
-      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).cved!.res)
+      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
 
       # 全てのセッション(人気ページGAP値等計算用)
       ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
@@ -417,8 +419,9 @@ class UsersController < ApplicationController
 
       # 人気ページテーブル
       @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      cved_session = guard_for_zero_division(all_session - fav_gap['bad'].results.map { |t| t.sessions.to_i }.sum)
-      not_cved_session = guard_for_zero_division(all_session - fav_gap['good'].results.map { |t| t.sessions.to_i }.sum)
+
+      cved_session = cved_data.map{|t| t.sessions.to_f}.sum
+      not_cved_session = all_session - cved_session
 
       create_skeleton_favorite_table(fav_for_skel, @favorite_table)
       put_favorite_table_for_skelton(fav_gap, @favorite_table)
@@ -428,7 +431,6 @@ class UsersController < ApplicationController
       calc_gap_for_favorite(@favorite_table)
 
       # ランディングページテーブル
-      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
       @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       @landing_table = put_landing_table(land_for_skel, @landing_table)
 
@@ -613,9 +615,8 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
-          # # ボトルネック算出用
-          # bottle_metrics = metrics_camel_case_datas.dup
-          # bottle_metrics.push((@cv_txt.classify + 's').to_sym)
+          # # # ボトルネック算出用（時間別）
+          # bottle_metrics = metrics_camel_case_datas.dup << (@cv_txt.classify + 's').to_sym
           # cls_name = 'CollectDataForCalcBottleNeck' + rndm.to_s
           # # 4回までリトライできます
           # Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
@@ -623,8 +624,16 @@ class UsersController < ApplicationController
           #     bottle_metrics, [:dateHour] ).results(@ga_profile,@cond)
           # end
 
-          # # 標準偏差の獲得
+          # # # ボトルネック算出用(日別)
+          # cls_name = 'CollectDataForCalcBottleNeck' + rndm.to_s
+          # Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          #   @cv_for_graph_daily = Analytics.create_class(cls_name,
+          #     bottle_metrics, [:date] ).results(@ga_profile,@cond)
+          # end
+
+          # # 相関係数の算出
           # @cv_for_graph_hourly.map{|t| t.pageviews.to_f}.corrcoef(@cv_for_graph_hourly.map{|t| t.send(@cv_txt).to_f })
+          # @cv_for_graph_daily.map{|t| t.pageviews.to_f}.corrcoef(@cv_for_graph_daily.map{|t| t.send(@cv_txt).to_f })
 
 
           # 指標値算出用
