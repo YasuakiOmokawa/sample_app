@@ -1,10 +1,7 @@
 // DOMツリー（htmlタグ）が全て読み込まれた後に実施されるイベントを定義する
 
 $(window).load(function() {
-  console.log('オンロードイベントが呼ばれました!');
   if (isTitleHome()) {
-    // 本番環境ではDOMツリーの構築より早くコマンドが実行されてしまうため、遅延時間を設ける
-    // setTimeout( function(){ analyzeHomePerPage(); }, 500);
     if (location.hash) {
       $("a[href=" + location.hash + "]").click();
     } else {

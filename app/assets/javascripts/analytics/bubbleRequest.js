@@ -39,6 +39,7 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
   // 表示項目のリセット
   $('#errormsg').empty();
+  plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []);
   resetHome('div#gh');
 
   // ローディングモーションを表示
