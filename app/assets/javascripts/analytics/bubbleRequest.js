@@ -265,8 +265,8 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
         error: function(xhr, ajaxOptions, thrownError) {
 
           // 内部エラーが発生したら表示
-          if (xhr.status == 500 || xhr.status == 503) {
-            $("span#errormsg").html('サーバーが一時的に応答不能となっています。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+          if (xhr.status == 503) {
+            $("span#errormsg").html('サーバーが一時的に応答不能となっています。<br>時間を置いてページを再読み込みしてください。<p/>');
             return;
           }
 
@@ -355,7 +355,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
       console.log(errorThrown);
 
       if (errorThrown == 'timeout') {
-        $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
+        $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。');
       } else {
         $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
       }

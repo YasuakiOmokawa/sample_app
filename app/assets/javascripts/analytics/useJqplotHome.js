@@ -184,21 +184,6 @@ function paddingRankBox(base_target) {
   });
 }
 
-// 優先順位の降順、
-// 　ページ名と項目名の昇順でソート
-// > がマイナスリターン。。降順、< がプラスリターンで昇順
-function sortIdxarr(idxarr) {
-
-  var idxarr = idxarr.sort(function(a,b) {
-    if (a.pri > b.pri) return  -1;
-    if (a.pri < b.pri) return  1;
-    if (a.page > b.page) return  1;
-    if (a.page < b.page) return  -1;
-    if (a.jp_metrics > b.jp_metrics) return  1;
-    if (a.jp_metrics < b.jp_metrics) return  -1;
-  });
-  return idxarr;
-}
 
 // バブル色の指定
 function setInitialBubbleColor() {
@@ -209,7 +194,7 @@ var setBubbleColor = function(x, y) {
     var label;
     var x = Number(x);
     var y = Number(y);
-    var YREFERENCE = 1.0
+    var YREFERENCE = 0.5
     var XREFERENCE = 0.5
 
     if (x >= XREFERENCE && y >= YREFERENCE) {
@@ -229,6 +214,14 @@ var setBubbleColor = function(x, y) {
 
 function calcCorrPri(data) {
   return data * 2;
+}
+
+function calcPriorityData(obj) {
+  if (obj.corr >= 0.5 && obj.vari >= 0.5) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 // データ項目一覧の設定
@@ -255,9 +248,9 @@ var setDataidx = function(obj, wd, idxarr) {
         ar = {},
         jp = tmp[j].jp_caption.split(';;');
 
-      ar['corr'] = calcCorrPri(tmp[j].corr);
+      ar['corr'] = tmp[j].corr;
       ar['vari'] = isVariationOverLimit(tmp[j].vari);
-      ar['pri'] = ar['corr'] + ar['vari'];
+      ar['pri'] = calcCorrPri(ar['corr']) + ar['vari'] + calcPriorityData(ar);
       ar['corr_sign'] = tmp[j].corr_sign;
       ar['jp_metrics'] = jp[0];
       ar['day_type_jp'] = jp[1];
@@ -272,6 +265,34 @@ var setDataidx = function(obj, wd, idxarr) {
       idxarr.push(ar);
     }
   }
+}
+
+// $("#mfm ul li a").each(function() {
+//   console.log($(this).data('corr'));
+// })
+
+// $("#mfm ul li a").each(function() {
+//   console.log($(this).data('pri'));
+// })
+
+// $("#mfm ul li a").each(function() {
+//   console.log($(this).data('vari'));
+// })
+
+// 優先順位の降順、
+// 　ページ名と項目名の昇順でソート
+// > がマイナスリターン。。降順、< がプラスリターンで昇順
+function sortIdxarr(idxarr) {
+
+  var idxarr = idxarr.sort(function(a,b) {
+    if (a.pri > b.pri) return  -1;
+    if (a.pri < b.pri) return  1;
+    if (a.page > b.page) return  1;
+    if (a.page < b.page) return  -1;
+    if (a.jp_metrics > b.jp_metrics) return  1;
+    if (a.jp_metrics < b.jp_metrics) return  -1;
+  });
+  return idxarr;
 }
 
 // 再描画用にデータを集める
@@ -458,7 +479,7 @@ function plotGraphHome(arr, idxarr) {
         yaxis: {
           // label: '相関係数',
           min: 0.0,
-          max: 2.0,
+          max: 1.0,
         },
       },
       // 背景色に関する設定

@@ -121,6 +121,8 @@ module ParamUtils
   # アクションに応じた@condの設定
   def set_action(wd, opt)
     case wd
+    when 'all'
+      opt[:filters].merge!( {} )
     when 'search'
       opt[:filters].merge!( {:medium.matches => 'organic'} )
     when 'direct'
