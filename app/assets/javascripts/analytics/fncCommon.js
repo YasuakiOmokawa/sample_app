@@ -193,16 +193,31 @@ function setFormAction(ref) {
   $('form[name="narrowForm"]').attr("action", ref);
 }
 
+function getHomeHistoryParameter() {
+  $('#from').val($('input[name="history_from"]').val());
+  $('#to').val($('input[name="history_to"]').val());
+  $('input[name="cv_num"]').val($('input[name="history_cv_num"]').val());
+  $('input[name="shori"]').val(0);
+}
+
 function backToHome(e) {
   var acts = getFormAction().split('/');
   var act_ref = e.attr("name") + "#" + acts[3];
-  $('input[name="shori"]').val(0);
   setFormAction(act_ref);
+  getHomeHistoryParameter();
   $('a#set').trigger('click');
+}
+
+function backHistoryToHome() {
+  var home_history = $('input[name="graph_history"]').val();
+  var history_length = history.length - Number(home_history);
+
+  history.go(-history_length);
 }
 
 function setBackToHome() {
   $('#bk a').click(function() {
+    // backHistoryToHome();
     backToHome($(this));
   });
 }
@@ -212,10 +227,27 @@ function triggerBackToHome() {
 }
 
 $(document).bind('keydown', 'esc', function() {
-  // alert('esc pressed');
-  $('.spinner').remove();
   return false;
 });
+
+// // Bind to StateChange Event
+// History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
+//     var State = History.getState(); // Note: We are using History.getState() instead of event.state
+// });
+
+function setHomeHistoryParameter() {
+  if (gon.history_from) {
+    $('input[name="history_from"]').val(gon.history_from);
+  }
+
+  if (gon.history_to) {
+    $('input[name="history_to"]').val(gon.history_to);
+  }
+
+  if (gon.history_cv_num) {
+    $('input[name="history_cv_num"]').val(gon.history_cv_num);
+  }
+}
 
 $(document).ready(function() {
 
@@ -376,5 +408,9 @@ $(document).ready(function() {
         $('#narrow_select').css('color', fColor);
       }
   });
+
+  // ホーム画面までの履歴を保持
+  setHomeHistoryParameter();
+
 
 });

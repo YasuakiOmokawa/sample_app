@@ -37,6 +37,10 @@
         <%= image_tag 'plus.png' , :class => "icon" %>
         <%= select_tag 'narrow_select', options_for_select(@categories), :include_blank => true, :prompt => '条件を設定' %>
       </span>
+      <input type="hidden" name="history_from" value=""/>
+      <input type="hidden" name="history_to" value=""/>
+      <input type="hidden" name="history_cv_num" value=""/>
+
       <a href="javascript:void(0)" onclick="document.narrowForm.submit();return false;" id="set">絞り込み</a>
     </span>
   </form>

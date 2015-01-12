@@ -102,6 +102,11 @@ function addClickEvtToInfo(target) {
     // 遷移先の強調項目を設定
     $('input[name="red_item"]').val(metrics);
 
+    // ホーム画面の履歴を保存
+    $('input[name="history_from"]').val($('#from').val());
+    $('input[name="history_to"]').val($('#to').val());
+    $('input[name="history_cv_num"]').val($('input[name="cv_num"]').val());
+
     // ページ遷移
     evtsend($(e.target));
   });

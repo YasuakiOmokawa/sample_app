@@ -28,3 +28,4 @@
 //= require ./plainoverlay/jquery.plainoverlay
 //= require jquery.tooltipster.min.js
 //= require jquery-hotkeys
+//= require history_jquery.min

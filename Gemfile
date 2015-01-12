@@ -33,6 +33,8 @@ gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
 gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
+gem 'historyjs-rails' # ブラウザの履歴情報を保持する
+
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
