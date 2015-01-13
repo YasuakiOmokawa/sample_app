@@ -176,6 +176,7 @@ class UsersController < ApplicationController
   end
 
   def edit
+    render :layout => false
   end
 
   def update
@@ -183,7 +184,7 @@ class UsersController < ApplicationController
         flash[:success] = "Profile updated"
         redirect_to @user
       else
-        render 'edit'
+        render 'edit', :layout => false
       end
   end
 

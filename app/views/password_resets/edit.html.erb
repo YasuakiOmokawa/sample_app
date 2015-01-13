@@ -1,5 +1,5 @@
-<h1>パスワードを再設定</h1>
-
+<!-- <h1>パスワードを再設定</h1>
+ --><!-- 
 <%= form_for @user, :url => password_reset_path(params[:id]) do |f| %>
   <%= render 'shared/error_messages' %>
   <div class="field">
@@ -12,3 +12,22 @@
   </div>
   <div class="actions"><%= f.submit "パスワード再設定" %></div>
 <% end %>
+ -->
+<%= render 'shared/error_messages' %>
+<div id="login">
+  <h1>パスワードを再設定</h1>
+  <p>新しいパスワードを入力し、再設定ボタンを押してください。</p>
+  <table>
+  <%= form_for @user, :url => password_reset_path(params[:id]) do |f| %>
+    <tr>
+      <td>新しいパスワード：</td><td><%= f.password_field :password %></td>
+    </tr>
+    <tr>
+      <td>確認のため再入力：</td><td><%= f.password_field :password_confirmation %></td>
+    </tr>
+    <tr>
+      <td></td><td><a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">再設定</a></td>
+    </tr>
+  <% end %>
+  </table>
+</div>

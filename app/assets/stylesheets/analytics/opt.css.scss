@@ -43,3 +43,11 @@ span#errormsg {
   margin-left: -80px;
   margin-top: 45px;
 }
+
+// パスワード編集画面のボタン
+#login table td a#cancel {
+margin: 15px 0 0 -40px;
+}
+#login table td a#submit {
+margin: 15px 0 0 -145px;
+}
