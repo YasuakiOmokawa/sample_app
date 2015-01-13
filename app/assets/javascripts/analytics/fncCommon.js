@@ -194,18 +194,37 @@ function setFormAction(ref) {
 }
 
 function getHomeHistoryParameter() {
-  $('#from').val($('input[name="history_from"]').val());
-  $('#to').val($('input[name="history_to"]').val());
-  $('input[name="cv_num"]').val($('input[name="history_cv_num"]').val());
+
+  if ( $('input[name="history_from"]').val() ) {
+    $('#from').val($('input[name="history_from"]').val());
+  }
+
+  if ($('input[name="history_to"]').val()) {
+    $('#to').val($('input[name="history_to"]').val());
+  }
+
+  if ($('input[name="history_cv_num"]').val()) {
+    $('input[name="cv_num"]').val($('input[name="history_cv_num"]').val());
+  }
+
   $('input[name="shori"]').val(0);
+  $('input[name="device"]').val('all');
+  $('input[name="visitor"]').val('all');
+  $('input[name="day_type"]').val('all_day');
+  $('#narrow_select').val("");
 }
 
 function backToHome(e) {
   var acts = getFormAction().split('/');
-  var act_ref = e.attr("name") + "#" + acts[3];
+  $('input[name="hash"]').val(acts[3]);
+
+  var act_ref = e.attr("name");
   setFormAction(act_ref);
+
   getHomeHistoryParameter();
+
   $('a#set').trigger('click');
+
 }
 
 function backHistoryToHome() {
@@ -217,7 +236,6 @@ function backHistoryToHome() {
 
 function setBackToHome() {
   $('#bk a').click(function() {
-    // backHistoryToHome();
     backToHome($(this));
   });
 }
@@ -230,10 +248,10 @@ $(document).bind('keydown', 'esc', function() {
   return false;
 });
 
-// // Bind to StateChange Event
-// History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
-//     var State = History.getState(); // Note: We are using History.getState() instead of event.state
-// });
+// Bind to StateChange Event
+History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
+    var State = History.getState(); // Note: We are using History.getState() instead of event.state
+});
 
 function setHomeHistoryParameter() {
   if (gon.history_from) {
@@ -247,6 +265,7 @@ function setHomeHistoryParameter() {
   if (gon.history_cv_num) {
     $('input[name="history_cv_num"]').val(gon.history_cv_num);
   }
+
 }
 
 $(document).ready(function() {
@@ -411,6 +430,4 @@ $(document).ready(function() {
 
   // ホーム画面までの履歴を保持
   setHomeHistoryParameter();
-
-
 });

@@ -5,7 +5,14 @@ $(window).load(function() {
     if (location.hash) {
       $("a[href=" + location.hash + "]").click();
     } else {
-      $('a[href="#all"]').click();
+
+      if (gon.history_hash) {
+        $("a[href=" + '#' + gon.history_hash + "]").click();
+        location.hash = '#' + gon.history_hash;
+      } else {
+        $('a[href="#all"]').click();
+      }
+
     }
   }
 });

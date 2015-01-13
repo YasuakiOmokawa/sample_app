@@ -315,14 +315,11 @@ class UsersController < ApplicationController
       @day_type = params[:day_type].presence || 'all_day'
       gon.radio_day = @day_type
 
-      # ホーム画面の日付を保存
+      # ホーム画面の日付、cv名, hashを保存
       gon.history_from = params[:history_from].presence
       gon.history_to = params[:history_to].presence
       gon.history_cv_num = params[:history_cv_num].presence
-      # gon.history_day_type = params[:history_day_type].presence
-      # gon.history_device = params[:history_device].presence
-      # gon.history_visitor = params[:history_visitor].presence
-      # gon.history_narrow_select = params[:history_narrow_select].presence
+      gon.history_hash = params[:hash].presence
 
     end
 
