@@ -5,3 +5,4 @@
 # セッションをmemcached で管理
 SampleApp::Application.config.session_store ActionDispatch::Session::CacheStore, key: '_sample_app_session', expire_after: 1.day
 
+#hello
