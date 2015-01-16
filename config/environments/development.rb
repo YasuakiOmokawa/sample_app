@@ -49,6 +49,7 @@ SampleApp::Application.configure do
   }
 
   # memcached の使用
-  config.cache_store = :dalli_store, {:expires_in => 1.day, :compress => true }
+  config.cache_store = :dalli_store
+  # config.cache_store = :dalli_store, {:expires_in => 1.day, :compress => true }
 
 end

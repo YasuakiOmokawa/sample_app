@@ -90,7 +90,8 @@ SampleApp::Application.configure do
                      :socket_timeout => 1.5,
                      :socket_failure_delay => 0.2
                     }
-                    
+
+
   # sendgridを使ってメール配信
   ActionMailer::Base.smtp_settings = {
     :address => 'smtp.sendgrid.net',

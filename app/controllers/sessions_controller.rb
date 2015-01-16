@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
 
   def new
+    redirect_to user_path(current_user) and return if signed_in?
     render :layout => false
   end
 
