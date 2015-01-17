@@ -217,19 +217,41 @@ module ParamUtils
     )
   end
 
-  # REFERENCE_VALUE = 0.43
-  REFERENCE_VALUE = 0.0
-  def get_analyzable_day_types(table)
-    res = get_day_types
-    get_day_types.each do |t|
-      d = Statistics::DayFactory.new(table, :sessions, t).data
-      res.delete(t) unless d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum) >= REFERENCE_VALUE
-      puts "day_type: #{t} cv_sum/metrics_sum: #{d.get_cves.sum / guard_for_zero_division(d.get_metrics.sum)}"
-    end
-    res
-  end
-
   def group_by_year_and_month(data)
     data.group_by{|k, v| k.to_s[0..5]}.map{|k, v| k}
   end
+
+  def is_not_uniq?(data)
+    return true if Array(data).uniq.size > 1
+  end
+
+  def validate_metrics(day_type, metricses, table)
+    validated_metrics = metricses.dup
+    metricses.each do |metrics|
+      df = Statistics::DayFactory.new(table, metrics, day_type).data
+      chk_valid_metrics(df.get_metrics, validated_metrics, metrics)
+    end
+    validated_metrics
+  end
+
+  def chk_valid_metrics(data, metricses, metrics)
+    unless is_not_uniq?(data)
+      metricses.delete(metrics)
+      puts "指標#{metrics}は一意なので分析対象から外します。"
+    end
+  end
+
+  # # REFERENCE_VALUE = 0.43
+  # # REFERENCE_VALUE = 0.0
+  # def get_analyzable_day_types(table)
+  #   res = get_day_types
+  #   get_day_types.each do |t|
+  #     d = Statistics::Day.new(table).data
+  #     res.delete(t) unless d.get_cves(d.day_on)
+  #     puts "day_type: #{t} "
+  #   end
+  #   res
+  # end
+
+
 end

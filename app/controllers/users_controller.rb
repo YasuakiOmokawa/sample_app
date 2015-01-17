@@ -658,13 +658,41 @@ class UsersController < ApplicationController
           put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
           put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
 
-          analyze_day_types = get_analyzable_day_types(@table_for_graph)
-          unless analyze_day_types.blank?
+          # 分析データのバリデート
+          logger.info("分析データのバリデートを開始します")
+          get_day_types.each do |day_type|
+
+            # CVデータのバリデート
+            puts "CVデータをバリデートします"
+            cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
+            unless is_not_uniq?(cves)
+              puts "CVが一意なので分析できません。"
+              break
+            end
+            puts "CVバリデートOK。後続のバリデートを実行します。"
+
+            # 指標データのバリデート
+            puts "指標データをバリデートします"
+            validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
+            unless validated_metrics.size >= 1
+              puts "分析対象の指標データがありませんので分析を実行できません。"
+              break
+            end
+            puts "指標データバリデートOK。後続のバリデートを実行します。"
+
+            # cvと指標データの組み合わせをバリデート
+            puts "CVデータと指標データの組み合わせをバリデートします"
+            df = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data
+            df.get_cves
+            df.get_metrics
+            validated_metrics.each do |metrics|
+
+            end
+            validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
 
             calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
 
             # バブルチャートに表示するデータを算出
-            analyze_day_types.each do |day_type|
               bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, day_type)
               d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
               home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
@@ -680,9 +708,7 @@ class UsersController < ApplicationController
             @cond[:filters] = {}
             logger.info("filters option reset end. now is #{@cond}")
 
-          end
         }
-        return if analyze_day_types.blank?
 
         # ループ終了。jqplot へデータ渡す
         if shori != 0
