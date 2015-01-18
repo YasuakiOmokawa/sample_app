@@ -658,10 +658,6 @@ class UsersController < ApplicationController
           logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
 
           @valids.each do |valid|
-            valid.metricses.delete(:sessions) if valid.day_type == 'all_day'
-          end
-
-          @valids.each do |valid|
             # バブルチャートに表示するデータを算出
             bubble_datas = generate_graph_data(@table_for_graph, valid.metricses, valid.day_type)
             d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
@@ -671,10 +667,6 @@ class UsersController < ApplicationController
             day_room = room +  '::' + valid.day_type
             p_hash[x][day_room] = home_graph_data
             logger.info("#{x} #{day_room} のデータセットが完了しました。")
-            unless home_graph_data.include?(:sessions)
-              logger.info( "あれれー、おかしいぞ。all_dayのsessionsだけないぞー。")
-              logger.info(home_graph_data)
-            end
           end
           # reset_filter_option
         end

@@ -12,16 +12,16 @@ var prcnt_all_cntr = 0;
 function getDevOpts() {
   return [
     'pc',
-    // 'sphone',
-    // 'mobile',
+    'sphone',
+    'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    // 'new',
-    // 'repeat'
+    'new',
+    'repeat'
   ];
 }
 
