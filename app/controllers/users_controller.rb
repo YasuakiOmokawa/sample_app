@@ -673,8 +673,8 @@ class UsersController < ApplicationController
 
             # 指標データのバリデート
             puts "指標データをバリデートします"
-            validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
-            unless validated_metrics.size >= 1
+            single_uniq_validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
+            unless single_uniq_validated_metrics.size >= 1
               puts "分析対象の指標データがありませんので分析を実行できません。"
               break
             end
@@ -682,31 +682,38 @@ class UsersController < ApplicationController
 
             # cvと指標データの組み合わせをバリデート
             puts "CVデータと指標データの組み合わせをバリデートします"
-            df = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data
-            df.get_cves
-            df.get_metrics
-            validated_metrics.each do |metrics|
-
+            multiple_uniq_validated_metrics = single_uniq_validated_metrics.dup
+            single_uniq_validated_metrics.each do |metrics|
+              df_vali = Statistics::DayFactory.new(@table_for_graph, metrics, day_type).data
+              unless cves.zip(df_vali.get_metrics).uniq.size >= 3
+                puts "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。"
+                multiple_uniq_validated_metrics.delete(metrics)
+              end
             end
-            validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
+            unless multiple_uniq_validated_metrics.size >= 1
+              puts "分析対象の指標データがありませんので分析を実行できません。"
+              break
+            end
+            puts "CVデータと指標データの組み合わせバリデートOK。"
+            puts "分析データのバリデートがすべて完了しました。分析を開始します"
 
-            calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas) # スケルトンからGAP値を計算
+            calc_gap_for_graph(@table_for_graph, multiple_uniq_validated_metrics) # スケルトンからGAP値を計算
 
             # バブルチャートに表示するデータを算出
-              bubble_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, day_type)
-              d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
-              home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
+            bubble_datas = generate_graph_data(@table_for_graph, multiple_uniq_validated_metrics, day_type)
+            d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
+            home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 
-              # ページ項目へ追加
-              day_room = room +  '::' + day_type
-              p_hash[x][day_room] = home_graph_data
-              logger.info("pages data set success!")
-            end
+            # ページ項目へ追加
+            day_room = room +  '::' + day_type
+            p_hash[x][day_room] = home_graph_data
+            logger.info("#{x} #{day_room} のデータセットが完了しました。")
+          end
 
-            # フィルタオプションのリセット
-            logger.info("filters option reset start. now is #{@cond}")
-            @cond[:filters] = {}
-            logger.info("filters option reset end. now is #{@cond}")
+          # フィルタオプションのリセット
+          logger.info("filters option reset start. now is #{@cond}")
+          @cond[:filters] = {}
+          logger.info("filters option reset end. now is #{@cond}")
 
         }
 
