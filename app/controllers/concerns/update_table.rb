@@ -170,6 +170,7 @@ module UpdateTable
   def concat_data_for_graph(datas, mets)
     mets.each do |k, v|
       datas[k][:jp_caption] = mets[k][:jp_caption]
+      datas.delete(k) if datas[k].size == 1
     end
     datas
   end

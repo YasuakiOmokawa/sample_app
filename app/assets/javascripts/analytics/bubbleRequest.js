@@ -12,16 +12,16 @@ var prcnt_all_cntr = 0;
 function getDevOpts() {
   return [
     'pc',
-    'sphone',
-    'mobile',
+    // 'sphone',
+    // 'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    'new',
-    'repeat'
+    // 'new',
+    // 'repeat'
   ];
 }
 
@@ -554,7 +554,7 @@ function cacheShapedBubbleParts(req_opts, elm, shaped_idxarr, req_opts) {
 
 function addWhenNotCved() {
   afterCall('div#gh');
-  $("span#errormsg").html('分析対象のデータが足りません。コンバージョンレートが43%以上の期間を指定して再実行してください。');
+  $("span#errormsg").html('アナリティクスのデータが分析対象に達していません。');
   plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
 }
 

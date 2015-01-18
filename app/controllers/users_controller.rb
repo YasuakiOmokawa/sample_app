@@ -639,79 +639,44 @@ class UsersController < ApplicationController
           logger.info("分析データのバリデートを開始します")
 
           @valid_analyze_day_types = get_day_types
-          @valid_analyze_metrics = @metrics_snake_case_datas.dup
 
           validate_cv
           if @valid_analyze_day_types.size == 0
-            puts "分析対象の日付がありません。処理を終了します。"
+            logger.info( "分析対象の日付がありません。処理を終了します。" )
             break
           end
 
           # 日付とメトリクスの組み合わせコレクションを作る
-          @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @valid_analyze_metrics).create
-
-          # @valids.each do |valid|
-          #   puts valid.day_type
-          # end
+          @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @metrics_snake_case_datas).create
 
           validate_metrics
           if @valids.map {|t| t.metricses.size}.sum == 0
-            puts "分析対象の指標データがありません。処理を終了します。"
+            logger.info( "分析対象の指標データがありません。処理を終了します。" )
             break
           end
 
-          logger.info("分析データのバリデートを開始します")
-          get_day_types.each do |day_type|
+          logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
 
-            # CVデータのバリデート
-            # puts "CVデータをバリデートします"
-            # cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
-            # unless is_not_uniq?(cves)
-            #   puts "CVが一意なので分析できません。"
-            #   break
-            # end
-            # puts "CVバリデートOK。後続のバリデートを実行します。"
-
-            # 指標データのバリデート
-            # puts "指標データをバリデートします"
-            # single_uniq_validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
-            # unless single_uniq_validated_metrics.size >= 1
-            #   puts "分析対象の指標データがありませんので分析を実行できません。"
-            #   break
-            # end
-            # puts "指標データバリデートOK。後続のバリデートを実行します。"
-
-            # cvと指標データの組み合わせをバリデート
-            puts "CVデータと指標データの組み合わせをバリデートします"
-            multiple_uniq_validated_metrics = single_uniq_validated_metrics.dup
-            single_uniq_validated_metrics.each do |metrics|
-              df_vali = Statistics::DayFactory.new(@table_for_graph, metrics, day_type).data
-              unless cves.zip(df_vali.get_metrics).uniq.size >= 3
-                puts "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。"
-                multiple_uniq_validated_metrics.delete(metrics)
-              end
-            end
-            unless multiple_uniq_validated_metrics.size >= 1
-              puts "分析対象の指標データがありませんので分析を実行できません。"
-              break
-            end
-            puts "CVデータと指標データの組み合わせバリデートOK。"
-            puts "分析データのバリデートがすべて完了しました。分析を開始します"
+          @valids.each do |valid|
+            valid.metricses.delete(:sessions) if valid.day_type == 'all_day'
           end
 
-            calc_gap_for_graph(@table_for_graph, multiple_uniq_validated_metrics) # スケルトンからGAP値を計算
-
+          @valids.each do |valid|
             # バブルチャートに表示するデータを算出
-            bubble_datas = generate_graph_data(@table_for_graph, multiple_uniq_validated_metrics, day_type)
-            d_hsh = metrics_day_type_jp_caption(day_type, metrics_for_graph_merge)
+            bubble_datas = generate_graph_data(@table_for_graph, valid.metricses, valid.day_type)
+            d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
             home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 
             # ページ項目へ追加
-            day_room = room +  '::' + day_type
+            day_room = room +  '::' + valid.day_type
             p_hash[x][day_room] = home_graph_data
             logger.info("#{x} #{day_room} のデータセットが完了しました。")
-
-            reset_filter_option
+            unless home_graph_data.include?(:sessions)
+              logger.info( "あれれー、おかしいぞ。all_dayのsessionsだけないぞー。")
+              logger.info(home_graph_data)
+            end
+          end
+          # reset_filter_option
         end
 
         # ループ終了。jqplot へデータ渡す

@@ -226,45 +226,53 @@ module ParamUtils
   end
 
   def validate_cv
-    puts "CVデータをバリデートします"
+    logger.info( "CVデータをバリデートします")
     get_day_types.each do |day_type|
       cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
       unless is_not_uniq?(cves)
-        puts "CVが一意なので分析できません。#{day_type}は分析対象から外します。"
+        logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
         @valid_analyze_day_types.delete(day_type)
       end
-      puts "CVバリデートOK。"
+      logger.info( "CVバリデートOK。")
     end
-    puts "CVバリデート完了。"
+    logger.info( "CVバリデート完了。")
   end
 
   def delete_invalid_metrics(data, metrics, metricses)
-    # data = %w(1.0 1.0)
+    # data = %w(1.0 1.0) #異常用コード
     unless is_not_uniq?(data)
+      logger.info( "指標#{metrics}は一意なので分析対象から外します。")
       metricses.delete(metrics)
-      puts "指標#{metrics}は一意なので分析対象から外します。"
+    end
+  end
+
+  def delete_invalid_metrics_multiple(data, metrics, metricses, cves)
+    # cves = cves.map{|t| t = '0.0'} #異常用コード
+    # data = data.map{|t| t = '0.0'} #異常用コード
+    unless cves.zip(data).uniq.size >= 3
+      logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
+      metricses.delete(metrics)
     end
   end
 
   def validate_metrics
-    puts "指標データをバリデートします"
+    logger.info( "指標データをバリデートします")
     @valids.each do |valid|
       @metrics_snake_case_datas.each do |metrics|
+        cves = Statistics::DayFactory.new(@table_for_graph, :sessions, valid.day_type).data.get_cves
         df = Statistics::DayFactory.new(@table_for_graph, metrics, valid.day_type).data
         delete_invalid_metrics(df.get_metrics, metrics, valid.metricses)
+        delete_invalid_metrics_multiple(df.get_metrics, metrics, valid.metricses, cves)
       end
-      puts "#{valid.day_type}の指標バリデートOK。"
+      logger.info( "#{valid.day_type}の指標バリデートOK。")
     end
-    puts "指標バリデート完了。"
-  end
-
-  def validate_metrics_multiple_of_cv
+    logger.info( "指標バリデート完了。")
   end
 
   def reset_filter_option
-    puts "filters option reset start. now is #{@cond}"
+    logger.info( "filters option reset start. now is #{@cond}")
     @cond[:filters] = {}
-    puts "filters option reset end. now is #{@cond}"
+    logger.info( "filters option reset end. now is #{@cond}")
   end
 
   class ValidAnalyzeMaterial
@@ -279,7 +287,7 @@ module ParamUtils
 
     def create
       @days.reduce(Set.new) do |valids, day_type|
-        valids << Valids.new(day_type, @metricses)
+        valids << Valids.new(day_type, @metricses.dup)
       end
     end
   end
@@ -304,6 +312,23 @@ module ParamUtils
   #     chk_valid_metrics(df.get_metrics, validated_metrics, metrics)
   #   end
   #   validated_metrics
+  # end
+
+  # def validate_metrics_multiple_of_cv
+  #   puts "CVデータと指標データの組み合わせをバリデートします"
+  #   multiple_uniq_validated_metrics = single_uniq_validated_metrics.dup
+  #   @valids.each do |valid|
+  #     cves = Statistics::DayFactory.new(@table_for_graph, :sessions, valid.day_type).data.get_cves
+  #     df_vali = Statistics::DayFactory.new(@table_for_graph, metrics, valid.day_type).data
+  #     unless cves.zip(df_vali.get_metrics).uniq.size >= 3
+  #       puts "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。"
+  #       multiple_uniq_validated_metrics.delete(metrics)
+  #     end
+  #   end
+  #   unless multiple_uniq_validated_metrics.size >= 1
+  #     puts "分析対象の指標データがありませんので分析を実行できません。"
+  #     break
+  #   end
   # end
 
 
