@@ -588,9 +588,8 @@ class UsersController < ApplicationController
         # ページ項目ごとにデータ集計
         p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
 
-        # パラレル処理は考えていないが、一応残しておく（API制限がもしかしたら外れるかも。。）
-        analyze_day_types = []
-        Parallel.map(page, :in_threads=>1) { |x, z|
+        # 絞り込んだページ項目で、処理を開始
+        page.each do |x, z|
 
           room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
 
@@ -602,7 +601,7 @@ class UsersController < ApplicationController
           # データ指標
           metrics = Metrics.new()
           metrics_camel_case_datas = metrics.garb_parameter
-          metrics_snake_case_datas = metrics.garb_result
+          @metrics_snake_case_datas = metrics.garb_result
           metrics_for_graph_merge = metrics.jp_caption
 
           # リトライ時のメッセージを指定
@@ -623,27 +622,6 @@ class UsersController < ApplicationController
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
-          # # # ボトルネック算出用（時間別）
-          # bottle_metrics = metrics_camel_case_datas.dup << (@cv_txt.classify + 's').to_sym
-          # cls_name = 'CollectDataForCalcBottleNeck' + rndm.to_s
-          # # 4回までリトライできます
-          # Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          #   @cv_for_graph_hourly = Analytics.create_class(cls_name,
-          #     bottle_metrics, [:dateHour] ).results(@ga_profile,@cond)
-          # end
-
-          # # # ボトルネック算出用(日別)
-          # cls_name = 'CollectDataForCalcBottleNeck' + rndm.to_s
-          # Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          #   @cv_for_graph_daily = Analytics.create_class(cls_name,
-          #     bottle_metrics, [:date] ).results(@ga_profile,@cond)
-          # end
-
-          # # 相関係数の算出
-          # @cv_for_graph_hourly.map{|t| t.pageviews.to_f}.corrcoef(@cv_for_graph_hourly.map{|t| t.send(@cv_txt).to_f })
-          # @cv_for_graph_daily.map{|t| t.pageviews.to_f}.corrcoef(@cv_for_graph_daily.map{|t| t.send(@cv_txt).to_f })
-
-
           # 指標値算出用
           # 4回までリトライできます
           gap = ''
@@ -652,33 +630,56 @@ class UsersController < ApplicationController
           end
 
           ### データ計算部
-
-          @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+          @table_for_graph = Hash.new { |h,k| h[k] = {} }
           create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
           put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
-          put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
+          put_metrics_data_to_table_for_graph(gap, @table_for_graph, @metrics_snake_case_datas)
 
           # 分析データのバリデート
+          logger.info("分析データのバリデートを開始します")
+
+          @valid_analyze_day_types = get_day_types
+          @valid_analyze_metrics = @metrics_snake_case_datas.dup
+
+          validate_cv
+          if @valid_analyze_day_types.size == 0
+            puts "分析対象の日付がありません。処理を終了します。"
+            break
+          end
+
+          # 日付とメトリクスの組み合わせコレクションを作る
+          @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @valid_analyze_metrics).create
+
+          # @valids.each do |valid|
+          #   puts valid.day_type
+          # end
+
+          validate_metrics
+          if @valids.map {|t| t.metricses.size}.sum == 0
+            puts "分析対象の指標データがありません。処理を終了します。"
+            break
+          end
+
           logger.info("分析データのバリデートを開始します")
           get_day_types.each do |day_type|
 
             # CVデータのバリデート
-            puts "CVデータをバリデートします"
-            cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
-            unless is_not_uniq?(cves)
-              puts "CVが一意なので分析できません。"
-              break
-            end
-            puts "CVバリデートOK。後続のバリデートを実行します。"
+            # puts "CVデータをバリデートします"
+            # cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
+            # unless is_not_uniq?(cves)
+            #   puts "CVが一意なので分析できません。"
+            #   break
+            # end
+            # puts "CVバリデートOK。後続のバリデートを実行します。"
 
             # 指標データのバリデート
-            puts "指標データをバリデートします"
-            single_uniq_validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
-            unless single_uniq_validated_metrics.size >= 1
-              puts "分析対象の指標データがありませんので分析を実行できません。"
-              break
-            end
-            puts "指標データバリデートOK。後続のバリデートを実行します。"
+            # puts "指標データをバリデートします"
+            # single_uniq_validated_metrics = validate_metrics(day_type, metrics_snake_case_datas, @table_for_graph)
+            # unless single_uniq_validated_metrics.size >= 1
+            #   puts "分析対象の指標データがありませんので分析を実行できません。"
+            #   break
+            # end
+            # puts "指標データバリデートOK。後続のバリデートを実行します。"
 
             # cvと指標データの組み合わせをバリデート
             puts "CVデータと指標データの組み合わせをバリデートします"
@@ -696,6 +697,7 @@ class UsersController < ApplicationController
             end
             puts "CVデータと指標データの組み合わせバリデートOK。"
             puts "分析データのバリデートがすべて完了しました。分析を開始します"
+          end
 
             calc_gap_for_graph(@table_for_graph, multiple_uniq_validated_metrics) # スケルトンからGAP値を計算
 
@@ -708,14 +710,9 @@ class UsersController < ApplicationController
             day_room = room +  '::' + day_type
             p_hash[x][day_room] = home_graph_data
             logger.info("#{x} #{day_room} のデータセットが完了しました。")
-          end
 
-          # フィルタオプションのリセット
-          logger.info("filters option reset start. now is #{@cond}")
-          @cond[:filters] = {}
-          logger.info("filters option reset end. now is #{@cond}")
-
-        }
+            reset_filter_option
+        end
 
         # ループ終了。jqplot へデータ渡す
         if shori != 0
