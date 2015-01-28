@@ -358,7 +358,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
       if (errorThrown == 'timeout') {
         $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。');
       } else {
-        $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
+        $("span#errormsg").html('エラーが発生しました。再ログインしてください。<br>解消されない場合、下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
       }
 
       // 失敗したら処理終了

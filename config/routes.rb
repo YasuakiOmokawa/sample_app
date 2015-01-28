@@ -1,9 +1,12 @@
 SampleApp::Application.routes.draw do
   # get "password_resets/new"
-  resources :users ,:except => [:index] do
+  # resources :users ,:except => [:index] do
+  resources :users do
     member do
-      get :search, :direct, :referral, :social, :campaign, :last, :all
+      get :search, :direct, :referral, :social, :campaign, :last, :all, :show_detail, :edit_detail
       post :show
+      patch :update_detail
+      put :update_detail
     end
   end
   resources :sessions, only: [:new, :create, :destroy]

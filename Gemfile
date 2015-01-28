@@ -56,9 +56,13 @@ group :development, :test do
 end
 
 group :test do
-  gem 'selenium-webdriver', '2.35.1'
+  gem 'selenium-webdriver'
   gem 'capybara', '2.1.0'
   gem 'factory_girl_rails', '4.2.1'
+  gem 'database_cleaner' # データベースが絡むテストには必要
+  # gem 'capybara-webkit' # デフォルトのjavascript_driverを変更する場合
+  # gem "launchy" # ブラウザ立ち上げ抑止 windowsでは 使用不可
+  # gem 'headless' #webkit テスト時にブラウザを立ち上げさせない windows では使えない
 end
 
 group :doc do

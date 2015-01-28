@@ -1,10 +1,17 @@
-<% provide(:title, 'All users') %>
-<h1>All users</h1>
+<% provide(:title, 'すべてのユーザー') %>
+<%= link_to "ログアウト", signout_path, method: "delete" %>
+<h1>すべてのユーザー</h1>
 
-<%= will_paginate %>
 
 <ul class="users">
-  <%= render @users %>
+  <!-- <%= render @users %> -->
+  <% @users.each do |user| %>
+    <li>
+      <%= link_to user.name, show_detail_user_path(user) %>
+      <% if current_user.admin? && !current_user?(user) %>
+        | <%= link_to "ユーザーを削除", user, method: :delete,
+          data: {confirm: "本当によろしいですか？"} %>
+      <% end %>
+    </li>
+  <% end %>
 </ul>
-
-<%= will_paginate %>

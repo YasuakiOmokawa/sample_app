@@ -1,0 +1,11 @@
+<% provide(:title, 'ユーザーの詳細') %>
+<%= link_to "一覧画面へ", users_path %> | <%= link_to "編集", edit_detail_user_path(@user) %>
+<h1>ユーザーの詳細</h1>
+
+<table class = "infos">
+  <tr><td class="id">ID</td><td> <%= @user.id %></td></tr>
+  <tr><td class="name">name</td><td> <%= @user.name %></td></tr>
+  <tr><td class="gaproperty_id">gaproperty_id</td><td> <%= @user.gaproperty_id %></td></tr>
+  <tr><td class="gaprofile_id">gaprofile_id</td><td> <%= @user.gaprofile_id %></td></tr>
+  <tr><td class="gaproject_id">gaproject_id</td><td> <%= @user.gaproject_id %></td></tr>
+</table>

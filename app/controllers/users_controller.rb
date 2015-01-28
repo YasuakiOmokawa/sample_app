@@ -9,9 +9,9 @@ class UsersController < ApplicationController
   require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign]
-  before_action :correct_user,   only: [:edit, :update]
-  before_action :admin_user,      only: :destroy
+  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :show_detail, :edit_detail, :update_detail]
+  before_action :correct_user,   only: [:edit, :update, :edit_detail, :update_detail]
+  before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
   prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
@@ -128,6 +128,9 @@ class UsersController < ApplicationController
   end
 
   def index
+    render :layout => false, :text => "管理者権限をもつユーザでログインしてください" unless current_user.admin?
+
+    @users = User.all
     # @users = User.paginate(page: params[:page])
   end
 
@@ -164,7 +167,6 @@ class UsersController < ApplicationController
   end
 
   def create
-    # params[:ga_password] = params[:password]
     @user = User.new(user_params)
     if @user.save
       sign_in @user
@@ -179,6 +181,10 @@ class UsersController < ApplicationController
     render :layout => false
   end
 
+  def edit_detail
+    # render :layout => false
+  end
+
   def update
       if @user.update_attributes(user_params)
         flash[:success] = "Profile updated"
@@ -188,17 +194,32 @@ class UsersController < ApplicationController
       end
   end
 
+  def update_detail
+      if @user.update_attributes(user_params)
+        flash[:success] = "Profile updated"
+        redirect_to users_path
+      else
+        render 'edit_detail'
+      end
+  end
+
+
   def destroy
       User.find(params[:id]).destroy
-      flash[:success] = "User destroyed."
+      flash[:success] = "ユーザーを削除しました。"
       redirect_to users_url
+  end
+
+  def show_detail
+      @user = User.find(params[:id])
   end
 
   private
 
     def user_params
       params.require(:user).permit(:name, :email, :password,
-                                   :password_confirmation)
+                                   :password_confirmation, :gaproperty_id,
+                                   :gaprofile_id, :gaproject_id)
     end
 
     # Before actions
