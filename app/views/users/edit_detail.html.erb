@@ -4,10 +4,10 @@
   <table>
   <%= form_for(@user, :url =>{:action => 'update_detail'}, html: {:name => 'editDetailForm'}) do |f| %>
     <tr>
-      <td>名前：</td><td><%= f.text_area :name %></td>
+      <td>名前：</td><td><%= f.text_field :name %></td>
     </tr>
     <tr>
-      <td>メールアドレス：</td><td><%= f.text_area :email %></td>
+      <td>メールアドレス：</td><td><%= f.text_field :email %></td>
     </tr>
     <tr>
       <td>パスワード：</td><td><%= f.password_field :password %></td>
@@ -16,13 +16,13 @@
       <td>確認のため再入力：</td><td><%= f.password_field :password_confirmation %></td>
     </tr>
     <tr>
-      <td>Google Analytics プロパティID：</td><td><%= f.text_area :gaproperty_id %></td>
+      <td>Google Analytics プロパティID：</td><td><%= f.text_field :gaproperty_id %></td>
     </tr>
     <tr>
-      <td>Google Analytics プロファイルID：</td><td><%= f.text_area :gaprofile_id %></td>
+      <td>Google Analytics プロファイルID：</td><td><%= f.text_field :gaprofile_id %></td>
     </tr>
     <tr>
-      <td>Google デベロッパープロジェクトID：</td><td><%= f.text_area :gaproject_id %></td>
+      <td>Google デベロッパープロジェクトID：</td><td><%= f.text_field :gaproject_id %></td>
     </tr>
     <tr>
       <td></td><td><%= link_to "一覧画面へ", users_path %></td>

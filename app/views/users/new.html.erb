@@ -9,14 +9,20 @@
       <%= f.label :name, '名前' %>
       <%= f.text_field :name %>
 
-      <%= f.label :email, 'Google Analytics アカウントのメールアドレス' %>
+      <%= f.label :email, 'メールアドレス' %>
       <%= f.text_field :email %>
 
-      <%= f.label :password, 'Google Analytics アカウントのパスワード' %>
+      <%= f.label :password, 'パスワード' %>
       <%= f.password_field :password %>
 
       <%= f.label :password_confirmation, "パスワードを再度入力" %>
       <%= f.password_field :password_confirmation %>
+
+      <%= f.label :gaproperty_id, "Google Analytics プロパティID" %>
+      <%= f.text_field :gaproperty_id %>
+
+      <%= f.label :gaprofile_id, "Google Analytics プロファイルD" %>
+      <%= f.text_field :gaprofile_id %>
 
       <%= f.submit "アカウントを作成する", class: "btn btn-large btn-primary" %>
     <% end %>

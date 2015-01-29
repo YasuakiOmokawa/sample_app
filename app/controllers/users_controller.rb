@@ -4,14 +4,13 @@ class UsersController < ApplicationController
   require 'create_table'
   require 'insert_table'
   require 'update_table'
-  require 'parallel'
   require 'securerandom'
   require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign, :show_detail, :edit_detail, :update_detail]
-  before_action :correct_user,   only: [:edit, :update, :edit_detail, :update_detail]
-  before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail]
+  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign]
+  before_action :correct_user,   only: [:edit, :update]
+  before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
   prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
@@ -169,9 +168,8 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      sign_in @user
-      flash[:success] = "ようこそ！"
-      redirect_to @user
+      flash[:success] = "ユーザを登録しました！"
+      redirect_to users_path
     else
       render 'new'
     end
@@ -182,7 +180,7 @@ class UsersController < ApplicationController
   end
 
   def edit_detail
-    # render :layout => false
+    @user = User.find(params[:id])
   end
 
   def update
@@ -195,6 +193,7 @@ class UsersController < ApplicationController
   end
 
   def update_detail
+      @user = User.find(params[:id])
       if @user.update_attributes(user_params)
         flash[:success] = "Profile updated"
         redirect_to users_path

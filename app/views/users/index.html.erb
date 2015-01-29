@@ -1,10 +1,9 @@
 <% provide(:title, 'すべてのユーザー') %>
-<%= link_to "ログアウト", signout_path, method: "delete" %>
+<%= link_to "ログアウト", signout_path, method: "delete" %> | <%= link_to "ユーザ登録", signup_path %>
 <h1>すべてのユーザー</h1>
 
 
 <ul class="users">
-  <!-- <%= render @users %> -->
   <% @users.each do |user| %>
     <li>
       <%= link_to user.name, show_detail_user_path(user) %>
