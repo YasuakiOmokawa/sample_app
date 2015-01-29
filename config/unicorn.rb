@@ -1,6 +1,6 @@
 require 'action_dispatch/middleware/session/dalli_store'
 
-worker_processes Integer(ENV["WEB_CONCURRENCY"] || 3)
+worker_processes Integer(ENV["WEB_CONCURRENCY"] || 8)
 timeout 30
 preload_app true
 
