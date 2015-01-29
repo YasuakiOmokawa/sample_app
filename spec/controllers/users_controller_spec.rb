@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 require 'holiday_japan'
-require 'parallel'
 require 'securerandom'
 require "retryable"
 require 'user_func'
@@ -69,7 +68,28 @@ describe UsersController do
         expect(@valid_analyze_day_types.include?('all_day')).to eq(true)
       end
     end
-
   end
 
+  describe 'ホーム画面分析' do
+    before do
+      json_file_path =  Rails.root.join('spec', 'fixtures', 'table_for_graph.json').to_s
+      json_data = open(json_file_path) do |io|
+        JSON.load(io)
+      end
+      @table_for_graph = JSON.parse(json_data)
+    end
+    let(:df) { Statistics::DayFactory.new(@table_for_graph, :pageviews, 'all_day').data}
+
+    it "31日分のデータがあること" do
+      expect(@table_for_graph.size).to eq(31)
+    end
+
+    it "全日データのインスタンスが作成されていること" do
+      expect(df.komoku).to eq(:pageviews)
+    end
+
+    it "スミルノフ・グラブス検定" do
+      # ..
+    end
+  end
 end
