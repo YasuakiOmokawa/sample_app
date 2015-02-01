@@ -78,14 +78,14 @@ describe UsersController do
       end
       @table_for_graph = JSON.parse(json_data)
     end
-    let(:df) { Statistics::DayFactory.new(@table_for_graph, :pageviews, 'all_day').data}
+    let(:df) { Statistics::DayFactory.new(@table_for_graph, "percent_new_sessions", 'all_day').data}
 
     it "31日分のデータがあること" do
       expect(@table_for_graph.size).to eq(31)
     end
 
     it "全日データのインスタンスが作成されていること" do
-      expect(df.komoku).to eq(:pageviews)
+      expect(df.komoku).to eq("pageviews")
     end
 
     it "スミルノフ・グラブス検定" do
