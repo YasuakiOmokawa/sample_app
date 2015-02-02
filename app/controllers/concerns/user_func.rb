@@ -1,4 +1,49 @@
+module ExcelFunc
+
+  def self.excel_upper_quartile(array)
+    excel_quartile(:upper, array)
+  end
+
+  def self.excel_lower_quartile(array)
+    excel_quartile(:lower, array)
+  end
+
+  def self.excel_quartile(extreme, array)
+    return nil if array.empty?
+    sorted_array = array.sort
+    u = case extreme
+    when :upper then 3 * sorted_array.length + 1
+    when :lower then sorted_array.length + 3
+    else raise "ArgumentError"
+    end
+    u *= 0.25
+    if (u-u.truncate).is_a?(Integer)
+      return sorted_array[(u-u.truncate)-1]
+    else
+      sample = sorted_array[u.truncate.abs-1]
+      sample1 = sorted_array[(u.truncate.abs)]
+      return sample+((sample1-sample)*(u-u.truncate))
+    end
+  end
+end
+
 module UserFunc
+
+  def chk_not_a_number(target)
+    if target.nan?
+      0.0
+    else
+      target
+    end
+  end
+
+  def check_number_sign(n)
+    if n >= 0
+      'plus'
+    else
+      'minus'
+    end
+  end
 
   def guard_for_zero_division(value)
     if value.nil? or value <= 0
@@ -292,32 +337,6 @@ module ParamUtils
     end
   end
 
-  def excel_quartile(extreme,array)
-    return nil if array.empty?
-    sorted_array = array.sort
-    u = case extreme
-    when :upper then 3 * sorted_array.length + 1
-    when :lower then sorted_array.length + 3
-    else raise "ArgumentError"
-    end
-    u *= 0.25
-    if (u-u.truncate).is_a?(Integer)
-      return sorted_array[(u-u.truncate)-1]
-    else
-      sample = sorted_array[u.truncate.abs-1]
-      sample1 = sorted_array[(u.truncate.abs)]
-      return sample+((sample1-sample)*(u-u.truncate))
-    end
-  end
-
-  def excel_upper_quartile(array)
-    excel_quartile(:upper, array)
-  end
-
-  def excel_lower_quartile(array)
-    excel_quartile(:lower, array)
-  end
-
   class MetricsAndCV
     MetricsAndCV = Struct.new(:metrics, :cv)
 
@@ -333,6 +352,7 @@ module ParamUtils
   end
 
   class IQR
+    include ExcelFunc
     IQR = Struct.new(:upper, :lower, :range_value)
 
     def initialize(obj)
@@ -340,45 +360,28 @@ module ParamUtils
     end
 
     def create
-      IQR.new(excel_upper_quartile(@obj.get_metrics),
-        excel_lower_quartile(@obj.get_metrics),
-        excel_upper_quartile(@obj.get_metrics) - excel_lower_quartile(@obj.get_metrics)
+      IQR.new(ExcelFunc.excel_upper_quartile(@obj.get_metrics),
+        ExcelFunc.excel_lower_quartile(@obj.get_metrics),
+        ExcelFunc.excel_upper_quartile(@obj.get_metrics) - ExcelFunc.excel_lower_quartile(@obj.get_metrics)
       )
     end
   end
 
   def detect_outlier_with_iqr(df)
     metrics_and_cv = MetricsAndCV.new(df.get_metrics.zip(df.get_cves)).create
-    # metrics_and_cv[2].metrics = 588.24 # 上限値削除テスト　除外されない
-    # metrics_and_cv[12].metrics = 588.25 # 上限値削除テスト　除外される
-    # metrics_and_cv[3].metrics = 588.26 # 上限値削除テスト　除外される
-    # metrics_and_cv[26].metrics = 134.24 # 下限値削除テスト　除外される
-    # metrics_and_cv[22].metrics = 134.25 # 下限値削除テスト　除外される
-    # metrics_and_cv[27].metrics = 134.26 # 下限値削除テスト　除外されない
-    metrics_and_cv.each do |t|
-      t.metrics = 0
-    end
-    # puts ("除外前の配列サイズは #{metrics_and_cv.size} です")
 
     iqr = IQR.new(df).create
-    # puts ("lower is #{iqr.lower}")
-    # puts ("upper is #{iqr.upper}")
-    # puts ("range_value is #{iqr.range_value}")
 
-    puts("IQRによる外れ値の検出を行います")
     detected = metrics_and_cv.reduce([]) do |acum, data|
       if data.metrics >= iqr.upper + (iqr.range_value * 1.5) or data.metrics <= iqr.lower - (iqr.range_value * 1.5)
-        puts "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。"
+        logger.info( "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。")
       else
         acum << data
       end
       acum
     end
-    puts("IQRによる外れ値の検出が終了しました")
-    # puts ("除外後の配列サイズは #{detected.size} です")
     return detected
   end
-# detect_outlier_with_iqr(df)
 
   def get_detected_metrics(detected)
     metrics = detected.reduce([]) do |acum, data|

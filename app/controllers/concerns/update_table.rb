@@ -110,22 +110,6 @@ module UpdateTable
     return tbl
   end
 
-  def chk_not_a_number(target)
-    if target.nan?
-      0.0
-    else
-      target
-    end
-  end
-
-  def check_number_sign(n)
-    if n >= 0
-      'plus'
-    else
-      'minus'
-    end
-  end
-
   def metrics_day_type_jp_caption(day_type, metricses)
     if day_type == 'day_on'
       d_hsh = add_metrics_day_on(metricses)
@@ -189,15 +173,19 @@ module UpdateTable
     col.each do |komoku, jp|
 
       df = Statistics::DayFactory.new(tbl, komoku, type).data
-      rs = Statistics::ResultSet.new(df)
+      detected = detect_outlier_with_iqr(df)
+      metrics = get_detected_metrics(detected)
+      cv = get_detected_cves(detected)
 
-      rs.set_corr
-      rs.set_corr_sign
-      rs.set_variation
-      rs.set_metrics_stddev
-      rs.set_metrics_avg
+      tmp = Hash.new{ |h,k| h[k] = {} }
 
-      r_hsh.merge!(rs.result)
+      tmp[df.komoku][:corr] = chk_not_a_number(metrics.corrcoef(cv)).round(1).abs
+      tmp[df.komoku][:corr_sign] = check_number_sign(chk_not_a_number(metrics.corrcoef(cv)).round(1))
+      tmp[df.komoku][:vari] = chk_not_a_number( (metrics.stddev / metrics.avg).round(1) )
+      tmp[df.komoku][:metrics_stddev] = metrics.stddev.round(1)
+      tmp[df.komoku][:metrics_avg] = metrics.avg.round(1)
+
+      r_hsh.merge!(tmp)
     end
     r_hsh
   rescue

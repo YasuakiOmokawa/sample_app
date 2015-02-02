@@ -79,17 +79,21 @@ describe UsersController do
       @table_for_graph = JSON.parse(json_data)
     end
     let(:df) { Statistics::DayFactory.new(@table_for_graph, "percent_new_sessions", 'all_day').data}
+    let(:iqr) {IQR.new(df).create}
 
     it "31日分のデータがあること" do
       expect(@table_for_graph.size).to eq(31)
     end
 
     it "全日データのインスタンスが作成されていること" do
-      expect(df.komoku).to eq("pageviews")
+      expect(df.komoku).to eq("percent_new_sessions")
     end
 
-    it "スミルノフ・グラブス検定" do
-      # ..
+    it "IQR検定 上限値以上の値が削除されること" do
+      detect_outlier_with_iqr(df)
+      Rails.logger.stub(:info => nil)
+      log_str = "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。"
+      Rails.logger.should_receive(:info).with(log_str).once
     end
   end
 end

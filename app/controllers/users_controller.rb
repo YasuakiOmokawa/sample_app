@@ -675,14 +675,6 @@ class UsersController < ApplicationController
             break
           end
 
-          @valids.each do |valid|
-            df = Statistics::DayFactory.new(@table_for_graph, valid.metricses, valid.day_type).data
-            if detect_outlier_with_iqr(df).size == 0
-              puts("#{valid.day_type} の #{valid.metricses} は全て外れ値の為、分析対象ではありません")
-              
-            end
-          end
-
           logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
 
           @valids.each do |valid|
@@ -696,7 +688,6 @@ class UsersController < ApplicationController
             p_hash[x][day_room] = home_graph_data
             logger.info("#{x} #{day_room} のデータセットが完了しました。")
           end
-          # reset_filter_option
         end
 
         # ループ終了。jqplot へデータ渡す
