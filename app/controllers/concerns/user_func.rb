@@ -337,20 +337,6 @@ module ParamUtils
     end
   end
 
-  class MetricsAndCV
-    MetricsAndCV = Struct.new(:metrics, :cv)
-
-    def initialize(arr)
-      @arr = arr
-    end
-
-    def create
-      @arr.reduce([]) do |datas, data|
-        datas << MetricsAndCV.new(data[0], data[1])
-      end
-    end
-  end
-
   class IQR
     include ExcelFunc
     IQR = Struct.new(:upper, :lower, :range_value)
@@ -367,8 +353,7 @@ module ParamUtils
     end
   end
 
-  def detect_outlier_with_iqr(df)
-    metrics_and_cv = MetricsAndCV.new(df.get_metrics.zip(df.get_cves)).create
+  def detect_outlier_with_iqr(df, metrics_and_cv)
 
     iqr = IQR.new(df).create
 
@@ -436,6 +421,4 @@ module ParamUtils
   #     break
   #   end
   # end
-
-
 end

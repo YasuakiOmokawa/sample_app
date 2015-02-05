@@ -21,13 +21,6 @@ module InsertTable
 
               # 再訪問率以外の計算
               tbl[k][t.to_sym] = v
-
-              # 再訪問率の計算方式を、一時的にセッションベースにするためコメントアウト
-              # al = all.to_i
-              # p al
-              # if al < 1 then al = 1 end # ゼロ除算例外の防止
-              # p al
-              # tbl[:repeat_rate][t.to_sym] = ( v.to_f / al.to_f ) * 100
             end
           end
 
@@ -44,17 +37,6 @@ module InsertTable
     end
     return tbl
   end
-
-  # def pick_value(d, date, item, komoku, value)
-
-  #   if (komoku.nil? and value.nil?) and (d[komoku] == value and d[:date] == date)
-  #     res = d[item].to_f.round(1)
-  #   else
-  #     res = 0
-  #   end
-  #   binding.pry
-  #   res
-  # end
 
   def put_table_for_special(data, tbl, item, second_komoku, second_value)
     {'good' => 0, 'bad' => 1}.each do |k, v|
@@ -94,23 +76,6 @@ module InsertTable
       0
     end
   end
-
-  # グラフ値テーブルへ値を代入
-  # def put_table_for_graph(data, tbl, item)
-  #   {'good' => 0, 'bad' => 1}.each do |k, v|
-  #     data[k].each do |d|
-  #       date = d.date
-  #       item.each do |t|
-  #         if t == 'repeat_rate'.to_sym then
-  #           tbl[date][t][v] = calc_repeat_rate(d)
-  #         else
-  #           tbl[date][t][v] = d[t].to_f.round(1)
-  #         end
-  #       end
-  #     end unless data[k].total_results == 0
-  #   end
-  # return tbl
-  # end
 
   # グラフ値テーブルへcv値を代入
   def put_cv_data_to_table_for_graph(data, table, cv_num)

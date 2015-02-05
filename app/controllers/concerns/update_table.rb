@@ -1,16 +1,5 @@
 module UpdateTable
 
-  def calc_desire_datas(tbl)
-    tbl.each do |k, v|
-      if tbl[k][:corr_sign] == 'plus'
-       tbl[k][:desire] = (tbl[k][:metrics_avg] + tbl[k][:metrics_stddev]).round(1)
-     else
-       tbl[k][:desire] = (tbl[k][:metrics_avg] - tbl[k][:metrics_stddev]).round(1)
-      end
-    end
-    tbl
-  end
-
   def calc_percent_for_favorite_table(ssn, table, data_type)
     table.each do |k, v|
       table[k][data_type] = (table[k][data_type] / ssn * 100).round(1) if table[k][data_type] >0
@@ -78,6 +67,7 @@ module UpdateTable
   end
 
   def format_value(format, value)
+    return value if value == '-'
     case format
     when "time" then
       chg_time(value)
@@ -170,20 +160,25 @@ module UpdateTable
     r_hsh = Hash.new{ |h,k| h[k] = {} }
 
     # 項目別
-    col.each do |komoku, jp|
+    Array(col).each do |komoku, jp|
 
       df = Statistics::DayFactory.new(tbl, komoku, type).data
-      detected = detect_outlier_with_iqr(df)
-      metrics = get_detected_metrics(detected)
-      cv = get_detected_cves(detected)
+      metrics_and_cv = Statistics::MetricsAndCV.new(df.get_metrics.zip(df.get_cves)).create
+
+      # 外れ値検出ロジック
+      metrics_and_cv = detect_outlier_with_iqr(df, metrics_and_cv)
+      # metrics_and_cv = MetricsAndCV.new([0].zip([0])).create if metrics_and_cv.blank?
+
+      metrics = get_detected_metrics(metrics_and_cv)
+      cv = get_detected_cves(metrics_and_cv)
 
       tmp = Hash.new{ |h,k| h[k] = {} }
 
-      tmp[df.komoku][:corr] = chk_not_a_number(metrics.corrcoef(cv)).round(1).abs
-      tmp[df.komoku][:corr_sign] = check_number_sign(chk_not_a_number(metrics.corrcoef(cv)).round(1))
-      tmp[df.komoku][:vari] = chk_not_a_number( (metrics.stddev / metrics.avg).round(1) )
-      tmp[df.komoku][:metrics_stddev] = metrics.stddev.round(1)
-      tmp[df.komoku][:metrics_avg] = metrics.avg.round(1)
+      tmp[df.komoku][:corr] = metrics_and_cv.blank? ? '-' : chk_not_a_number(metrics.corrcoef(cv)).round(1).abs
+      tmp[df.komoku][:corr_sign] = metrics_and_cv.blank? ? 'none' : check_number_sign(chk_not_a_number(metrics.corrcoef(cv)).round(1))
+      tmp[df.komoku][:vari] = metrics_and_cv.blank? ? '-' : chk_not_a_number( (metrics.stddev / metrics.avg).round(1) )
+      tmp[df.komoku][:metrics_stddev] = metrics_and_cv.blank? ? '-' : metrics.stddev.round(1)
+      tmp[df.komoku][:metrics_avg] = metrics_and_cv.blank? ? '-' : metrics.avg.round(1)
 
       r_hsh.merge!(tmp)
     end
@@ -191,6 +186,19 @@ module UpdateTable
   rescue
     puts $!
     puts $@
+  end
+
+  def calc_desire_datas(tbl)
+    tbl.each do |k, v|
+      if tbl[k][:corr_sign] == 'plus'
+        tbl[k][:desire] = (tbl[k][:metrics_avg] + tbl[k][:metrics_stddev]).round(1)
+      elsif tbl[k][:corr_sign] == 'minus'
+        tbl[k][:desire] = (tbl[k][:metrics_avg] - tbl[k][:metrics_stddev]).round(1)
+      else
+        tbl[k][:desire] = '-'
+      end
+    end
+    tbl
   end
 
   def head_special(table, limit)
