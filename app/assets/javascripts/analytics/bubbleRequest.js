@@ -554,7 +554,7 @@ function cacheShapedBubbleParts(req_opts, elm, shaped_idxarr, req_opts) {
 
 function addWhenNotCved() {
   afterCall('div#gh');
-  $("span#errormsg").html('アナリティクスのデータが分析対象に達していません。');
+  $("span#errormsg").html('アナリティクスのデータが分析対象に達していません。<br>CVがある期間を指定して再実行してください。');
   plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []); // ダミー表示
 }
 
