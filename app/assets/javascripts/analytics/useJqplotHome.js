@@ -3,12 +3,11 @@ function createGraphPlots(idxarr, arr) {
   var plot_color = {}, tmp_arr = [];
 
   for (i=0; i < idxarr.length; i++) {
-    plot_color = setInitialBubbleColor();
 
-    // x, y, radius, plot_color
     var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
-    tmp_arr[i] = [  x, y, 1, plot_color];
+    plot_color = setInitialBubbleColor();
+    tmp_arr[i] = [ x, y, 1, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
   arr.push(tmp_arr);
 }

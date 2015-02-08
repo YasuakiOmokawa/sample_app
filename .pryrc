@@ -57,7 +57,8 @@ load 'user_func.rb'
 load 'create_table.rb'
 load 'insert_table.rb'
 load 'update_table.rb'
-include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
+include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
+
 
       @user = User.find(3)
       analyticsservice = AnalyticsService.new

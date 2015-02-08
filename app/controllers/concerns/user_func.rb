@@ -283,10 +283,18 @@ module ParamUtils
     logger.info( "CVバリデート完了。")
   end
 
-  def delete_invalid_metrics(data, metrics, metricses)
+  def delete_uniq_metrics(data, metrics, metricses)
     # data = %w(1.0 1.0) #異常用コード
     unless is_not_uniq?(data)
       logger.info( "指標#{metrics}は一意なので分析対象から外します。")
+      metricses.delete(metrics)
+    end
+  end
+
+  def delete_too_much_zero_metrics(data, metrics, metricses)
+    # data = [1, 2, 1, 0, 0, 0, 0, 0, 0] #異常用コード
+    if ExcelFunc.excel_upper_quartile(data) == 0
+      logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
       metricses.delete(metrics)
     end
   end
@@ -306,8 +314,9 @@ module ParamUtils
       @metrics_snake_case_datas.each do |metrics|
         cves = Statistics::DayFactory.new(@table_for_graph, :sessions, valid.day_type).data.get_cves
         df = Statistics::DayFactory.new(@table_for_graph, metrics, valid.day_type).data
-        delete_invalid_metrics(df.get_metrics, metrics, valid.metricses)
+        delete_uniq_metrics(df.get_metrics, metrics, valid.metricses)
         delete_invalid_metrics_multiple(df.get_metrics, metrics, valid.metricses, cves)
+        delete_too_much_zero_metrics(df.get_metrics, metrics, valid.metricses)
       end
       logger.info( "#{valid.day_type}の指標バリデートOK。")
     end

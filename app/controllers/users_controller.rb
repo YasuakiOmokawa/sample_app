@@ -6,7 +6,7 @@ class UsersController < ApplicationController
   require 'update_table'
   require 'securerandom'
   require "retryable"
-  include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils
+  include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
   before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign]
   before_action :correct_user,   only: [:edit, :update]
