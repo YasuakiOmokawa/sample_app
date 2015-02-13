@@ -3,8 +3,7 @@ function setEventOnChangeCVName() {
       $('input[name="cv_num"]').val($(this).val());
 
       if (isTitleHome()) {
-        var key = isTargetClicked(getAnalyzedPageName());
-        bubbleCreateAtTabLink(key);
+        changeLocationHash(getLocationHashPage());
       } else {
         $('a#set').trigger('click');
       }

@@ -11,17 +11,17 @@ var prcnt_all_cntr = 0;
 // デバイス
 function getDevOpts() {
   return [
-    'pc',
-    'sphone',
-    'mobile',
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    'new',
-    'repeat'
+    // 'new',
+    // 'repeat'
   ];
 }
 
@@ -586,11 +586,50 @@ function setLoadingMortion(dom, req_opts) {
 
 }
 
+function replaceAll(expression, org, dest){
+    return expression.split(org).join(dest);
+}
+
+// ホーム画面でハッシュが変更されたときのイベント
+function locationHashChanged() {
+  var params = decodeURIComponent(location.hash).split("#");
+  setAnchorParams(params);
+  var page = params[1];
+  bubbleCreateAtTabLink(page);
+}
+
+// ホーム画面でハッシュを変更させる
+function changeLocationHash(page) {
+  location.hash = encodeURIComponent(page + createHomeURIBaseParams());
+}
+
+function createHomeURIBaseParams() {
+  var from = replaceAll($('#from').val(), '/', '-');
+  var to = replaceAll($('#to').val(), '/', '-');
+  var cv_num = $('input[name="cv_num"]').val();
+  return params = '#' + from + '#' + to + '#' + cv_num;
+}
+
+function getLocationHashPage() {
+  var params = decodeURIComponent(location.hash).split("#");
+  return params[1];
+}
+
+function setAnchorParams(params) {
+  $('#from').val(replaceAll(params[2], '-', '/'));
+  $('#to').val(replaceAll(params[3], '-', '/'));
+  $('input[name="cv_num"]').val(params[4]);
+  $('select[name="cvselect"]').val(params[4]);
+}
+
 $(document).ready(function() {
 
+  // hashchangeハンドラの定義
+  window.onhashchange = locationHashChanged;
+
+  // タブがクリックされたときのイベント
   $('#pnt a').click(function() {
-    var hash = this.hash;
-    var page = hash.slice(1);
-    bubbleCreateAtTabLink(page);
+    var page = $(this).attr('class');
+    changeLocationHash(page);
   });
 });

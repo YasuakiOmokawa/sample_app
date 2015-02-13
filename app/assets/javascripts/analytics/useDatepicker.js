@@ -156,9 +156,7 @@ $(function() {
           $("input.tod").datepicker("destroy");
 
           if (isTitleHome()) {
-            var hash = isLocationHash();
-            var page = hash.slice(1);
-            bubbleCreateAtTabLink(page);
+            changeLocationHash(getLocationHashPage());
           } else {
             $('a#set').trigger('click');
           }
