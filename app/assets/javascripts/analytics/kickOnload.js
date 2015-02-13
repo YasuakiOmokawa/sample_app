@@ -5,7 +5,11 @@ $(window).load(function() {
     if (location.hash) {
       locationHashChanged();
     } else {
-      changeLocationHash('all');
+      if (gon.history_hash) {
+        changeLocationHash(gon.history_hash);
+      } else {
+        changeLocationHash('all');
+      }
     }
   }
 });
