@@ -5,8 +5,7 @@ $(window).load(function() {
 
     if (location.hash) {
       console.log('window load イベント実行');
-      // locationHashChanged();
-      setTimeout("locationHashChanged()", 10);
+      setTimeout("locationHashChanged()", 10); // Chromeレンダリングバグ対応でsetTimeout
     } else {
       if (gon.history_hash) {
         console.log('グラフへ戻る　イベントが発生しました');
