@@ -51,6 +51,9 @@ Spork.prefork do
     #     --seed 1234
     config.order = "random"
     config.include Capybara::DSL
+
+    # ファクトリを簡単に呼び出せるよう、Factory Girl の構文をインクルードする
+    config.include FactoryGirl::Syntax::Methods
   end
 end
 

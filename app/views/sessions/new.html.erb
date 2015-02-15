@@ -1,15 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta http-equiv="content-style-type" content="text/css">
-<title>ログイン ｜ AST</title>
-  <%= stylesheet_link_tag "analytics", media: "all" %>
-</head>
-<body>
-<% flash.each do |key, value| %>
-    <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
-<% end %>
+<%provide(:title, 'ログイン') %>
 <div id="login">
   <h1>AST&nbsp;ログイン</h1>
   <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
@@ -32,8 +21,6 @@
     </tr>
    <% end %>
   </table>
-  <div id="ftr">Copyright (C) 2014 senk Inc. All Rights Reserved.</div>
+<!--   <div id="ftr">Copyright (C) 2014 senk Inc. All Rights Reserved.</div>
 </div>
-
-</body>
-</html>
+ -->

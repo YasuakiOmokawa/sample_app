@@ -5,6 +5,7 @@
   <%= select_tag 'cvselect', options_for_select( @ga_goal ) %>
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
+  <%= link_to "設定編集", edit_init_analyze_user_path(current_user) %>
   <div>ID：<%= @user.name %></div>
 </div>
 

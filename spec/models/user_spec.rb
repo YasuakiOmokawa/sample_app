@@ -4,23 +4,15 @@ describe 'User' do
 
   describe "複数項目の一括登録テスト" do
 
-    before { FactoryGirl.create(:user) }
-    after { User.delete_all }
-    let(:user) { User.where(email: 'michael@example.com').first }
+    after(:all) { User.delete_all }
 
-    it "DB登録されてること" do
-      expect(user.email).to eq('michael@example.com')
+    it "ファクトリが有効であること" do
+      expect(build(:user)).to be_valid
     end
 
-    it "validate対象ではない単項目を更新できること" do
-      user.update_attributes({gaproperty_id: 'TEST'})
-      expect(user).to be_valid
-    end
-
-    it "name項目の異常値更新をはじけること" do
+    it "validateするメソッドで、対象項目の異常値更新をはじけること" do
       tmp = 'o' * 51
-      user.update_attribute(:name, tmp)
-      expect(user).not_to be_valid
+      expect(build(:user, name: tmp)).to have(1).errors_on(:name)
     end
   end
 end

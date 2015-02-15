@@ -2,7 +2,7 @@ class SessionsController < ApplicationController
 
   def new
     redirect_to user_path(current_user) and return if signed_in?
-    render :layout => false
+    render :layout => 'not_ga'
   end
 
   def create
@@ -13,7 +13,7 @@ class SessionsController < ApplicationController
       redirect_back_or user
     else
       flash.now[:error] = 'IDかパスワードが間違っています'
-      render 'new', :layout => false
+      render 'new', :layout => 'not_ga'
     end
   end
 

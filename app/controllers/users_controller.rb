@@ -8,8 +8,8 @@ class UsersController < ApplicationController
   require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :campaign]
-  before_action :correct_user,   only: [:edit, :update]
+  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :edit_init_analyze, :update_init_analyze]
+  before_action :correct_user,   only: [:edit, :update, :edit_init_analyze, :update_init_analyze]
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
@@ -176,7 +176,15 @@ class UsersController < ApplicationController
   end
 
   def edit
-    render :layout => false
+    render :layout => 'not_ga'
+  end
+
+  def edit_init_analyze
+    analyticsservice = AnalyticsService.new
+    session = AnalyticsService.new.login(@user)                                     # アナリティクスAPI認証パラメータ１
+    ga_profile = analyticsservice.load_profile(session, @user)                                     # アナリティクスAPI認証パラメータ２
+    @ga_goal = analyticsservice.get_goal(ga_profile)                                     # アナリティクスに設定されているCV
+    render :layout => 'not_ga'
   end
 
   def edit_detail
@@ -188,7 +196,16 @@ class UsersController < ApplicationController
         flash[:success] = "Profile updated"
         redirect_to @user
       else
-        render 'edit', :layout => false
+        render 'edit', :layout => 'not_ga'
+      end
+  end
+
+  def update_init_analyze
+      if @user.update_columns(user_params)
+        flash[:success] = "Profile updated"
+        redirect_to @user
+      else
+        render 'edit_analyze_prof', :layout => false
       end
   end
 
@@ -201,7 +218,6 @@ class UsersController < ApplicationController
         render 'edit_detail'
       end
   end
-
 
   def destroy
       User.find(params[:id]).destroy
@@ -218,7 +234,7 @@ class UsersController < ApplicationController
     def user_params
       params.require(:user).permit(:name, :email, :password,
                                    :password_confirmation, :gaproperty_id,
-                                   :gaprofile_id, :gaproject_id)
+                                   :gaprofile_id, :gaproject_id, :init_cv_num)
     end
 
     # Before actions
@@ -314,13 +330,8 @@ class UsersController < ApplicationController
      gon.red_item  = (params[:red_item].presence || '')
      gon.graphic_item = @graphic_item.to_s
      gon.format_string = check_format_graph(@graphic_item)
-
-     @cv_num = (params[:cv_num].presence.to_i || 1)                                                     # CV種類
-     if @cv_num == 0
-        @cv_num = 1
-     end
-
-     gon.cv_num = @cv_num
+     # CV種類
+     gon.cv_num = @cv_num = (params[:cv_num].presence || @user.init_cv_num).to_i
       # 絞り込みキーワード
       @narrow_word = params[:narrow_select].presence
       if params[:narrow_select].present?
