@@ -624,12 +624,13 @@ function setAnchorParams(params) {
 
 $(document).ready(function() {
 
-  // hashchangeハンドラの定義
-  window.onhashchange = locationHashChanged;
-
   // タブがクリックされたときのイベント
   $('#pnt a').click(function() {
     var page = $(this).attr('class');
     changeLocationHash(page);
   });
+
+  // hashchangeハンドラの定義
+  window.onhashchange = locationHashChanged;
+
 });
