@@ -35,6 +35,7 @@ gem 'tooltipster-rails' # ツールチップ（吹き出し）
 gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
 gem 'historyjs-rails' # ブラウザの履歴情報を保持する
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
+gem 'airbrake' # Errbit通知用
 
 group :development, :test do
   gem 'rspec-rails', '2.13.1'
