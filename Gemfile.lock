@@ -1,6 +1,17 @@
+GIT
+  remote: git://github.com/mataki/heroku_backup_task.git
+  revision: 9b57f083b7ade38e43b9c7d46391137920a81fc1
+  specs:
+    heroku_backup_task (0.0.5.1)
+      activesupport
+      fog
+      heroku (>= 2.30.2)
+      rake
+
 GEM
   remote: http://rubygems.org/
   specs:
+    CFPropertyList (2.3.0)
     actionmailer (4.0.5)
       actionpack (= 4.0.5)
       mail (~> 2.5.4)
@@ -25,8 +36,10 @@ GEM
       multi_json (~> 1.3)
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
+    addressable (2.3.7)
     arel (4.0.2)
     awesome_print (1.2.0)
+    bcrypt-ruby (3.1.2)
     bcrypt-ruby (3.1.2-x64-mingw32)
     better_errors (1.1.0)
       coderay (>= 1.0.0)
@@ -67,6 +80,7 @@ GEM
     debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
     erubis (2.7.0)
+    excon (0.44.2)
     execjs (2.1.0)
     factory_girl (4.2.0)
       activesupport (>= 3.0.0)
@@ -75,7 +89,90 @@ GEM
       railties (>= 3.0.0)
     faker (1.1.2)
       i18n (~> 0.5)
+    ffi (1.9.6)
     ffi (1.9.6-x64-mingw32)
+    fission (0.5.0)
+      CFPropertyList (~> 2.2)
+    fog (1.28.0)
+      fog-atmos
+      fog-aws (~> 0.0)
+      fog-brightbox (~> 0.4)
+      fog-core (~> 1.27, >= 1.27.3)
+      fog-ecloud
+      fog-json
+      fog-profitbricks
+      fog-radosgw (>= 0.0.2)
+      fog-riakcs
+      fog-sakuracloud (>= 0.0.4)
+      fog-serverlove
+      fog-softlayer
+      fog-storm_on_demand
+      fog-terremark
+      fog-vmfusion
+      fog-voxel
+      fog-xml (~> 0.1.1)
+      ipaddress (~> 0.5)
+      nokogiri (~> 1.5, >= 1.5.11)
+    fog-atmos (0.1.0)
+      fog-core
+      fog-xml
+    fog-aws (0.1.0)
+      fog-core (~> 1.27)
+      fog-json (~> 1.0)
+      fog-xml (~> 0.1)
+      ipaddress (~> 0.8)
+    fog-brightbox (0.7.1)
+      fog-core (~> 1.22)
+      fog-json
+      inflecto (~> 0.0.2)
+    fog-core (1.29.0)
+      builder
+      excon (~> 0.38)
+      formatador (~> 0.2)
+      mime-types
+      net-scp (~> 1.1)
+      net-ssh (>= 2.1.3)
+    fog-ecloud (0.0.2)
+      fog-core
+      fog-xml
+    fog-json (1.0.0)
+      multi_json (~> 1.0)
+    fog-profitbricks (0.0.1)
+      fog-core
+      fog-xml
+      nokogiri
+    fog-radosgw (0.0.3)
+      fog-core (>= 1.21.0)
+      fog-json
+      fog-xml (>= 0.0.1)
+    fog-riakcs (0.1.0)
+      fog-core
+      fog-json
+      fog-xml
+    fog-sakuracloud (1.0.0)
+      fog-core
+      fog-json
+    fog-serverlove (0.1.1)
+      fog-core
+      fog-json
+    fog-softlayer (0.4.1)
+      fog-core
+      fog-json
+    fog-storm_on_demand (0.1.0)
+      fog-core
+      fog-json
+    fog-terremark (0.0.4)
+      fog-core
+      fog-xml
+    fog-vmfusion (0.0.1)
+      fission
+      fog-core
+    fog-voxel (0.0.2)
+      fog-core
+      fog-xml
+    fog-xml (0.1.1)
+      fog-core
+      nokogiri (~> 1.5, >= 1.5.11)
     formatador (0.2.5)
     garb (0.9.8)
       activesupport (>= 2.2)
@@ -96,6 +193,15 @@ GEM
       childprocess (>= 0.2.3)
       guard (>= 1.1)
       spork (>= 0.8.4)
+    heroku (3.10.1)
+      heroku-api (~> 0.3.19)
+      launchy (>= 0.3.2)
+      netrc (~> 0.7.7)
+      rest-client (= 1.6.7)
+      rubyzip
+    heroku-api (0.3.22)
+      excon (~> 0.38)
+      multi_json (~> 1.8)
     hike (1.2.3)
     hirb (0.7.2)
     hirb-unicode (0.0.5)
@@ -105,7 +211,9 @@ GEM
       railties (>= 3.0)
     holiday_japan (1.1.0)
     i18n (0.6.9)
+    inflecto (0.0.2)
     interception (0.5)
+    ipaddress (0.8.0)
     jbuilder (1.0.2)
       activesupport (>= 3.0.0)
     jquery-hotkeys-rails (0.7.9.1)
@@ -120,6 +228,8 @@ GEM
       railties (>= 3.2.16)
     json (1.8.0)
     kgio (2.9.2)
+    launchy (2.4.3)
+      addressable (~> 2.3)
     listen (2.7.6)
       celluloid (>= 0.15.2)
       rb-fsevent (>= 0.9.3)
@@ -133,9 +243,16 @@ GEM
     mini_portile (0.6.0)
     minitest (4.7.5)
     multi_json (1.10.1)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.9.2)
+    netrc (0.7.9)
     newrelic_rpm (3.9.1.236)
+    nokogiri (1.6.2.1)
+      mini_portile (= 0.6.0)
     nokogiri (1.6.2.1-x64-mingw32)
       mini_portile (= 0.6.0)
+    pg (0.15.1)
     pg (0.15.1-x64-mingw32)
     polyglot (0.3.5)
     pry (0.9.12.6)
@@ -184,6 +301,8 @@ GEM
       ffi (>= 0.5.0)
     rdoc (3.12.2)
       json (~> 1.4)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     retryable (1.3.6)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
@@ -279,6 +398,7 @@ DEPENDENCIES
   gon
   guard-rspec (= 2.5.0)
   guard-spork (= 1.5.0)
+  heroku_backup_task!
   hirb
   hirb-unicode
   historyjs-rails
