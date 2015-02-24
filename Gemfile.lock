@@ -37,6 +37,9 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     addressable (2.3.7)
+    airbrake (4.1.0)
+      builder
+      multi_json
     arel (4.0.2)
     awesome_print (1.2.0)
     bcrypt-ruby (3.1.2)
@@ -380,6 +383,7 @@ PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
+  airbrake
   awesome_print
   bcrypt-ruby (= 3.1.2)
   better_errors

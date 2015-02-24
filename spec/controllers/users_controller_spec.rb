@@ -88,12 +88,5 @@ describe UsersController do
     it "全日データのインスタンスが作成されていること" do
       expect(df.komoku).to eq("percent_new_sessions")
     end
-
-    it "IQR検定 上限値以上の値が削除されること" do
-      detect_outlier_with_iqr(df)
-      Rails.logger.stub(:info => nil)
-      log_str = "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。"
-      Rails.logger.should_receive(:info).with(log_str).once
-    end
   end
 end

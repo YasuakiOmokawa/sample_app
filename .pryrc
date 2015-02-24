@@ -60,7 +60,7 @@ load 'update_table.rb'
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
 
-      @user = User.find(3)
+      @user = User.find(1)
       analyticsservice = AnalyticsService.new
       @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
         @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
