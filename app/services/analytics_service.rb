@@ -21,7 +21,7 @@ class AnalyticsService
   end
 
   # セッションログイン(並列処理用)
-  def login_multi(user_data, mlt_id)
+  def login_multi(mlt_id)
 
     session = Garb::Session.new
 
