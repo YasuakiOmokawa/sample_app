@@ -78,14 +78,14 @@ module UserFunc
       c[:filters] = o[:filters].merge( { cv.to_sym.send(v) => 1 } )
 
       if metrics.nil?
-        hash[k] = Analytics.const_get(name).results(prof, c)
+        hash[k] = Ast::Ganalytics::Garbs::Data.const_get(name).results(prof, c)
       elsif metrics == [:repeat_rate] then
 
         # クラス名を一意にするため、乱数を算出
         rndm = SecureRandom.hex(4)
         name = name + rndm.to_s
 
-        hash[k] = Analytics.create_class(name,
+        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
           [ :sessions, :percent_new_sessions ],
           [:date]).results(prof, c)
       elsif dimensions.nil?
@@ -94,7 +94,7 @@ module UserFunc
         rndm = SecureRandom.hex(4)
         name = name + rndm.to_s
 
-        hash[k] = Analytics.create_class(name,
+        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
           [ metrics ],
           [:date]).results(prof, c)
       else
@@ -103,7 +103,7 @@ module UserFunc
         rndm = SecureRandom.hex(4)
         name = name + rndm.to_s
 
-        hash[k] = Analytics.create_class(name,
+        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
           [ metrics ],
           [ dimensions ]).results(prof, c)
       end

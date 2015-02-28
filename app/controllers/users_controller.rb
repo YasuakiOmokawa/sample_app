@@ -23,11 +23,11 @@ class UsersController < ApplicationController
 
     special = :socialNetwork
     # データ取得部
-    soc_source = Analytics.create_class('Soc',
-      [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
+    soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
+      [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
 
     soc_gap = fetch_analytics_data('Fetch',
-      @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
+      @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
       @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
 
     # 計算部
@@ -68,11 +68,11 @@ class UsersController < ApplicationController
 
     special = :source
     # データ取得部
-    ref_source = Analytics.create_class('Ref',
-      [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
+    ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
+      [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
 
     ref_gap = fetch_analytics_data('Fetch',
-      @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
+      @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
       @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
 
     # 計算部
@@ -314,12 +314,13 @@ class UsersController < ApplicationController
       # パラメータ共通設定
 
       @user = User.find(params[:id])
-      analyticsservice = AnalyticsService.new
+      gaservice = Ast::Ganalytics::Garbs::Session.new
+      # analyticsservice = AnalyticsService.new
+      @session = gaservice.login(@user)
+      # @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
 
-      @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
-
-      @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
-      @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
+      @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
+      @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      set_action(params[:action], @cond)
       gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末
@@ -381,7 +382,7 @@ class UsersController < ApplicationController
       cls_name = 'CVForGraphSkeleton' + rndm.to_s
       # 4回までリトライできます
       Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-        @cv_for_graph = Analytics.create_class(cls_name,
+        @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,
           [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
       end
 
@@ -393,16 +394,16 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      cved_data = Analytics.create_class('CvedSession',
-        [:sessions], [:pagePath]).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).cved!.res)
-      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
-      fav_for_skel = Analytics::FetchKeywordForPages.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
+      cved_data = Ast::Ganalytics::Garbs::Data.create_class('CvedSession',
+        [:sessions], [:pagePath]).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).cved!.res)
+      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
+      fav_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForPages.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
 
       # ランディングページ用
-      land_for_skel = Analytics::FetchKeywordForLanding.results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
+      land_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForLanding.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
 
       # 全てのセッション(人気ページGAP値等計算用)
-      ga_result = Analytics.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
+      ga_result = Ast::Ganalytics::Garbs::Data.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
       tmp_all_session = ga_result.results[0].sessions.to_i if ga_result.total_results > 0
       all_session = guard_for_zero_division(tmp_all_session)
 
@@ -583,16 +584,16 @@ class UsersController < ApplicationController
           case wd
           when 'referral'
             special = :source
-            ref_source = Analytics.create_class('Ref',
-              [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+            ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
+              [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
             ref_source.each do |t|
               kwds.push('r' + t.source)
             end
           when 'social'
             special = :socialNetwork
             # データ取得部
-            soc_source = Analytics.create_class('Soc',
-              [ :sessions], [special] ).results(@ga_profile, Ganalytics::Garb::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+            soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
+              [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
             soc_source.each do |t|
               kwds.push( 'l' + t.social_network)
             end
@@ -649,7 +650,7 @@ class UsersController < ApplicationController
           cls_name = 'CVForGraphSkeleton' + rndm.to_s
           # 4回までリトライできます
           Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            @cv_for_graph = Analytics.create_class(cls_name,
+            @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,
               [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
           end
 
