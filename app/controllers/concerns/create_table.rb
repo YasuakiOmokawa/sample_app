@@ -100,13 +100,13 @@ module CreateTable
 
 
   # グラフ値テーブルスケルトンを作成
-  def create_skeleton_for_graph(hsh, from, to, clm)
+  def create_skeleton_for_graph(hsh, from, to, metricses)
     idx = 1
     (from..to).each do |t|
       dts = t.to_s.gsub( /-/, "" )
       d_type = chk_day(t)
 
-      clm.each do |u, i|
+      metricses.each do |u, i|
         hsh[dts][:cv] = 0
         hsh[dts]["idx"] = idx
         hsh[dts][:day_type] = d_type
@@ -116,6 +116,8 @@ module CreateTable
     end
     return hsh
   end
+
+
 
   # 土日祝日判定
     # wday 0 .. sun, 'day_sun'

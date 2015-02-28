@@ -60,11 +60,11 @@ load 'update_table.rb'
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
 
-      @user = User.find(1)
-      analyticsservice = AnalyticsService.new
-      @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
-        @ga_profile = analyticsservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
-        @ga_goal = analyticsservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
+      @user = User.find(3)
+      gaservice = Ast::Ganalytics::Garbs::Session.new
+      @session = gaservice.login(@user)
+      @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
+      @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
       @from = set_date_format('2014/11/1')
       @to = set_date_format('2014/12/1')
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ

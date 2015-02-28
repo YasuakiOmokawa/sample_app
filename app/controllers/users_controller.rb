@@ -315,10 +315,7 @@ class UsersController < ApplicationController
 
       @user = User.find(params[:id])
       gaservice = Ast::Ganalytics::Garbs::Session.new
-      # analyticsservice = AnalyticsService.new
       @session = gaservice.login(@user)
-      # @session = analyticsservice.login(@user)                                     # アナリティクスAPI認証パラメータ１
-
       @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
       @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
@@ -376,10 +373,10 @@ class UsersController < ApplicationController
       ### APIデータ取得部
 
       # クラス名を一意にするため、乱数を算出
-      rndm = SecureRandom.hex(4)
+      # rndm = SecureRandom.hex(4)
 
       # 指標値テーブルへCV代入用
-      cls_name = 'CVForGraphSkeleton' + rndm.to_s
+      cls_name = 'CVForGraphSkeleton'
       # 4回までリトライできます
       Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
         @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,
@@ -644,10 +641,10 @@ class UsersController < ApplicationController
           ### APIデータ取得部
 
           # クラス名を一意にするため、乱数を算出
-          rndm = SecureRandom.hex(4)
+          # rndm = SecureRandom.hex(4)
 
           # CV代入用
-          cls_name = 'CVForGraphSkeleton' + rndm.to_s
+          cls_name = 'CVForGraphSkeleton'
           # 4回までリトライできます
           Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
             @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,

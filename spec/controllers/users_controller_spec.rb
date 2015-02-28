@@ -89,4 +89,25 @@ describe UsersController do
       expect(df.komoku).to eq("percent_new_sessions")
     end
   end
+
+  describe "UserFunc" do
+    before do
+      require 'pstore'
+        out_file_path =  Rails.root.join('spec', 'fixtures', 'garb').to_s
+        db = PStore.new(out_file_path)
+        db.transaction{|garb|
+          @ga_profile = garb[:ga_profile]
+          @ast_data = garb[:ast_data]
+      }
+    end
+
+    describe "validate_cv" do
+
+      it "validate対象データが呼ばれること" do
+        expect(@ast_data[0].date).to eq('20141101')
+      end
+
+      
+    end
+  end
 end
