@@ -2,9 +2,10 @@ module Statistics
 
   class DayOff < AllDay
 
-    def initialize(days_data, komoku)
+    def initialize(days_data, komoku, cv_num)
       @komoku = komoku
-      @data = days_data.reject {|k, v| v[@komoku][3] == 'day_on'}
+      @data = days_data.reject {|item| item.day_type == 'day_on'}
+      @cv_num = cv_num.to_s
     end
 
     def komoku

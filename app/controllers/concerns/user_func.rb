@@ -271,16 +271,16 @@ module ParamUtils
   end
 
   def validate_cv
-    logger.info( "CVデータをバリデートします")
+    Rails.logger.info( "CVデータをバリデートします")
     get_day_types.each do |day_type|
-      cves = Statistics::DayFactory.new(@table_for_graph, :sessions, day_type).data.get_cves
+      cves = Statistics::DayFactory.new(@ast_data, :sessions, day_type, @cv_num).data.get_cves
       unless is_not_uniq?(cves)
-        logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
+        Rails.logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
         @valid_analyze_day_types.delete(day_type)
       end
-      logger.info( "CVバリデートOK。")
+      Rails.logger.info( "CVバリデートOK。")
     end
-    logger.info( "CVバリデート完了。")
+    Rails.logger.info( "CVバリデート完了。")
   end
 
   def delete_uniq_metrics(data, metrics, metricses)

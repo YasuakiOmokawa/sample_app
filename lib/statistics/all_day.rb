@@ -2,17 +2,19 @@ module Statistics
 
   class AllDay
 
-    def initialize(days_data, komoku)
+    def initialize(days_data, komoku, cv_num)
       @komoku = komoku
       @data = days_data
+      @cv_num = cv_num.to_s
     end
 
     def get_metrics
-      @data.map {|k, v| v[@komoku][0].to_f + v[@komoku][1].to_f}
+      @data.map {|item| item.send(@komoku).to_f}
     end
 
     def get_cves
-      @data.map {|k, v| v[:cv].to_f}
+      cv_txt = "goal#{@cv_num}_completions"
+      @data.map { |item| item.send(cv_txt.to_sym).to_f }
     end
 
     def get_corr
@@ -40,7 +42,7 @@ module Statistics
     end
 
     def chk_not_a_number(target)
-      if target.nan?
+      if (target.nan? or target.infinite?)
         0.0
       else
         target

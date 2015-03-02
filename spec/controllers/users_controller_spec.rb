@@ -70,35 +70,16 @@ describe UsersController do
     end
   end
 
-  describe 'ホーム画面分析' do
-    before do
-      json_file_path =  Rails.root.join('spec', 'fixtures', 'table_for_graph.json').to_s
-      json_data = open(json_file_path) do |io|
-        JSON.load(io)
-      end
-      @table_for_graph = JSON.parse(json_data)
-    end
-    let(:df) { Statistics::DayFactory.new(@table_for_graph, "percent_new_sessions", 'all_day').data}
-    let(:iqr) {IQR.new(df).create}
-
-    it "31日分のデータがあること" do
-      expect(@table_for_graph.size).to eq(31)
-    end
-
-    it "全日データのインスタンスが作成されていること" do
-      expect(df.komoku).to eq("percent_new_sessions")
-    end
-  end
-
   describe "UserFunc" do
     before do
       require 'pstore'
         out_file_path =  Rails.root.join('spec', 'fixtures', 'garb').to_s
         db = PStore.new(out_file_path)
-        db.transaction{|garb|
+        db.transaction{ |garb|
           @ga_profile = garb[:ga_profile]
           @ast_data = garb[:ast_data]
-      }
+        }
+        @cv_num = 1
     end
 
     describe "validate_cv" do
@@ -107,7 +88,15 @@ describe UsersController do
         expect(@ast_data[0].date).to eq('20141101')
       end
 
-      
+      it "バリデートした結果、全ての日付タイプが正常になること" do
+        @valid_analyze_day_types = get_day_types
+        validate_cv
+        expect(@valid_analyze_day_types.size).to eq(3)
+      end
+    end
+
+    describe "validate_metrics" do
+      #..
     end
   end
 end
