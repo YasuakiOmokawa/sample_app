@@ -284,43 +284,39 @@ module ParamUtils
   end
 
   def delete_uniq_metrics(data, metrics, metricses)
-    # data = %w(1.0 1.0) #異常用コード
     unless is_not_uniq?(data)
-      logger.info( "指標#{metrics}は一意なので分析対象から外します。")
+      Rails.logger.info( "指標#{metrics}は一意なので分析対象から外します。")
       metricses.delete(metrics)
     end
   end
 
   def delete_too_much_zero_metrics(data, metrics, metricses)
-    # data = [1, 2, 1, 0, 0, 0, 0, 0, 0] #異常用コード
     if ExcelFunc.excel_upper_quartile(data) == 0
-      logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
+      Rails.logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
       metricses.delete(metrics)
     end
   end
 
   def delete_invalid_metrics_multiple(data, metrics, metricses, cves)
-    # cves = cves.map{|t| t = '0.0'} #異常用コード
-    # data = data.map{|t| t = '0.0'} #異常用コード
     unless cves.zip(data).uniq.size >= 3
-      logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
+      Rails.logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
       metricses.delete(metrics)
     end
   end
 
   def validate_metrics
-    logger.info( "指標データをバリデートします")
+    Rails.logger.info( "指標データをバリデートします")
     @valids.each do |valid|
       @metrics_snake_case_datas.each do |metrics|
-        cves = Statistics::DayFactory.new(@table_for_graph, :sessions, valid.day_type).data.get_cves
-        df = Statistics::DayFactory.new(@table_for_graph, metrics, valid.day_type).data
+        cves = Statistics::DayFactory.new(@ast_data, :sessions, valid.day_type, @cv_num).data.get_cves
+        df = Statistics::DayFactory.new(@ast_data, metrics, valid.day_type, @cv_num).data
         delete_uniq_metrics(df.get_metrics, metrics, valid.metricses)
         delete_invalid_metrics_multiple(df.get_metrics, metrics, valid.metricses, cves)
         delete_too_much_zero_metrics(df.get_metrics, metrics, valid.metricses)
       end
-      logger.info( "#{valid.day_type}の指標バリデートOK。")
+      Rails.logger.info( "#{valid.day_type}の指標バリデートOK。")
     end
-    logger.info( "指標バリデート完了。")
+    Rails.logger.info( "指標バリデート完了。")
   end
 
   def reset_filter_option
@@ -368,7 +364,7 @@ module ParamUtils
 
     detected = metrics_and_cv.reduce([]) do |acum, data|
       if data.metrics >= iqr.upper + (iqr.range_value * 1.5) or data.metrics <= iqr.lower - (iqr.range_value * 1.5)
-        logger.info( "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。")
+        Rails.logger.info( "#{df.komoku} の #{data.metrics} は、外れ値として除外されました。")
       else
         acum << data
       end

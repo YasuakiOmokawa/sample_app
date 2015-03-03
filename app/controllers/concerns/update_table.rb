@@ -162,12 +162,11 @@ module UpdateTable
     # 項目別
     Array(col).each do |komoku, jp|
 
-      df = Statistics::DayFactory.new(tbl, komoku, type).data
+      df = Statistics::DayFactory.new(tbl, komoku, type, @cv_num).data
       metrics_and_cv = Statistics::MetricsAndCV.new(df.get_metrics.zip(df.get_cves)).create
 
       # 外れ値検出ロジック
       metrics_and_cv = detect_outlier_with_iqr(df, metrics_and_cv)
-      # metrics_and_cv = MetricsAndCV.new([0].zip([0])).create if metrics_and_cv.blank?
 
       metrics = get_detected_metrics(metrics_and_cv)
       cv = get_detected_cves(metrics_and_cv)

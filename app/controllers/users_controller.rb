@@ -639,30 +639,19 @@ class UsersController < ApplicationController
           end
 
           ### APIデータ取得部
-
-          # クラス名を一意にするため、乱数を算出
-          # rndm = SecureRandom.hex(4)
-
-          # CV代入用
-          cls_name = 'CVForGraphSkeleton'
+          cls_name = 'SiteData'
           # 4回までリトライできます
-          Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,
-              [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
+          site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+            Ast::Ganalytics::Garbs::Data.create_class(cls_name,
+              metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
           end
 
-          # 指標値算出用
-          # 4回までリトライできます
-          gap = ''
-          Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            gap = fetch_analytics_data('Fetch', @ga_profile,@cond, @cv_txt, {}, metrics_camel_case_datas, :date)
+          ### 取得データ加工部
+          @ast_data = site_data.reduce([]) do |acum, item|
+            item.day_type = chk_day(item.date.to_date)
+            item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
+            acum << item
           end
-
-          ### データ計算部
-          @table_for_graph = Hash.new { |h,k| h[k] = {} }
-          create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
-          put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
-          put_metrics_data_to_table_for_graph(gap, @table_for_graph, @metrics_snake_case_datas)
 
           # 分析データのバリデート
           logger.info("分析データのバリデートを開始します")
@@ -688,14 +677,14 @@ class UsersController < ApplicationController
 
           @valids.each do |valid|
             # バブルチャートに表示するデータを算出
-            bubble_datas = generate_graph_data(@table_for_graph, valid.metricses, valid.day_type)
+            bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
             d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
             home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 
             # ページ項目へ追加
             day_room = room +  '::' + valid.day_type
             p_hash[x][day_room] = home_graph_data
-            logger.info("#{x} #{day_room} のデータセットが完了しました。")
+            Rails.logger.info("#{x} #{day_room} のデータセットが完了しました。")
           end
         end
 
