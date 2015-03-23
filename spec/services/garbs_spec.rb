@@ -88,11 +88,34 @@ describe Ast::Ganalytics::Garbs do
         item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
         acum << item
       end
-
       expect(@ast_data).to be_true
-
     end
 
+    it "人気ページ用CVデータを取得できること" do
+      cved_data = Ast::Ganalytics::Garbs::Data.create_class('CvedSession',
+        [:sessions], [:pagePath]).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).cved!.res)
+      expect(cved_data).to be_true
+    end
+
+    it "人気ページ用GAPデータを取得できること" do
+      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
+      expect(fav_gap).to be_true
+    end
+
+    it "人気ページ用スケルトンデータを取得できること" do
+      fav_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForPages.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
+      expect(fav_for_skel).to be_true
+    end
+
+    it "ランディングページ用データを取得できること" do
+      land_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForLanding.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
+      expect(land_for_skel).to be_true
+    end
+
+    it "全てのセッションデータが取得できること" do
+      ga_result = Ast::Ganalytics::Garbs::Data.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
+      expect(ga_result). to be_true
+    end
   end
 
 end

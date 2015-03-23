@@ -29,6 +29,29 @@ end
 
 module UserFunc
 
+  def change_to_garb_kwds(src, param)
+    res = Array(src).reduce([]) do |acum, item|
+      acum << item.send(param)
+      acum
+    end
+    res
+  end
+
+  def reduce_with_kwd(src, kwd, param)
+    res = Array(src).reduce([]) do |acum, item|
+    if item.send(param) == kwd.to_s
+      item.day_type = chk_day(item.date.to_date)
+      acum << item
+    end
+      acum
+    end
+    res
+  end
+
+  def to_garb_attr(prm)
+    prm.to_s.to_snake_case.to_sym
+  end
+
   def chk_not_a_number(target)
     if target.nan?
       0.0
@@ -263,7 +286,7 @@ module ParamUtils
   end
 
   def group_by_year_and_month(data)
-    data.group_by{|k, v| k.to_s[0..5]}.map{|k, v| k}
+    data.group_by{|item| item.date[0..5]}.map{|k, v| k}
   end
 
   def is_not_uniq?(data)
@@ -273,9 +296,9 @@ module ParamUtils
   def validate_cv
     Rails.logger.info( "CVデータをバリデートします")
     get_day_types.each do |day_type|
-      cves = Statistics::DayFactory.new(@ast_data, :sessions, day_type, @cv_num).data.get_cves
+      cves = cves_for_validate(@ast_data, day_type)
       unless is_not_uniq?(cves)
-        Rails.logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
+        validate_cv_msg(day_type)
         @valid_analyze_day_types.delete(day_type)
       end
       Rails.logger.info( "CVバリデートOK。")
@@ -283,33 +306,57 @@ module ParamUtils
     Rails.logger.info( "CVバリデート完了。")
   end
 
+  def validate_cv_msg(day_type)
+    Rails.logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
+  end
+
+  def cves_for_validate(data, day_type)
+    Statistics::DayFactory.new(data, :sessions, day_type, @cv_num).data.get_cves
+  end
+
+  def metrics_for_validate(data, day_type, metrics)
+    Statistics::DayFactory.new(data, metrics, day_type, @cv_num).data
+  end
+
   def delete_uniq_metrics(data, metrics, metricses)
     unless is_not_uniq?(data)
-      Rails.logger.info( "指標#{metrics}は一意なので分析対象から外します。")
+      validate_uniq_metrics_msg(metrics)
       metricses.delete(metrics)
     end
+  end
+
+  def validate_uniq_metrics_msg(metrics)
+    Rails.logger.info( "指標#{metrics}は一意なので分析対象から外します。")
   end
 
   def delete_too_much_zero_metrics(data, metrics, metricses)
     if ExcelFunc.excel_upper_quartile(data) == 0
-      Rails.logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
+      validate_too_much_zero_metrics_msg(metrics)
       metricses.delete(metrics)
     end
   end
 
+  def validate_too_much_zero_metrics_msg(metrics)
+    Rails.logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
+  end
+
   def delete_invalid_metrics_multiple(data, metrics, metricses, cves)
     unless cves.zip(data).uniq.size >= 3
-      Rails.logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
+      validate_invalid_metrics_multiple_msg(metrics)
       metricses.delete(metrics)
     end
+  end
+
+  def validate_invalid_metrics_multiple_msg(metrics)
+    Rails.logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
   end
 
   def validate_metrics
     Rails.logger.info( "指標データをバリデートします")
     @valids.each do |valid|
       @metrics_snake_case_datas.each do |metrics|
-        cves = Statistics::DayFactory.new(@ast_data, :sessions, valid.day_type, @cv_num).data.get_cves
-        df = Statistics::DayFactory.new(@ast_data, metrics, valid.day_type, @cv_num).data
+        cves = cves_for_validate(@ast_data, valid.day_type)
+        df = metrics_for_validate(@ast_data, valid.day_type, metrics)
         delete_uniq_metrics(df.get_metrics, metrics, valid.metricses)
         delete_invalid_metrics_multiple(df.get_metrics, metrics, valid.metricses, cves)
         delete_too_much_zero_metrics(df.get_metrics, metrics, valid.metricses)
@@ -388,42 +435,4 @@ module ParamUtils
     end
     cv
   end
-
-  # # REFERENCE_VALUE = 0.43
-  # # REFERENCE_VALUE = 0.0
-  # def get_analyzable_day_types(table)
-  #   res = get_day_types
-  #   get_day_types.each do |t|
-  #     d = Statistics::Day.new(table).data
-  #     res.delete(t) unless d.get_cves(d.day_on)
-  #     puts "day_type: #{t} "
-  #   end
-  #   res
-  # end
-
-  # def validate_metrics(day_type, metricses, table)
-  #   validated_metrics = metricses.dup
-  #   metricses.each do |metrics|
-  #     df = Statistics::DayFactory.new(table, metrics, day_type).data
-  #     chk_valid_metrics(df.get_metrics, validated_metrics, metrics)
-  #   end
-  #   validated_metrics
-  # end
-
-  # def validate_metrics_multiple_of_cv
-  #   puts "CVデータと指標データの組み合わせをバリデートします"
-  #   multiple_uniq_validated_metrics = single_uniq_validated_metrics.dup
-  #   @valids.each do |valid|
-  #     cves = Statistics::DayFactory.new(@table_for_graph, :sessions, valid.day_type).data.get_cves
-  #     df_vali = Statistics::DayFactory.new(@table_for_graph, metrics, valid.day_type).data
-  #     unless cves.zip(df_vali.get_metrics).uniq.size >= 3
-  #       puts "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。"
-  #       multiple_uniq_validated_metrics.delete(metrics)
-  #     end
-  #   end
-  #   unless multiple_uniq_validated_metrics.size >= 1
-  #     puts "分析対象の指標データがありませんので分析を実行できません。"
-  #     break
-  #   end
-  # end
 end

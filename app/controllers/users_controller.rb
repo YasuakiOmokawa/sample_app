@@ -13,49 +13,73 @@ class UsersController < ApplicationController
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
+  before_action :cv_for_graph, only: [:social, :referral]
   prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
+
+  def cv_for_graph
+    @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class("CvForGraph",
+      [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile, @cond)
+  end
 
   def social
     # パラメータ個別設定
     @title = 'ソーシャル'
     @narrow_action = social_user_path
+    @details_partial = 'details'
     gon.div_page_tab = 'social'
 
     special = :socialNetwork
+    @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    @categories = []
+    special_for_garb = to_garb_attr(special)
     # データ取得部
-    soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
-      [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
-
-    soc_gap = fetch_analytics_data('Fetch',
-      @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
-      @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
+    session_rank = get_session_rank(special)
+    if session_rank.total_results == 0
+      Rails.logger.info("#{@title} の参照元は非分析対象です")
+      render :layout => 'ganalytics', :action => 'show' and return
+    end
+    session_data = get_session_data(special)
 
     # 計算部
-    soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    tmp_soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_for_soc(soc_source, tmp_soc_table, @from, @to, [:sessions])
+    changed_kwds = change_to_garb_kwds(session_rank,
+      special_for_garb)
 
-    soc_source.each do |k|
-      src = k.send(special.to_s.to_snake_case).to_sym
-      str_src = k.send(special.to_s.to_snake_case).to_s
-      type_komoku = komoku_day_type(:sessions, @day_type)
-      put_cv_data_to_table_for_graph(@cv_for_graph, tmp_soc_table[src], @cv_num)
-      put_table_for_special(soc_gap, tmp_soc_table[src], [:sessions], special.to_s.to_snake_case, str_src)
-      soc_table[src] = calc_desire_datas(
-        generate_graph_data(tmp_soc_table[src], [:sessions], @day_type))[type_komoku]
+    changed_kwds.each do |kwd|
+      Rails.logger.info("#{kwd} のソーシャルバリデートを実施します")
+      reduce = reduce_with_kwd(session_data,
+        kwd, special_for_garb)
+      # バリデートデータの準備
+      cves = cves_for_validate(reduce, @day_type)
+      df = metrics_for_validate(reduce, @day_type, :sessions)
+      #CVバリデート
+      unless is_not_uniq?(cves)
+        validate_cv_msg(@day_type)
+        next
+      end
+      #メトリクスバリデート
+      unless is_not_uniq?(df.get_metrics)
+         validate_uniq_metrics_msg(:sessions)
+         next
+      end
+      unless cves.zip(df.get_metrics).uniq.size >= 3
+        validate_invalid_metrics_multiple_msg(:sessions)
+        next
+      end
+      if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
+        validate_too_much_zero_metrics_msg(:sessions)
+        next
+      end
+
+      Rails.logger.info("#{kwd} のソーシャルバリデートに成功しました")
+
+      # 相関分析開始
+      res_table[kwd] = generate_graph_data(reduce,
+          [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
     end
 
-    @in_table = head_special(soc_table, 3)     # 相関係数の高い順にソート
-
-    ar = []
-    cnt = 1
-    @in_table.each do |k, v|
-      cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
-      ar.push( [cap, k.to_s + 'l'] )
-      cnt += 1
-    end
-    @categories = ar
-    @details_partial = 'details'
+    calc_desire_datas(res_table)
+    @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
+    create_listbox_categories('l')
 
     render :layout => 'ganalytics', :action => 'show'
   end
@@ -64,60 +88,75 @@ class UsersController < ApplicationController
     # パラメータ個別設定
     @title = 'その他ウェブサイト'
     @narrow_action = referral_user_path
+    @details_partial = 'details'
     gon.div_page_tab = 'referral'
 
     special = :source
+    @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+    @categories = []
+    special_for_garb = to_garb_attr(special)
     # データ取得部
-    ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
-      [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
-
-    ref_gap = fetch_analytics_data('Fetch',
-      @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res,
-      @cv_txt, {}, [:sessions, (@cv_txt.classify + 's').to_sym], [:date, special])
+    session_rank = get_session_rank(special)
+    if session_rank.total_results == 0
+      Rails.logger.info("#{@title} の参照元は非分析対象です")
+      render :layout => 'ganalytics', :action => 'show' and return
+    end
+    session_data = get_session_data(special)
 
     # 計算部
-    ref_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    tmp_ref_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    create_skeleton_for_ref(ref_source, tmp_ref_table, @from, @to, [:sessions])
+    changed_kwds = change_to_garb_kwds(session_rank,
+      special_for_garb)
 
-    ref_source.each do |k|
-      src = k.send(special).to_sym
-      str_src = k.send(special).to_s
-      type_komoku = komoku_day_type(:sessions, @day_type)
-      put_cv_data_to_table_for_graph(@cv_for_graph, tmp_ref_table[src], @cv_num)
-      put_table_for_special(ref_gap, tmp_ref_table[src], [:sessions], special, str_src)
-      ref_table[src] = calc_desire_datas(
-        generate_graph_data(tmp_ref_table[src], [:sessions], @day_type))[type_komoku]
+    changed_kwds.each do |kwd|
+      Rails.logger.info("#{kwd} の参照バリデートを実施します")
+      reduce = reduce_with_kwd(session_data,
+        kwd, special_for_garb)
+      # バリデートデータの準備
+      cves = cves_for_validate(reduce, @day_type)
+      df = metrics_for_validate(reduce, @day_type, :sessions)
+      #CVバリデート
+      unless is_not_uniq?(cves)
+        validate_cv_msg(@day_type)
+        next
+      end
+      #メトリクスバリデート
+      unless is_not_uniq?(df.get_metrics)
+         validate_uniq_metrics_msg(:sessions)
+         next
+      end
+      unless cves.zip(df.get_metrics).uniq.size >= 3
+        validate_invalid_metrics_multiple_msg(:sessions)
+        next
+      end
+      if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
+        validate_too_much_zero_metrics_msg(:sessions)
+        next
+      end
+
+      Rails.logger.info("#{kwd} の参照バリデートに成功しました")
+
+      # 相関分析開始
+      res_table[kwd] = generate_graph_data(reduce,
+          [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
     end
 
-    @in_table = head_special(ref_table, 3)     # 相関係数の高い順にソート
-
-    ar = []
-    cnt = 1
-    @in_table.each do |k, v|
-      cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
-      ar.push( [cap, k.to_s + 'r'] )
-      cnt += 1
-    end
-    @categories = ar
-    @details_partial = 'details'
+    calc_desire_datas(res_table)
+    @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
+    create_listbox_categories('r')
 
     render :layout => 'ganalytics', :action => 'show'
   end
 
   def direct
-    # パラメータ個別設定
     @title = '直接入力/ブックマーク'
     @narrow_action = direct_user_path
     gon.div_page_tab = 'direct'
-
     @details_partial = 'norender'
 
     render :layout => 'ganalytics', :action => 'show'
   end
 
   def search
-    # パラメータ個別設定
     @title = '検索'
     @narrow_action = search_user_path
     gon.div_page_tab = 'search'
@@ -128,9 +167,7 @@ class UsersController < ApplicationController
 
   def index
     render :layout => false, :text => "管理者権限をもつユーザでログインしてください" unless current_user.admin?
-
     @users = User.all
-    # @users = User.paginate(page: params[:page])
   end
 
   def show
@@ -371,23 +408,11 @@ class UsersController < ApplicationController
       end
 
       ### APIデータ取得部
-
-      # クラス名を一意にするため、乱数を算出
-      # rndm = SecureRandom.hex(4)
-
-      # 指標値テーブルへCV代入用
-      cls_name = 'CVForGraphSkeleton'
+      cls_name = 'SiteData'
       # 4回までリトライできます
-      Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-        @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class(cls_name,
-          [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile,@cond)
-      end
-
-      # 指標値算出用
-      # 4回までリトライできます
-      gap = ''
-      Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-        gap = fetch_analytics_data('Fetch', @ga_profile, @cond, @cv_txt, {}, metrics_camel_case_datas, :date)
+      site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+        Ast::Ganalytics::Garbs::Data.create_class(cls_name,
+          metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
       end
 
       # 人気ページ用
@@ -401,28 +426,22 @@ class UsersController < ApplicationController
 
       # 全てのセッション(人気ページGAP値等計算用)
       ga_result = Ast::Ganalytics::Garbs::Data.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
-      tmp_all_session = ga_result.results[0].sessions.to_i if ga_result.total_results > 0
+      tmp_all_session = ga_result.results.first.sessions.to_i if ga_result.total_results > 0
       all_session = guard_for_zero_division(tmp_all_session)
 
       ### データ計算部
+      @ast_data = site_data.reduce([]) do |acum, item|
+        item.day_type = chk_day(item.date.to_date)
+        item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
+        acum << item
+      end
 
-       # グラフデータテーブルへ表示する指標値
-      @desire_caption =  metrics_for_graph_merge[@graphic_item][:jp_caption]
-
-      # グラフ表示用および指標値用テーブル
-      @table_for_graph = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      create_skeleton_for_graph(@table_for_graph, @from, @to, metrics_for_graph_merge)
-
-      # CV値挿入
-      put_cv_data_to_table_for_graph(@cv_for_graph, @table_for_graph, @cv_num)
-
-      # GAP値をスケルトンへ挿入
-      put_metrics_data_to_table_for_graph(gap, @table_for_graph, metrics_snake_case_datas)
-      calc_gap_for_graph(@table_for_graph, metrics_snake_case_datas)
+      # グラフデータテーブルへ表示する指標値
+      @desire_caption = metrics_for_graph_merge[@graphic_item][:jp_caption]
 
       # 指標値テーブルへ表示するデータを算出
-      desire_datas = generate_graph_data(@table_for_graph, metrics_snake_case_datas, @day_type)
-      calc_desire_datas(desire_datas) # 目標値の算出
+      desire_datas = generate_graph_data(@ast_data, metrics_snake_case_datas, @day_type)
+      calc_desire_datas(desire_datas) unless desire_datas.nil? # 目標値の算出
 
       # 日本語データを追加
       d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
@@ -430,23 +449,23 @@ class UsersController < ApplicationController
 
       # グラフ表示プログラムへ渡すデータを作成
       @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
-      ym = group_by_year_and_month(@table_for_graph)
 
-      create_data_for_graph_display(@data_for_graph_display, @table_for_graph, @graphic_item)
-      if chk_monthly?(ym) == true
-        @data_for_graph_display = create_monthly_summary_data_for_graph_display(@data_for_graph_display, ym, @graphic_item)
-      end
+      create_data_for_graph_display(@data_for_graph_display, @ast_data, @graphic_item, @cv_num)
+      @data_for_graph_display = create_monthly_summary_data_for_graph_display(
+        @data_for_graph_display, group_by_year_and_month(@ast_data),
+        @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data)) == true
       gon.data_for_graph_display = @data_for_graph_display
 
       # グラフテーブルへ渡すデータを作成
       @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
-      create_data_for_graph_display(@data_for_graph_table, @table_for_graph, @graphic_item)
+      create_data_for_graph_display(@data_for_graph_table, @ast_data, @graphic_item, @cv_num)
 
       ## フォーマット変更
 
         # 目標値データへ
         @details_desire_datas.each do |k, v|
-          change_format_for_desire(@details_desire_datas[k], check_format_graph(k).to_s, v)
+          change_format_for_desire(@details_desire_datas[k],
+            check_format_graph(k).to_s, v)
         end
 
         # グラフテーブルへ
@@ -469,8 +488,7 @@ class UsersController < ApplicationController
 
       # ランディングページテーブル
       @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      @landing_table = put_landing_table(land_for_skel, @landing_table)
-
+      put_landing_table(land_for_skel, @landing_table)
     end
 
     def create_home

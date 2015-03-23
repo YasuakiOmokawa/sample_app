@@ -11,14 +11,32 @@ include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
 describe UsersController do
   before do
-    require 'pstore'
-      out_file_path =  Rails.root.join('spec', 'fixtures', 'garb').to_s
-      db = PStore.new(out_file_path)
-      db.transaction{ |garb|
-        @ga_profile = garb[:ga_profile]
-        @ast_data = garb[:ast_data]
-      }
-      @cv_num = 1
+    require('pstore')
+    out_file_path =  Rails.root.join('spec', 'fixtures', 'garb').to_s
+    db = PStore.new(out_file_path)
+    db.transaction{ |garb|
+      @ga_profile = garb[:ga_profile]
+      @ast_data = garb[:ast_data]
+      @cved_data = garb[:cved_data]
+      @fav_gap = garb[:fav_gap]
+      @fav_for_skel = garb[:fav_for_skel]
+      @land_for_skel = garb[:land_for_skel]
+      @ga_result = garb[:ga_result]
+      @cv_for_graph = garb[:cv_for_graph]
+      @soc_source = garb[:soc_source]
+      @soc_gap = garb[:soc_gap]
+      @ref_source = garb[:ref_source]
+      @ref_gap = garb[:ref_gap]
+      @soc_session_rank = garb[:soc_session_rank]
+      @soc_session_data = garb[:soc_session_data]
+    }
+    @cv_num = 1
+    @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
+    @day_type = 'day_off'
+    @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+    @from = set_date_format('2014/12/1')
+    @to = set_date_format('2014/12/1')
+    @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }
   end
 
   describe "is_not_uniq?" do
@@ -164,6 +182,266 @@ describe UsersController do
       expect(home_graph_data[:percent_new_sessions][:jp_caption]).to eq('新規ユーザー')
       expect(home_graph_data[:users][:jp_caption]).to eq('ユーザー')
       expect(home_graph_data[:repeat_rate][:jp_caption]).to eq('リピーター')
+    end
+  end
+
+  describe "create_common_table" do
+    before do
+      metrics = Metrics.new()
+      @metrics_for_graph_merge = metrics.jp_caption
+      @metrics_snake_case_datas = metrics.garb_result
+      @bubble_datas = generate_graph_data(@ast_data, @metrics_snake_case_datas, 'all_day')
+      @day_type = "all_day"
+      @graphic_item = :pageviews
+    end
+
+    it "人気ページ用CVデータが読めること" do
+      expect(@cved_data).to be_true
+    end
+
+    it "人気ページ用GAPデータが読めること" do
+      expect(@fav_gap).to be_true
+    end
+
+    it "人気ページ用スケルトンデータが読めること" do
+      expect(@fav_for_skel).to be_true
+    end
+
+    it "ランディングページ用データが読めること" do
+      expect(@land_for_skel).to be_true
+    end
+
+    it "全セッション用データが読めること" do
+      expect(@ga_result).to be_true
+    end
+
+    it "グラフ用CVデータが読めること" do
+      expect(@cv_for_graph).to be_true
+    end
+
+    it "ソーシャルランキングデータが読めること" do
+      expect(@soc_session_rank).to be_true
+    end
+
+    it "リファレンスソースデータが読めること" do
+      expect(@ref_source).to be_true
+    end
+
+    it "ソーシャルソースデータが読めること" do
+      expect(@soc_session_data).to be_true
+    end
+
+    it "リファレンスギャップデータが読めること" do
+      expect(@ref_gap).to be_true
+    end
+
+    it "グラフデータテーブルへ表示する日本語指標値を取得できること" do
+      @desire_caption = @metrics_for_graph_merge[@graphic_item][:jp_caption]
+      expect(@desire_caption).to eq("PV数")
+    end
+
+    it "目標値が算出できること" do
+      desire_datas = generate_graph_data(@ast_data, @metrics_snake_case_datas, @day_type)
+      calc_desire_datas(desire_datas)
+      expect(desire_datas[@graphic_item][:desire]).to be_true
+    end
+
+    it "日本語キャプションが追加できること" do
+      d_hsh = metrics_day_type_jp_caption(@day_type, @metrics_for_graph_merge)
+      desire_datas = generate_graph_data(@ast_data, @metrics_snake_case_datas, @day_type)
+      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh)
+      expect(@details_desire_datas[@graphic_item][:jp_caption]).to eq("PV数")
+    end
+
+    it "年月のグルーピングを作成できること" do
+      ym = group_by_year_and_month(@ast_data)
+      expect(ym.size).to eq(2)
+    end
+
+    it "グラフ表示プログラムへ渡すデータを作成できること" do
+      create_data_for_graph_display(@data_for_graph_display, @ast_data, @graphic_item, @cv_num)
+      @data_for_graph_display = create_monthly_summary_data_for_graph_display(
+        @data_for_graph_display, group_by_year_and_month(@ast_data),
+        @graphic_item) if chk_monthly?(nil) == true
+      expect(@data_for_graph_display).to be_true
+    end
+
+    it "年月のグルーピングを作成できていれば、サマリデータを返すこと" do
+      create_data_for_graph_display(@data_for_graph_display, @ast_data, @graphic_item, @cv_num)
+      @data_for_graph_display = create_monthly_summary_data_for_graph_display(
+        @data_for_graph_display, group_by_year_and_month(@ast_data),
+        @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data)) == true
+      expect(@data_for_graph_display).to be_true
+    end
+
+    it "グラフテーブルへ渡すデータを作成できること" do
+      @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
+      create_data_for_graph_display(@data_for_graph_table, @ast_data, @graphic_item, @cv_num)
+      expect(@data_for_graph_table).to be_true
+    end
+
+    it "目標値データのフォーマット変更ができること" do
+      d_hsh = metrics_day_type_jp_caption(@day_type, @metrics_for_graph_merge)
+      desire_datas = generate_graph_data(@ast_data, @metrics_snake_case_datas, @day_type)
+      calc_desire_datas(desire_datas) # 目標値の算出
+      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh)
+      @details_desire_datas.each do |k, v|
+        change_format_for_desire(@details_desire_datas[k],
+          check_format_graph(k).to_s, v)
+      end
+      expect(@details_desire_datas[:pageviews].values.to_s).to_not match('%')
+      expect(@details_desire_datas[:pageviews].values.to_s).to_not match(':')
+      expect(@details_desire_datas[:repeat_rate].values.to_s).to match('%')
+      expect(@details_desire_datas[:avg_session_duration].values.to_s).to match(':')
+    end
+
+    it "グラフテーブルのフォーマットが変更できること" do
+      @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
+      create_data_for_graph_display(@data_for_graph_table, @ast_data, @graphic_item, @cv_num)
+      @data_for_graph_table.each do |k, v|
+        change_format_for_graph_table(@data_for_graph_table[k], check_format_graph(@graphic_item), v[0] )
+      end
+      expect(@data_for_graph_table.to_s).to_not match(':')
+      expect(@data_for_graph_table.to_s).to_not match('%')
+    end
+
+    it "人気ページテーブルデータのgoodとbadの和がgapと同値になること" do
+      #事前処理
+      tmp_all_session = @ga_result.results.first.sessions.to_i if @ga_result.total_results > 0
+      all_session = guard_for_zero_division(tmp_all_session)
+
+      @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      cved_session = @cved_data.map{|t| t.sessions.to_f}.sum
+      not_cved_session = all_session - cved_session
+      create_skeleton_favorite_table(@fav_for_skel, @favorite_table)
+      put_favorite_table_for_skelton(@fav_gap, @favorite_table)
+      calc_percent_for_favorite_table(cved_session, @favorite_table, :good)
+      calc_percent_for_favorite_table(not_cved_session, @favorite_table, :bad)
+      calc_gap_for_favorite(@favorite_table)
+
+      @favorite_table.values.each { |v| expect(v[:good] + v[:bad] ).to eq(v[:gap].abs) }
+    end
+
+    it "ランディングページテーブルが加工できること" do
+      @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      put_landing_table(@land_for_skel, @landing_table)
+      expect(@landing_table).to be_true
+    end
+  end
+
+  describe 'special_parameter_per_action' do
+    it "Garbのデータ構造を操作するために、属性の書式を変更できること" do
+      expect(to_garb_attr(:socialNetwork)).to eq(:social_network)
+    end
+  end
+
+  describe "referral" do
+    before do
+      @special = :source
+      @special_for_garb = to_garb_attr(@special)
+      @sample_reduced_data = reduce_with_kwd(@soc_session_data,
+        "(not set)", @special_for_garb)
+      @sample_changed_kwds = change_to_garb_kwds(@soc_session_rank,
+        @special_for_garb)
+      @in_table = @soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      @categories = []
+      @res_table = {
+        "(not set)" => {
+                      :corr => 0.2,
+                 :corr_sign => "plus",
+                      :vari => 0.1,
+            :metrics_stddev => 7.7,
+               :metrics_avg => 84.2
+        },
+        "(set)" => {
+                      :corr => "-",
+                 :corr_sign => "plus",
+                      :vari => 0.1,
+            :metrics_stddev => 7.7,
+               :metrics_avg => 84.2
+        }
+      }
+    end
+
+    describe "データ取得" do
+
+      it "ランクデータを取得できること" do
+        expect(get_session_rank(@special)).to be_true
+      end
+
+      it "セッションデータを取得できること" do
+        expect(get_session_data(@special)).to be_true
+      end
+    end
+  end
+
+  describe "social" do
+    before do
+      @special = :socialNetwork
+      @special_for_garb = to_garb_attr(@special)
+      @sample_reduced_data = reduce_with_kwd(@soc_session_data,
+        "(not set)", @special_for_garb)
+      @sample_changed_kwds = change_to_garb_kwds(@soc_session_rank,
+        @special_for_garb)
+      @in_table = @soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+      @categories = []
+      @res_table = {
+        "(not set)" => {
+                      :corr => 0.2,
+                 :corr_sign => "plus",
+                      :vari => 0.1,
+            :metrics_stddev => 7.7,
+               :metrics_avg => 84.2
+        },
+        "(set)" => {
+                      :corr => "-",
+                 :corr_sign => "plus",
+                      :vari => 0.1,
+            :metrics_stddev => 7.7,
+               :metrics_avg => 84.2
+        }
+      }
+
+    end
+
+    describe "データ取得" do
+
+      it "ランクデータを取得できること" do
+        expect(get_session_rank(@special)).to be_true
+      end
+
+      it "セッションデータを取得できること" do
+        expect(get_session_data(@special)).to be_true
+      end
+    end
+
+    context "正常にデータが絞り込まれた場合" do
+
+      it "Garbのランキングデータをキーワードデータに修正できること" do
+        expect(@sample_changed_kwds).to be_true
+      end
+
+      it "算出した相関データの上位３つを絞り込めること" do
+        expect(head_special(@res_table, 3)).to be_true
+      end
+
+      it "絞り込みリストボックスへ表示するための配列を作成できること" do
+        @in_table = head_special(@res_table, 3)
+        create_listbox_categories('l')
+        expect(@categories).to be_true
+      end
+    end
+
+    context "データが絞り込まれなかった場合" do
+
+      it "相関算出に失敗すること" do
+      @sample_not_reduced_data = reduce_with_kwd(@soc_session_data,
+        "(set)", @special_for_garb) # -> nil
+        soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+        soc_table["(set)"] = generate_graph_data(
+          @sample_not_reduced_data, [:sessions], 'all_day')
+        expect(soc_table["(set)"]).not_to be_true
+      end
     end
   end
 end

@@ -83,7 +83,7 @@
         <td class="cont">直帰率</td><td><div class="lt"><%= ddd[('bounce_rate' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('bounce_rate' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('bounce_rate' + postfix).to_sym][:desire] %></td>
       </tr>
     </table>
-    <%= render partial: @details_partial, locals: {in_table: @in_table, special: @special } %>
+    <%= render partial: @details_partial, locals: {in_table: @in_table} %>
   </div>
 
   <div id="rtfm">
