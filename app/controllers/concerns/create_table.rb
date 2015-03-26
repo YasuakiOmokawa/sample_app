@@ -53,12 +53,15 @@ module CreateTable
     tmp
   end
 
+# select_metrics(@data_for_graph_display, "201411")
+# select_cves(@data_for_graph_display, "201411")
+
   def select_metrics(data, t)
-    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[0]}
+    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[0].to_f}
   end
 
   def select_cves(data, t)
-    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[1]}
+    data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[1].to_f}
   end
 
   def set_data_for_format(data, format)

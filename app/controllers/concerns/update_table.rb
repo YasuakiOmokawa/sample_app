@@ -156,6 +156,17 @@ module UpdateTable
     datas
   end
 
+  def create_common_skelton_table(col)
+    Array(col).reduce(Hash.new{ |h,k| h[k] = {} }) do |acum, metrics|
+      acum[metrics][:corr] = '-'
+      acum[metrics][:corr_sign] = 'none'
+      acum[metrics][:vari] = '-'
+      acum[metrics][:metrics_stddev] = '-'
+      acum[metrics][:metrics_avg] = '-'
+      acum
+    end
+  end
+
   def generate_graph_data(tbl, col, type)
     r_hsh = Hash.new{ |h,k| h[k] = {} }
 

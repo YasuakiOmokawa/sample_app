@@ -251,7 +251,7 @@ jQuery( function() {
 
   });
 
-    // ★jqplot描画
+  // ★jqplot描画
   var squareBar = jQuery . jqplot( 'gh', graph_data, setYaxisLimit(options, gon.format_string));
 
   // グラフのy座標へ水平線を設定
@@ -260,7 +260,6 @@ jQuery( function() {
   for(var i=0; i < yticks.length; i++) {
 
     // 目盛りの値を変換
-    // tick = setYgridnum(gon.format_string, $(yticks[i]).text()); // y2axisを使用するようにしたため、変換は不要
     tick = $(yticks[i]).text();
     // console.log(tick);
 

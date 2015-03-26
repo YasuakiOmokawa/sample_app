@@ -13,7 +13,7 @@ class UsersController < ApplicationController
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
-  before_action :cv_for_graph, only: [:social, :referral]
+  # before_action :cv_for_graph, only: [:social, :referral]
   prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
 
   def cv_for_graph
@@ -441,11 +441,12 @@ class UsersController < ApplicationController
 
       # 指標値テーブルへ表示するデータを算出
       desire_datas = generate_graph_data(@ast_data, metrics_snake_case_datas, @day_type)
+      desire_datas = create_common_skelton_table(metrics_snake_case_datas) if desire_datas.nil?
       calc_desire_datas(desire_datas) unless desire_datas.nil? # 目標値の算出
 
       # 日本語データを追加
       d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
-      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh)
+      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh) unless desire_datas.nil?
 
       # グラフ表示プログラムへ渡すデータを作成
       @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
@@ -466,7 +467,7 @@ class UsersController < ApplicationController
         @details_desire_datas.each do |k, v|
           change_format_for_desire(@details_desire_datas[k],
             check_format_graph(k).to_s, v)
-        end
+        end unless @details_desire_datas.nil?
 
         # グラフテーブルへ
         @data_for_graph_table.each do |k, v|
