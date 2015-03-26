@@ -158,6 +158,7 @@ module UpdateTable
 
   def create_common_skelton_table(col)
     Array(col).reduce(Hash.new{ |h,k| h[k] = {} }) do |acum, metrics|
+      metrics = (metrics.to_s + get_postfix).to_sym
       acum[metrics][:corr] = '-'
       acum[metrics][:corr_sign] = 'none'
       acum[metrics][:vari] = '-'

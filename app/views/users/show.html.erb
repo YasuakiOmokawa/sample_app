@@ -49,14 +49,7 @@
         <td class="cont"></td><td><div class="lt">平均値</div><div class="rt">（標準偏差）</div></td><td>目標値</td>
       </tr>
       <%
-        if @day_type == 'day_on'
-          postfix = '__day_on'
-        elsif @day_type == 'day_off'
-          postfix = '__day_off'
-        else
-          postfix = ''
-        end
-
+        postfix = get_postfix
         ddd = @details_desire_datas
       %>
       <tr>

@@ -13,13 +13,7 @@ class UsersController < ApplicationController
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]
-  # before_action :cv_for_graph, only: [:social, :referral]
   prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
-
-  def cv_for_graph
-    @cv_for_graph = Ast::Ganalytics::Garbs::Data.create_class("CvForGraph",
-      [ (@cv_txt.classify + 's').to_sym], [:date] ).results(@ga_profile, @cond)
-  end
 
   def social
     # パラメータ個別設定
