@@ -29,6 +29,13 @@ end
 
 module UserFunc
 
+  def get_ga_profiles
+    gaservice = Ast::Ganalytics::Garbs::Session.new
+    @session = gaservice.login(@user)
+    @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
+    @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
+  end
+
   def change_to_garb_kwds(src, param)
     res = Array(src).reduce([]) do |acum, item|
       acum << item.send(param)

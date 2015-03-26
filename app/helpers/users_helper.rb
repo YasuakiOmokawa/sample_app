@@ -17,4 +17,8 @@ module UsersHelper
       postfix = ''
     end
   end
+
+  def get_gafooter_text
+    'Copyright (C) 2015 senk Inc. All Rights Reserved.'
+  end
 end

@@ -211,10 +211,7 @@ class UsersController < ApplicationController
   end
 
   def edit_init_analyze
-    analyticsservice = AnalyticsService.new
-    session = AnalyticsService.new.login(@user)                                     # アナリティクスAPI認証パラメータ１
-    ga_profile = analyticsservice.load_profile(session, @user)                                     # アナリティクスAPI認証パラメータ２
-    @ga_goal = analyticsservice.get_goal(ga_profile)                                     # アナリティクスに設定されているCV
+    get_ga_profiles
     render :layout => 'not_ga'
   end
 
@@ -334,7 +331,6 @@ class UsersController < ApplicationController
         # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
         if cached_item.present?
           logger.info( 'キャッシュデータが読み込まれました。')
-          # logger.info( cached_item)
           @json = cached_item
           return
         else
@@ -345,10 +341,7 @@ class UsersController < ApplicationController
       # パラメータ共通設定
 
       @user = User.find(params[:id])
-      gaservice = Ast::Ganalytics::Garbs::Session.new
-      @session = gaservice.login(@user)
-      @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
-      @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
+      get_ga_profiles
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
      set_action(params[:action], @cond)
       gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末
