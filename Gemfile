@@ -38,10 +38,10 @@ gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.gi
 gem 'airbrake' # Errbit通知用
 
 group :development, :test do
-  gem 'rspec-rails', '2.13.1'
-  gem 'guard-rspec', '2.5.0'
+  gem 'rspec-rails', '2.99.0'
+  gem 'guard-rspec', '4.5.0'
   gem 'spork-rails', '4.0.0'
-  gem 'guard-spork', '1.5.0'
+  gem 'guard-spork', '2.1.0'
   gem 'childprocess', '0.3.6'
   gem 'pry-rails'
   gem 'pry-doc'
