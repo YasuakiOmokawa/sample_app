@@ -2,6 +2,12 @@ source 'http://rubygems.org'
 ruby '2.0.0'
 #ruby-gemset=railstutorial_rails_4_0
 
+# postgresインストール前実行コマンド
+# bundle config build.pg --with-pg-config=/usr/pgsql-9.3/bin/pg_config --with-pg-lib=/usr/pgsql-9.3/lib
+
+# vagrant環境へインストール
+# bundle install --path /home/vagrant/bundles/sample_app
+
 gem 'rails', '4.0.5'
 gem 'pg', '0.15.1'
 gem 'bootstrap-sass', '2.3.2.0'
@@ -25,10 +31,7 @@ gem 'jbuilder', '1.0.2'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails', '1.3'
 gem 'newrelic_rpm'
-# gem 'google-api-client' # oauth2認証に必要
-# gem 'oauth2' # oauth2認証に必要
 gem 'parallel' # バブルチャート取得処理を並行化
-# gem 'friendly_id' # URL表記をわかりやすくする
 gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
@@ -36,6 +39,8 @@ gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
 gem 'historyjs-rails' # ブラウザの履歴情報を保持する
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
+gem 'therubyracer', :platforms => :ruby # javascriptランタイム
+gem 'unicorn'
 
 group :development, :test do
   gem 'rspec-rails', '2.99.0'
@@ -53,7 +58,7 @@ group :development, :test do
   gem 'binding_of_caller'
   gem 'awesome_print' # オブジェクトの見やすさを改善
   gem 'hirb' # pry上でsql結果を整形
-  gem 'wdm', '>= 0.1.0' # avoid polling for changes on windows
+  # gem 'wdm', '>= 0.1.0' # avoid polling for changes on windows
 end
 
 group :test do
@@ -72,5 +77,4 @@ end
 
 group :production do
   gem 'rails_12factor', '0.0.2'
-  gem 'unicorn'
 end

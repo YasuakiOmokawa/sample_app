@@ -5,8 +5,8 @@ development:
   database: xxxdb_dev
   pool: 5
   timeout: 5000
-  username: testuser
-  password: testuser
+  username: vagrant
+  password: vagrant
 
 test:
   adapter: postgresql
@@ -15,5 +15,5 @@ test:
   database: xxxdb_test
   pool: 5
   timeout: 5000
-  username: testuser
-  password: testuser
+  username: vagrant
+  password: vagrant
