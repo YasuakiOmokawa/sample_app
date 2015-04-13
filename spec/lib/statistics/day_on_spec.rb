@@ -13,7 +13,7 @@ describe Statistics::DayOn do
     end
 
     it "インスタンスが正常であること" do
-      expect(@day_on).to be_true
+      expect(@day_on).to be_truthy
     end
 
     it "インスタンス化したときの項目を取得できること" do

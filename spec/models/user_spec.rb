@@ -12,7 +12,9 @@ describe 'User' do
 
     it "validateするメソッドで、対象項目の異常値更新をはじけること" do
       tmp = 'o' * 51
-      expect(build(:user, name: tmp)).to have(1).errors_on(:name)
+      vega = build(:user, name: tmp)
+      vega.valid?
+      expect(vega.errors.size).to eql(1)
     end
   end
 end

@@ -10,7 +10,7 @@ describe UserUploaded::UploadedFile do
   describe "データ読み込み" do
 
     it "データが読み込まれること" do
-      expect(@uploaded_file).to_not be_true
+      expect(@uploaded_file).to be_truthy
     end
   end
 

@@ -14,7 +14,7 @@ describe Statistics::AllDay do
     end
 
     it "インスタンスが正常であること" do
-      expect(@all_day).to be_true
+      expect(@all_day).to be_truthy
     end
 
     it "cvが正常に取得できること" do

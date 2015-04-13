@@ -167,7 +167,7 @@ describe UsersController do
     end
 
     it "バブルチャート表示データを正常に算出できること" do
-      expect(@bubble_datas).to be_true
+      expect(@bubble_datas).to be_truthy
     end
 
     it "日本語名をバブルチャート表示データへ付与できること" do
@@ -196,43 +196,43 @@ describe UsersController do
     end
 
     it "人気ページ用CVデータが読めること" do
-      expect(@cved_data).to be_true
+      expect(@cved_data).to be_truthy
     end
 
     it "人気ページ用GAPデータが読めること" do
-      expect(@fav_gap).to be_true
+      expect(@fav_gap).to be_truthy
     end
 
     it "人気ページ用スケルトンデータが読めること" do
-      expect(@fav_for_skel).to be_true
+      expect(@fav_for_skel).to be_truthy
     end
 
     it "ランディングページ用データが読めること" do
-      expect(@land_for_skel).to be_true
+      expect(@land_for_skel).to be_truthy
     end
 
     it "全セッション用データが読めること" do
-      expect(@ga_result).to be_true
+      expect(@ga_result).to be_truthy
     end
 
     it "グラフ用CVデータが読めること" do
-      expect(@cv_for_graph).to be_true
+      expect(@cv_for_graph).to be_truthy
     end
 
     it "ソーシャルランキングデータが読めること" do
-      expect(@soc_session_rank).to be_true
+      expect(@soc_session_rank).to be_truthy
     end
 
     it "リファレンスソースデータが読めること" do
-      expect(@ref_source).to be_true
+      expect(@ref_source).to be_truthy
     end
 
     it "ソーシャルソースデータが読めること" do
-      expect(@soc_session_data).to be_true
+      expect(@soc_session_data).to be_truthy
     end
 
     it "リファレンスギャップデータが読めること" do
-      expect(@ref_gap).to be_true
+      expect(@ref_gap).to be_truthy
     end
 
     it "グラフデータテーブルへ表示する日本語指標値を取得できること" do
@@ -243,7 +243,7 @@ describe UsersController do
     it "目標値が算出できること" do
       desire_datas = generate_graph_data(@ast_data, @metrics_snake_case_datas, @day_type)
       calc_desire_datas(desire_datas)
-      expect(desire_datas[@graphic_item][:desire]).to be_true
+      expect(desire_datas[@graphic_item][:desire]).to be_truthy
     end
 
     it "日本語キャプションが追加できること" do
@@ -263,7 +263,7 @@ describe UsersController do
       @data_for_graph_display = create_monthly_summary_data_for_graph_display(
         @data_for_graph_display, group_by_year_and_month(@ast_data),
         @graphic_item) if chk_monthly?(nil) == true
-      expect(@data_for_graph_display).to be_true
+      expect(@data_for_graph_display).to be_truthy
     end
 
     it "年月のグルーピングを作成できていれば、サマリデータを返すこと" do
@@ -271,13 +271,13 @@ describe UsersController do
       @data_for_graph_display = create_monthly_summary_data_for_graph_display(
         @data_for_graph_display, group_by_year_and_month(@ast_data),
         @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data)) == true
-      expect(@data_for_graph_display).to be_true
+      expect(@data_for_graph_display).to be_truthy
     end
 
     it "グラフテーブルへ渡すデータを作成できること" do
       @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
       create_data_for_graph_display(@data_for_graph_table, @ast_data, @graphic_item, @cv_num)
-      expect(@data_for_graph_table).to be_true
+      expect(@data_for_graph_table).to be_truthy
     end
 
     it "目標値データのフォーマット変更ができること" do
@@ -325,7 +325,7 @@ describe UsersController do
     it "ランディングページテーブルが加工できること" do
       @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
       put_landing_table(@land_for_skel, @landing_table)
-      expect(@landing_table).to be_true
+      expect(@landing_table).to be_truthy
     end
   end
 
@@ -366,11 +366,11 @@ describe UsersController do
     describe "データ取得" do
 
       it "ランクデータを取得できること" do
-        expect(get_session_rank(@special)).to be_true
+        expect(get_session_rank(@special)).to be_truthy
       end
 
       it "セッションデータを取得できること" do
-        expect(get_session_data(@special)).to be_true
+        expect(get_session_data(@special)).to be_truthy
       end
     end
   end
@@ -407,28 +407,28 @@ describe UsersController do
     describe "データ取得" do
 
       it "ランクデータを取得できること" do
-        expect(get_session_rank(@special)).to be_true
+        expect(get_session_rank(@special)).to be_truthy
       end
 
       it "セッションデータを取得できること" do
-        expect(get_session_data(@special)).to be_true
+        expect(get_session_data(@special)).to be_truthy
       end
     end
 
     context "正常にデータが絞り込まれた場合" do
 
       it "Garbのランキングデータをキーワードデータに修正できること" do
-        expect(@sample_changed_kwds).to be_true
+        expect(@sample_changed_kwds).to be_truthy
       end
 
       it "算出した相関データの上位３つを絞り込めること" do
-        expect(head_special(@res_table, 3)).to be_true
+        expect(head_special(@res_table, 3)).to be_truthy
       end
 
       it "絞り込みリストボックスへ表示するための配列を作成できること" do
         @in_table = head_special(@res_table, 3)
         create_listbox_categories('l')
-        expect(@categories).to be_true
+        expect(@categories).to be_truthy
       end
     end
 
@@ -440,7 +440,7 @@ describe UsersController do
         soc_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
         soc_table["(set)"] = generate_graph_data(
           @sample_not_reduced_data, [:sessions], 'all_day')
-        expect(soc_table["(set)"]).not_to be_true
+        expect(soc_table["(set)"]).not_to be_truthy
       end
     end
   end
