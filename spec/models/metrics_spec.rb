@@ -1,4 +1,4 @@
-require 'spec_helper'
+require('rails_helper')
 
 describe Metrics do
   it "garb用パラメータ配列の数が7つであること" do

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require('rails_helper')
 require "retryable"
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
@@ -117,5 +117,4 @@ describe Ast::Ganalytics::Garbs do
       expect(ga_result). to be_true
     end
   end
-
 end

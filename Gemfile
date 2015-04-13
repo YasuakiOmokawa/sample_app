@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-ruby '2.0.0'
+ruby '2.2.1'
 #ruby-gemset=railstutorial_rails_4_0
 
 # postgresインストール前実行コマンド
@@ -8,16 +8,15 @@ ruby '2.0.0'
 # vagrant環境へインストール
 # bundle install --path /home/vagrant/bundles/sample_app
 
-gem 'rails', '4.0.5'
+gem 'rails', '4.1.1'
 gem 'pg', '0.15.1'
 gem 'bootstrap-sass', '2.3.2.0'
 gem 'sprockets', '2.11.0'
 gem 'bcrypt-ruby', '3.1.2'
-gem 'faker', '1.1.2'
 gem 'will_paginate', '3.0.4'
 gem 'bootstrap-will_paginate', '0.0.9'
 gem 'garb'
-gem 'json', '1.8.0'
+gem 'json', '1.8.2'
 gem 'holiday_japan'
 gem 'gon'
 gem 'jquery-turbolinks'
@@ -42,12 +41,13 @@ gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
 gem 'unicorn'
 
+
 group :development, :test do
-  gem 'rspec-rails', '2.99.0'
-  gem 'guard-rspec', '4.5.0'
-  gem 'spork-rails', '4.0.0'
-  gem 'guard-spork', '2.1.0'
-  gem 'childprocess', '0.3.6'
+  gem "rspec-rails"
+  gem "factory_girl_rails"
+  gem 'spring-commands-rspec'
+  gem 'guard-rspec'
+  gem 'childprocess'
   gem 'pry-rails'
   gem 'pry-doc'
   gem 'pry-stack_explorer'
@@ -62,13 +62,13 @@ group :development, :test do
 end
 
 group :test do
-  gem 'selenium-webdriver'
-  gem 'capybara', '2.1.0'
-  gem 'factory_girl_rails', '4.2.1'
-  gem 'database_cleaner' # データベースが絡むテストには必要
+  gem "faker", "~> 1.4.3"
+  gem "capybara", "~> 2.4.3"
+  gem "database_cleaner", "~> 1.3.0"
+  gem "launchy", "~> 2.4.2"
+  gem "selenium-webdriver", "~> 2.43.0"
   # gem 'capybara-webkit' # デフォルトのjavascript_driverを変更する場合
-  # gem "launchy" # ブラウザ立ち上げ抑止 windowsでは 使用不可
-  # gem 'headless' #webkit テスト時にブラウザを立ち上げさせない windows では使えない
+  gem 'headless' #webkit テスト時にブラウザを立ち上げさせない windows では使えない
 end
 
 group :doc do
