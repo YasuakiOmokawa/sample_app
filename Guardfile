@@ -1,4 +1,4 @@
-ignore([%r{^bin/*}, %r{^config/*}, %r{^db/*}, %r{^log/*}, %r{^public/*}, %r{^tmp/*}, %r{^.git/*}])
+ignore([%r{^bin/*}, %r{^config/*}, %r{^db/*}, %r{^log/*}, %r{^public/*}, %r{^tmp/*}])
 
 guard :rspec, cmd: 'bundle exec spring rspec --color --format documentation',
   all_on_start: false, all_after_pass: false do

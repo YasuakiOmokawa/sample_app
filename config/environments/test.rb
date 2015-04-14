@@ -36,4 +36,7 @@ SampleApp::Application.configure do
 
   # bcrypt'のコスト関数を下げることでテストの速度を向上させる。
   ActiveModel::SecurePassword.min_cost = true
+
+  # テストの実行順（Rails5.0 からはランダムにテストが実行されるようになるらしい）
+  config.active_support.test_order = :sorted # `:random`にしてもよい
 end
