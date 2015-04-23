@@ -39,6 +39,31 @@ describe UsersController do
     @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }
   end
 
+  describe "visit show" do
+    before { create(:secret) }
+    let(:user) {create(:multiple_test_user)}
+
+    context "ログインしている場合", js: true do
+      it "パスワード編集画面が表示されること" do
+        visit root_path
+        fill_in 'session_email', with: user.email
+        fill_in 'session_password', with: user.password
+        click_on 'ログイン'
+        # ↓home画面
+        click_on "パスワード変更"
+        expect(page).to have_title('パスワード編集')
+        expect(page).to have_content('パスワードを再設定')
+      end
+    end
+
+    context "ログインしていない場合" do
+      it "ログインを促すこと" do
+        visit edit_user_path(user)
+        expect(page).to have_content('ログインしてください')
+      end
+    end
+  end
+
   describe "is_not_uniq?" do
     it "配列データが一意でなければtrueを返すこと" do
       d = %w(1.0 2.0 2.0)

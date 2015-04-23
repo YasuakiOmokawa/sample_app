@@ -34,7 +34,7 @@ module SampleApp
     config.i18n.default_locale = :ja
     config.i18n.available_locales = [:ja, :en]
     config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif)
-    config.autoload_paths += %W(#{config.root}/lib)
+    config.autoload_paths += %W(#{config.root}/lib #{config.root}/app/validators/)
 
     # Unicorn のロギングを有効化
     config.logger = Logger.new(STDOUT)

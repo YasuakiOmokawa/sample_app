@@ -82,10 +82,14 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
+    capybara-webkit (1.5.0)
+      capybara (>= 2.3.0, < 2.5.0)
+      json
     celluloid (0.16.0)
       timers (~> 4.0.0)
     childprocess (0.5.6)
       ffi (~> 1.0, >= 1.0.11)
+    cliver (0.3.2)
     coderay (1.1.0)
     coffee-rails (4.1.0)
       coffee-script (>= 2.2.0)
@@ -230,7 +234,6 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
-    headless (1.0.2)
     heroku (3.31.3)
       heroku-api (>= 0.3.19)
       launchy (>= 0.3.2)
@@ -304,6 +307,11 @@ GEM
     parallel (1.4.1)
     pg (0.18.1)
     pg (0.18.1-x64-mingw32)
+    poltergeist (1.6.0)
+      capybara (~> 2.1)
+      cliver (~> 0.3.1)
+      multi_json (~> 1.0)
+      websocket-driver (>= 0.2.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -410,11 +418,6 @@ GEM
     sdoc (0.3.20)
       json (>= 1.1.3)
       rdoc (~> 3.10)
-    selenium-webdriver (2.43.0)
-      childprocess (~> 0.5)
-      multi_json (~> 1.0)
-      rubyzip (~> 1.0)
-      websocket (~> 1.0)
     shellany (0.0.1)
     slop (3.6.0)
     spinjs-rails (1.3)
@@ -457,7 +460,9 @@ GEM
       binding_of_caller (>= 0.7.2)
       railties (>= 4.0)
       sprockets-rails (>= 2.0, < 4.0)
-    websocket (1.2.1)
+    websocket-driver (0.5.4)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.2)
     will_paginate (3.0.7)
     win32console (1.3.2)
     xpath (2.0.0)
@@ -478,6 +483,7 @@ DEPENDENCIES
   bootstrap-sass (= 3.3.4.1)
   bootstrap-will_paginate
   capybara (~> 2.4.3)
+  capybara-webkit (~> 1.5.0)
   childprocess
   coffee-rails
   daemons
@@ -488,7 +494,6 @@ DEPENDENCIES
   garb
   gon
   guard-rspec
-  headless
   heroku_backup_task!
   hirb
   hirb-unicode
@@ -504,6 +509,7 @@ DEPENDENCIES
   newrelic_rpm
   parallel
   pg
+  poltergeist (~> 1.6.0)
   pry-byebug
   pry-doc
   pry-rails
@@ -515,7 +521,6 @@ DEPENDENCIES
   rspec-rails
   sass-rails
   sdoc (= 0.3.20)
-  selenium-webdriver (~> 2.43.0)
   spinjs-rails (= 1.3.0)
   spring-commands-rspec
   sprockets (= 3.0.0)

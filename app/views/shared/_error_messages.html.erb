@@ -1,10 +1,10 @@
-<% if @user.errors.any? %>
+<% if error_contents.errors.any? %>
   <div id="error_explanation">
     <div class="alert alert-error">
-      入力に <%= @user.errors.count %> 個のエラーがあります。
+      入力に <%= error_contents.errors.count %> 個のエラーがあります。
       <br>
       <ul>
-      <% @user.errors.full_messages.each do |msg| %>
+      <% error_contents.errors.full_messages.each do |msg| %>
         <li>* <%= msg %></li>
       <% end %>
       </ul>

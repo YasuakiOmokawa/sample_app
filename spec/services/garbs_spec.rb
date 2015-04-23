@@ -3,8 +3,7 @@ require "retryable"
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
 describe Ast::Ganalytics::Garbs do
-  before(:all) do
-    @secret = FactoryGirl.create(:secret)
+  before do
     @from = DateTime.parse('2014/11/1')
     @to = DateTime.parse('2014/12/1')
     @cond = {
@@ -14,8 +13,8 @@ describe Ast::Ganalytics::Garbs do
     }
     @cv_num = 1
     @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+    create(:secret)
   end
-  after(:all) { @secret.destroy }
   let(:project1) { create(:gaproject) }
   let(:user) { create(:multiple_test_user) }
 

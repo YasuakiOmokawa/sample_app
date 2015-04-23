@@ -1,0 +1,20 @@
+<%provide(:title, 'ファイルアップロード') %>
+<%= render partial: 'shared/error_messages', locals: {error_contents: @content }%>
+<div id="login">
+  <h1>ファイルアップロード</h1>
+  <p>完了後にホーム画面に戻ります。</p>
+  <table>
+  <% @content.user_id = @user.id %>
+  <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
+    <tr>
+      <td>ユーザー</td><td><input disabled value=<%= @user.name %>></td>
+    </tr>
+    <tr>
+      <td>分析データを選択：</td><td><%= f.file_field :upload_file %><%= f.text_field :user_id, :type => 'hidden' %></td>
+    </tr>
+    <tr>
+      <td></td><td><%= link_to "キャンセル", root_path, {:id => 'cancel'} %></td>
+      <td><a id='submit' href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード</a></td>
+    </tr>
+  <% end %>
+  </table>

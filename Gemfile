@@ -67,9 +67,8 @@ group :test do
   gem "capybara", "~> 2.4.3"
   gem "database_cleaner", "~> 1.3.0"
   gem "launchy", "~> 2.4.2"
-  gem "selenium-webdriver", "~> 2.43.0"
-  # gem 'capybara-webkit' # デフォルトのjavascript_driverを変更する場合
-  gem 'headless' #webkit テスト時にブラウザを立ち上げさせない windows では使えない
+  gem 'capybara-webkit', "~> 1.5.0" # デフォルトのjavascript_driverを変更する場合
+  gem "poltergeist", "~> 1.6.0"
 end
 
 group :doc do
@@ -79,3 +78,5 @@ end
 group :production do
   gem 'rails_12factor', '0.0.2'
 end
+
+

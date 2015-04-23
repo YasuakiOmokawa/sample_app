@@ -11,17 +11,17 @@ var prcnt_all_cntr = 0;
 // デバイス
 function getDevOpts() {
   return [
-    'pc',
-    'sphone',
-    'mobile',
+    // 'pc',
+    // 'sphone',
+    // 'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    'new',
-    'repeat'
+    // 'new',
+    // 'repeat'
   ];
 }
 

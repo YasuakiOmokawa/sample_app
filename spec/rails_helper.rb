@@ -4,6 +4,12 @@ require 'spec_helper'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require('factory_girl')
+require 'capybara/rails'
+require 'capybara/rspec'
+# require 'database_cleaner'
+require 'capybara/poltergeist'
+Capybara.javascript_driver = :poltergeist
+
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -18,11 +24,16 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
 
+LAUNCHY_DEBUG=true
+
 RSpec.configure do |config|
   config.before(:all) do
     FactoryGirl.reload # これがないとfactoryの変更が反映されません
   end
   # config.filter_run focus: true
+
+  # capybara のview render を有効化する
+  config.render_views
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   # config.fixture_path = "#{::Rails.root}/spec/fixtures"
@@ -30,29 +41,52 @@ RSpec.configure do |config|
   # Include Factory Girl syntax to simplify calls to factories
   config.include FactoryGirl::Syntax::Methods
 
+  # Capybara の文法を使う
+  config.include Capybara::DSL
+
   # Include custom login macros
   config.include LoginMacros
 
-  # Configure DatabaseCleaner to reset data between tests
+  # RSpecでroutesのpathを指定するために設定
+  config.include Rails.application.routes.url_helpers
+
+  # If you're not using ActiveRecord, or you'd prefer not to run each of your
+  # examples within a transaction, remove the following line or assign false
+  # instead of true.
+  # config.use_transactional_fixtures = true
+  # 追加箇所 trueからfalseにする
+   config.use_transactional_fixtures = false
+
+  # Add Begin
+  # suite: RSpecコマンドでテストを実行する単位
+  # all:  各テストファイル(xxx_spec.rb)単位
+  # each: 各テストケース(it)単位
   config.before(:suite) do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with :truncation
+    DatabaseCleaner.clean_with :truncation  # テスト開始時にDBをクリーンにする
   end
 
-  config.around(:each) do |example|
-    DatabaseCleaner.cleaning do
-      example.run
-    end
+  # js以外のテスト時は通常のtransactionでデータを削除する
+  config.before(:each) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  # jsのテスト時はtruncationで削除する
+  config.before(:each, js: true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.start
   end
 
   config.after(:each) do
     DatabaseCleaner.clean
   end
 
-  # If you're not using ActiveRecord, or you'd prefer not to run each of your
-  # examples within a transaction, remove the following line or assign false
-  # instead of true.
-  config.use_transactional_fixtures = true
+  config.after(:all) do
+    DatabaseCleaner.clean_with :truncation # all時にDBをクリーンにする
+  end
+  # Add End
 
   # RSpec Rails can automatically mix in different behaviours to your tests
   # based on their file location, for example enabling you to call `get` and
