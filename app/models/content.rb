@@ -6,10 +6,11 @@ class Content < ActiveRecord::Base
   serialize :upload_file
 
   validates :upload_file, presence: true
-  validates :user_id, presence: true
-
   # カスタムバリデーション
-  validates :upload_file, csv: true
+  validates :upload_file, csv: true, :allow_nil => true
 
+  def present?
+    self.user_id.present?
+  end
 
 end

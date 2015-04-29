@@ -8,4 +8,6 @@ Rails.application.config.assets.precompile += %w[
   kickonload.js
   fnccommon.js
   homefnc.js
+  upldedanlyz.js
+  setselect.js
 ]

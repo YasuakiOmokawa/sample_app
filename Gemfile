@@ -31,16 +31,16 @@ gem 'jbuilder'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails', '1.3.0'
 gem 'newrelic_rpm'
-gem 'parallel' # バブルチャート取得処理を並行化
+# gem 'parallel' # バブルチャート取得処理を並行化
 gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
-gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
-gem 'historyjs-rails' # ブラウザの履歴情報を保持する
+# gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
+# gem 'historyjs-rails' # ブラウザの履歴情報を保持する
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
-gem 'unicorn'
+gem 'remotipart', '~> 1.2' # :remote => true をfile_field付きでも可能にする
 
 group :development, :test do
   gem "rspec-rails"
@@ -58,7 +58,6 @@ group :development, :test do
   gem 'binding_of_caller'
   gem 'awesome_print' # オブジェクトの見やすさを改善
   gem 'hirb' # pry上でsql結果を整形
-  # gem 'wdm', '>= 0.1.0' # avoid polling for changes on windows
   gem 'web-console', '~> 2.0' # デフォルトエラーページ用のデバッギングツール　Rails 4.2より
 end
 
@@ -67,8 +66,7 @@ group :test do
   gem "capybara", "~> 2.4.3"
   gem "database_cleaner", "~> 1.3.0"
   gem "launchy", "~> 2.4.2"
-  gem 'capybara-webkit', "~> 1.5.0" # デフォルトのjavascript_driverを変更する場合
-  gem "poltergeist", "~> 1.6.0"
+  gem "poltergeist", "~> 1.6.0" # headless browse test using Phantomjs
 end
 
 group :doc do
@@ -77,6 +75,7 @@ end
 
 group :production do
   gem 'rails_12factor', '0.0.2'
+  gem 'unicorn'
 end
 
 

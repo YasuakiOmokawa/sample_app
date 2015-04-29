@@ -1,12 +1,15 @@
 <% @user ||= current_user %>
 <!-- header_st -->
 <div id="hd">
-  <h1>Analytics Support Tool</h1>
+  <h1>SiteGoal</h1>
   <%= select_tag 'cvselect', options_for_select( @ga_goal ) %>
   <%= link_to "ログアウト", signout_path, method: "delete" %>
   <%= link_to "パスワード変更", edit_user_path(current_user) %>
-  <%= link_to "アップロード", content_path(current_user) %>
   <%= link_to "設定編集", edit_init_analyze_user_path(current_user) %>
+  <%= link_to "アップロード", content_path(current_user) %>
+  <% if @contents.size > 0  %>
+    <%= link_to "カスタム分析", 'javascript:void(0);', {id: "open-uplded_anlyz_status-dialog"} %>
+  <% end %>
   <div>ID：<%= @user.name %></div>
 </div>
 

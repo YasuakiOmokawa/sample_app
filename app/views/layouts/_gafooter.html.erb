@@ -1,1 +1,9 @@
 <div id="footer"><%= get_gafooter_text %></div>
+
+<!-- uploaded analyze form dialog -->
+<%= render partial: 'uplded_anlyz_statuses/dialog',
+  locals: {contents: @contents} %>
+
+<!-- contents upload form dialog -->
+<%= render partial: 'contents/dialog',
+  locals: {content: @content, user: @user} %>

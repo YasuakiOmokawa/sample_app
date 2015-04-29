@@ -2,19 +2,26 @@
 <%= render partial: 'shared/error_messages', locals: {error_contents: @content }%>
 <div id="login">
   <h1>ファイルアップロード</h1>
-  <p>完了後にホーム画面に戻ります。</p>
+  <h2><%= link_to "ホームへ戻る", root_path %></h2>
   <table>
-  <% @content.user_id = @user.id %>
   <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
+    <%= f.text_field :user_id, :value => @user.id, :type => 'hidden' %>
+    <% if get_users_contents(@user.id).size > 0 %>
+      <tr>
+        <td>アップロード済：</td><td><%= f.select :id,
+          get_users_contents(@user.id),
+          :selected=> get_users_contents(@user.id).values.first%></td>
+      </tr>
+      <tr>
+        <td></td><td><%= link_to "選択データを削除", content_path(current_user),
+            {id: "content-delete-link", method: :delete, data: {confirm: "本当によろしいですか？"} } %></td>
+      </tr>
+     <% end %>
     <tr>
-      <td>ユーザー</td><td><input disabled value=<%= @user.name %>></td>
+      <td>アップロード：</td><td><%= f.file_field :upload_file %></td>
     </tr>
     <tr>
-      <td>分析データを選択：</td><td><%= f.file_field :upload_file %><%= f.text_field :user_id, :type => 'hidden' %></td>
-    </tr>
-    <tr>
-      <td></td><td><%= link_to "キャンセル", root_path, {:id => 'cancel'} %></td>
-      <td><a id='submit' href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード</a></td>
+      <td></td><td><a href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード開始</a></td>
     </tr>
   <% end %>
   </table>

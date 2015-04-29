@@ -11,11 +11,14 @@
 // about supported directives.
 //
 //= require jquery
+// ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
+//= require bootstrap
 //= require jquery-ui/datepicker
 //= require jquery-ui/datepicker-ja
 //= require jquery-ui/dialog
+// ↓jquery.remotipart はjquery_ujsより下にする
 //= require jquery_ujs
-//= require bootstrap
+//= require jquery.remotipart
 //= require ./jqplot/jquery.jqplot
 //= require ./jqplot/plugins/barRenderer
 //= require ./jqplot/plugins/categoryAxisRenderer
@@ -27,5 +30,3 @@
 //= require jquery.spin
 //= require ./plainoverlay/jquery.plainoverlay
 //= require jquery.tooltipster.min.js
-//= require jquery-hotkeys
-//= require history_jquery.min

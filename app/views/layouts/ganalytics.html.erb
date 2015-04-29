@@ -8,6 +8,7 @@
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "usedatepicker", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "fnccommon", "data-turbolinks-track" => true %>
+    <%= javascript_include_tag "upldedanlyz", "data-turbolinks-track" => true %>
     <%= include_gon %>
     <% if @title == 'ホーム' %>
       <%= javascript_include_tag "usejqplothome", "data-turbolinks-track" => true %>
@@ -37,7 +38,8 @@
           @narrow_word,
           @in_table,
           @data_for_graph_display,
-          @details_desire_datas
+          @details_desire_datas,
+          @content
           ].each do |t|
     %>
      <%= debug t.inspect %>

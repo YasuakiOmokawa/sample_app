@@ -70,3 +70,28 @@ margin: 15px 0 0 -145px;
 #login table td select {
     margin: 0 0 0 20px;
 }
+
+// カスタム分析ダイアログ
+
+// フォーム位置
+form#uplded_anlyz_status-form {
+  text-align: center;
+}
+
+// エラーメッセージ
+div.model-dialog div.alert-danger {
+  color: red;
+  font-weight: bold;
+}
+
+// エラー文言　初期時の非表示
+div.model-dialog div.hide {
+  display: none;
+}
+
+// アップロードダイアログ
+
+// テキストの折り返し
+input#content_upload_file {
+  word-wrap: break-word;
+}

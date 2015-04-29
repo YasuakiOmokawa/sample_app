@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+
   require 'holiday_japan'
   require 'user_func'
   require 'create_table'
@@ -272,11 +273,8 @@ class UsersController < ApplicationController
 
     def chk_param
 
-      @from = params[:from].presence || Date.today.prev_month
-      @to = params[:to].presence || Date.today
-      @from = set_date_format(@from) if params[:from].present?
-      @to = set_date_format(@to) if params[:to].present?
-
+      @from = params[:from].present? ? set_date_format(params[:from]) : Date.today.prev_month
+      @to = params[:to].present? ? set_date_format(params[:to]) : Date.today
 
       # ajaxリクエストの判定
       if request.xhr?
@@ -362,6 +360,8 @@ class UsersController < ApplicationController
       gon.history_cv_num = params[:history_cv_num].presence
       gon.history_hash = params[:hash].presence
 
+      # ユーザーがアップロードした分析用ファイル
+      @contents = ContentsController.helpers.get_users_contents(@user.id)
     end
 
     def create_common_table

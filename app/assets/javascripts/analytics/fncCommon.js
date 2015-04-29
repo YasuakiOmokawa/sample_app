@@ -32,13 +32,9 @@ function isTargetClicked(target) {
 }
 
 var HomeOverlay = new function() {
-  var self = function HomeOverlay() {
-
-  };
-
+  var self = function HomeOverlay() {};
   self.prototype = {
     constructor: self
-
     ,handler: function handler() {
       $('form div.plainoverlay').css(
         {
@@ -51,7 +47,6 @@ var HomeOverlay = new function() {
         }
       );
     }
-
     ,overlayNarrow: function overlayNarrow(fn) {
       $('span#home-overlay').plainOverlay('show',
         {
@@ -60,23 +55,17 @@ var HomeOverlay = new function() {
         }
       );
     }
-
     ,hello: function hello() {
       console.log('hello!');
     }
   };
-
   return self;
 };
 
 var SelectOverlay = new function() {
-  var self = function SelectOverlay() {
-
-  };
-
+  var self = function SelectOverlay() {};
   self.prototype = {
     constructor: self
-
     ,handler: function handler() {
       $('form div.plainoverlay').css(
         {
@@ -89,7 +78,6 @@ var SelectOverlay = new function() {
         }
       );
     }
-
     ,overlayNarrow: function overlayNarrow(fn) {
       $('span#select-overlay').plainOverlay('show',
         {
@@ -98,12 +86,10 @@ var SelectOverlay = new function() {
         }
       );
     }
-
     ,hello: function hello() {
       console.log('hello!');
     }
   };
-
   return self;
 };
 
@@ -245,11 +231,6 @@ function triggerBackToHome() {
 
 $(document).bind('keydown', 'esc', function() {
   return false;
-});
-
-// Bind to StateChange Event
-History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
-    var State = History.getState(); // Note: We are using History.getState() instead of event.state
 });
 
 function setHomeHistoryParameter() {

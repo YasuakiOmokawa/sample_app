@@ -11,12 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150421131817) do
+ActiveRecord::Schema.define(version: 20150425082451) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "contents", force: :cascade do |t|
+  create_table "contents", id: :bigserial, force: :cascade do |t|
     t.string   "upload_file_name", limit: 255
     t.text     "upload_file"
     t.datetime "created_at"
@@ -43,6 +43,11 @@ ActiveRecord::Schema.define(version: 20150421131817) do
 
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
+  create_table "errors", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "gaprojects", force: :cascade do |t|
     t.string   "proj_name",           limit: 255
     t.string   "api_key",             limit: 255
@@ -65,6 +70,25 @@ ActiveRecord::Schema.define(version: 20150421131817) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "uplded_anlyz_statuses", force: :cascade do |t|
+    t.integer  "user_id",                              null: false
+    t.boolean  "active",               default: false
+    t.integer  "content_id", limit: 8,                 null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+  end
+
+  add_index "uplded_anlyz_statuses", ["user_id"], name: "index_uplded_anlyz_statuses_on_user_id", unique: true, using: :btree
+
+  create_table "uploaded_analyzes", force: :cascade do |t|
+    t.integer  "user_id",                    null: false
+    t.boolean  "active",     default: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+  end
+
+  add_index "uploaded_analyzes", ["user_id"], name: "index_uploaded_analyzes_on_user_id", unique: true, using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "name",                   limit: 255
