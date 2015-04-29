@@ -13,11 +13,16 @@ class ContentsController < ApplicationController
     @tmp_content[:upload_file] = @testfile
     @content = Content.new(@tmp_content)
     if @content.save
-      flash[:success] = "アップロード成功"
-      redirect_to(root_path)
+      flash[:notice] = "アップロードしました"
+      redirect_to content_path(current_user)
     else
       render 'contents/show', :layout => 'not_ga'
     end
+  end
+
+  def destroy
+    Content.find(params[:content_id]).destroy
+    redirect_to content_path(current_user)
   end
 
   private
@@ -26,7 +31,7 @@ class ContentsController < ApplicationController
       @user = User.find(params[:content][:user_id])
       upload_file = content_params[:upload_file]
       @tmp_content = {}
-      if upload_file != nil
+      unless upload_file.nil?
         @tmp_content[:upload_file_name] = upload_file.original_filename
         @tmp_content[:user_id] = content_params[:user_id]
         begin
@@ -43,6 +48,6 @@ class ContentsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def content_params
-      params.require(:content).permit(:upload_file, :user_id)
+      params.require(:content).permit(:id, :upload_file, :user_id)
     end
 end
