@@ -45,7 +45,7 @@ class UsersController < ApplicationController
         kwd, special_for_garb)
 
       # カスタムデータ置き換え判定
-
+      replace_cv_with_custom(@content, reduce, @cv_txt)
 
       # バリデートデータの準備
       cves = cves_for_validate(reduce, @day_type)
@@ -112,7 +112,7 @@ class UsersController < ApplicationController
         kwd, special_for_garb)
 
       # カスタムデータ置き換え判定
-      
+      replace_cv_with_custom(@content, reduce, @cv_txt)
 
       # バリデートデータの準備
       cves = cves_for_validate(reduce, @day_type)
@@ -420,7 +420,7 @@ class UsersController < ApplicationController
       end
 
       # カスタムデータ置き変え判定
-
+      replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
       # グラフデータテーブルへ表示する指標値
       @desire_caption = metrics_for_graph_merge[@graphic_item][:jp_caption]

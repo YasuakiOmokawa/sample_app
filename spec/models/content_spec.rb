@@ -35,7 +35,7 @@ describe Content do
   it "期間の指定が不正であればエラーとなること" do
     invalid_from_to_content.valid?
     expect(invalid_from_to_content.errors[:upload_file]
-      ).to include('開始日付は終了日付より前にしてください')
+      ).to include('日付は連続データを入力し、開始日付は終了日付の前日にしてください')
   end
 
   it "アップロードデータを取得できること" do

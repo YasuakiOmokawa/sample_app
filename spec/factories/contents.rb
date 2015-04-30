@@ -5,7 +5,7 @@ FactoryGirl.define do
   arr_of_arrs_zero = CSV.read(Rails.root.join('spec',
     'fixtures', '1.tsv').to_s, {col_sep: "\t"})
   arr_of_arrs_valid = CSV.read(Rails.root.join('spec',
-    'fixtures', '4.tsv').to_s, {col_sep: "\t"})
+    'fixtures', 'same_as_ast_data.tsv').to_s, {col_sep: "\t"})
   arr_of_arrs_invalid_header = CSV.read(Rails.root.join('spec',
     'fixtures', '3.tsv').to_s, {col_sep: "\t"})
   arr_of_arrs_unmatch = CSV.read(Rails.root.join('spec',

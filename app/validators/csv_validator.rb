@@ -16,11 +16,11 @@ class CsvValidator < ActiveModel::EachValidator
       begin
         a = value.map{|t| t[0]}
         a.delete("date")
-        a.map{|t| set_date_format(t) }
+        b = a.map{|t| set_date_format(t) }
         from = set_date_format(a.first)
         to = set_date_format(a.last)
-        unless from < to
-          record.errors[attribute] << (options[:message] || "開始日付は終了日付より前にしてください")
+        unless (from..to).map { |t| t }.size == b.size
+          record.errors[attribute] << (options[:message] || "日付は連続データを入力し、開始日付は終了日付の前日にしてください")
         end
       rescue
         record.errors[attribute] << (options[:message] || "日付はYYYY/MM/DD形式にし、正しい日付を入力してください")

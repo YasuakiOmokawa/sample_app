@@ -16,9 +16,7 @@
 //= require jquery-ui/datepicker
 //= require jquery-ui/datepicker-ja
 //= require jquery-ui/dialog
-// ↓jquery.remotipart はjquery_ujsより下にする
 //= require jquery_ujs
-//= require jquery.remotipart
 //= require ./jqplot/jquery.jqplot
 //= require ./jqplot/plugins/barRenderer
 //= require ./jqplot/plugins/categoryAxisRenderer

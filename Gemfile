@@ -40,7 +40,6 @@ gem 'tooltipster-rails' # ツールチップ（吹き出し）
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
-gem 'remotipart', '~> 1.2' # :remote => true をfile_field付きでも可能にする
 
 group :development, :test do
   gem "rspec-rails"

@@ -225,11 +225,21 @@ module UpdateTable
   end
 
   def replace_cv_with_custom(custom, cv, ident)
-    custom.upload_file.each_with_index do |item, idx|
-      cv[idx][ident.to_sym] = item[1]
+    cv.each do |item|
+      matched = custom.upload_file.
+        find {|t| t[0].match(/#{create_matcher(item[:date])}/)}
+      item[ident.to_sym] = matched[1] unless matched.nil?
     end unless custom.nil?
   end
 
   private
+
+    def create_matcher(o)
+      [
+        o[0..3].to_i.to_s,
+        o[4..5].to_i.to_s,
+        o[6..7].to_i.to_s
+      ].join('/') unless o.nil?
+    end
 
 end
