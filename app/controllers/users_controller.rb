@@ -43,6 +43,10 @@ class UsersController < ApplicationController
       Rails.logger.info("#{kwd} のソーシャルバリデートを実施します")
       reduce = reduce_with_kwd(session_data,
         kwd, special_for_garb)
+
+      # カスタムデータ置き換え判定
+
+
       # バリデートデータの準備
       cves = cves_for_validate(reduce, @day_type)
       df = metrics_for_validate(reduce, @day_type, :sessions)
@@ -106,6 +110,10 @@ class UsersController < ApplicationController
       Rails.logger.info("#{kwd} の参照バリデートを実施します")
       reduce = reduce_with_kwd(session_data,
         kwd, special_for_garb)
+
+      # カスタムデータ置き換え判定
+      
+
       # バリデートデータの準備
       cves = cves_for_validate(reduce, @day_type)
       df = metrics_for_validate(reduce, @day_type, :sessions)
@@ -273,8 +281,9 @@ class UsersController < ApplicationController
 
     def chk_param
 
-      @from = params[:from].present? ? set_date_format(params[:from]) : Date.today.prev_month
-      @to = params[:to].present? ? set_date_format(params[:to]) : Date.today
+      @content = UpldedAnlyzStatusesController.helpers.active_content(params[:id])
+      @content.upload_file.shift unless @content.nil?
+      (@from, @to) = set_from_to(@content, params)
 
       # ajaxリクエストの判定
       if request.xhr?
@@ -409,6 +418,9 @@ class UsersController < ApplicationController
         item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
         acum << item
       end
+
+      # カスタムデータ置き変え判定
+
 
       # グラフデータテーブルへ表示する指標値
       @desire_caption = metrics_for_graph_merge[@graphic_item][:jp_caption]
@@ -645,6 +657,9 @@ class UsersController < ApplicationController
             item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
             acum << item
           end
+
+          # カスタムデータ置き変え判定
+          replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
           # 分析データのバリデート
           logger.info("分析データのバリデートを開始します")

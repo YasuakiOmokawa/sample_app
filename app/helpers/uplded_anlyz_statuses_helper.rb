@@ -1,8 +1,7 @@
 module UpldedAnlyzStatusesHelper
 
-  def active_content?
-    ul = UpldedAnlyzStatus.active(params[:id]).first
-    @content = Content.find(ul.content_id)
-    render 
+  def active_content(id)
+    ul = UpldedAnlyzStatus.active(id).first
+    Content.find(ul.content_id) unless ul.nil?
   end
 end

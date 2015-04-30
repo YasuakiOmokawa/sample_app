@@ -159,8 +159,7 @@ module ParamUtils
   # 日付生成
   def set_date_format(date)
     y, m, d = date.split("/")
-    d = Date.new(y.to_i, m.to_i, d.to_i)
-    return d
+    Date.new(y.to_i, m.to_i, d.to_i)
   end
 
   # 使用端末の設定
@@ -441,5 +440,16 @@ module ParamUtils
       acum
     end
     cv
+  end
+
+  def set_from_to(content, params)
+    if content.nil?
+      from = params[:from].present? ? set_date_format(params[:from]) : Date.today.prev_month
+      to = params[:to].present? ? set_date_format(params[:to]) : Date.today
+    else
+      from = set_date_format(content.upload_file.first[0])
+      to = set_date_format(content.upload_file.last[0])
+    end
+    [from, to]
   end
 end

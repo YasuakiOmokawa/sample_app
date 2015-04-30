@@ -224,6 +224,12 @@ module UpdateTable
     res
   end
 
+  def replace_cv_with_custom(custom, cv, ident)
+    custom.upload_file.each_with_index do |item, idx|
+      cv[idx][ident.to_sym] = item[1]
+    end unless custom.nil?
+  end
+
   private
 
 end

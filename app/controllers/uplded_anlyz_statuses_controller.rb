@@ -1,7 +1,5 @@
 class UpldedAnlyzStatusesController < ApplicationController
 
-  # before_action :correct_user, only: [:update]
-
   def update
     uplded_anlyz_status = UpldedAnlyzStatus.find_or_initialize_by(
       user_id: params[:id])
