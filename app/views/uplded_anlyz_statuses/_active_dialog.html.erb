@@ -1,0 +1,15 @@
+<div id='uplded_anlyz_status-active-dialog'  class='model-dialog' title='カスタム分析の開始'>
+<div class="alert alert-danger hide" id="uplded_anlyz_status-active-error-message">
+  データの更新に失敗しました。
+  <div id="errors"><ul/></div>
+</div>
+
+<%= form_for UpldedAnlyzStatus.new,
+  :url =>  {:controller => :uplded_anlyz_statuses,  :action => :active},
+  :html => { :id => "uplded_anlyz_status-active-form",
+   :class => "model-dialog-form", :method => :patch},
+  :remote => true do |f| %>
+<%= f.select :content_id, contents, :selected=> contents.values.first, :include_blank => true %>
+<%= f.submit "分析開始" %>
+<% end %>
+</div>

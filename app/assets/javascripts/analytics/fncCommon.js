@@ -212,13 +212,6 @@ function backToHome(e) {
 
 }
 
-function backHistoryToHome() {
-  var home_history = $('input[name="graph_history"]').val();
-  var history_length = history.length - Number(home_history);
-
-  history.go(-history_length);
-}
-
 function setBackToHome() {
   $('#bk a').click(function() {
     backToHome($(this));
@@ -231,6 +224,11 @@ function triggerBackToHome() {
 
 $(document).bind('keydown', 'esc', function() {
   return false;
+});
+
+// Bind to StateChange Event with historyjs-rails gem
+History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
+    var State = History.getState(); // Note: We are using History.getState() instead of event.state
 });
 
 function setHomeHistoryParameter() {

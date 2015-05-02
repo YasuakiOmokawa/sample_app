@@ -1,9 +1,8 @@
 <div id="footer"><%= get_gafooter_text %></div>
 
-<!-- uploaded analyze form dialog -->
-<%= render partial: 'uplded_anlyz_statuses/dialog',
+<!-- uploaded analyze form active dialog -->
+<%= render partial: 'uplded_anlyz_statuses/active_dialog',
   locals: {contents: @contents} %>
 
-<!-- contents upload form dialog -->
-<%= render partial: 'contents/dialog',
-  locals: {content: @content, user: @user} %>
+<!-- uploaded analyze form inactive dialog -->
+<%= render partial: 'uplded_anlyz_statuses/inactive_dialog' %>

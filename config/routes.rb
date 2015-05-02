@@ -12,7 +12,11 @@ SampleApp::Application.routes.draw do
   resources :sessions, only: [:new, :create, :destroy]
   resources :password_resets
   resources :contents
-  resources :uplded_anlyz_statuses
+  resources :uplded_anlyz_statuses do
+    member do
+      patch :active, :inactive
+    end
+  end
   root  'sessions#new'
   # root  'static_pages#home'
   match '/signup',  to: 'users#new', via: 'get'

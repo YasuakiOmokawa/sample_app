@@ -74,7 +74,7 @@ margin: 15px 0 0 -145px;
 // カスタム分析ダイアログ
 
 // フォーム位置
-form#uplded_anlyz_status-form {
+form.model-dialog-form {
   text-align: center;
 }
 
@@ -87,11 +87,4 @@ div.model-dialog div.alert-danger {
 // エラー文言　初期時の非表示
 div.model-dialog div.hide {
   display: none;
-}
-
-// アップロードダイアログ
-
-// テキストの折り返し
-input#content_upload_file {
-  word-wrap: break-word;
 }

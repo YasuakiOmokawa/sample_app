@@ -279,15 +279,10 @@ class UsersController < ApplicationController
       redirect_to(root_path) unless current_user.admin?
     end
 
-    def chk_param
-
-      @content = UpldedAnlyzStatusesController.helpers.active_content(params[:id])
-      @content.upload_file.shift unless @content.nil?
-      (@from, @to) = set_from_to(@content, params)
-
-      # ajaxリクエストの判定
+    def chk_cache
       if request.xhr?
 
+        # idea1_カスタム分析判定箇所候補
         @req_str = request.fullpath.to_s
 
         logger.info('リクエストパラメータのフルパスは以下です。')
@@ -299,6 +294,7 @@ class UsersController < ApplicationController
         # キャッシュ読み書き(バブル用データ)
         if params[:analyze_type].present?
 
+          # idea2_カスタム分析判定箇所候補
           memcache_graph_key = create_cache_key(params[:analyze_type].to_s)
 
           if params[:r_obj].present?
@@ -331,6 +327,16 @@ class UsersController < ApplicationController
           logger.info( 'リクエストされたキーに紐づいているキャッシュデータはありません。')
         end
       end
+    end
+
+    def chk_param
+
+      @content = UpldedAnlyzStatusesController.helpers.active_content(params[:id])
+      @content.upload_file.shift unless @content.nil?
+      (@from, @to) = set_from_to(@content, params)
+
+      # ajaxリクエストの判定
+      chk_cache
 
       # パラメータ共通設定
 

@@ -6,7 +6,14 @@
   <table>
   <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
     <%= f.text_field :user_id, :value => @user.id, :type => 'hidden' %>
+    <tr>
+      <td>アップロード：</td><td><%= f.file_field :upload_file %></td>
+    </tr>
+    <tr>
+      <td></td><td><a href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード開始</a></td>
+    </tr>
     <% if get_users_contents(@user.id).size > 0 %>
+      <tr><td></td></tr>
       <tr>
         <td>アップロード済：</td><td><%= f.select :id,
           get_users_contents(@user.id),
@@ -17,11 +24,5 @@
             {id: "content-delete-link", method: :delete, data: {confirm: "本当によろしいですか？"} } %></td>
       </tr>
      <% end %>
-    <tr>
-      <td>アップロード：</td><td><%= f.file_field :upload_file %></td>
-    </tr>
-    <tr>
-      <td></td><td><a href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード開始</a></td>
-    </tr>
   <% end %>
   </table>

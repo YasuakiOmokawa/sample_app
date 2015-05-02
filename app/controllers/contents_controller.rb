@@ -22,6 +22,9 @@ class ContentsController < ApplicationController
 
   def destroy
     Content.find(params[:content_id]).destroy
+    actives = UpldedAnlyzStatus.where(user_id: params[:id],
+      content_id: params[:content_id], active: true).first
+    actives.update_attributes(active: false) unless actives.nil?
     redirect_to content_path(current_user)
   end
 

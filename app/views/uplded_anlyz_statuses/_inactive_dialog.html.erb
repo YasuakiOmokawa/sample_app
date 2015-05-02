@@ -1,0 +1,23 @@
+<div id='uplded_anlyz_status-inactive-dialog'  class='model-dialog' title='カスタム分析の解除'>
+<!-- カスタム分析有効状態判定 -->
+<%
+  @a_status = UpldedAnlyzStatus.new
+  active_content = UpldedAnlyzStatusesController.
+    helpers.active_content(current_user.id)
+    unless active_content.nil?
+      @a_status.content_id = active_content.id
+%>
+  <span id="custom-trigger">
+  <%= active_content.upload_file_name %><br>でカスタム分析を実行中です</span>
+<% end %>
+
+<%= form_for @a_status,
+  :url =>  {:controller => :uplded_anlyz_statuses,  :action => :inactive},
+  :html => { :id => "uplded_anlyz_status-inactive-form",
+    :method => :patch,
+    :style => 'display:inline;'},
+  :remote => true do |f| %>
+<%= f.text_field :content_id, :type => 'hidden' %>
+<%= f.submit "解除" %>
+<% end %>
+</div>

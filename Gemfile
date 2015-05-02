@@ -35,8 +35,8 @@ gem 'newrelic_rpm'
 gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
-# gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
-# gem 'historyjs-rails' # ブラウザの履歴情報を保持する
+gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
+gem 'historyjs-rails' # ブラウザの履歴情報を保持する フルajax化対応用
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム

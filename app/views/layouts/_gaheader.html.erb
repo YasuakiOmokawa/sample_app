@@ -8,7 +8,7 @@
   <%= link_to "設定編集", edit_init_analyze_user_path(current_user) %>
   <%= link_to "アップロード", content_path(current_user) %>
   <% if @contents.size > 0  %>
-    <%= link_to "カスタム分析", 'javascript:void(0);', {id: "open-uplded_anlyz_status-dialog"} %>
+    <%= link_to "カスタム分析", 'javascript:void(0);', {id: "open-uplded_anlyz_status-active-dialog"} %>
   <% end %>
   <div>ID：<%= @user.name %></div>
 </div>
