@@ -1,5 +1,8 @@
 class UpldedAnlyzStatusesController < ApplicationController
 
+  before_action :signed_in_user, only: [:active, :inactive]
+  before_action :correct_user, only: [:active, :inactive]
+
   def active
     uplded_anlyz_status = UpldedAnlyzStatus.find_or_initialize_by(
       user_id: params[:id])

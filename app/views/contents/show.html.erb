@@ -5,19 +5,18 @@
   <h2><%= link_to "ホームへ戻る", root_path %></h2>
   <table>
   <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
-    <%= f.text_field :user_id, :value => @user.id, :type => 'hidden' %>
     <tr>
       <td>アップロード：</td><td><%= f.file_field :upload_file %></td>
     </tr>
     <tr>
       <td></td><td><a href="javascript:void(0)" onclick="document.uploadForm.submit();return false;">アップロード開始</a></td>
     </tr>
-    <% if get_users_contents(@user.id).size > 0 %>
+    <% if get_users_contents(current_user.id).size > 0 %>
       <tr><td></td></tr>
       <tr>
         <td>アップロード済：</td><td><%= f.select :id,
-          get_users_contents(@user.id),
-          :selected=> get_users_contents(@user.id).values.first%></td>
+          get_users_contents(current_user.id),
+          :selected=> get_users_contents(current_user.id).values.first%></td>
       </tr>
       <tr>
         <td></td><td><%= link_to "選択データを削除", content_path(current_user),

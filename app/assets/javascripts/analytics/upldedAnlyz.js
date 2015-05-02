@@ -280,7 +280,11 @@ $(function(){
         // ダイアログの位置を固定させる
         $(event.target).parent().css('position', 'fixed');
       },
-    });
+      open  : function() {
+        // ダイアログの強制フォーカスを外す
+        $(this).find('input, textarea').blur();
+      },
+   });
 
     // タイトルバーを表示させない
     $('.' + class_name + " div.ui-dialog-titlebar").hide();

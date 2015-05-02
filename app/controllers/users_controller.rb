@@ -9,8 +9,32 @@ class UsersController < ApplicationController
   require "retryable"
   include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
-  before_action :signed_in_user, only: [:index, :edit, :update, :destroy, :show, :all, :search, :direct, :referral, :social, :edit_init_analyze, :update_init_analyze]
-  before_action :correct_user,   only: [:edit, :update, :edit_init_analyze, :update_init_analyze]
+  before_action :signed_in_user, only: [
+    :index,
+    :edit,
+    :update,
+    :destroy,
+    :show,
+    :all,
+    :search,
+    :direct,
+    :referral,
+    :social,
+    :edit_init_analyze,
+    :update_init_analyze
+  ]
+  before_action :correct_user,   only: [
+    :show,
+    :all,
+    :search,
+    :direct,
+    :referral,
+    :social,
+    :edit,
+    :update,
+    :edit_init_analyze,
+    :update_init_analyze
+  ]
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:show]

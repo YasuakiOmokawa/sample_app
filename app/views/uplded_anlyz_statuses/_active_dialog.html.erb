@@ -9,7 +9,7 @@
   :html => { :id => "uplded_anlyz_status-active-form",
    :class => "model-dialog-form", :method => :patch},
   :remote => true do |f| %>
-<%= f.select :content_id, contents, :selected=> contents.values.first, :include_blank => true %>
+<%= f.select :content_id, contents, :selected=> contents.values.first %>
 <%= f.submit "分析開始" %>
 <% end %>
 </div>

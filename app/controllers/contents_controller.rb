@@ -1,7 +1,7 @@
 class ContentsController < ApplicationController
 
-  before_action :signed_in_user, only: [:show]
-  before_action :correct_user, only: [:show]
+  before_action :signed_in_user, only: [:show, :destroy]
+  before_action :correct_user, only: [:show, :destroy]
   before_action :chk_file, only: [:create]
 
   def show
@@ -31,12 +31,11 @@ class ContentsController < ApplicationController
   private
 
     def chk_file
-      @user = User.find(params[:content][:user_id])
       upload_file = content_params[:upload_file]
       @tmp_content = {}
       unless upload_file.nil?
         @tmp_content[:upload_file_name] = upload_file.original_filename
-        @tmp_content[:user_id] = content_params[:user_id]
+        @tmp_content[:user_id] = current_user.id
         begin
           @testfile = CSV.read(upload_file.tempfile, {col_sep: "\t"})
         rescue => e

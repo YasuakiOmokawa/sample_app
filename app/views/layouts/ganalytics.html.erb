@@ -29,6 +29,11 @@
     <% end %>
     <%= yield %>
     <%= render 'layouts/gafooter' %>
+    <!-- uploaded analyze form active dialog -->
+    <%= render partial: 'uplded_anlyz_statuses/active_dialog',
+      locals: {contents: @contents} %>
+    <!-- uploaded analyze form inactive dialog -->
+    <%= render partial: 'uplded_anlyz_statuses/inactive_dialog' %>
     <%
       if Rails.env.development? then
         [
