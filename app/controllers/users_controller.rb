@@ -306,20 +306,20 @@ class UsersController < ApplicationController
     def chk_cache
       if request.xhr?
 
-        # idea1_カスタム分析判定箇所候補
-        @req_str = request.fullpath.to_s
+        @memcache_kwd_key = set_key_for_data_cache(request.fullpath.to_s, @content)
 
         logger.info('リクエストパラメータのフルパスは以下です。')
-        logger.info(@req_str)
+        logger.info(@memcache_kwd_key)
 
-        cached_item = Rails.cache.read(@req_str)
+        cached_item = Rails.cache.read(@memcache_kwd_key)
         logger.info('キャッシュされたキーワードデータが読み込まれました。') unless cached_item.nil?
 
         # キャッシュ読み書き(バブル用データ)
         if params[:analyze_type].present?
 
-          # idea2_カスタム分析判定箇所候補
-          memcache_graph_key = create_cache_key(params[:analyze_type].to_s)
+          memcache_graph_key = set_key_for_data_cache(
+            create_cache_key(params[:analyze_type].to_s),
+            @content)
 
           if params[:r_obj].present?
 
@@ -637,7 +637,7 @@ class UsersController < ApplicationController
 
           # 結果をキャッシュへ格納
           logger.info( "絞り込み条件を取得しました。キャッシュへ登録します。")
-          Rails.cache.write(@req_str, @json, expires_in: 1.hour, compress: true)
+          Rails.cache.write(@memcache_kwd_key, @json, expires_in: 1.hour, compress: true)
 
           # コントローラを抜ける
           return

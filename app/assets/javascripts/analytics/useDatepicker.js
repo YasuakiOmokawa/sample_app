@@ -111,14 +111,10 @@ $(function() {
 
   // 期間設定ダイアログ
   $('#dialog-form').dialog({
-    closeOnEscape: false,
     autoOpen: false,
     draggable: false,
     dialogClass: 'jquery-ui-dialog-form',
     open:function(event, ui){
-
-      // 閉じるボタンを表示させない
-      $(".ui-dialog-titlebar-close").hide();
 
       // datepickerを設定
       addDatepicker();

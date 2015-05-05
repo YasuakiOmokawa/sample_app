@@ -1,5 +1,8 @@
 class UpldedAnlyzStatusesController < ApplicationController
 
+  require 'user_func'
+  include ParamUtils
+
   before_action :signed_in_user, only: [:active, :inactive]
   before_action :correct_user, only: [:active, :inactive]
 
@@ -16,8 +19,8 @@ class UpldedAnlyzStatusesController < ApplicationController
     if uplded_anlyz_status.update_attributes(permits)
       content = Content.find(content_id)
       content.upload_file.shift
-      from = content.upload_file.first[0]
-      to = content.upload_file.last[0]
+      from = padding_date_format(content.upload_file.first[0])
+      to = padding_date_format(content.upload_file.last[0])
       render json: {
           from: from,
           to: to,
@@ -32,7 +35,6 @@ class UpldedAnlyzStatusesController < ApplicationController
 
   def inactive
     uplded_anlyz_status = UpldedAnlyzStatus.where(
-      content_id: uplded_anlyz_status_params[:content_id],
       user_id: params[:id], active: true).first
     unless uplded_anlyz_status.nil?
       uplded_anlyz_status.update_attributes(active: false)

@@ -10,6 +10,7 @@
   <span id="custom-trigger">
   <%= active_content.upload_file_name %><br>でカスタム分析を実行中です</span>
 <% end %>
+<input type="hidden" name="custom_file_id" />
 
 <%= form_for @a_status,
   :url =>  {:controller => :uplded_anlyz_statuses,  :action => :inactive},

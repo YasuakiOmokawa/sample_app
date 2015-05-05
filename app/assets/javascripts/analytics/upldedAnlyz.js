@@ -123,7 +123,7 @@ $(function(){
     self.prototype = extend(uber, {
       constructor: self
 
-      ,onsuccess: function onsuccess() {
+      ,onsuccess: function onsuccess(event, xhr) {
         uber.onsuccess.call();
         var ifrm = this.frm, idialog = this.dialogs;
         $(ifrm).on('ajax:success', function(event, xhr) {
@@ -134,15 +134,17 @@ $(function(){
           $("#from").val( xhr.from );
           $("#to").val( xhr.to );
 
-          // アップロードファイルの名前、idを設定
+          // アップロードファイルの名前を設定
           $("#custom-trigger").remove();  // 表示のリセット
           $('#uplded_anlyz_status-inactive-form')
             .before(
               '<span id="custom-trigger">' +
               xhr.upload_file_name +
               '<br>でカスタム分析を実行中です</span>'
-            )
-            .find('#uplded_anlyz_status_content_id').val(xhr.content_id);
+            );
+
+          // ファイルid を設定
+          $('input[name="custom_file_id"]').val(xhr.content_id);
 
           // 期間設定のhidden inputへ設定
           setRange();
@@ -197,6 +199,9 @@ $(function(){
           // CV選択ボックスを表示
           var selectcvutil = new SelectCvUtil();
           selectcvutil.show();
+
+          // ファイルid を解除
+          $('input[name="custom_file_id"]').val('');
         });
       }
     });
@@ -324,4 +329,5 @@ $(function(){
   setUASActiveDialog();
   setUASInactiveDialog();
   ifCustomAnlyz();
+
 });

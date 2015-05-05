@@ -452,4 +452,17 @@ module ParamUtils
     end
     [from, to]
   end
+
+  def set_key_for_data_cache(item, option)
+    if option.try(:id)
+      "#{item}&custom_id=#{option.id}"
+    else
+      item
+    end
+  end
+
+  def padding_date_format(d)
+    t = d.split('/')
+    "#{t[0]}/#{t[1].rjust(2, '0')}/#{t[2].rjust(2, '0')}"
+  end
 end
