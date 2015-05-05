@@ -1,5 +1,4 @@
 module UpdateTable
-  include ParamUtils
 
   def calc_percent_for_favorite_table(ssn, table, data_type)
     table.each do |k, v|
