@@ -5,6 +5,8 @@ describe UpdateTable do
   let(:updatetable) { test_class.new }
   let(:test_class2) { Struct.new(:upldedanlyzstatuseshelper) { include UpldedAnlyzStatusesHelper } }
   let(:upldedanlyzstatuseshelper) { test_class2.new }
+  # let(:test_class3) { Struct.new(:paramutils) { include ParamUtils } }
+  # let(:paramutils) { test_class3.new }
 
   describe ".replace_cv_with_custom" do
     before do

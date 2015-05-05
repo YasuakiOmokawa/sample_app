@@ -1,4 +1,5 @@
 module UpdateTable
+  include ParamUtils
 
   def calc_percent_for_favorite_table(ssn, table, data_type)
     table.each do |k, v|
@@ -225,9 +226,13 @@ module UpdateTable
   end
 
   def replace_cv_with_custom(custom, cv, ident)
+
     cv.each do |item|
+      matcher = set_date_format(
+        create_matcher(item[:date])).to_s
       matched = custom.upload_file.
-        find {|t| t[0].match(/#{create_matcher(item[:date])}/)}
+        find {|t| set_date_format(t[0]).to_s.match(
+          /#{matcher}/)}
       item[ident.to_sym] = matched[1] unless matched.nil?
     end unless custom.nil?
   end

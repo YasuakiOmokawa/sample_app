@@ -11,17 +11,17 @@ var prcnt_all_cntr = 0;
 // デバイス
 function getDevOpts() {
   return [
-    // 'pc',
-    // 'sphone',
-    // 'mobile',
+    'pc',
+    'sphone',
+    'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    // 'new',
-    // 'repeat'
+    'new',
+    'repeat'
   ];
 }
 
@@ -604,11 +604,24 @@ function changeLocationHash(page) {
 }
 
 function createHomeURIBaseParams() {
-  var from = replaceAll($('#from').val(), '/', '-');
-  var to = replaceAll($('#to').val(), '/', '-');
-  var cv_num = $('input[name="cv_num"]').val();
-  return params = '#' + from + '#' + to + '#' + cv_num;
+  var params = "";
+  jQuery.each(setHomeURIBaseParams(), function (key, val) {
+    params += '#' + val;
+  });
+  return params;
 }
+
+function setHomeURIBaseParams() {
+  var params = {}, id = '';
+  params.from = replaceAll($('#from').val(), '/', '-');
+  params.to = replaceAll($('#to').val(), '/', '-');
+  params.cv_num = $('input[name="cv_num"]').val();
+  if ( id = $('input[name="custom_file_id"]').val() ) {
+    params.custom_file_id = id;
+  }
+  return params;
+}
+
 
 function getLocationHashPage() {
   var params = decodeURIComponent(location.hash).split("#");
