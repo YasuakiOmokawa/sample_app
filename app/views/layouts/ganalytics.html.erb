@@ -23,6 +23,11 @@
     <%= render 'layouts/shim' %>
   </head>
   <body>
+<%
+  @a_status = UpldedAnlyzStatus.new
+  @active_content = UpldedAnlyzStatusesController.
+    helpers.active_content(current_user.id)
+%>
     <%= render 'layouts/gaheader' %>
     <% flash.each do |key, value| %>
       <%= content_tag(:div, value, class: "alert alert-#{key}") %>

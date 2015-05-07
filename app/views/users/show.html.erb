@@ -34,7 +34,15 @@
           <% end %>
         </tr>
         <tr>
+<%
+  active_content = UpldedAnlyzStatusesController.
+    helpers.active_content(current_user.id)
+%>
+        <% if active_content.nil? %>
           <td class="cont">CV数</td>
+        <% else %>
+          <td class="cont">カスタムデータ</td>
+        <% end %>
           <% @data_for_graph_table.each do |k, v| %>
             <td data-day=<%= v[2] %>><%= v[1] %></td>
           <% end %>
