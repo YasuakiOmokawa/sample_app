@@ -31,7 +31,8 @@ class ContentsController < ApplicationController
   private
 
     def chk_file
-      upload_file = content_params[:upload_file]
+      # binding.pry
+      upload_file = content_params[:upload_file] unless params[:content].nil?
       @tmp_content = {}
       unless upload_file.nil?
         @tmp_content[:upload_file_name] = upload_file.original_filename

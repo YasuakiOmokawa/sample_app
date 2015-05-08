@@ -7,6 +7,7 @@ describe Content do
   let(:invalid_unmatch_content) {build(:invalid_unmatch_content)}
   let(:invalid_date_format_content) {build(:invalid_date_format_content)}
   let(:invalid_from_to_content) {build(:invalid_from_to_content)}
+  let(:invalid_from_date_content) {build(:invalid_from_date_content)}
 
   it "データが3行以上ないとエラーになること" do
     zero_content.valid?
@@ -36,6 +37,12 @@ describe Content do
     invalid_from_to_content.valid?
     expect(invalid_from_to_content.errors[:upload_file]
       ).to include('日付は連続データを入力し、開始日付は終了日付の前日にしてください')
+  end
+
+  it "開始日付が2005/1/1より前であればエラーとなること" do
+    invalid_from_date_content.valid?
+    expect(invalid_from_date_content.errors[:upload_file]
+      ).to include('開始日付は2005/1/1以降にしてください')
   end
 
   it "アップロードデータを取得できること" do

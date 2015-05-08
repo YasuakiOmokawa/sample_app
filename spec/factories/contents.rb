@@ -14,6 +14,8 @@ FactoryGirl.define do
     'fixtures', '8.tsv').to_s, {col_sep: "\t"})
   arr_of_arrs_invalid_from_to = CSV.read(Rails.root.join('spec',
     'fixtures', '7.tsv').to_s, {col_sep: "\t"})
+  arr_of_arrs_invalid_from_date = CSV.read(Rails.root.join('spec',
+    'fixtures', 'invalid_from.tsv').to_s, {col_sep: "\t"})
 
   factory :valid_content, class: Content do
     upload_file arr_of_arrs_valid
@@ -44,5 +46,10 @@ FactoryGirl.define do
   factory :invalid_from_to_content, class: Content do
     upload_file arr_of_arrs_invalid_from_to
     user_id 6
+  end
+
+  factory :invalid_from_date_content, class: Content do
+    upload_file arr_of_arrs_invalid_from_date
+    user_id 7
   end
 end
