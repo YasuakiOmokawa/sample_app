@@ -38,11 +38,11 @@ class ContentsController < ApplicationController
         @tmp_content[:upload_file_name] = upload_file.original_filename
         @tmp_content[:user_id] = current_user.id
         begin
-          @testfile = CSV.read(upload_file.tempfile, {col_sep: "\t"})
+          @testfile = CSV.read(upload_file.tempfile)
         rescue => e
           @tmp_content[:upload_file] = 'hoge'
           @content = Content.new(@tmp_content)
-          @content.errors[:base] << "TSV形式のファイルを選択してください"
+          @content.errors[:base] << "ファイル形式が間違っています"
           @content.errors.add(:upload_file, e)
           render 'contents/show', :layout => 'not_ga'
         end

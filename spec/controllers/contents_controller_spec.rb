@@ -37,24 +37,24 @@ describe ContentsController do
     end
   end
 
-    describe "アップロードダイアログのリストボックスが正常であること", js: true do
-      context "アップロードファイルが存在する場合" do
-        it "リストボックスに値が存在すること" do
-          sign_in(user)
-          visit root_path
-          expect(page).to have_select(
-            'uplded_anlyz_status[content_id]', selected: 'valid_file')
-        end
-      end
+    # describe "アップロードダイアログのリストボックスが正常であること", js: true do
+    #   context "アップロードファイルが存在する場合" do
+    #     it "リストボックスに値が存在すること" do
+    #       sign_in(user)
+    #       visit root_path
+    #       expect(page).to have_select(
+    #         'uplded_anlyz_status[content_id]', selected: 'valid_file')
+    #     end
+    #   end
 
-      context "アップロードファイルが存在しない場合" do
-        it "リストボックスに値が存在しないこと" do
-          sign_in(no_upload_user)
-          visit root_path
-          expect(page).to have_select(
-            'uplded_anlyz_status[content_id]', selected: [])
-        end
-      end
-    end
+    #   context "アップロードファイルが存在しない場合" do
+    #     it "リストボックスに値が存在しないこと" do
+    #       sign_in(no_upload_user)
+    #       visit root_path
+    #       expect(page).to have_select(
+    #         'uplded_anlyz_status[content_id]', selected: [])
+    #     end
+    #   end
+    # end
 
 end

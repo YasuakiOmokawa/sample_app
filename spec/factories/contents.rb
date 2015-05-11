@@ -3,19 +3,19 @@ require('csv')
 
 FactoryGirl.define do
   arr_of_arrs_zero = CSV.read(Rails.root.join('spec',
-    'fixtures', '1.tsv').to_s, {col_sep: "\t"})
+    'fixtures', '1.csv').to_s)
   arr_of_arrs_valid = CSV.read(Rails.root.join('spec',
-    'fixtures', 'same_as_ast_data.tsv').to_s, {col_sep: "\t"})
+    'fixtures', 'same_as_ast_data.csv').to_s)
   arr_of_arrs_invalid_header = CSV.read(Rails.root.join('spec',
-    'fixtures', '3.tsv').to_s, {col_sep: "\t"})
+    'fixtures', '3.csv').to_s)
   arr_of_arrs_unmatch = CSV.read(Rails.root.join('spec',
-    'fixtures', '5.tsv').to_s, {col_sep: "\t"})
+    'fixtures', '5.csv').to_s)
   arr_of_arrs_invalid_date_format = CSV.read(Rails.root.join('spec',
-    'fixtures', '8.tsv').to_s, {col_sep: "\t"})
+    'fixtures', '8.csv').to_s)
   arr_of_arrs_invalid_from_to = CSV.read(Rails.root.join('spec',
-    'fixtures', '7.tsv').to_s, {col_sep: "\t"})
+    'fixtures', '7.csv').to_s)
   arr_of_arrs_invalid_from_date = CSV.read(Rails.root.join('spec',
-    'fixtures', 'invalid_from.tsv').to_s, {col_sep: "\t"})
+    'fixtures', 'invalid_from.csv').to_s)
 
   factory :valid_content, class: Content do
     upload_file arr_of_arrs_valid
