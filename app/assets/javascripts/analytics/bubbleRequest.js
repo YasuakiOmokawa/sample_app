@@ -1,5 +1,3 @@
-// ajaxリクエスト格納
-
 // バブルチャート表示リクエストの処理開始、完了フラグ
 // 0: 未処理 1: 処理中 2: 処理終了
 var bbl_shori_flg = 0;
@@ -228,21 +226,111 @@ function parseElem(elem) {
   return elm_txt;
 }
 
+function createAjaxRequest(params) {
+
+  var request = $.Deferred(function(deferred) {
+    $.ajax({
+      url: params.userpath,
+      // timeout: 2,
+      type:'GET',
+      dataType: "json",
+      tryCount: 0,
+      retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+      // バブルチャート用データ取得用のパラメータ
+      data: {
+        from : $('#from').val(),
+        to : $('#to').val(),
+        cv_num : $('input[name="cv_num"]').val(),
+        shori : $('input[name="shori"]').val(),
+        act : params.elm_txt,             // 取得するページ項目
+        dev : params.filter.dev,                 // デバイス
+        usr : params.filter.usr,                   // 訪問者
+        kwd : params.filter.kwd,                 // キーワード
+      },
+      error: function(xhr, ajaxOptions, thrownError) {
+
+        // 内部エラーが発生したら表示
+        if (xhr.status == 503) {
+          $("span#errormsg").html('サーバーが一時的に応答不能となっています。<br>時間を置いてページを再読み込みしてください。<p/>');
+          return;
+        }
+
+        this.tryCount++;
+
+        if (this.tryCount < this.retryLimit) {
+
+          console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
+
+          $.ajax(this).done(function(data, textStatus, jqXHR) {
+            deferred.resolveWith(this, [data, textStatus, jqXHR]);
+          }).fail(function(jqXHR, textStatus, errorThrown) {
+            if (this.tryCount >= this.retryLimit) {
+
+              console.log('再試行の上限に達しました。エラー処理を実行します。');
+
+              deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
+            }
+          });
+        }
+      }
+    }).done(function(data, textStatus, jqXHR) {
+      deferred.resolveWith(this, [data, textStatus, jqXHR]);
+    });
+  }).promise();
+  return request;
+}
+
+function createFilter(v) {
+  return {
+    dev: String(v.dev), // undefined の場合はサーバ側でall を指定する
+    usr: String(v.usr), // undefined の場合はサーバ側でall を指定する
+    kwd: String(v.kwd) === "undefined" ? 'nokwd' : String(v.kwd)
+  };
+}
+
 // バブルチャート用データのリクエスト（非同期）
 function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts) {
 
   // ajaxリクエストの生成
+  var requests = [];
   if (bbl_shori_flg == 1) {
 
+    var parallel_limit = opts_cntr + 3; // 並列処理数
+    while (opts_cntr < parallel_limit) {
+      var req_params = {
+        filter: createFilter( opts[opts_cntr] ),
+        userpath: userpath,
+        elm_txt: elm_txt
+      };
+      requests.push( createAjaxRequest(req_params) );
+      opts_cntr++;
+      if (opts_cntr > opts.length - 1) {
+        break;
+      }
+    }
   }
 
+  if (requests) {
 
+    $.when.apply($, requests).done(function() {
 
+      var page_fltr_wd;
       console.log( 'ajax通信成功!');
 
       // グラフ描画用のデータをマージ
+      $.each(arguments, function(k, v) {
 
+        var r_obj_tmp = JSON.parse(v[0].homearr);
+        $.extend(true, tmp_obj, r_obj_tmp);
 
+        // 項目名、フィルタ名の取得
+        page_fltr_wd = v[0].page_fltr_wd;
+        var page_fltr_dev = v[0].page_fltr_dev;
+        var page_fltr_usr = v[0].page_fltr_usr;
+        var page_fltr_kwd = v[0].page_fltr_kwd;
+
+        console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
+      });
 
       // フィルタリングオプションの配列が無くなるまでajaxを実行
       if (opts_cntr <= opts.length - 1) {
@@ -283,6 +371,7 @@ function callExecuter(elm_txt, opts, userpath, opts_cntr, return_obj, tmp_obj, k
       if (errorThrown == 'timeout') {
         $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。');
       } else {
+        $("span#errormsg").html('エラーが発生しました。再ログインしてください。<br>解消されない場合、下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ errorThrown );
       }
 
       // 失敗したら処理終了
@@ -366,6 +455,7 @@ function TabMark(dom, page_name) {
 // バブル作成用にページ下部のタブリンクに埋め込む関数
 function bubbleCreateAtTabLink(page_name) {
 
+  if (bbl_shori_flg === 1) {
     $("span#errormsg").html('現在実行中のリクエストが完了してからもう一度お試しください。');
     return;
   }
