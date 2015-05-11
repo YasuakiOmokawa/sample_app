@@ -40,6 +40,7 @@ gem 'historyjs-rails' # ブラウザの履歴情報を保持する フルajax化
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
+gem 'unicorn'
 
 group :development, :test do
   gem "rspec-rails"
@@ -74,7 +75,6 @@ end
 
 group :production do
   gem 'rails_12factor', '0.0.2'
-  gem 'unicorn'
 end
 
 
