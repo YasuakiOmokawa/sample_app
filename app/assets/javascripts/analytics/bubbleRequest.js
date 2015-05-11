@@ -590,14 +590,6 @@ function replaceAll(expression, org, dest){
     return expression.split(org).join(dest);
 }
 
-// ホーム画面でハッシュが変更されたときのイベント
-function locationHashChanged() {
-  var params = decodeURIComponent(location.hash).split("#");
-  setAnchorParams(params);
-  var page = params[1];
-  bubbleCreateAtTabLink(page);
-}
-
 // ホーム画面でハッシュを変更させる
 function changeLocationHash(page) {
   location.hash = encodeURIComponent(page + createHomeURIBaseParams());
@@ -629,16 +621,35 @@ function getLocationHashPage() {
 }
 
 function setAnchorParams(params) {
-  $('#from').val(replaceAll(params[2], '-', '/'));
-  $('#to').val(replaceAll(params[3], '-', '/'));
-  $('input[name="cv_num"]').val(params[4]);
-  $('select[name="cvselect"]').val(params[4]);
+  $('#from').val(replaceAll(params.from, '-', '/'));
+  $('#to').val(replaceAll(params.to, '-', '/'));
+  $('input[name="cv_num"]').val(params.cv_num);
+  $('select[name="cvselect"]').val(params.cv_num);
 }
+
+// ホーム画面でハッシュが変更されたときのイベント
+function locationHashChanged() {
+var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
+console.log("location.hash is " + params)
+setAnchorParams(params);
+bubbleCreateAtTabLink(params.category);
+}
+
+function pushLocationHash(d) {
+  var obj = {};
+  obj.category = d[1], obj.from = d[2], obj.to = d[3], obj.cv_num = d[4];
+  if (d[5]) {
+    obj.file_id = d[5];
+  }
+  return obj;
+}
+
 
 $(document).ready(function() {
 
-  // タブがクリックされたときのイベント
-  $('#pnt a').click(function() {
+  // 分析カテゴリがクリックされたときのイベント
+  var anlyz_category = '#pnt a';
+  $(anlyz_category).click(function() {
     var page = $(this).attr('class');
     changeLocationHash(page);
   });
