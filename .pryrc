@@ -59,14 +59,3 @@ load 'insert_table.rb'
 load 'update_table.rb'
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
-
-      @user = User.find(10)
-      get_ga_profiles
-      @from = set_date_format('2014/11/1')
-      @to = set_date_format('2014/12/1')
-     @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
-     @graphic_item  = ('pageviews').to_sym
-     @cv_num = 1                                                     # CV種類
-      @cvr_txt = ('goal' + @cv_num.to_s + '_conversion_rate')
-      @cv_txt = ('goal' + @cv_num.to_s + '_completions')
-      @day_type = 'all_day'

@@ -9,43 +9,36 @@ module Ast
 
       class Session
 
-        # セッションログイン
+        def initialize(params)
+          @oauth2 = params.oauth2
+          @user_data = params.user_data
+        end
+
+        # セッション取得
         def login
           session = Garb::Session.new
-          session.access_token = GoogleOauth2Installed.access_token
+          session.access_token = @oauth2.access_token
           session
         end
 
-        # プロファイルのロード
-        def load_profile(session, user_data)
-
-          # プロファイル情報の取得
-          profile = Garb::Management::Profile.all(session).detect { |p|
-            p.web_property_id == user_data.gaproperty_id
-            p.id == user_data.gaprofile_id
+        # プロファイル情報の取得
+        def load_profile
+          Garb::Management::Profile.all(login).detect { |p|
+            p.web_property_id == @user_data.gaproperty_id
+            p.id == @user_data.gaprofile_id
           }
-
-          return profile
         end
 
         # 設定されているゴール値の取得
-        def get_goal(profile)
-
-          # リターン用ハッシュ
-          hsh = {}
-
+        def get_goal
           # ゴール(CV)情報の取得
-          goal = Garb::Management::Goal::for_profile(profile)
+          goal = Garb::Management::Goal::for_profile(load_profile)
 
-          goal.each do |t|
-            jsn = t.to_json
-            jload = JSON.load(jsn)
-            k = jload['entry']['name']
-            v = jload['entry']['id']
-            hsh[k] = v
+          goal.reduce({}) do |acum, item|
+            j = JSON.load(item.to_json)
+            acum[j['entry']['name']] = j['entry']['id']
+            acum
           end
-
-          return hsh
         end
       end
     end

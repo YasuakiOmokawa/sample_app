@@ -29,12 +29,22 @@ end
 
 module UserFunc
 
+  Oauths = Struct.new(:oauth2, :user_data)
+
   def get_ga_profiles
-    set_oauth2_env
-    gaservice = Ast::Ganalytics::Garbs::Session.new
-    @session = gaservice.login
-    @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
-    @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
+    oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(@user.gaproject)
+    gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, @user))
+
+    @session ||= gaservice.login
+    @ga_profile ||= gaservice.load_profile # Garb でデータを取得するときに使う
+
+    oauthed = Rails.cache.fetch("oauthed_user_id_#{@user.id}", expires_in: 1.hour) do
+      [
+        gaservice.get_goal       # アナリティクスに設定されているCV一覧
+      ]
+    end
+
+    @ga_goal = oauthed[0]
   end
 
   def change_to_garb_kwds(src, param)
@@ -156,17 +166,6 @@ module UserFunc
 
   private
 
-    def set_oauth2_env
-      unless ENV["OAUTH2_SETTED"]
-        ENV["OAUTH2_SETTED"] = "true"
-        ENV["OAUTH2_CLIENT_ID"] = @user.gaproject.oauth2_client_id
-        ENV["OAUTH2_CLIENT_SECRET"] = @user.gaproject.oauth2_client_secret
-        ENV["OAUTH2_SCOPE"] = @user.gaproject.oauth2_scope
-        ENV["OAUTH2_ACCESS_TOKEN"] = @user.gaproject.oauth2_access_token
-        ENV["OAUTH2_REFRESH_TOKEN"] = @user.gaproject.oauth2_refresh_token
-        ENV["OAUTH2_EXPIRES_AT"] = @user.gaproject.oauth2_expires_at
-      end
-    end
 end
 
 module ParamUtils
