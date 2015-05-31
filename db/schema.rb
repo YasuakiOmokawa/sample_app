@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150425082451) do
+ActiveRecord::Schema.define(version: 20150531025926) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,13 +49,16 @@ ActiveRecord::Schema.define(version: 20150425082451) do
   end
 
   create_table "gaprojects", force: :cascade do |t|
-    t.string   "proj_name",           limit: 255
-    t.string   "api_key",             limit: 255
+    t.string   "proj_name",            limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "proj_owner_email",    limit: 255
-    t.string   "proj_owner_password", limit: 255
     t.integer  "userid"
+    t.string   "oauth2_access_token"
+    t.string   "oauth2_refresh_token"
+    t.string   "oauth2_expires_at"
+    t.string   "oauth2_client_id"
+    t.string   "oauth2_client_secret"
+    t.string   "oauth2_scope"
   end
 
   add_index "gaprojects", ["userid"], name: "index_gaprojects_on_userid", using: :btree
@@ -80,15 +83,6 @@ ActiveRecord::Schema.define(version: 20150425082451) do
   end
 
   add_index "uplded_anlyz_statuses", ["user_id"], name: "index_uplded_anlyz_statuses_on_user_id", unique: true, using: :btree
-
-  create_table "uploaded_analyzes", force: :cascade do |t|
-    t.integer  "user_id",                    null: false
-    t.boolean  "active",     default: false
-    t.datetime "created_at",                 null: false
-    t.datetime "updated_at",                 null: false
-  end
-
-  add_index "uploaded_analyzes", ["user_id"], name: "index_uploaded_analyzes_on_user_id", unique: true, using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "name",                   limit: 255

@@ -363,7 +363,6 @@ class UsersController < ApplicationController
       chk_cache
 
       # パラメータ共通設定
-
       @user = User.find(params[:id])
       get_ga_profiles
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ

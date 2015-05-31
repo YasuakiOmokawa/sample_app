@@ -1,23 +1,14 @@
 <%provide(:title, 'ログイン') %>
 <div id="login">
-  <h1>AST&nbsp;ログイン</h1>
-  <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
-  <table>
-  <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
-    <tr>
-      <td>ID：</td><td><%= f.text_field :email %></td>
-    </tr>
-    <tr>
-      <td>パスワード：</td><td><%= f.password_field :password %></td>
-    </tr>
-    <tr>
-      <td></td><td><input type="checkbox" name="remember_me"><span>ログインしたままにする</span></td>
-    </tr>
-    <tr>
-      <td></td><td><a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">ログイン</a></td>
-    </tr>
-    <tr>
-      <td></td><td><p>※ID、パスワードを忘れた方は、先駈までお問い合わせください。</p></td>
-    </tr>
+  <div id="fm">
+    <div id="ttl">SiteGoal<span>ログイン</span></div>
+    <div id="block">
+      <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
+      <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
+      <dl><dt>ＩＤ&nbsp;：</dt><dd><%= f.text_field :email, :class => 'txt' %></dd></dl>
+      <dl><dt>パスワード&nbsp;：</dt><dd><%= f.password_field :password, :class => 'txt' %></dd></dl>
+      <dl><dt>&nbsp</dt><dd><input type="checkbox" name="remember_me">ログインしたままにする</dd></dl>
+      <dl><dt>&nbsp</dt><dd><a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">ログイン</a></dd></dl>
+      <dl><dt>&nbsp</dt><dd><p>※ID、パスワードを忘れた方は、先駈までお問い合わせください。</p></dd></dl>
+    </div>
    <% end %>
-  </table>

@@ -4,6 +4,5 @@ class ChangeTableToGaprojects < ActiveRecord::Migration
       t.column :proj_owner_email, :string
       t.column :proj_owner_password, :string
     end
-
   end
 end

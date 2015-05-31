@@ -30,8 +30,9 @@ end
 module UserFunc
 
   def get_ga_profiles
+    set_oauth2_env
     gaservice = Ast::Ganalytics::Garbs::Session.new
-    @session = gaservice.login(@user)
+    @session = gaservice.login
     @ga_profile = gaservice.load_profile(@session, @user)                                     # アナリティクスAPI認証パラメータ２
     @ga_goal = gaservice.get_goal(@ga_profile)                                     # アナリティクスに設定されているCV
   end
@@ -152,6 +153,20 @@ module UserFunc
     end
     p
   end
+
+  private
+
+    def set_oauth2_env
+      unless ENV["OAUTH2_SETTED"]
+        ENV["OAUTH2_SETTED"] = "true"
+        ENV["OAUTH2_CLIENT_ID"] = @user.gaproject.oauth2_client_id
+        ENV["OAUTH2_CLIENT_SECRET"] = @user.gaproject.oauth2_client_secret
+        ENV["OAUTH2_SCOPE"] = @user.gaproject.oauth2_scope
+        ENV["OAUTH2_ACCESS_TOKEN"] = @user.gaproject.oauth2_access_token
+        ENV["OAUTH2_REFRESH_TOKEN"] = @user.gaproject.oauth2_refresh_token
+        ENV["OAUTH2_EXPIRES_AT"] = @user.gaproject.oauth2_expires_at
+      end
+    end
 end
 
 module ParamUtils

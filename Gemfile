@@ -41,6 +41,9 @@ gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.gi
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
 gem 'unicorn'
+gem 'google-oauth2-installed' # oauth2 認証をgoogle analytics api 用に簡便化( google service account を使わない方式 )
+gem 'legato' # google analytics api 接続用
+gem 'dotenv-rails', :groups => [:development, :test] # 環境変数設定
 
 group :development, :test do
   gem "rspec-rails"

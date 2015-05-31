@@ -11,16 +11,15 @@
     <%= render 'layouts/shim' %>
   </head>
   <body>
-    <div class="container">
-      <% flash.each do |key, value| %>
-        <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
-      <% end %>
+    <% flash.each do |key, value| %>
+      <%= content_tag(:div, simple_format(value), class: "alert alert-#{key}") %>
+    <% end %>
 
-      <%= yield %>
+    <%= yield %>
 
-        <div id="ftr"><%= get_gafooter_text %></div>
+        <div id="copy"><%= get_gafooter_text %></div>
       </div>
-      <%= debug(params) if Rails.env.development? %>
+     <%= debug(params) if Rails.env.development? %>
     </div>
   </body>
 </html>
