@@ -1,27 +1,24 @@
 <% @user ||= current_user %>
 <!-- header_st -->
 <div id="hd">
-  <h1>SiteGoal</h1>
-  <%= select_tag 'cvselect', options_for_select( @ga_goal ) %>
-  <%= link_to "ログアウト", signout_path, method: "delete" %>
-  <%= link_to "パスワード変更", edit_user_path(current_user) %>
-  <%= link_to "設定編集", edit_init_analyze_user_path(current_user) %>
-  <%= link_to "アップロード", content_path(current_user) %>
-  <% if @contents.size > 0  %>
-    <%= link_to "カスタム分析", 'javascript:void(0);', {id: "open-uplded_anlyz_status-active-dialog"} %>
-  <% end %>
-  <div>ID：<%= @user.name %></div>
+<h1>SiteGoal</h1><span class="name">Analytics Support Tool</span>
+<ul>
+  <li><%= link_to "ログアウト", signout_path, method: "delete" %></li>
+  <li><%= link_to "パスワード変更", edit_user_path(current_user) %></li>
+  <li class="id">ID：<%= @user.name %></li>
+</ul>
 </div>
+<!-- hrader_end -->
 
-<div id="iref">
+
+
+<!-- <div id="iref">
   <form action="<%= @narrow_action %>" method="GET" name="narrowForm">
-    <!-- Datepicker  -->
     <a href="javascript:void(0)" id="jrange"><%= image_tag 'calender.png' %><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a>&nbsp;&nbsp;&nbsp;
     <span id='home-overlay'>
       <input type="checkbox" name="day_type" class="ic" value="all_day" checked>&nbsp;or&nbsp;&nbsp;
       <input type="checkbox" name="day_type" class="ic" value="day_on">平日&nbsp;&nbsp;
       <input type="checkbox" name="day_type" class="ic" value="day_off">土日祝
-      <!-- datepicker用のinput -->
       <input type="hidden" id="from" name="from" value="<%= @from.strftime("%Y/%m/%d") %>"/>
       <input type="hidden" id="to" name="to" value="<%= @to.strftime("%Y/%m/%d")  %>" />
       <input type="hidden" value="1" name="cv_num" />
@@ -37,7 +34,6 @@
       <input type="checkbox" name="visitor"class="ic" value="all" checked>&nbsp;or&nbsp;&nbsp;
       <input type="checkbox" name="visitor"class="ic" value="new">新規&nbsp;&nbsp;
       <input type="checkbox" name="visitor"class="ic" value="repeat">リピーター
-      <!-- ここはページによって挙動を変える -->
       <span id='select-overlay'>
         <%= image_tag 'plus.png' , :class => "icon" %>
         <%= select_tag 'narrow_select', options_for_select(@categories), :include_blank => true, :prompt => '条件を設定' %>
@@ -51,9 +47,10 @@
     </span>
   </form>
 </div>
+ -->
 
 <!-- datepicker form dialog start -->
-<div id="dialog-form">
+<!-- <div id="dialog-form">
   <p>期間を設定してください</p>
   <p>期間は最低3日以上を選択してください。</p>
   <br/>
@@ -62,5 +59,4 @@
     <label for="tod">終了</label>
     <input type="text" class="tod" name="tod"  size="10" style="width:100px;" readonly="readonly"  />
 </div>
-<!-- datepicker form dialog end -->
-<!-- header_end -->
+ --><!-- datepicker form dialog end -->

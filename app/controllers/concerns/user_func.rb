@@ -34,17 +34,7 @@ module UserFunc
   def get_ga_profiles
     oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(@user.gaproject)
     gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, @user))
-
-    @session ||= gaservice.login
     @ga_profile ||= gaservice.load_profile # Garb でデータを取得するときに使う
-
-    oauthed = Rails.cache.fetch("oauthed_user_id_#{@user.id}", expires_in: 1.hour) do
-      [
-        gaservice.get_goal       # アナリティクスに設定されているCV一覧
-      ]
-    end
-
-    @ga_goal = oauthed[0]
   end
 
   def change_to_garb_kwds(src, param)

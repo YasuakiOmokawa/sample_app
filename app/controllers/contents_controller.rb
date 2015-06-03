@@ -4,9 +4,20 @@ class ContentsController < ApplicationController
   before_action :correct_user, only: [:show, :destroy]
   before_action :chk_file, only: [:create]
 
+  Oauths = Struct.new(:oauth2, :user_data)
+
   def show
     @content ||= Content.new
-    render :layout => 'not_ga'
+
+    oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(current_user.gaproject)
+    gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, current_user))
+    @ga_goals = Rails.cache.fetch("oauthed_user_id_#{current_user.id}", expires_in: 1.hour) do
+      gaservice.get_goal       # アナリティクスに設定されているCV一覧
+    end
+
+    respond_to do |format|
+      format.js
+    end
   end
 
   def create

@@ -226,10 +226,12 @@ $(document).bind('keydown', 'esc', function() {
   return false;
 });
 
-// Bind to StateChange Event with historyjs-rails gem
-History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
-    var State = History.getState(); // Note: We are using History.getState() instead of event.state
-});
+// // Bind to StateChange Event with historyjs-rails gem
+// // Note: We are using statechange instead of popstate
+// History.Adapter.bind(window,'statechange',function(){
+//     // Note: We are using History.getState() instead of event.state
+//     var State = History.getState();
+// });
 
 function setHomeHistoryParameter() {
   if (gon.history_from) {
@@ -245,6 +247,16 @@ function setHomeHistoryParameter() {
   }
 
 }
+
+$(document).ready(function() {
+  // DOM element with id = "right" will be replaced after data load.
+  window.wiselinks = new Wiselinks($('#right'));
+
+  $(document).off('page:loading').on('page:loading', function(event, $target, render, url) {
+    console.log("Loading: #{url} to #{$target.selector} within '#{render}'");
+    // code to start loading animation
+  });
+});
 
 $(document).ready(function() {
 

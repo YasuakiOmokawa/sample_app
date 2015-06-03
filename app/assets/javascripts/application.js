@@ -11,6 +11,8 @@
 // about supported directives.
 //
 //= require jquery
+//= require wiselinks
+// require history_jquery.min
 // ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
 //= require bootstrap
 //= require jquery-ui/datepicker
@@ -29,4 +31,3 @@
 //= require ./plainoverlay/jquery.plainoverlay
 //= require jquery.tooltipster.min.js
 //= require jquery-hotkeys
-//= require history_jquery.min

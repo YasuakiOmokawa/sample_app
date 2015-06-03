@@ -24,10 +24,6 @@ describe Ast::Ganalytics::Garbs do
       @gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, user))
     end
 
-    it "セッションが正常に作れること" do
-      expect(@gaservice.login).to be_truthy
-    end
-
     it "プロファイルが正常に作れること" do
       expect(@gaservice.load_profile).to be_truthy
     end

@@ -197,6 +197,14 @@ class UsersController < ApplicationController
     @users = User.all
   end
 
+  def first
+    # テンプレート検証用
+    @tests = %w(まどか さやか ほむら マミ 杏子)
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def show
     # パラメータ個別設定
     @title = 'ホーム'
@@ -204,6 +212,9 @@ class UsersController < ApplicationController
     gon.narrow_action = user_path
     @details_partial = 'norender'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
+
+    # テンプレート検証用
+    @tests = %w(hoge fuga gogo)
 
     render json: {
       :homearr => @json,
@@ -213,7 +224,7 @@ class UsersController < ApplicationController
       :page_fltr_kwd => @page_fltr_kwd
     } and return if request.xhr?
 
-    render :layout => 'ganalytics', :file => '/app/views/users/first' and return
+    render :layout => 'ganalytics' and return
   end
 
   def all

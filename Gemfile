@@ -31,18 +31,18 @@ gem 'jbuilder'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails', '1.3.0'
 gem 'newrelic_rpm'
-# gem 'parallel' # バブルチャート取得処理を並行化
 gem 'retryable' # APIコールのリトライを実行しやすくする
 gem 'dalli' # memcache クライアント
 gem 'tooltipster-rails' # ツールチップ（吹き出し）
 gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
-gem 'historyjs-rails' # ブラウザの履歴情報を保持する フルajax化対応用
+# gem 'historyjs-rails' # ブラウザの履歴情報を保持する フルajax化対応用
+gem 'wiselinks' # RailsでPjaxライクな処理を実装する
 gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
 gem 'unicorn'
 gem 'google-oauth2-installed' # oauth2 認証をgoogle analytics api 用に簡便化( google service account を使わない方式 )
-gem 'legato' # google analytics api 接続用
+# gem 'legato' # google analytics api 接続用
 gem 'dotenv-rails', :groups => [:development, :test] # 環境変数設定
 
 group :development, :test do

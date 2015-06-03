@@ -107,65 +107,65 @@ function addDatepicker() {
   });
 }
 
-$(function() {
+// $(function() {
 
-  // 期間設定ダイアログ
-  $('#dialog-form').dialog({
-    autoOpen: false,
-    draggable: false,
-    dialogClass: 'jquery-ui-dialog-form',
-    open:function(event, ui){
+//   // 期間設定ダイアログ
+//   $('#dialog-form').dialog({
+//     autoOpen: false,
+//     draggable: false,
+//     dialogClass: 'jquery-ui-dialog-form',
+//     open:function(event, ui){
 
-      // datepickerを設定
-      addDatepicker();
+//       // datepickerを設定
+//       addDatepicker();
 
-      // 日付リンクから、期間設定をダイアログの入力ボックスへ転記
-      addRangeToDatePicker();
+//       // 日付リンクから、期間設定をダイアログの入力ボックスへ転記
+//       addRangeToDatePicker();
 
-      // datepicker を表示させるため、初期focus を行う。
-      $("div.jquery-ui-dialog-form").focus();
+//       // datepicker を表示させるため、初期focus を行う。
+//       $("div.jquery-ui-dialog-form").focus();
 
-    },
-    width: 400,
-    height: 200,
-    title: '期間設定',
-    modal: true,
-    position: {
-      my: "left top",
-      at: "left top",
-      of: 'a#jrange'
-    },
-    buttons: {
-        "設定": function(){
+//     },
+//     width: 400,
+//     height: 200,
+//     title: '期間設定',
+//     modal: true,
+//     position: {
+//       my: "left top",
+//       at: "left top",
+//       of: 'a#jrange'
+//     },
+//     buttons: {
+//         "設定": function(){
 
-          // 入力ボックスの値を#from, #to へ格納
-          $("#from").val( $("input.fromd").val() );
-          $("#to").val( $("input.tod").val() );
+//           // 入力ボックスの値を#from, #to へ格納
+//           $("#from").val( $("input.fromd").val() );
+//           $("#to").val( $("input.tod").val() );
 
-          $(this).dialog('close');
+//           $(this).dialog('close');
 
-          // 入力値を期間設定のhidden inputへ設定
-          setRange();
+//           // 入力値を期間設定のhidden inputへ設定
+//           setRange();
 
-          // datepicker の削除
-          $("input.fromd").datepicker("destroy");
-          $("input.tod").datepicker("destroy");
+//           // datepicker の削除
+//           $("input.fromd").datepicker("destroy");
+//           $("input.tod").datepicker("destroy");
 
-          if (isTitleHome()) {
-            changeLocationHash(getLocationHashPage());
-          } else {
-            $('a#set').trigger('click');
-          }
-      },
-      "キャンセル": function(){
-        $(this).dialog('close');
+//           if (isTitleHome()) {
+//             changeLocationHash(getLocationHashPage());
+//           } else {
+//             $('a#set').trigger('click');
+//           }
+//       },
+//       "キャンセル": function(){
+//         $(this).dialog('close');
 
-        // datepickerを削除
-        $("input.fromd").datepicker("destroy");
-        $("input.tod").datepicker("destroy");
-      }
-    }
-  });
-});
+//         // datepickerを削除
+//         $("input.fromd").datepicker("destroy");
+//         $("input.tod").datepicker("destroy");
+//       }
+//     }
+//   });
+// });
 
 

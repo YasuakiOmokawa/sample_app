@@ -1,157 +1,29 @@
-<div id="childroom">
-  <div id="mfm_d">
-    <div id="bk"><a href="javascript:void(0)" name=<%= user_path %>><%= image_tag 'back.png', :class => "icon" %>グラフに戻る</a></div>
-    <%
-      option = @graphic_item.to_sym
-      graphic_hash = {
-        "PV数" => :pageviews,
-        "セッション" => :sessions,
-        "ユーザー" => :users,
-        "平均PV数" => :pageviews_per_session,
-        "平均滞在時間" => :avg_session_duration,
-        "新規ユーザー" => :percent_new_sessions,
-        "リピーター" => :repeat_rate,
-        "直帰率" => :bounce_rate,
-      }
-    %>
-  <div id="tb">
-    <%= select_tag('graphicselect', options_for_select( graphic_hash, option)) %>
-
-    <div id="gh" style="z-index: 1;"></div><br>
-
-    <div id="num">
-      <table>
-          <tr id="day">
-          <td class="cont"></td>
-          <% @data_for_graph_table.each do |k, v| %>
-            <td data-dflg=<%= v[2] %>><%= k.to_s[4, 2].to_i %>/<%= k.to_s[6, 2].to_i %></td>
-          <% end %>
-        </tr>
-        <tr>
-          <td class="cont"><%= @desire_caption %></td>
-          <% @data_for_graph_table.each do |k, v| %>
-            <td data-day=<%= v[2] %>><%= v[0] %></td>
-          <% end %>
-        </tr>
-        <tr>
-<%
-  active_content = UpldedAnlyzStatusesController.
-    helpers.active_content(current_user.id)
-%>
-        <% if active_content.nil? %>
-          <td class="cont">CV数</td>
-        <% else %>
-          <td class="cont">カスタムデータ</td>
-        <% end %>
-          <% @data_for_graph_table.each do |k, v| %>
-            <td data-day=<%= v[2] %>><%= v[1] %></td>
-          <% end %>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <div id="ltfm">
-    <table id="highlight">
-      <tr id="tpc">
-        <td class="cont"></td><td><div class="lt">平均値</div><div class="rt">（標準偏差）</div></td><td>目標値</td>
-      </tr>
-      <%
-        postfix = get_postfix
-        ddd = @details_desire_datas
-      %>
-      <tr>
-        <td class="cont">PV数</td><td><div class="lt"><%= ddd[('pageviews' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('pageviews' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('pageviews' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">セッション</td><td><div class="lt"><%= ddd[('sessions' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('sessions' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('sessions' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">ユーザー</td><td><div class="lt"><%= ddd[('users' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('users' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('users' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">平均PV数</td><td><div class="lt"><%= ddd[('pageviews_per_session' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('pageviews_per_session' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('pageviews_per_session' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">平均滞在時間</td><td><div class="lt"><%= ddd[('avg_session_duration' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('avg_session_duration' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('avg_session_duration' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">新規ユーザー</td><td><div class="lt"><%= ddd[('percent_new_sessions' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('percent_new_sessions' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('percent_new_sessions' + postfix).to_sym][:desire] %></td>
-      </tr>
-      <tr>
-        <td class="cont">リピーター</td><td><div class="lt"><%= ddd[('repeat_rate' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('repeat_rate' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('repeat_rate' + postfix).to_sym][:desire] %></td>
-      <tr>
-        <td class="cont">直帰率</td><td><div class="lt"><%= ddd[('bounce_rate' + postfix).to_sym][:metrics_avg] %></div><div class="rt">（±<%= ddd[('bounce_rate' + postfix).to_sym][:metrics_stddev] %>）</div></td><td><%= ddd[('bounce_rate' + postfix).to_sym][:desire] %></td>
-      </tr>
-    </table>
-    <%= render partial: @details_partial, locals: {in_table: @in_table} %>
-  </div>
-
-  <div id="rtfm">
-    <table>
-      <tr id="tpc">
-        <td>理想値</td><td class="page">人気ページ</td><td>現状値</td><td>GAP値</td>
-      </tr>
-      <%
-        @favorite_table.each do |k, v|
-          # if k != "その他"
-          title,page = k.split(";;")
-      %>
-        <tr>
-          <td><%= v[:good] %>%</td>
-          <td class="page"><%= truncate(title, :length => 20) %><div><%= truncate(page, :length => 20) %></div></td>
-          <td><%= v[:bad] %>%</td>
-          <td><%= v[:gap] %>%</td>
-        </tr>
-      <%
-        end
-        # 人気ページ数が5に満たない場合、テーブルを埋める
-        if @favorite_table.size < 5
-          padding_size = 5 - @favorite_table.size
-          padding_size.times {
-      %>
-        <tr>
-          <td>-</td>
-          <td class="page">-<div>-</div></td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-      <%
-          }
-        end
-      %>
-    </table>
+<div id="frame">
+  <div id="left">
     <br>
-    <div id="lp">
-      <table>
-        <tr id="tpc">
-          <td class="page">ランディングページ</td><td>直帰率</td><td>平均滞在時間</td>
-        </tr>
-        <%
-          @landing_table.each do |k,v|
-        %>
-        <tr>
-          <td><%= truncate(v[:page_title], :length => 25) %><div><%= truncate(v[:landing_page_path], :length => 25) %></div></td>
-          <td><%= v[:bounce_rate] %></td><td><%= v[:avg_session_duration] %></td>
-        </tr>
-        <%
-          end
+    <br>
+    <h2>解析期間</h2>
+    <p><%= link_to 'テンプレート生成', first_user_path(current_user), remote: true %></p>
+    <p><%= link_to '選択してください', content_path(current_user), remote: true %></p>
+    <!-- <p><a href=<%= content_path(current_user) %>>選択してください</a></p> -->
+    <!-- <p><a href=<%= content_path(current_user) %>><%= @from.strftime("%Y/%m/%d") %>-<%= @to.strftime("%Y/%m/%d") %></a></p> -->
+    <h2>CV設定</h2>
+    <p><a href="">選択してください</a></p>
+    <!-- <p><a href="">コンバージョン　その１</a></p> -->
+    <a id="atics">分析開始</a>
+    <br class="clear">
 
-          lpad_size = 5 - @landing_table.size
-          if lpad_size >= 1
-            lpad_size.times {
-        %>
-        <tr>
-          <td>-<div>-</div></td><td>-</td><td>-</td>
-        </tr>
-        <%
-            }
-          end
-        %>
-      </table>
-    </div>
-  </div><br>
+    <ul>
+      <li><div id="all">全体</div></li>
+      <li><a href="">オーガニック検索</a></li>
+      <li><a href="">直接入力/ブックマーク</a></li>
+      <li><a href="">その他ウェブサイト</a></li>
+      <li><a href="">ソーシャル</a></li>
+      <li><!--<a href="" id="back">戻る</a>--></li>
+    </ul>
   </div>
 
-  </div><br>
+  <div id="right">
+    <%= render partial: "first"%>
+  </div>
 </div>

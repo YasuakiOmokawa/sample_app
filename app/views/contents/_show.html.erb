@@ -1,0 +1,16 @@
+<%provide(:title, '各種設定') %>
+<div id="container">
+  <h2>期間設定</h2>
+  <div id="calender"></div>
+
+  <h2>ＣＶ設定</h2>
+  <ul id="button">
+  <% @ga_goals.each do |name, number| %>
+    <li><a href="javascript:void(0)">選択</a><%= name %></li>
+  <% end %>
+    <li><a href="">選択</a><input type="file" name="exit_data"></li>
+  </ul>
+  <br class="clear">
+
+  <div id="setting"><a href="" id="st">設定</a><a href="">キャンセル</a></div>
+</div>
