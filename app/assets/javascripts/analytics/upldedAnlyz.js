@@ -322,12 +322,12 @@ $(function(){
     $( "#dialog-form" ).dialog('open');
   }
 
-  // 期間設定リンクへ、ダイアログオープン関数をバインド
-  var datepickerutil = new DatepickerUtil();
-  datepickerutil.on();
+  // // 期間設定リンクへ、ダイアログオープン関数をバインド
+  // var datepickerutil = new DatepickerUtil();
+  // datepickerutil.on();
 
-  setUASActiveDialog();
-  setUASInactiveDialog();
-  ifCustomAnlyz();
+  // setUASActiveDialog();
+  // setUASInactiveDialog();
+  // ifCustomAnlyz();
 
 });

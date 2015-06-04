@@ -248,13 +248,33 @@ function setHomeHistoryParameter() {
 
 }
 
+// Wiselinks 設定
 $(document).ready(function() {
   // DOM element with id = "right" will be replaced after data load.
   window.wiselinks = new Wiselinks($('#right'));
 
   $(document).off('page:loading').on('page:loading', function(event, $target, render, url) {
-    console.log("Loading: #{url} to #{$target.selector} within '#{render}'");
+    console.log("Loading: " + url + " to " + $target.selector + " within '" + render + "'");
     // code to start loading animation
+  });
+
+  $(document).off('page:redirected').on('page:redirected', function(event, $target, render, url) {
+    console.log("Redirected to: "+ url);
+    // code to start loading animation
+  });
+
+  $(document).off('page:always').on('page:always', function(event, xhr, settings) {
+    console.log("Wiselinks page loading completed");
+    // code to stop loading animation
+  });
+
+  $(document).off('page:done').on('page:done', function(event, $target, status, url, data) {
+    console.log("Wiselinks status: '" + status + "'");
+  });
+
+  $(document).off('page:fail').on('page:fail', function(event, $target, status, url, error, code) {
+    console.log("Wiselinks status: '" + status + "'");
+    // code to show error message
   });
 });
 

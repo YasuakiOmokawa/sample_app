@@ -8,6 +8,8 @@ class ContentsController < ApplicationController
 
   def show
     @content ||= Content.new
+    response.headers['X-Wiselinks-Title'] = URI.encode(
+      ApplicationController.helpers.full_title("各種設定"))
 
     oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(current_user.gaproject)
     gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, current_user))
@@ -15,9 +17,7 @@ class ContentsController < ApplicationController
       gaservice.get_goal       # アナリティクスに設定されているCV一覧
     end
 
-    respond_to do |format|
-      format.js
-    end
+    render partial: 'contents/show'
   end
 
   def create

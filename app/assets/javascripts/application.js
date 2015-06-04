@@ -12,7 +12,6 @@
 //
 //= require jquery
 //= require wiselinks
-// require history_jquery.min
 // ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
 //= require bootstrap
 //= require jquery-ui/datepicker

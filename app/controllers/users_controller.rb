@@ -198,11 +198,9 @@ class UsersController < ApplicationController
   end
 
   def first
-    # テンプレート検証用
+    # ホーム画面pjax用
     @tests = %w(まどか さやか ほむら マミ 杏子)
-    respond_to do |format|
-      format.js
-    end
+    render partial: 'first'
   end
 
   def show

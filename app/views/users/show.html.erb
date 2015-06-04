@@ -3,8 +3,8 @@
     <br>
     <br>
     <h2>解析期間</h2>
-    <p><%= link_to 'テンプレート生成', first_user_path(current_user), remote: true %></p>
-    <p><%= link_to '選択してください', content_path(current_user), remote: true %></p>
+    <p><%= link_to 'テンプレート生成', first_user_path(current_user), data: { push: "partial", target: "#right" } %></p>
+    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "#right" } %></p>
     <!-- <p><a href=<%= content_path(current_user) %>>選択してください</a></p> -->
     <!-- <p><a href=<%= content_path(current_user) %>><%= @from.strftime("%Y/%m/%d") %>-<%= @to.strftime("%Y/%m/%d") %></a></p> -->
     <h2>CV設定</h2>
