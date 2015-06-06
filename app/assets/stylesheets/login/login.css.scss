@@ -1,0 +1,242 @@
+html {
+    color: #000000;
+    background: #ffffff;
+}
+
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+textarea,
+p,
+blockquote,
+th,
+td {
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+fieldset,
+img {
+    border: 0;
+}
+
+address,
+caption,
+cite,
+code,
+dfn,
+em,
+strong,
+th,
+var {
+    font-style: normal;
+    font-weight: normal;
+}
+
+li {
+    list-style: none;
+}
+
+caption,
+th {
+    text-align: left;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+q:before,
+q:after {
+    content: '';
+}
+
+abbr,
+acronym {
+    border: 0;
+    font-variant: normal;
+}
+
+sup {
+    vertical-align: text-top;
+}
+
+sub {
+    vertical-align: text-bottom;
+}
+
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+input,
+textarea,
+select {
+    *font-size: 100%;
+}
+
+legend {
+    color: #000000;
+}
+
+a {
+    text-decoration: none;
+    color: #000000;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+body {
+    font: 15px/1.231 arial, helvetica, clean, sans-serif;
+    *font-size: small;
+    *font: x-small;
+}
+
+select,
+input,
+button,
+textarea,
+button {
+    font: 99% arial, helvetica, clean, sans-serif;
+}
+
+table {
+    font-size: inherit;
+    font: 100%;
+}
+
+pre,
+code,
+kbd,
+samp,
+tt {
+    font-family: monospace;
+    *font-size: 108%;
+    line-height: 100%;
+}
+
+br.clear {
+    clear: both;
+}
+
+html {
+    background-color: #eeeeee;
+}
+
+#fm_log {
+    width: 600px;
+    position: relative;
+    top: 100px;
+    margin: 0 auto;
+    border: solid 1px #c7c7c7;
+    background-color: #ffffff;
+}
+
+#fm_log h1 {
+    padding: 10px 0 10px 15px;
+    font-size: 140%;
+    background-color: #696969;
+    color: #ffffff;
+}
+
+#fm_log #explan {
+    margin: 20px;
+}
+
+#fm_log dl {
+    clear: both;
+    margin: 0 0 0 25px;
+    padding: 12px 0 0 0;
+}
+
+#fm_log dt {
+    width: 120px;
+    float: left;
+    text-align: right;
+}
+
+#fm_log dd {
+    width: 400px;
+    float: left;
+}
+
+#fm_log dd input {
+    width: 75%;
+    margin: 0 0 0 10px;
+}
+
+#fm_log #log_hold {
+    clear: both;
+    position: relative;
+    margin: 0 0 0 155px;
+    padding: 10px 0 0 0;
+}
+
+#fm_log #log_hold input {
+    position: relative;
+    top: 2px;
+    margin: 0 10px 0 0;
+}
+
+#fm_log a {
+    display: block;
+    width: 150px;
+    margin: 25px 0 0 155px;
+    padding: 10px 0 8px 0;
+    font-size: 115%;
+    text-align: center;
+    text-decoration: none;
+    background-color: #696969;
+    color: #ffffff;
+}
+
+#fm_log a:hover {
+    background-color: #808080;
+}
+
+#fm_log #caution {
+    margin: 10px 0 0 155px;
+    font-size: 85%;
+    color: #696969;
+}
+
+#fm_log #copy {
+    margin: 35px 0 7px 0;
+    font-size: 85%;
+    text-align: center;
+    color: #808080;
+}

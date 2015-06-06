@@ -1,12 +1,13 @@
-<!-- erroe_st -->
-<!-- <div id="error"><p>データ不足のため、分析できません。<br>（分析には最低3日分のCVデータが必要です）<br><br>解析期間もしくはＣＶ設定を変更し、再度分析をお試しください。</p></div> -->
-<!-- error_end -->
-<div id="container">
-  <div id="graph" style="z-index: 1;">
-    <!-- hover_st -->
-    <div id="hvr_r">
+<!--
+<div id="stay"></div>
+<p id="s_word">データ不足のため、分析できません。<br>（分析には最低3日分のCVデータが必要です）<br><br>解析期間もしくはＣＶ設定を変更し、再度分析をお試しください。</p>
+-->
+<div id="term">2015/01/01&nbsp;-&nbsp;2015/12/31&nbsp;</div>
+<div id="graph">
+  <div id="fm_in">
+    <div id="hvr_l">
       <dl id="tgt"><dt>ページビュー数</dt><dd>1,234<span id="gp">（+123）</span></dd></dl>
-      <ul>
+      <ul id="bottom">
         <li><dl><dt>流入元</dt><dd>直接入力/ブックマーク</dd></dl></li>
         <li><dl><dt>曜日</dt><dd>土日祝</dd></dl></li>
         <li><dl><dt>デバイス</dt><dd>スマートフォン</dd></dl></li>
@@ -14,11 +15,12 @@
         <li><dl><dt>その他条件</dt><dd>参照元：http://www.senk-inc.co.jp</dd></dl></li>
       </ul>
     </div>
-    <!-- hover_end -->
   </div>
-  <ul id="rank">
+</div>
+
+<ul id="number">
   <% @tests.each do |test| %>
     <li><a href=""><%= test %></a></li>
   <% end %>
-  </ul>
-</div>
+  <br class="clear">
+</ul>

@@ -120,60 +120,91 @@ a:hover {
     text-decoration: underline;
 }
 
-html {
-    height: 100%;
+body {
+    font: 15px/1.231 arial, helvetica, clean, sans-serif;
+    *font-size: small;
+    *font: x-small;
 }
 
+select,
+input,
+button,
+textarea,
+button {
+    font: 99% arial, helvetica, clean, sans-serif;
+}
+
+table {
+    font-size: inherit;
+    font: 100%;
+}
+
+pre,
+code,
+kbd,
+samp,
+tt {
+    font-family: monospace;
+    *font-size: 108%;
+    line-height: 100%;
+}
+
+br.clear {
+    clear: both;
+}
+
+html,
 body {
+    width: 100%;
+    min-width: 1200px;
     height: 100%;
-    font-size: 15px;
-    font-family: "ヒラギノ角ゴ Pro W3", Hiragino Kaku Gothic Pro, "メイリオ", Meiryo, sans-serif;
-    line-height: 15px;
+    min-height: 100%;
+}
+
+#fm {
+    width: 100%;
+    min-width: 1200px;
+    min-height: 100%;
+    background-color: #393939;
 }
 
 #hd {
-    position: fixed;
-    top: 0;
-    z-index: 2;
     width: 100%;
-    min-width: 1500px;
-    height: 16px;
-    padding: 14px 0 10px 0;
+    min-width: 1200px;
     background-color: #000000;
     color: #ffffff;
 }
 
 #hd h1 {
     float: left;
-    margin: 0 0 0 20px;
+    margin: 0 0 0 15px;
+    padding: 8px 0;
     font-size: 20px;
 }
 
-#hd .name {
-    margin: 0 0 0 10px;
-    font-size: 12px;
+#hd p {
+    float: left;
+    padding: 15px 0 0 12px;
+    font-size: 13px;
     color: #c0c0c0;
 }
 
 #hd ul {
     float: right;
+    padding: 11px 0 0 0;
 }
 
-#hd ul li {
+#hd li {
     float: right;
+    padding: 0 10px 0 0;
+    font-size: 14px;
 }
 
-#hd ul li.id {
-    margin: 0 25px 0 0;
-}
-
-#hd ul li a {
+#hd li a {
     display: block;
-    position: relative;
-    top: -7px;
-    margin: 0 10px 0 0;
+    margin: -5px 0 0 0;
     padding: 6px 10px 5px 10px;
-    font-size: 12px;
+    font-size: 13px;
     text-align: center;
     text-decoration: none;
     background-color: #c0c0c0;
@@ -183,651 +214,556 @@ body {
     background-color: #a9a9a9;
 }
 
-#frame {
-    width: 100%;
-    min-width: 1500px;
-    background-color: #c0c0c0;
-}
-
-#frame #left {
-    position: fixed;
-    top: 40px;
-    z-index: 1;
-    width: 20%;
-    min-width: 300px;
-    height: 100%;
+#fm_menu {
+    width: 22%;
+    min-width: 22%;
+    min-height: 100%;
+    float: left;
     background-color: #393939;
     color: #ffffff;
 }
 
-#frame #left h2 {
-    margin: 25px 0 0 25px;
-    font-size: 20px;
+#fm_menu h2 {
+    margin: 0 0 0 10%;
+    padding: 20px 0 0 0;
+    font-size: 21px;
     text-decoration: underline;
 }
 
-#frame #left h2 a {
-    text-decoration: underline;
+#fm_menu h2#tp {
+    margin: 25px 0 0 10%;
+}
+
+#fm_menu p {
+    margin: 5px 0 0 10%;
+}
+
+#fm_menu p a {
+    font-size: 19px;
     color: #ffffff;
 }
 
-#frame #left h2 a:hover {
-    text-decoration: none;
-}
-
-#frame #left p {
-    margin: 13px 0 0 25px;
-    font-size: 18px;
-}
-
-#frame #left p a {
-    color: #ffffff;
-}
-
-#frame #left p a.set {
+#fm_menu p a.set {
     color: #ffa500;
 }
 
-#frame #left a#atics {
+#fm_menu a#atics {
     display: block;
+    width: 85%;
     float: right;
-    margin: 50px 0 0 0;
-    padding: 22px 0 20px 20px;
-    width: 88%;
-    font-size: 22px;
+    margin: 45px 0 0 0;
+    padding: 18px 0 18px 20px;
+    font-size: 20px;
     text-decoration: none;
     background-color: #ffffff;
     color: #000000;
 }
 
-#frame #left a:hover#atics {
+#fm_menu a:hover#atics {
     background-color: #dcdcdc;
     color: #000000;
 }
 
-#frame #left a#atics_s {
+#fm_menu a#atics_s {
     display: block;
+    width: 85%;
     float: right;
-    margin: 50px 0 0 0;
-    padding: 22px 0 20px 20px;
-    width: 88%;
-    font-size: 22px;
+    margin: 45px 0 0 0;
+    padding: 18px 0 18px 20px;
+    font-size: 20px;
     text-decoration: none;
     background-color: #ffa500;
     color: #ffffff;
 }
 
-#frame #left a:hover#atics_s {
+#fm_menu a:hover#atics_s {
     background-color: #ffb833;
     color: #ffffff;
 }
 
-#frame #left ul {
-    margin: 55px 0 0 0;
+#fm_menu ul {
+    clear: both;
     width: 100%;
+    padding: 55px 0 0 0;
 }
 
-#frame #left ul li {
-    font-size: 17px;
+#fm_menu ul li {
+    font-size: 16px;
     border-top: solid 1px #6c6c6c;
 }
 
-#frame #left ul li a {
+#fm_menu ul li a {
     display: block;
-    padding: 18px 0 15px 50px;
+    padding: 18px 0 15px 15%;
     text-decoration: none;
     color: #ffffff;
 }
 
-#frame #left ul li a:hover {
-    display: block;
-    padding: 18px 0 15px 50px;
+#fm_menu ul li a:hover {
+    background-color: #606060;
+    color: #ffffff;
+}
+
+#fm_menu ul li div {
+    padding: 18px 0 15px 15%;
     background-color: #606060;
     text-decoration: none;
     color: #ffffff;
 }
 
-#frame #left ul li a#all {
-    display: block;
-    padding: 18px 0 15px 25px;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-#frame #left ul li a:hover#all {
-    display: block;
-    padding: 18px 0 15px 25px;
-    background-color: #606060;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-#frame #left ul li div#all {
-    padding: 18px 0 15px 25px;
-    background-color: #606060;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-#frame #left ul li div {
-    padding: 18px 0 15px 50px;
-    background-color: #606060;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-#frame #left ul li div.select_a {
-    padding: 18px 0 15px 25px;
-    text-decoration: none;
-    background-color: #393939;
-    color: #ffffff;
-}
-
-#frame #left ul li div.select {
-    padding: 18px 0 15px 50px;
-    background-color: #393939;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-#frame #left ul li a#back {
+#fm_menu ul li a#back {
     display: block;
     margin: 20px 0 0 0;
-    padding: 18px 50px 15px 0;
+    padding: 18px 15% 15px 0;
     text-align: right;
     text-decoration: none;
     color: #ffffff;
 }
 
-#frame #left ul li a:hover#back {
-    display: block;
-    margin: 20px 0 0 0;
-    padding: 18px 50px 15px 0;
-    text-align: right;
-    text-decoration: none;
+#fm_menu ul li a:hover#back {
     background-color: #ffa500;
     color: #ffffff;
 }
 
-br.clear {
-    clear: both;
-}
-
-#frame #right {
-    float: right;
-    width: 80%;
-    height: 100%;
-    margin: 40px 0 0 0;
-    padding: 0 0 60px 0;
-    min-width: 1200px;
+#fm_data {
+    width: 78%;
+    min-width: 78%;
+    float: left;
     background-color: #ffffff;
 }
 
-#frame #right #error {
+#fm_data #stay {
+    width: 100%;
+    min-width: 100%;
+    min-height: 120%;
     position: fixed;
-    z-index: 1;
-    width: 100%;
-    min-width: 1200px;
-    height: 100%;
+    top: -40px;
     opacity: 0.6;
-    font-size: 25px;
-    line-height: 1.2;
+    text-align: center;
     background-color: #000000;
     color: #ffffff;
 }
 
-#frame #right #error p {
-    margin: 300px 0 0 0;
-    width: 87%;
+#fm_data p#s_word {
+    width: 85%;
+    position: fixed;
+    padding: 20% 0 0 0;
+    font-size: 18px;
     text-align: center;
+    color: #ffffff;
 }
 
-#frame #right #container {
-    margin: 25px 0 0 25px;
+#fm_data #term {
+    width: 90%;
+    margin: 25px auto 0 auto;
+    font-family: arial;
+    font-size: 17px;
+    text-align: right;
+    color: #202020;
+}
+
+#fm_data #graph {
+    width: 90%;
+    height: 500px;
+    margin: 5px auto 0 auto;
+}
+
+#fm_data #graph #fm_in {
+    width: 99%;
     height: 100%;
-}
-
-#frame #right #graph {
-    width: 1190px;
-    height: 650px;
-    margin: 0 0 10px 0;
+    margin: 0 auto;
     background-color: #eeeeee;
 }
 
-#frame #right #graph #hvr_l {
+#fm_data #graph #fm_in #hvr_l {
     float: left;
-    width: 595px;
-    height: 650px;
+    width: 50%;
+    height: 100%;
     opacity: 0.6;
     background-color: #000000;
     color: #ffffff;
 }
 
-#frame #right #graph #hvr_l dl#tgt {
-    margin: 105px 0 0 45px;
+#fm_data #graph #fm_in #hvr_l dl#tgt {
+    margin: 55px 0 0 9%;
 }
 
-#frame #right #graph #hvr_l dl#tgt dt {
-    font-size: 25px;
+#fm_data #graph #fm_in #hvr_l dl#tgt dt {
+    font-size: 24px;
 }
 
-#frame #right #graph #hvr_l dl#tgt dd {
-    margin: 57px 0 0 -3px;
+#fm_data #graph #fm_in #hvr_l dl#tgt dd {
+    margin: 10px 0 0 -8px;
     font-family: Arial;
-    font-size: 70px;
+    font-size: 60px;
 }
 
-#frame #right #graph #hvr_l dl#tgt dd #gp {
-    margin: 0 0 0 15px;
-    font-size: 35px;
+#fm_data #graph #fm_in #hvr_l dl#tgt dd #gp {
+    margin: 0 0 0 5px;
+    font-size: 30px;
 }
 
-#frame #right #graph #hvr_l ul {
+#fm_data #graph #fm_in #hvr_l ul#bottom {
     clear: both;
-    margin: 110px 0 0 45px;
+    padding: 55px 0 0 8%;
 }
 
-#frame #right #graph #hvr_l ul dt {
+#fm_data #graph #fm_in #hvr_l ul#bottom dl {
+    clear: both;
+}
+
+#fm_data #graph #fm_in #hvr_l ul#bottom dt {
     float: left;
     margin: 10px 0 0 0;
-    padding: 15px 3px 12px 0;
-    width: 120px;
+    padding: 10px 0;
+    width: 80px;
+    font-size: 80%;
     text-align: center;
     background-color: #ffffff;
     color: #000000;
 }
 
-#frame #right #graph #hvr_l ul dd {
+#fm_data #graph #fm_in #hvr_l ul#bottom dd {
     float: left;
-    margin: 10px 0 0 20px;
-    width: 350px;
-    padding: 15px 0 12px 0;
-    font-size: 15px;
+    margin: 10px 10px 0 15px;
+    padding: 10px 0;
+    font-size: 13px;
     color: #ffffff;
 }
 
-#frame #right #graph #hvr_r {
+#fm_data #graph #fm_in #hvr_r {
     float: right;
-    width: 595px;
-    height: 650px;
+    width: 50%;
+    height: 100%;
     opacity: 0.6;
     background-color: #000000;
     color: #ffffff;
 }
 
-#frame #right #graph #hvr_r dl#tgt {
-    margin: 105px 0 0 45px;
+#fm_data #graph #fm_in #hvr_r dl#tgt {
+    margin: 55px 0 0 9%;
 }
 
-#frame #right #graph #hvr_r dl#tgt dt {
-    font-size: 25px;
+#fm_data #graph #fm_in #hvr_r dl#tgt dt {
+    font-size: 24px;
 }
 
-#frame #right #graph #hvr_r dl#tgt dd {
-    margin: 57px 0 0 -3px;
+#fm_data #graph #fm_in #hvr_r dl#tgt dd {
+    margin: 10px 0 0 -8px;
     font-family: Arial;
-    font-size: 70px;
+    font-size: 60px;
 }
 
-#frame #right #graph #hvr_r dl#tgt dd #gp {
-    margin: 0 0 0 15px;
-    font-size: 35px;
+#fm_data #graph #fm_in #hvr_r dl#tgt dd #gp {
+    margin: 0 0 0 5px;
+    font-size: 30px;
 }
 
-#frame #right #graph #hvr_r ul {
+#fm_data #graph #fm_in #hvr_r ul#bottom {
     clear: both;
-    margin: 110px 0 0 45px;
+    padding: 55px 0 0 8%;
 }
 
-#frame #right #graph #hvr_r ul dt {
+#fm_data #graph #fm_in #hvr_r ul#bottom dt {
     float: left;
     margin: 10px 0 0 0;
-    padding: 15px 3px 12px 0;
-    width: 120px;
+    padding: 10px 0;
+    width: 80px;
+    font-size: 80%;
     text-align: center;
     background-color: #ffffff;
     color: #000000;
 }
 
-#frame #right #graph #hvr_r ul dd {
+#fm_data #graph #fm_in #hvr_r ul#bottom dd {
     float: left;
-    margin: 10px 0 0 20px;
-    width: 350px;
-    padding: 15px 0 12px 0;
-    font-size: 15px;
+    margin: 10px 10px 0 15px;
+    width: 73%;
+    padding: 10px 0;
+    font-size: 13px;
     color: #ffffff;
 }
 
-#frame #right ul#rank {
+#fm_data ul#number {
+    display: flex;
+    justify-content: center;
+    width: 90%;
+    margin: 10px auto 0 auto;
+    vertical-align: middle;
+}
+
+#fm_data ul#number li {
+    width: 6.6%;
+    min-width: 50px;
+}
+
+#fm_data ul#number li a {
+    display: block;
     width: 100%;
-    min-width: 1200px;
-    text-align: left;
-}
-
-#frame #right ul#rank li a {
-    display: block;
     float: left;
-    width: 68px;
-    margin: 0 10px 0 0;
-    padding: 26px 0;
-    font-size: 20px;
+    padding: 15px 0;
+    font-family: Arial;
+    font-size: 22px;
     text-align: center;
-    text-decoration: none;
-    border: solid 1px #a0a0a0;
-}
-
-#frame #right ul#rank li a:hover {
-    background-color: #606060;
+    background-color: #a9a9a9;
     color: #ffffff;
 }
 
-#frame #right h2 {
-    width: 90%;
-    min-width: 1200px;
-    margin: 15px 0 0 0;
-    padding: 0 0 8px 0;
-    font-size: 25px;
-    border-bottom: solid 1px #c0c0c0;
-}
-
-#frame #right #calender {
-    width: 90%;
-    min-width: 1200px;
-    height: 300px;
-    margin: 10px 0 50px 0;
-    background-color: #eeeeee;
-}
-
-#frame #right ul#button {
-    margin: 25px 0 0 15px;
-}
-
-#frame #right ul#button li {
-    clear: both;
-}
-
-#frame #right ul#button li a {
-    display: block;
-    float: left;
-    position: relative;
-    top: -9px;
-    margin: 0 17px 10px 0;
-    padding: 10px 20px 8px 20px;
+#fm_data #number a:hover {
     text-decoration: none;
-    background-color: #cfcfcf;
+    background-color: #c0c0c0;
 }
 
-#frame #right ul#button li a:hover {
-    background-color: #606060;
-    color: #ffffff;
-}
-
-#frame #right ul li div {
-    float: left;
-    position: relative;
-    top: -9px;
-    margin: 0 17px 10px 0;
-    padding: 10px 20px 8px 20px;
-    text-decoration: none;
-    background-color: #606060;
-    color: #ffffff;
-}
-
-#frame #right ul#button li input {
-    position: relative;
-    top: -5px;
-    margin: 0 5px 0 0;
-    padding: 0 10px;
-}
-
-#frame #right #setting {
-    width: 90%;
-    min-width: 1200px;
-    border-top: solid 1px #c0c0c0;
-}
-
-#frame #right #setting a#st {
-    display: block;
-    float: left;
-    position: relative;
-    top: 25px;
-    left: 15px;
-    margin: 0 17px 10px 0;
-    padding: 25px 40px 23px 40px;
-    text-decoration: none;
-    background-color: #00608d;
-    color: #ffffff;
-}
-
-#frame #right #setting a:hover#st {
-    background-color: #0073a8;
-}
-
-#frame #right #setting a {
-    display: block;
-    float: left;
-    position: relative;
-    top: 25px;
-    left: 15px;
-    margin: 0 17px 10px 0;
-    padding: 25px 40px 23px 40px;
-    text-decoration: none;
-    background-color: #cfcfcf;
-    color: #000000;
-}
-
-#frame #right #setting a:hover {
-    background-color: #606060;
-    color: #ffffff;
-}
-
-#frame #right #container div.data {
-    float: left;
-    width: 370px;
-    height: 120px;
-    margin: 0 15px 0 0;
+#fm_data #condition {
+    width: 94%;
+    margin: 15px 0 0 2%;
+    padding: 0 0 0 3px;
     border: solid 1px #c7c7c7;
 }
 
-#frame #right #container div.data h3 {
-    margin: 20px 0 0 20px;
-    font-size: 18px;
+#fm_data #condition ul {
+    margin: 10px 0 15px 12px;
 }
 
-#frame #right #container div.data p {
-    margin: 30px 0 0 17px;
+#fm_data #condition dl {
+    width: 33%;
+    float: left;
+    padding: 8px 0 0 0;
+}
+
+#fm_data #condition dl#ed {
+    width: 66%;
+    float: left;
+    padding: 8px 0 0 0;
+}
+
+#fm_data #condition dt {
+    width: 92px;
+    float: left;
+    padding: 7px 0;
+    font-size: 13px;
+    text-align: center;
+    background-color: #eeeeee;
+}
+
+#fm_data #condition dd {
+    float: left;
+    padding: 7px 0 7px 10px;
+    font-size: 13px;
+}
+
+#fm_data .data {
+    width: 30%;
+    float: left;
+    margin: 15px 0 0 2%;
+    border: solid 1px #c7c7c7;
+}
+
+#fm_data .data dt {
+    margin: 17px 0 0 6%;
+    font-size: 16px;
+}
+
+#fm_data .data dt span {
+    font-size: 12px;
+}
+
+#fm_data .data dd {
+    margin: 10px 0 10px 6%;
     font-family: Arial;
     font-size: 50px;
     color: #474747;
 }
 
-#frame #right #container div.data_g {
+#fm_data #data_gap {
+    width: 30%;
     float: left;
-    width: 370px;
-    height: 120px;
-    margin: 0 15px 0 0;
+    margin: 15px 0 0 2%;
     border: solid 1px #c7c7c7;
     background-color: #00608d;
     color: #ffffff;
 }
 
-#frame #right #container div.data_g h3 {
-    margin: 20px 0 0 20px;
-    font-size: 18px;
-}
-
-#frame #right #container div.data_g p {
-    margin: 30px 0 0 17px;
-    font-family: Arial;
-    font-size: 50px;
-    color: #ffffff;
-}
-
-#frame #right #container #condition {
-    margin: 0 0 15px 0;
-    padding: 0 15px 10px 5px;
-    width: 1124px;
-    border: solid 1px #c7c7c7;
-}
-
-#frame #right #container #condition dt {
-    float: left;
-    width: 120px;
-    margin: 10px 0 0 10px;
-    padding: 10px 0;
-    text-align: center;
-    background-color: #eeeeee;
-}
-
-#frame #right #container #condition dd {
-    float: left;
-    width: 230px;
-    margin: 10px 0 0 10px;
-    padding: 10px 0;
-}
-
-#frame #right #container #condition dd#ed {
-    float: left;
-    width: 600px;
-    margin: 10px 0 0 10px;
-    padding: 10px 0;
-}
-
-#frame #right #container #line_graph {
-    width: 1146px;
-    height: 450px;
-    margin: 30px 0 0 0;
-    background-color: #eeeeee;
-}
-
-#frame #right #container table {
-    width: 1146px;
-    margin: 30px 0 0 0;
-}
-
-#frame #right #container table tr td {
-    width: 180px;
-    padding: 10px 10px 10px 0;
-    text-align: right;
-    border: solid 1px #c7c7c7;
-    background-color: #ffffff;
-    color: #000000;
-}
-
-#frame #right #container table tr#hl td {
-    width: 180px;
-    padding: 10px 0 10px 10px;
-    text-align: left;
-    border: solid 1px #c7c7c7;
-    background-color: #e0e0e0;
-    color: #000000;
-}
-
-#frame #right #container table tr#hl td#gap {
-    background-color: #00608d;
-    color: #ffffff;
-}
-
-#frame #right #container table tr td.data {
-    width: 606px;
-    padding: 0 0 0 10px;
-    text-align: left;
-}
-
-#frame #right #container table tr td.data .nbr {
-    display: block;
-    float: left;
-    width: 45px;
-}
-
-#login {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    background-color: #eeeeee;
-}
-
-#login #fm {
-    position: relative;
-    top: 100px;
-    width: 700px;
-    margin: 0 auto;
-    border: solid 1px #c7c7c7;
-    background-color: #ffffff;
-}
-
-#login #fm #ttl {
-    padding: 12px 0 10px 18px;
-    font-size: 20px;
-    line-height: 1em;
-    background-color: #696969;
-    color: #ffffff;
-}
-
-#login #fm #ttl span {
-    padding: 0 0 0 10px;
+#fm_data #data_gap dt {
+    margin: 17px 0 0 6%;
     font-size: 16px;
 }
 
-#login #fm #block {
-    padding: 20px;
-    font-size: 15px;
+#fm_data #data_gap dd {
+    margin: 10px 0 10px 6%;
+    font-family: Arial;
+    font-size: 50px;
 }
 
-#login #fm #block p {
-    margin: 0 0 30px 0;
-}
-
-#login #fm #block dl {
-    clear: both;
-    margin: 0 0 0 25px;
-    padding: 12px 0 0 0;
-}
-
-#login #fm #block dt {
-    float: left;
-    width: 120px;
+#fm_data #day {
+    width: 94%;
+    margin: 15px 0 0 2%;
+    padding: 0 0 0 3px;
     text-align: right;
+    border: solid 1px #ffffff;
 }
 
-#login #fm #block dd {
-    float: left;
-    width: 500px;
+#fm_data #detail_graph {
+    width: 94%;
+    height: 420px;
+    margin: 5px 0 0 2%;
+    background-color: #eeeeee;
 }
 
-#login #fm #block dd input {
-    margin: -4px 10px 0 10px;
+#fm_data table {
+    width: 94%;
+    margin: 20px 0 20px 2%;
+    padding: 0 0 0 10px;
+    border-top: solid 1px #c7c7c7;
+    border-right: solid 1px #c7c7c7;
 }
 
-#login #fm #block dd input.txt {
-    width: 80%;
+#fm_data table tr td {
+    width: 15%;
+    padding: 8px 0 10px 20px;
+    border-bottom: solid 1px #c7c7c7;
+    border-left: solid 1px #c7c7c7;
 }
 
-#login #fm #block dd a {
-    display: block;
-    width: 150px;
-    margin: 20px 0 0 10px;
-    padding: 10px 0 8px 0;
-    font-size: 14px;
-    text-align: center;
-    text-decoration: none;
-    background-color: #696969;
+#fm_data table tr#ms {
+    background-color: #e0e0e0;
+}
+
+#fm_data table tr td.hl {
+    width: 55%;
+    padding: 8px 0 8px 20px;
+}
+
+#fm_data table tr td#gap {
+    background-color: #00608d;
     color: #ffffff;
 }
 
-#login #fm #block dd a:hover {
-    background-color: #808080;
+#fm_data table tr td span {
+    display: block;
+    width: 45px;
+    float: left;
 }
 
-#login #fm #block dd p {
-    margin: 0 0 0 8px;
-    font-size: 12px;
-    color: #696969;
+#fm_data .setting {
+    width: 94%;
+    margin: 20px 0 0 2%;
 }
 
-#login #fm #copy {
-    margin: 50px 0 7px 0;
-    font-size: 12px;
+#fm_data .setting h2 {
+    padding: 4px 0 4px 10px;
+    font-size: 25px;
+    border-bottom: solid 1px #393939;
+    border-left: solid 20px #393939;
+}
+
+#fm_data #calender {
+    width: 94%;
+    height: 300px;
+    margin: 15px 0 0 2%;
+}
+
+#fm_data #calender p {
+    margin: 0 0 0 20px;
+    padding: 0 0 15px 0;
+    font-family: Arial;
+    font-size: 20px;
+    color: #393939;
+}
+
+#fm_data ul#cv {
+    width: 94%;
+    margin: 25px 0 0 2%;
+    padding: 0 0 14px 0;
+    border-bottom: solid 1px #393939;
+}
+
+#fm_data ul#cv li {
+    clear: both;
+    margin: 25px 0 0 20px;
+}
+
+#fm_data ul#cv a {
+    display: block;
+    float: left;
+    position: relative;
+    top: -6px;
+    margin: 0 13px 0 0;
+    padding: 5px 20px;
+    font-size: 17px;
+    text-decoration: none;
+    background-color: #cfcfcf;
+}
+
+#fm_data ul#cv a:hover {
+    background-color: #606060;
+    color: #ffffff;
+}
+
+#fm_data ul#cv input#file {
+    width: 300px;
+    height: 27px;
+    position: relative;
+    top: -3px;
+    margin: 0 5px 0 0;
+    padding: 0;
+    font-size: 22px;
+    border: none;
+    border: solid 1px #cfcfcf;
+}
+
+#fm_data ul#cv input {
+    width: 70px;
+    position: relative;
+    top: -6px;
+}
+
+#fm_data #btn {
+    width: 94%;
+    margin: 25px 0 0 2%;
+    padding: 0 0 60px 0;
+}
+
+#fm_data #btn a {
+    display: block;
+    float: left;
+    margin: 0 10px 0 0;
+    padding: 25px 40px 23px 40px;
+    font-size: 16px;
     text-align: center;
-    color: #808080;
+    text-decoration: none;
+    background-color: #00608d;
+    color: #ffffff;
+}
+
+#fm_data #btn a:hover {
+    background-color: #0073a8;
+}
+
+#fm_data #btn a#cancell {
+    display: block;
+    float: left;
+    margin: 0 10px 0 0;
+    padding: 25px 40px 23px 40px;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    background-color: #cfcfcf;
+    color: #000000;
+}
+
+#fm_data #btn a#cancell:hover {
+    background-color: #606060;
+    color: #ffffff;
+}
+
+#fm_data #btn div {
+    float: left;
+    margin: 0 10px 0 0;
+    padding: 25px 40px 23px 40px;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    background-color: #cfcfcf;
+    color: #000000;
 }

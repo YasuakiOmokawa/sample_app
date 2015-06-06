@@ -1,16 +1,18 @@
-<%provide(:title, '各種設定') %>
-<div id="container">
-  <h2>期間設定</h2>
-  <div id="calender"></div>
-
-  <h2>ＣＶ設定</h2>
-  <ul id="button">
+<div class="setting"><h2>期間設定</h2></div>
+<div id="calender">
+  <div id="date-range">
+    <div id="date-range-field" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+      <span></span>
+      <a href="#" style="border-bottom-right-radius: 5px;">▼</a>
+    </div>
+  </div>
+</div>
+<br>
+<div class="setting"><h2>CV設定</h2></div>
+<ul id="cv">
   <% @ga_goals.each do |name, number| %>
     <li><a href="javascript:void(0)">選択</a><%= name %></li>
   <% end %>
-    <li><a href="">選択</a><input type="file" name="exit_data"></li>
-  </ul>
-  <br class="clear">
-
-  <div id="setting"><a href="" id="st">設定</a><a href="">キャンセル</a></div>
-</div>
+  <li><a href="">選択</a><input type="text" id="file"><input type="button" value="参照"></li>
+</ul>
+<div id="btn"><a href="">設定</a><a href="" id="cancell">キャンセル</a><br class="clear"></div>

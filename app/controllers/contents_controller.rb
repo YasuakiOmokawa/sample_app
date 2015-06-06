@@ -9,7 +9,7 @@ class ContentsController < ApplicationController
   def show
     @content ||= Content.new
     response.headers['X-Wiselinks-Title'] = URI.encode(
-      ApplicationController.helpers.full_title("各種設定"))
+      ApplicationController.helpers.full_title("設定"))
 
     oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(current_user.gaproject)
     gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, current_user))

@@ -1,14 +1,16 @@
 <% @user ||= current_user %>
-<!-- header_st -->
-<div id="hd">
-<h1>SiteGoal</h1><span class="name">Analytics Support Tool</span>
-<ul>
-  <li><%= link_to "ログアウト", signout_path, method: "delete" %></li>
-  <li><%= link_to "パスワード変更", edit_user_path(current_user) %></li>
-  <li class="id">ID：<%= @user.name %></li>
-</ul>
-</div>
-<!-- hrader_end -->
+  <!-- hrader_st -->
+  <div id="hd">
+    <h1>SiteGoal</h1>
+    <p>Analytics Support Tool</p>
+    <ul>
+      <li><%= link_to "ログアウト", signout_path, method: "delete" %></li>
+      <li><%= link_to "パスワード変更", edit_user_path(current_user) %></li>
+      <li>ＩＤ：<%= @user.name %></li>
+    </ul>
+    <br class="clear">
+  </div>
+  <!-- hrader_end -->
 
 
 

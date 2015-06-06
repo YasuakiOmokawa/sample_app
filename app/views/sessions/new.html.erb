@@ -1,14 +1,13 @@
 <%provide(:title, 'ログイン') %>
-<div id="login">
-  <div id="fm">
-    <div id="ttl">SiteGoal<span>ログイン</span></div>
-    <div id="block">
-      <p>ID、パスワードを入力し、ログインボタンを押してください。</p>
-      <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
-      <dl><dt>ＩＤ&nbsp;：</dt><dd><%= f.text_field :email, :class => 'txt' %></dd></dl>
-      <dl><dt>パスワード&nbsp;：</dt><dd><%= f.password_field :password, :class => 'txt' %></dd></dl>
-      <dl><dt>&nbsp</dt><dd><input type="checkbox" name="remember_me">ログインしたままにする</dd></dl>
-      <dl><dt>&nbsp</dt><dd><a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">ログイン</a></dd></dl>
-      <dl><dt>&nbsp</dt><dd><p>※ID、パスワードを忘れた方は、先駈までお問い合わせください。</p></dd></dl>
-    </div>
+<div id="fm_log">
+  <h1>SiteGoal</h1>
+  <p id="explan">ID、パスワードを入力し、ログインボタンを押してください。</p>
+  <%= form_for(:session, url: sessions_path, html: {:name => 'loginForm'}) do |f| %>
+  <dl><dt>ＩＤ&nbsp;：</dt><dd><%= f.text_field :email, :class => 'txt' %></dd></dl>
+  <dl><dt>パスワード&nbsp;：</dt><dd><%= f.password_field :password, :class => 'txt' %></dd></dl>
+  <div id="log_hold"><input type="checkbox" name="remember_me">ログイン状態を維持する</div>
+  <a href="javascript:void(0)" onclick="document.loginForm.submit();return false;">ログイン</a>
+  <p id="caution">※ID、パスワードを忘れた方は、先駈までお問い合わせください。</p>
    <% end %>
+  <p id="copy"><%= get_gafooter_text %></p>
+</div>

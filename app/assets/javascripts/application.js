@@ -14,8 +14,12 @@
 //= require wiselinks
 // ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
 //= require bootstrap
-//= require jquery-ui/datepicker
-//= require jquery-ui/datepicker-ja
+// require jquery-ui/datepicker
+
+// data-range datepicker
+//= require ./datepicker/datepicker
+
+// require jquery-ui/datepicker-ja
 //= require jquery-ui/dialog
 //= require jquery_ujs
 //= require ./jqplot/jquery.jqplot

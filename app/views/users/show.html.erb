@@ -1,29 +1,26 @@
-<div id="frame">
-  <div id="left">
-    <br>
-    <br>
-    <h2>解析期間</h2>
-    <p><%= link_to 'テンプレート生成', first_user_path(current_user), data: { push: "partial", target: "#right" } %></p>
-    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "#right" } %></p>
-    <!-- <p><a href=<%= content_path(current_user) %>>選択してください</a></p> -->
-    <!-- <p><a href=<%= content_path(current_user) %>><%= @from.strftime("%Y/%m/%d") %>-<%= @to.strftime("%Y/%m/%d") %></a></p> -->
+  <!-- menu_st -->
+  <div id="fm_menu">
+    <h2 id="tp">解析期間</h2>
+    <p><%= link_to 'テンプレート生成', first_user_path(current_user), data: { push: "partial", target: "#fm_data" } %></p>
+    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "#fm_data" }, class: "set" %></p>
+    <!-- <p><a href="">2015/01/01&nbsp;-&nbsp;2015/12/31</a></p> -->
     <h2>CV設定</h2>
-    <p><a href="">選択してください</a></p>
-    <!-- <p><a href="">コンバージョン　その１</a></p> -->
-    <a id="atics">分析開始</a>
-    <br class="clear">
+    <p><a href="" class="set">CVを設定して下さい</a></p>
+    <a href="" id="atics">分析開始</a>
 
     <ul>
-      <li><div id="all">全体</div></li>
+      <li><div>全体</div></li>
       <li><a href="">オーガニック検索</a></li>
       <li><a href="">直接入力/ブックマーク</a></li>
       <li><a href="">その他ウェブサイト</a></li>
       <li><a href="">ソーシャル</a></li>
-      <li><!--<a href="" id="back">戻る</a>--></li>
     </ul>
   </div>
+  <!-- menu_end -->
 
-  <div id="right">
+  <div id="datepicker-calendar"></div>
+  <!-- data_st -->
+  <div id="fm_data">
     <%= render partial: "first"%>
-  </div>
-</div>
+  </div><br class="clear">
+  <!-- data_end -->
