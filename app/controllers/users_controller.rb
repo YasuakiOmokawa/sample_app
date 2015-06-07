@@ -202,11 +202,7 @@ class UsersController < ApplicationController
     @title = ApplicationController.helpers.full_title('ホーム')
     response.headers['X-Wiselinks-Title'] = URI.encode(@title)
     wiselinks_layout
-    # class_eval do
-    #   def wiselinks_layout
-    #     'ganalytics'
-    #   end
-    # end
+    # @partial = 'first'
 
     @tests = %w(まどか さやか ほむら マミ 杏子)
     unless request.wiselinks_partial?
@@ -217,12 +213,7 @@ class UsersController < ApplicationController
   def show
     # パラメータ個別設定
     @title = ApplicationController.helpers.full_title('ホーム')
-    # response.headers['X-Wiselinks-Title'] = URI.encode(@title)
-    # class_eval do
-    #   def wiselinks_layout
-    #     'ganalytics'
-    #   end
-    # end
+    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
     # @partial = 'first'
 
     # @narrow_action = user_path
@@ -230,7 +221,7 @@ class UsersController < ApplicationController
     # gon.div_page_tab = 'first'
 
     # テンプレート検証用
-    # @tests = %w(hoge fuga gogo)
+    @tests = %w(hoge fuga gogo)
 
     unless request.wiselinks?
       render json: {

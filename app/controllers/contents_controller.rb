@@ -11,6 +11,7 @@ class ContentsController < ApplicationController
     @title = ApplicationController.helpers.full_title('設定')
     response.headers['X-Wiselinks-Title'] = URI.encode(@title)
     wiselinks_layout
+    # @partial = 'contents/show'
 
     @content ||= Content.new
 

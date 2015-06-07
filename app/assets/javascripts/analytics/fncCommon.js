@@ -250,7 +250,7 @@ function setHomeHistoryParameter() {
 
 // Wiselinks 設定
 $(document).ready(function() {
-  window.wiselinks = new Wiselinks($('@data-role'), {
+  window.wiselinks = new Wiselinks($('@content'), {
     html4: true,
     target_missing: 'exception'
   });
@@ -268,7 +268,8 @@ $(document).ready(function() {
   $(document).off('page:always').on('page:always', function(event, xhr, settings) {
     console.log("Wiselinks page loading completed");
     // code to stop loading animation
-    // bindDatepickerOperation();
+    initDatepicker();
+    bindDatepickerOperation();
     triggerDatepicker();
   });
 

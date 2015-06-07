@@ -1,10 +1,12 @@
 $(function() {
   initDatepicker();
   bindDatepickerOperation();
+  triggerDatepicker();
 });
 
 function triggerDatepicker() {
-  $("#hoge").on('click', function() {
+  $("#hoge").on('mouseenter', function() {
+    console.log("hoge がクリックされました");
     $('#date-range-field').click();
   });
 }
