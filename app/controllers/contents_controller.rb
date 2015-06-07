@@ -7,9 +7,12 @@ class ContentsController < ApplicationController
   Oauths = Struct.new(:oauth2, :user_data)
 
   def show
+    # パラメータ個別設定
+    @title = ApplicationController.helpers.full_title('設定')
+    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
+    wiselinks_layout
+
     @content ||= Content.new
-    response.headers['X-Wiselinks-Title'] = URI.encode(
-      ApplicationController.helpers.full_title("設定"))
 
     oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(current_user.gaproject)
     gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, current_user))
@@ -17,7 +20,9 @@ class ContentsController < ApplicationController
       gaservice.get_goal       # アナリティクスに設定されているCV一覧
     end
 
-    render partial: 'contents/show'
+    unless request.wiselinks_partial?
+      render layout: 'ganalytics', template: 'users/show'
+    end
   end
 
   def create
@@ -40,6 +45,10 @@ class ContentsController < ApplicationController
   end
 
   private
+
+    def wiselinks_layout
+      'ganalytics'
+    end
 
     def chk_file
       # binding.pry

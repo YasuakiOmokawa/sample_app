@@ -37,8 +37,8 @@ class UsersController < ApplicationController
   ]
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
-  before_action :create_home, only: [:show]
-  prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
+  # before_action :create_home, only: [:show]
+  # prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
 
   def social
     # パラメータ個別設定
@@ -198,9 +198,16 @@ class UsersController < ApplicationController
   end
 
   def first
-    # ホーム画面pjax用
-    @title = 'ホーム'
-    @partial = 'first'   # ページ毎の部分テンプレート
+    # パラメータ個別設定
+    @title = ApplicationController.helpers.full_title('ホーム')
+    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
+    wiselinks_layout
+    # class_eval do
+    #   def wiselinks_layout
+    #     'ganalytics'
+    #   end
+    # end
+
     @tests = %w(まどか さやか ほむら マミ 杏子)
     unless request.wiselinks_partial?
       render layout: 'ganalytics', action: 'show'
@@ -209,22 +216,31 @@ class UsersController < ApplicationController
 
   def show
     # パラメータ個別設定
-    @title = 'ホーム'
-    @narrow_action = user_path
-    gon.narrow_action = user_path
-    @partial = 'first'   # ページ毎の部分テンプレート
-    gon.div_page_tab = 'first'
+    @title = ApplicationController.helpers.full_title('ホーム')
+    # response.headers['X-Wiselinks-Title'] = URI.encode(@title)
+    # class_eval do
+    #   def wiselinks_layout
+    #     'ganalytics'
+    #   end
+    # end
+    # @partial = 'first'
+
+    # @narrow_action = user_path
+    # gon.narrow_action = user_path
+    # gon.div_page_tab = 'first'
 
     # テンプレート検証用
-    @tests = %w(hoge fuga gogo)
+    # @tests = %w(hoge fuga gogo)
 
-    render json: {
-      :homearr => @json,
-      :page_fltr_wd => @page_fltr_wd,
-      :page_fltr_dev => @page_fltr_dev,
-      :page_fltr_usr => @page_fltr_usr,
-      :page_fltr_kwd => @page_fltr_kwd
-    } and return if request.xhr?
+    unless request.wiselinks?
+      render json: {
+        :homearr => @json,
+        :page_fltr_wd => @page_fltr_wd,
+        :page_fltr_dev => @page_fltr_dev,
+        :page_fltr_usr => @page_fltr_usr,
+        :page_fltr_kwd => @page_fltr_kwd
+      } and return if request.xhr?
+    end
 
     render :layout => 'ganalytics' and return
   end
@@ -304,6 +320,10 @@ class UsersController < ApplicationController
   end
 
   private
+
+    def wiselinks_layout
+      'ganalytics'
+    end
 
     def user_params
       params.require(:user).permit(:name, :email, :password,

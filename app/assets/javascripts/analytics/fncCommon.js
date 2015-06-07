@@ -248,14 +248,10 @@ function setHomeHistoryParameter() {
 
 }
 
-  // DOM element with id = "fm_data" will be replaced after data load.
-  // window.wiselinks = new Wiselinks($('#fm_data'));
-  // window.wiselinks = new Wiselinks();
-
 // Wiselinks 設定
 $(document).ready(function() {
-  window.wiselinks = new Wiselinks( $('@data-role'), {
-    html4: false,
+  window.wiselinks = new Wiselinks($('@data-role'), {
+    html4: true,
     target_missing: 'exception'
   });
 
