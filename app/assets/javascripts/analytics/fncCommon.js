@@ -248,10 +248,16 @@ function setHomeHistoryParameter() {
 
 }
 
+  // DOM element with id = "fm_data" will be replaced after data load.
+  // window.wiselinks = new Wiselinks($('#fm_data'));
+  // window.wiselinks = new Wiselinks();
+
 // Wiselinks 設定
 $(document).ready(function() {
-  // DOM element with id = "fm_data" will be replaced after data load.
-  window.wiselinks = new Wiselinks($('#fm_data'));
+  window.wiselinks = new Wiselinks( $('@data-role'), {
+    html4: false,
+    target_missing: 'exception'
+  });
 
   $(document).off('page:loading').on('page:loading', function(event, $target, render, url) {
     console.log("Loading: " + url + " to " + $target.selector + " within '" + render + "'");
@@ -266,7 +272,8 @@ $(document).ready(function() {
   $(document).off('page:always').on('page:always', function(event, xhr, settings) {
     console.log("Wiselinks page loading completed");
     // code to stop loading animation
-    initDatepicker();
+    // bindDatepickerOperation();
+    triggerDatepicker();
   });
 
   $(document).off('page:done').on('page:done', function(event, $target, status, url, data) {
@@ -282,21 +289,21 @@ $(document).ready(function() {
 $(document).ready(function() {
 
   // ページタイトルに応じて、絞り込み要素をフィルタする
-  var ol = overlayFactory($('title').text());
-  if (typeof ol != "undefined") {
-    ol.overlayNarrow(ol);
-    overlayOnResize(ol);
-  }
+  // var ol = overlayFactory($('title').text());
+  // if (typeof ol != "undefined") {
+  //   ol.overlayNarrow(ol);
+  //   overlayOnResize(ol);
+  // }
 
   setBackToHome();
 
-  setEventOnChangeCVName();
+  // setEventOnChangeCVName();
 
   // グラフに表示する項目のプルダウンを選択したときのイベント
-  $('select#graphicselect').change(function() {
-    $('input[name="graphic_item"]').val($(this).val());
-    $('a#set').trigger('click');
-  });
+  // $('select#graphicselect').change(function() {
+  //   $('input[name="graphic_item"]').val($(this).val());
+  //   $('a#set').trigger('click');
+  // });
 
   // 種類ごとにチェックボックスの複数選択を抑止
   $('input[name=device]').click(function() {
@@ -440,5 +447,5 @@ $(document).ready(function() {
   });
 
   // ホーム画面までの履歴を保持
-  setHomeHistoryParameter();
+  // setHomeHistoryParameter();
 });

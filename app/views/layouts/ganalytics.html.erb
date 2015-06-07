@@ -22,13 +22,16 @@
     <% end %>
     <%= csrf_meta_tags %>
     <%= render 'layouts/shim' %>
+    <%= wiselinks_meta_tag %>
   </head>
   <body>
+  <div role="content">
     <%= render 'layouts/gaheader' %>
     <% flash.each do |key, value| %>
       <%= content_tag(:div, value, class: "alert alert-#{key}") %>
     <% end %>
     <%= yield %>
+  </div>
     <%
       if Rails.env.development? then
         [

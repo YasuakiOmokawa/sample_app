@@ -11,6 +11,7 @@
 // about supported directives.
 //
 //= require jquery
+//= require jquery.role
 //= require wiselinks
 // ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
 //= require bootstrap

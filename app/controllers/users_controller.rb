@@ -199,8 +199,12 @@ class UsersController < ApplicationController
 
   def first
     # ホーム画面pjax用
+    @title = 'ホーム'
+    @partial = 'first'   # ページ毎の部分テンプレート
     @tests = %w(まどか さやか ほむら マミ 杏子)
-    render partial: 'first'
+    unless request.wiselinks_partial?
+      render layout: 'ganalytics', action: 'show'
+    end
   end
 
   def show
@@ -208,7 +212,7 @@ class UsersController < ApplicationController
     @title = 'ホーム'
     @narrow_action = user_path
     gon.narrow_action = user_path
-    @details_partial = 'norender'   # ページ毎の部分テンプレート
+    @partial = 'first'   # ページ毎の部分テンプレート
     gon.div_page_tab = 'first'
 
     # テンプレート検証用
