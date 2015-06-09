@@ -250,7 +250,7 @@ function setHomeHistoryParameter() {
 
 // Wiselinks 設定
 $(document).ready(function() {
-  window.wiselinks = new Wiselinks($('@content'), {
+  window.wiselinks = new Wiselinks( $('@data-role'), { //  layouts/_wiselinks.html.erb で更新される場所を指定
     html4: true,
     target_missing: 'exception'
   });
@@ -271,6 +271,7 @@ $(document).ready(function() {
     initDatepicker();
     bindDatepickerOperation();
     triggerDatepicker();
+    triggerFileField();
   });
 
   $(document).off('page:done').on('page:done', function(event, $target, status, url, data) {

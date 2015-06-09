@@ -1,21 +1,10 @@
   <!-- menu_st -->
   <div id="fm_menu">
     <h2 id="tp">解析期間</h2>
-    <p id="get-first" style="display: none"><%= link_to 'get-first-template', first_user_path(current_user), data: { push: "partial", target: "@data-role" } %></p>
-    <p><%= link_to '選択してください', content_path(current_user), class: "set" %></p>
+    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set" %></p>
     <h2>CV設定</h2>
     <p><a href="" class="set">CVを設定して下さい</a></p>
     <a href="" id="atics">分析開始</a>
-
-    <ul>
-      <li><div>全体</div></li>
-      <li><a href="">オーガニック検索</a></li>
-      <li><a href="">直接入力/ブックマーク</a></li>
-      <li><a href="">その他ウェブサイト</a></li>
-      <li><a href="">ソーシャル</a></li>
-    </ul>
-  </div>
-  <!-- menu_end -->
 
   <div id="date-range-hidden" style="display: none">
     <div id="date-range-field" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
@@ -23,14 +12,23 @@
       <a href="#" style="border-bottom-right-radius: 5px;">▼</a>
     </div>
   </div>
+
+    <ul>
+      <li><div>全体</div></li>
+      <li><a href="">オーガニック検索</a></li>
+      <li><a href="">直接入力/ブックマーク</a></li>
+      <li><a href="">その他ウェブサイト</a></li>
+      <li><a href="">ソーシャル</a></li>
+      <li><a id="back" href="">戻る</a></li>
+    </ul>
+  </div>
+  <!-- menu_end -->
+
   <div id="datepicker-calendar"></div>
   <!-- data_st -->
   <div id="fm_data" role="data-role">
-  <% if @title.match(/設定/) %>
-    <%= render partial: 'contents/show' %>
-  <% else %>
-    <%= yield %>
-  <% end %>
+    <!-- replaced with layouts/_wiselinks.html.erb -->
+    <%= render partial: @partial %>
   </div>
   <br class="clear">
   <!-- data_end -->

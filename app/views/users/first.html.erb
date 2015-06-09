@@ -1,27 +1,26 @@
-<div id="frame">
-  <div id="left">
-    <br>
-    <br>
-    <h2>解析期間</h2>
-    <p><a href=<%= content_path(current_user) %>><%= @from.strftime("%Y/%m/%d") %>-<%= @to.strftime("%Y/%m/%d") %></a></p>
-    <!-- <p><a href=""><%= @from.strftime("%y/%m/%d") %>-<%= @to.strftime("%y/%m/%d") %></a></p> -->
-    <h2>CV設定</h2>
-    <p><a href="">選択してください</a></p>
-    <!-- <p><a href="">コンバージョン　その１</a></p> -->
-    <a id="atics">分析開始</a>
-    <br class="clear">
-
-    <ul>
-      <li><div id="all">全体</div></li>
-      <li><a href="">オーガニック検索</a></li>
-      <li><a href="">直接入力/ブックマーク</a></li>
-      <li><a href="">その他ウェブサイト</a></li>
-      <li><a href="">ソーシャル</a></li>
-      <li><!--<a href="" id="back">戻る</a>--></li>
-    </ul>
+<!--
+<div id="stay"></div>
+<p id="s_word">データ不足のため、分析できません。<br>（分析には最低3日分のCVデータが必要です）<br><br>解析期間もしくはＣＶ設定を変更し、再度分析をお試しください。</p>
+-->
+<div id="term">2015/01/01&nbsp;-&nbsp;2015/12/31&nbsp;</div>
+<div id="graph">
+  <div id="fm_in">
+    <div id="hvr_l">
+      <dl id="tgt"><dt>ページビュー数</dt><dd>1,234<span id="gp">（+123）</span></dd></dl>
+      <ul id="bottom">
+        <li><dl><dt>流入元</dt><dd>直接入力/ブックマーク</dd></dl></li>
+        <li><dl><dt>曜日</dt><dd>土日祝</dd></dl></li>
+        <li><dl><dt>デバイス</dt><dd>スマートフォン</dd></dl></li>
+        <li><dl><dt>ユーザー</dt><dd>リピーター</dd></dl></li>
+        <li><dl><dt>その他条件</dt><dd>参照元：http://www.senk-inc.co.jp</dd></dl></li>
+      </ul>
+    </div>
   </div>
-
-  <span id="partial">
-    <%= render partial: "first"%>
-  </span>
 </div>
+
+<ul id="number">
+  <% @tests.each do |test| %>
+    <li><a href=""><%= test %></a></li>
+  <% end %>
+  <br class="clear">
+</ul>

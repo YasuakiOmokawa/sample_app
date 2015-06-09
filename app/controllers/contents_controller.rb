@@ -6,12 +6,13 @@ class ContentsController < ApplicationController
 
   Oauths = Struct.new(:oauth2, :user_data)
 
+  def redirect
+    redirect_to user_url
+  end
+
   def show
-    # パラメータ個別設定
     @title = ApplicationController.helpers.full_title('設定')
-    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
-    wiselinks_layout
-    # @partial = 'contents/show'
+    @partial = 'contents/show'
 
     @content ||= Content.new
 
@@ -21,8 +22,11 @@ class ContentsController < ApplicationController
       gaservice.get_goal       # アナリティクスに設定されているCV一覧
     end
 
-    unless request.wiselinks_partial?
-      render layout: 'ganalytics', template: 'users/show'
+    if request.wiselinks?
+      wiselinks_title(@title)
+      render template: 'users/show'
+    else
+      render template: 'users/show', layout: 'ganalytics'
     end
   end
 
@@ -46,10 +50,6 @@ class ContentsController < ApplicationController
   end
 
   private
-
-    def wiselinks_layout
-      'ganalytics'
-    end
 
     def chk_file
       # binding.pry

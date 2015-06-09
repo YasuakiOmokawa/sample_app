@@ -4,6 +4,13 @@ $(function() {
   triggerDatepicker();
 });
 
+function triggerFileField() {
+  $("#file-field-button").click(function() {
+    console.log("file_field がクリックされました");
+    $('#content_upload_file').click();
+  });
+}
+
 function triggerDatepicker() {
   $("#hoge").on('mouseenter', function() {
     console.log("hoge がクリックされました");

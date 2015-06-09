@@ -10,10 +10,17 @@
 </div>
 <br>
 <div class="setting"><h2>CV設定</h2></div>
+<%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
 <ul id="cv">
   <% @ga_goals.each do |name, number| %>
     <li><a href="javascript:void(0)">選択</a><%= name %></li>
   <% end %>
-  <li><a href="">選択</a><input type="text" id="file"><input type="button" value="参照"></li>
+  <%= f.file_field :upload_file, style: "display: none" %>
+  <li><a href="">選択</a><input type="text" id="file"><input id="file-field-button" type="button" value="参照"></li>
 </ul>
-<div id="btn"><a href="">設定</a><a href="" id="cancell">キャンセル</a><br class="clear"></div>
+<div id="btn">
+  <a href="javascript:void(0)"  onclick="document.uploadForm.submit();return false;">設定</a>
+  <%= link_to 'キャンセル', redirect_content_path(current_user), data: { push: "true" }, id: "cancell" %>
+  <br class="clear">
+</div>
+<% end %>

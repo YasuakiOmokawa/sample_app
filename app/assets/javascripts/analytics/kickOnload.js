@@ -1,9 +1,9 @@
 $(window).load(function(){
 
-  if (isTitleHome()) {
-    console.log('ロードイベントが発生しました');
-    $('#get-first a').click();
-  }
+  // if (isTitleHome()) {
+  //   console.log('ロードイベントが発生しました');
+  //   $('#get-first a').click();
+  // }
 
   //   if (location.hash) {
   //     console.log('window load イベント実行');

@@ -197,31 +197,12 @@ class UsersController < ApplicationController
     @users = User.all
   end
 
-  def first
-    # パラメータ個別設定
-    @title = ApplicationController.helpers.full_title('ホーム')
-    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
-    wiselinks_layout
-    # @partial = 'first'
-
-    @tests = %w(まどか さやか ほむら マミ 杏子)
-    unless request.wiselinks_partial?
-      render layout: 'ganalytics', action: 'show'
-    end
-  end
-
   def show
-    # パラメータ個別設定
     @title = ApplicationController.helpers.full_title('ホーム')
-    response.headers['X-Wiselinks-Title'] = URI.encode(@title)
-    # @partial = 'first'
+    @partial = 'first'
 
-    # @narrow_action = user_path
-    # gon.narrow_action = user_path
-    # gon.div_page_tab = 'first'
-
-    # テンプレート検証用
-    @tests = %w(hoge fuga gogo)
+    # 検証用
+    @tests = %w(まどか さやか ほむら マミ 杏子)
 
     unless request.wiselinks?
       render json: {
@@ -233,7 +214,11 @@ class UsersController < ApplicationController
       } and return if request.xhr?
     end
 
-    render :layout => 'ganalytics' and return
+    if request.wiselinks?
+      wiselinks_title(@title)
+    else
+      render layout: 'ganalytics'
+    end
   end
 
   def all
@@ -311,10 +296,6 @@ class UsersController < ApplicationController
   end
 
   private
-
-    def wiselinks_layout
-      'ganalytics'
-    end
 
     def user_params
       params.require(:user).permit(:name, :email, :password,
