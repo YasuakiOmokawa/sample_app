@@ -272,6 +272,7 @@ $(document).ready(function() {
     bindDatepickerOperation();
     triggerDatepicker();
     triggerFileField();
+    replaceContentParentAttr();
   });
 
   $(document).off('page:done').on('page:done', function(event, $target, status, url, data) {
@@ -283,6 +284,16 @@ $(document).ready(function() {
     // code to show error message
   });
 });
+
+function replaceContentParentAttr() {
+  if ( location.href.match(/contents|detail/) ) {
+    console.log("replace changes to fm");
+    $('#replace').attr('id', "fm");
+  } else {
+    console.log("replace changes to fm");
+    $('#fm').attr('id', "replace");
+  }
+}
 
 $(document).ready(function() {
 

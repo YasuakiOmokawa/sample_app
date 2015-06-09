@@ -11,8 +11,7 @@ class ContentsController < ApplicationController
   end
 
   def show
-    @title = ApplicationController.helpers.full_title('設定')
-    @partial = 'contents/show'
+   @partial = 'contents/show'
 
     @content ||= Content.new
 
@@ -23,7 +22,6 @@ class ContentsController < ApplicationController
     end
 
     if request.wiselinks?
-      wiselinks_title(@title)
       render template: 'users/show'
     else
       render template: 'users/show', layout: 'ganalytics'

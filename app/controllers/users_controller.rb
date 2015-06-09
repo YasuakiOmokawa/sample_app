@@ -198,7 +198,6 @@ class UsersController < ApplicationController
   end
 
   def show
-    @title = ApplicationController.helpers.full_title('ホーム')
     @partial = 'first'
 
     # 検証用
@@ -214,9 +213,7 @@ class UsersController < ApplicationController
       } and return if request.xhr?
     end
 
-    if request.wiselinks?
-      wiselinks_title(@title)
-    else
+    unless request.wiselinks?
       render layout: 'ganalytics'
     end
   end
