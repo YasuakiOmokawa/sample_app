@@ -213,7 +213,7 @@ class UsersController < ApplicationController
       } and return if request.xhr?
     end
 
-    unless request.wiselinks?
+    unless request.wiselinks_partial?
       render layout: 'ganalytics'
     end
   end

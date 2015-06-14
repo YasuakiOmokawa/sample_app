@@ -28,6 +28,9 @@ SampleApp::Application.configure do
   # number of complex assets.
   config.assets.debug = true
 
+  # Wiselinks 用設定 assetの変更を探知する
+  config.assets.digest = true
+
   # ログを日ごとにローテート
   config.logger = ActiveSupport::Logger.new("log/development.log", "daily")
 

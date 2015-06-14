@@ -539,7 +539,6 @@ DEPENDENCIES
   sprockets (= 3.0.0)
   therubyracer
   tooltipster-rails
-  turbolinks
   uglifier
   unicorn
   web-console (~> 2.0)

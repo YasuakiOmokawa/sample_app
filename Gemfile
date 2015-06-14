@@ -26,7 +26,6 @@ gem 'uglifier'
 gem 'coffee-rails'
 gem 'jquery-rails'
 gem 'jquery-ui-rails', '~> 5.0.0'
-gem 'turbolinks'
 gem 'jbuilder'
 gem "daemons" # デプロイ先でデーモンとして動かすのに必要
 gem 'spinjs-rails', '1.3.0'

@@ -13,5 +13,9 @@
  *= require ./datepicker/base
  *= require ./datepicker/clean
  *= require_tree ./jqplot
- *= require_tree ./analytics
+ *= require ./analytics/box.css.scss
+ *= require ./analytics/date.css.scss
+ *= require ./analytics/style.css.scss
+ * ↓style.css.scss をオーバーライド
+ *= require ./analytics/opt.css.scss
 */

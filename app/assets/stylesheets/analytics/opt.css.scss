@@ -84,7 +84,11 @@ div.model-dialog div.alert-danger {
   font-weight: bold;
 }
 
-// エラー文言　初期時の非表示
-div.model-dialog div.hide {
+.hide {
   display: none;
+}
+
+.selected {
+    background-color: #606060 !important;
+    color: #ffffff
 }

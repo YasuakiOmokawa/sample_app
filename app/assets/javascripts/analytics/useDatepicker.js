@@ -1,54 +1,50 @@
 $(function() {
   initDatepicker();
   bindDatepickerOperation();
-  triggerDatepicker();
+  triggerFileField();
 });
 
 function triggerFileField() {
   $("#file-field-button").click(function() {
-    console.log("file_field がクリックされました");
     $('#content_upload_file').click();
-  });
-}
-
-function triggerDatepicker() {
-  $("#hoge").on('mouseenter', function() {
-    console.log("hoge がクリックされました");
-    $('#date-range-field').click();
   });
 }
 
 function initDatepicker() {
   var to = new Date();
   var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 14);
+  var init_text = fmt(from)+' - '+fmt(to);
 
-  $('#datepicker-calendar').DatePicker({
-    inline: true,
-    date: [from, to],
-    calendars: 3,
-    mode: 'range',
-    current: new Date(to.getFullYear(), to.getMonth() - 1, 1),
-    onChange: function(dates, el) {
-      // update the range display
-      $('#date-range-field span').text(
-        fmt(dates[0])+' - '+fmt(dates[1])
-      );
-    }
-  });
+  // Datepicker は複数設定させないようにする
+  if ( $('#datepicker-calendar').children().length == 0 ) {
+    $('#datepicker-calendar').DatePicker({
+      inline: true,
+      date: [from, to],
+      calendars: 3,
+      mode: 'range',
+      current: new Date(to.getFullYear(), to.getMonth() - 1, 1),
+      onChange: function(dates, el) {
+        var text = fmt(dates[0])+' - '+fmt(dates[1]);
+        $('#date-range-field span').text(text); // update the range display
+        $("input[name='content[date]']").val(text); // update the form date
+      }
+    });
+  }
 
   // initialize the special date dropdown field
-  // $('#date-range-field span').text(fmt(from)+' - '+fmt(to));
+  $('#date-range-field span').text(init_text);
+  $("input[name='content[date]']").val(init_text);
 }
 
 function bindDatepickerOperation() {
 
   // initialize the special date dropdown field
-  $('#date-range-field span').text("選択してください");
+  // $('#date-range-field span').text("選択してください");
 
   // bind a click handler to the date display field, which when clicked
   // toggles the date picker calendar, flips the up/down indicator arrow,
   // and keeps the borders looking pretty
-  $('#date-range-field').on('click', function(){
+  $('#date-range-field').click(function(){
     $('#datepicker-calendar').toggle();
     if($('#date-range-field a').text().charCodeAt(0) == 9660) {
       // switch to up-arrow
@@ -81,7 +77,7 @@ function bindDatepickerOperation() {
 
   // stop the click propagation when clicking on the calendar element
   // so that we don't close it
-  $('#datepicker-calendar').click(function(event){
+  $('#date-range-hidden').click(function(event){
     event.stopPropagation();
   });
 
