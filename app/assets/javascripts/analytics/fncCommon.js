@@ -4,7 +4,7 @@ $(document).bind('keydown', 'esc', function() {
 
 $(document).ready(function() {
   replaceContentParentAttr();
-  displaySelectedFileName();
+  // displaySelectedFileName();
   setFormCV();
 
   // Wiselinks 設定
@@ -31,7 +31,7 @@ $(document).ready(function() {
     bindDatepickerOperation();
     triggerFileField();
     replaceContentParentAttr();
-    displaySelectedFileName();
+    // displaySelectedFileName();
     setFormCV();
   });
 
@@ -53,25 +53,25 @@ $(document).ready(function() {
 });
 
 function setFormViaAjax() {
-  $('#btn a#submit').off('click').click(function() {
+  $("#btn a#submit")
+    .attr('href', 'javascript:void(0)')
+    .off('click').on('click', function() {
     $('form#new_content').ajaxSubmit();
   });
 }
 
 function displaySelectedFileName() {
-  $('#content_upload_file').off('change').on('change', function() {
-    var regex = /\\|\\/, file_name = $(this).val();
-    var array = file_name.split(regex);
+  var regex = /\\|\\/, file_name = $('#content_upload_file').val();
+  var array = file_name.split(regex);
 
-    // 空ファイルでなければ処理を実行する
-    if (array[array.length - 1].length > 0) {
-      $("input#file")
-        .val( array[array.length - 1] )
-        .prev().click();
-      // 日付選択カレンダーを非表示にする
-      $("#date-range").addClass('hide');
-    }
-  });
+  // 空ファイルでなければ処理を実行する
+  if (array[array.length - 1].length > 0) {
+    $("input#file")
+      .val( array[array.length - 1] )
+      .click();
+    // 日付選択カレンダーを非表示にする
+    $("#date-range").addClass('hide');
+  }
 }
 
 function replaceContentParentAttr() {
@@ -92,9 +92,12 @@ function setFormCV() {
     setFormViaAjax();
   });
 
-  $("#cv li a").click( function() {
+  // 「選択」リンクをクリックしたときの処理
+  $("#cv li").off('click').click(function(evt) {
+    var cv_data = $(this).find('a').data().cv_num;
+    console.log('cv_data set : '+ cv_data);
     $("input[name='content[cv_num]']")
-      .val( $(this).data().cv_num )
+      .val( cv_data )
       .change();
   });
 }
@@ -109,6 +112,7 @@ function focusSelectedCV() {
   // 「選択」リンクの色を変更
   if (cv_num.length > 0) {
     if (cv_num != "file") {
+      // アナリティクスへ設定済みのCVを変更
       $cves.eq(Number(cv_num)-1).addClass('selected');
       // 日付選択カレンダーを表示させる
       $("#date-range").removeClass('hide');
@@ -117,6 +121,7 @@ function focusSelectedCV() {
       // file_fieldの値を削除する
       $('#content_upload_file').val('');
     } else {
+      // オフラインデータのCVを変更
       $cves.eq(-1).addClass('selected');
     }
   }

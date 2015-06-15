@@ -22,11 +22,15 @@
   <% @ga_goals.each do |name, number| %>
     <li><a href="javascript:void(0)" data-cv_num=<%= number %>>選択</a><%= name %></li>
   <% end %>
-  <%= f.file_field :upload_file, class: "hide" %>
-  <li><a href="javascript:void(0)" data-cv_num="file">選択</a><input type="text" id="file"><input id="file-field-button" type="button" value="参照"></li>
+  <%= f.file_field :upload_file, class: "hide", onchange: "displaySelectedFileName()" %>
+  <li>
+    <a href="javascript:void(0)" data-cv_num="file">選択</a>
+    <input type="text" id="file">
+    <input id="file-field-button" type="button" value="参照">
+  </li>
 </ul>
 <div id="btn">
-  <a id="submit" href="javascript:void(0)">設定</a>
+  <a id="submit">設定</a>
   <%= link_to 'キャンセル', "javascript:history.back(-1);", data: { push: "true" }, id: "cancell" %>
   <br class="clear">
 </div>

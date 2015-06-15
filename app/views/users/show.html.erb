@@ -3,7 +3,7 @@
     <h2 id="tp">解析期間</h2>
     <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set" %></p>
     <h2>CV設定</h2>
-    <p><a href="" class="set">CVを設定して下さい</a></p>
+    <p><%= link_to 'CVを選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set" %></a></p>
     <a href="" id="atics">分析開始</a>
 
     <ul>
@@ -17,9 +17,12 @@
   </div>
   <!-- menu_end -->
 
+  <!-- datepicker_start -->
   <div id="date-range-hidden">
     <div id="datepicker-calendar"></div>
   </div>
+  <!-- datepicker_end-->
+
   <!-- data_st -->
   <div id="fm_data" role="data-role">
     <!-- replaced with layouts/_wiselinks.html.erb -->

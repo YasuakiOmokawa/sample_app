@@ -120,7 +120,7 @@ function setYaxisLimit(options, format) {
   return options;
 }
 
-var graph_data = setArr(gon.data_for_graph_display);
+// var graph_data = setArr(gon.data_for_graph_display);
 
 // グラフのオプション
 var options = {

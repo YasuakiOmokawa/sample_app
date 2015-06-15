@@ -354,28 +354,31 @@ body {
 }
 
 #fm_data #term {
-    width: 90%;
-    margin: 25px auto 0 auto;
+    width: 94%;
+    margin: 15px 0 0 2%;
     font-family: arial;
     font-size: 17px;
     text-align: right;
     color: #202020;
 }
 
-#fm_data #graph {
-    width: 90%;
-    height: 500px;
-    margin: 5px auto 0 auto;
-}
-
-#fm_data #graph #fm_in {
+#fm_data #term p {
     width: 99%;
     height: 100%;
-    margin: 0 auto;
-    background-color: #eeeeee;
 }
 
-#fm_data #graph #fm_in #hvr_l {
+#fm_data #graph {
+    width: 94%;
+    height: 550px;
+    margin: 5px 0 0 2%;
+}
+
+#fm_data #graph #fm_graph {
+    width: 99%;
+    height: 100%;
+}
+
+#fm_data #graph #fm_graph #hvr_l {
     float: left;
     width: 50%;
     height: 100%;
@@ -384,35 +387,35 @@ body {
     color: #ffffff;
 }
 
-#fm_data #graph #fm_in #hvr_l dl#tgt {
+#fm_data #graph #fm_graph #hvr_l dl#tgt {
     margin: 55px 0 0 9%;
 }
 
-#fm_data #graph #fm_in #hvr_l dl#tgt dt {
+#fm_data #graph #fm_graph #hvr_l dl#tgt dt {
     font-size: 24px;
 }
 
-#fm_data #graph #fm_in #hvr_l dl#tgt dd {
+#fm_data #graph #fm_graph #hvr_l dl#tgt dd {
     margin: 10px 0 0 -8px;
     font-family: Arial;
     font-size: 60px;
 }
 
-#fm_data #graph #fm_in #hvr_l dl#tgt dd #gp {
+#fm_data #graph #fm_graph #hvr_l dl#tgt dd #gp {
     margin: 0 0 0 5px;
     font-size: 30px;
 }
 
-#fm_data #graph #fm_in #hvr_l ul#bottom {
+#fm_data #graph #fm_graph #hvr_l ul#bottom {
     clear: both;
     padding: 55px 0 0 8%;
 }
 
-#fm_data #graph #fm_in #hvr_l ul#bottom dl {
+#fm_data #graph #fm_graph #hvr_l ul#bottom dl {
     clear: both;
 }
 
-#fm_data #graph #fm_in #hvr_l ul#bottom dt {
+#fm_data #graph #fm_graph #hvr_l ul#bottom dt {
     float: left;
     margin: 10px 0 0 0;
     padding: 10px 0;
@@ -423,7 +426,7 @@ body {
     color: #000000;
 }
 
-#fm_data #graph #fm_in #hvr_l ul#bottom dd {
+#fm_data #graph #fm_graph #hvr_l ul#bottom dd {
     float: left;
     margin: 10px 10px 0 15px;
     padding: 10px 0;
@@ -431,7 +434,7 @@ body {
     color: #ffffff;
 }
 
-#fm_data #graph #fm_in #hvr_r {
+#fm_data #graph #fm_graph #hvr_r {
     float: right;
     width: 50%;
     height: 100%;
@@ -440,31 +443,35 @@ body {
     color: #ffffff;
 }
 
-#fm_data #graph #fm_in #hvr_r dl#tgt {
+#fm_data #graph #fm_graph #hvr_r dl#tgt {
     margin: 55px 0 0 9%;
 }
 
-#fm_data #graph #fm_in #hvr_r dl#tgt dt {
+#fm_data #graph #fm_graph #hvr_r dl#tgt dt {
     font-size: 24px;
 }
 
-#fm_data #graph #fm_in #hvr_r dl#tgt dd {
+#fm_data #graph #fm_graph #hvr_r dl#tgt dd {
     margin: 10px 0 0 -8px;
     font-family: Arial;
     font-size: 60px;
 }
 
-#fm_data #graph #fm_in #hvr_r dl#tgt dd #gp {
+#fm_data #graph #fm_graph #hvr_r dl#tgt dd #gp {
     margin: 0 0 0 5px;
     font-size: 30px;
 }
 
-#fm_data #graph #fm_in #hvr_r ul#bottom {
+#fm_data #graph #fm_graph #hvr_r ul#bottom {
     clear: both;
     padding: 55px 0 0 8%;
 }
 
-#fm_data #graph #fm_in #hvr_r ul#bottom dt {
+#fm_data #graph #fm_graph #hvr_r ul#bottom dl {
+    clear: both;
+}
+
+#fm_data #graph #fm_graph #hvr_r ul#bottom dt {
     float: left;
     margin: 10px 0 0 0;
     padding: 10px 0;
@@ -475,42 +482,37 @@ body {
     color: #000000;
 }
 
-#fm_data #graph #fm_in #hvr_r ul#bottom dd {
+#fm_data #graph #fm_graph #hvr_r ul#bottom dd {
     float: left;
     margin: 10px 10px 0 15px;
-    width: 73%;
     padding: 10px 0;
     font-size: 13px;
     color: #ffffff;
 }
 
-#fm_data ul#number {
-    display: flex;
-    justify-content: center;
-    width: 90%;
-    margin: 10px auto 0 auto;
-    vertical-align: middle;
+#fm_data #rank {
+    width: 94%;
+    margin: 10px 0 0 2%;
 }
 
-#fm_data ul#number li {
+#fm_data ul#rank li {
     width: 6.6%;
-    min-width: 50px;
+    min-width: 6.6%;
+    float: left;
+    background-color: #a9a9a9;
 }
 
-#fm_data ul#number li a {
+#fm_data ul#rank li a {
     display: block;
     width: 100%;
-    float: left;
-    padding: 15px 0;
-    font-family: Arial;
-    font-size: 22px;
+    padding: 18px 0;
+    font-size: 20px;
     text-align: center;
-    background-color: #a9a9a9;
+    text-decoration: none;
     color: #ffffff;
 }
 
-#fm_data #number a:hover {
-    text-decoration: none;
+#fm_data ul#rank li a:hover {
     background-color: #c0c0c0;
 }
 

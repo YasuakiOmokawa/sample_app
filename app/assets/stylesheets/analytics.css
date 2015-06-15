@@ -16,6 +16,5 @@
  *= require ./analytics/box.css.scss
  *= require ./analytics/date.css.scss
  *= require ./analytics/style.css.scss
- * ↓style.css.scss をオーバーライド
  *= require ./analytics/opt.css.scss
 */

@@ -201,7 +201,7 @@ class UsersController < ApplicationController
     @partial = 'first'
 
     # 検証用
-    @tests = %w(まどか さやか ほむら マミ 杏子)
+    @tests = %w(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
 
     unless request.wiselinks?
       render json: {

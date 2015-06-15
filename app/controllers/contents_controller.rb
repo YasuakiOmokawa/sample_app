@@ -39,6 +39,7 @@ class ContentsController < ApplicationController
         from: @content.upload_file.first[0],
         to: @content.upload_file.last[0],
         cv_num: @content.id.to_s,
+        offline_data: @content.upload_file_name.split('.').first,
         storage_key: @storage_key
       }, status: 200
     else
@@ -86,12 +87,13 @@ class ContentsController < ApplicationController
       # binding.pry
       upload_file = content_params[:upload_file].presence
       @tmp_content = {}
-      if upload_file.nil? && content_params[:date] && content_params[:cv_num]
+      if upload_file.nil? && content_params[:date] && content_params[:cv_num] != 'file'
         (from, to) = content_params[:date].split(' - ')
         render json: {
           from: from,
           to: to,
           cv_num: content_params[:cv_num],
+          offline_data: 'none',
           storage_key: @storage_key
         }, status: 200
       elsif upload_file
