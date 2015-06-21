@@ -101,15 +101,10 @@ function eventsOnMenu() {
   // 「分析開始」がクリックされたときの処理
   $("#atics_s").on("click", function() {
     location.hash = base_anlyz_params;
-    // sessionStorage.removeItem("setting_key");
-    // if (!sessionStorage.getItem("setting_key")) {
-    //   console.log("セッションストレージの削除に成功しました");
-    // }
   });
 
   // hashchangeハンドラの定義
   window.onhashchange = locationHashChanged;
-
 }
 
 function replaceAll(expression, org, dest){
@@ -120,7 +115,7 @@ function locationHashChanged() {
 // var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
 console.log("location.hash is " + location.hash);
 // setAnchorParams(params);
-// bubbleCreateAtTabLink();
+bubbleCreateAtTabLink();
 }
 
 function eventsOnSettingUI() {
@@ -193,7 +188,6 @@ function execFormSubmit() {
     },
     success: function(obj) {
       sessionStorage.setItem( "setting_key", JSON.stringify(obj) );
-      // sessionStorage.setItem( obj.storage_key, JSON.stringify(obj) );
       $("#cancell").click(); // 設定前の画面へ戻る
     },
     error: function(xhr) {

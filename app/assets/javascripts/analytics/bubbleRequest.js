@@ -25,7 +25,7 @@ function getUsrOpts() {
 // バブルチャート取得関数
 function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
 
-  console.log( 'ajax通信開始!');
+  console.log( 'バブルチャートリクエストを開始!');
 
   // ページ遷移先の設定
   var
@@ -35,12 +35,12 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
     opts_cntr = 0;
 
   // 表示項目のリセット
-  $('#errormsg').empty();
-  plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []);
-  resetHome('div#gh');
+  // $('#errormsg').empty();
+  // plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []);
+  // resetHome('div#gh');
 
   // ローディングモーションを表示
-  setLoadingMortion('div#gh', req_opts);
+  // setLoadingMortion('div#gh', req_opts);
 
   // オプションキーワードを生成
   var kwd_opts = setKwds(elem, userpath);
@@ -74,66 +74,6 @@ function requestPartsData(elem, return_obj, req_opts, shaped_idxarr) {
     // データリクエストを実行
     callExecuter(elem, opts, userpath, opts_cntr, return_obj, tmp_obj, kwd_strgs, req_opts);
   }
-}
-
-// バブルチャートをオーバーレイ
-function addOverlay(dom, req_opts) {
-
-  $(dom).plainOverlay(
-    'show',
-    {
-      opacity: 0.2,
-      progress: function() {
-        var target = $('<div id="guardian"></div>'
-            + '<div id="daemon" style="white-space:pre;">'
-                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                + '<br>' // 位置調整のため、jp_page_name より大きい全角空白を詰める
-                + req_opts.jp_page_name + '<br>分析中<br><span></span>'
-            + '</div>');
-        return target;
-      }
-  });
-}
-
-// プログレススピナーを生成
-function createSpinner() {
-
-  var shaft = {
-    lines: 13, // The number of lines to draw
-    length: 15, // The length of each line
-    width: 9, // The line thickness
-    radius: 18, // The radius of the inner circle
-    corners: 1, // Corner roundness (0..1)
-    rotate: 0, // The rotation offset
-    direction: 1, // 1: clockwise, -1: counterclockwise
-    color: '#000', // #rgb or #rrggbb or array of colors
-    speed: 1, // Rounds per second
-    trail: 60, // Afterglow percentage
-    shadow: false, // Whether to render a shadow
-    hwaccel: false, // Whether to use hardware acceleration
-    className: 'spinner', // The CSS class to assign to the spinner
-    zIndex: 2e9, // The z-index (defaults to 2000000000)
-    top: '50%', // Top position relative to parent
-    left: '50%' // Left position relative to parent
-  };
-  var spinner = new Spinner(shaft).spin();
-
-  return spinner;
-}
-
-// 表示項目のリセット
-function resetHome(dom) {
-
-  var id = dom.split('#');
-
-  $(dom).replaceWith('<div id="' + id[1] + '" style="z-index: 1;"></div>');
-  $('#errormsg').empty();
-}
-
-function resetHomeRanking(dom) {
-  $(dom).empty();
 }
 
 // ページ項目に合わせた絞り込みキーワードを取得する
@@ -655,3 +595,62 @@ function setLoadingMortion(dom, req_opts) {
   // window.onhashchange = locationHashChanged;
 
 // });
+// バブルチャートをオーバーレイ
+// function addOverlay(dom, req_opts) {
+
+//   $(dom).plainOverlay(
+//     'show',
+//     {
+//       opacity: 0.2,
+//       progress: function() {
+//         var target = $('<div id="guardian"></div>'
+//             + '<div id="daemon" style="white-space:pre;">'
+//                 + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+//                 + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+//                 + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+//                 + '<br>' // 位置調整のため、jp_page_name より大きい全角空白を詰める
+//                 + req_opts.jp_page_name + '<br>分析中<br><span></span>'
+//             + '</div>');
+//         return target;
+//       }
+//   });
+// }
+
+// // プログレススピナーを生成
+// function createSpinner() {
+
+//   var shaft = {
+//     lines: 13, // The number of lines to draw
+//     length: 15, // The length of each line
+//     width: 9, // The line thickness
+//     radius: 18, // The radius of the inner circle
+//     corners: 1, // Corner roundness (0..1)
+//     rotate: 0, // The rotation offset
+//     direction: 1, // 1: clockwise, -1: counterclockwise
+//     color: '#000', // #rgb or #rrggbb or array of colors
+//     speed: 1, // Rounds per second
+//     trail: 60, // Afterglow percentage
+//     shadow: false, // Whether to render a shadow
+//     hwaccel: false, // Whether to use hardware acceleration
+//     className: 'spinner', // The CSS class to assign to the spinner
+//     zIndex: 2e9, // The z-index (defaults to 2000000000)
+//     top: '50%', // Top position relative to parent
+//     left: '50%' // Left position relative to parent
+//   };
+//   var spinner = new Spinner(shaft).spin();
+
+//   return spinner;
+// }
+
+// // 表示項目のリセット
+// function resetHome(dom) {
+
+//   var id = dom.split('#');
+
+//   $(dom).replaceWith('<div id="' + id[1] + '" style="z-index: 1;"></div>');
+//   $('#errormsg').empty();
+// }
+
+// function resetHomeRanking(dom) {
+//   $(dom).empty();
+// }

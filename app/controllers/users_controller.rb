@@ -15,181 +15,35 @@ class UsersController < ApplicationController
     :update,
     :destroy,
     :show,
-    :all,
-    :search,
-    :direct,
-    :referral,
-    :social,
+    # :all,
+    # :search,
+    # :direct,
+    # :referral,
+    # :social,
     :edit_init_analyze,
     :update_init_analyze
   ]
   before_action :correct_user,   only: [
     :show,
-    :all,
-    :search,
-    :direct,
-    :referral,
-    :social,
+    # :all,
+    # :search,
+    # :direct,
+    # :referral,
+    # :social,
     :edit,
     :update,
     :edit_init_analyze,
     :update_init_analyze
   ]
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
-  before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
-  # before_action :create_home, only: [:show]
-  # prepend_before_action :chk_param, only: [:show, :all, :search, :direct, :referral, :social, :campaign]
+  # before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
+  before_action :create_home, only: [:home_anlyz]
+  prepend_before_action :chk_param, only: [:home_anlyz]
 
-  def social
-    # パラメータ個別設定
-    @title = 'ソーシャル'
-    @narrow_action = social_user_path
-    @details_partial = 'details'
-    gon.div_page_tab = 'social'
-
-    special = :socialNetwork
-    @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    @categories = []
-    special_for_garb = to_garb_attr(special)
-    # データ取得部
-    session_rank = get_session_rank(special)
-    if session_rank.total_results == 0
-      Rails.logger.info("#{@title} の参照元は非分析対象です")
-      render :layout => 'ganalytics', :action => 'show' and return
-    end
-    session_data = get_session_data(special)
-
-    # 計算部
-    changed_kwds = change_to_garb_kwds(session_rank,
-      special_for_garb)
-
-    changed_kwds.each do |kwd|
-      Rails.logger.info("#{kwd} のソーシャルバリデートを実施します")
-      reduce = reduce_with_kwd(session_data,
-        kwd, special_for_garb)
-
-      # カスタムデータ置き換え判定
-      replace_cv_with_custom(@content, reduce, @cv_txt)
-
-      # バリデートデータの準備
-      cves = cves_for_validate(reduce, @day_type)
-      df = metrics_for_validate(reduce, @day_type, :sessions)
-      #CVバリデート
-      unless is_not_uniq?(cves)
-        validate_cv_msg(@day_type)
-        next
-      end
-      #メトリクスバリデート
-      unless is_not_uniq?(df.get_metrics)
-         validate_uniq_metrics_msg(:sessions)
-         next
-      end
-      unless cves.zip(df.get_metrics).uniq.size >= 3
-        validate_invalid_metrics_multiple_msg(:sessions)
-        next
-      end
-      if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
-        validate_too_much_zero_metrics_msg(:sessions)
-        next
-      end
-
-      Rails.logger.info("#{kwd} のソーシャルバリデートに成功しました")
-
-      # 相関分析開始
-      res_table[kwd] = generate_graph_data(reduce,
-          [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
-    end
-
-    calc_desire_datas(res_table)
-    @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
-    create_listbox_categories('l')
-
-    render :layout => 'ganalytics', :action => 'show'
+  def home_anlyz
   end
 
-  def referral
-    # パラメータ個別設定
-    @title = 'その他ウェブサイト'
-    @narrow_action = referral_user_path
-    @details_partial = 'details'
-    gon.div_page_tab = 'referral'
-
-    special = :source
-    @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    @categories = []
-    special_for_garb = to_garb_attr(special)
-    # データ取得部
-    session_rank = get_session_rank(special)
-    if session_rank.total_results == 0
-      Rails.logger.info("#{@title} の参照元は非分析対象です")
-      render :layout => 'ganalytics', :action => 'show' and return
-    end
-    session_data = get_session_data(special)
-
-    # 計算部
-    changed_kwds = change_to_garb_kwds(session_rank,
-      special_for_garb)
-
-    changed_kwds.each do |kwd|
-      Rails.logger.info("#{kwd} の参照バリデートを実施します")
-      reduce = reduce_with_kwd(session_data,
-        kwd, special_for_garb)
-
-      # カスタムデータ置き換え判定
-      replace_cv_with_custom(@content, reduce, @cv_txt)
-
-      # バリデートデータの準備
-      cves = cves_for_validate(reduce, @day_type)
-      df = metrics_for_validate(reduce, @day_type, :sessions)
-      #CVバリデート
-      unless is_not_uniq?(cves)
-        validate_cv_msg(@day_type)
-        next
-      end
-      #メトリクスバリデート
-      unless is_not_uniq?(df.get_metrics)
-         validate_uniq_metrics_msg(:sessions)
-         next
-      end
-      unless cves.zip(df.get_metrics).uniq.size >= 3
-        validate_invalid_metrics_multiple_msg(:sessions)
-        next
-      end
-      if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
-        validate_too_much_zero_metrics_msg(:sessions)
-        next
-      end
-
-      Rails.logger.info("#{kwd} の参照バリデートに成功しました")
-
-      # 相関分析開始
-      res_table[kwd] = generate_graph_data(reduce,
-          [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
-    end
-
-    calc_desire_datas(res_table)
-    @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
-    create_listbox_categories('r')
-
-    render :layout => 'ganalytics', :action => 'show'
-  end
-
-  def direct
-    @title = '直接入力/ブックマーク'
-    @narrow_action = direct_user_path
-    gon.div_page_tab = 'direct'
-    @details_partial = 'norender'
-
-    render :layout => 'ganalytics', :action => 'show'
-  end
-
-  def search
-    @title = '検索'
-    @narrow_action = search_user_path
-    gon.div_page_tab = 'search'
-    @details_partial = 'norender'
-
-    render :layout => 'ganalytics', :action => 'show'
+  def detail_anlyz
   end
 
   def index
@@ -216,15 +70,6 @@ class UsersController < ApplicationController
     unless request.wiselinks_partial?
       render layout: 'ganalytics'
     end
-  end
-
-  def all
-    @title = '全体'
-    @narrow_action = all_user_path
-    @details_partial = 'norender'   # ページ毎の部分テンプレート
-    gon.div_page_tab = 'all'
-
-    render :layout => 'ganalytics', :action => 'show'
   end
 
   def new
@@ -734,3 +579,165 @@ class UsersController < ApplicationController
       end
     end
 end
+
+  # def social
+  #   # パラメータ個別設定
+  #   @title = 'ソーシャル'
+  #   @narrow_action = social_user_path
+  #   @details_partial = 'details'
+  #   gon.div_page_tab = 'social'
+
+  #   special = :socialNetwork
+  #   @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+  #   @categories = []
+  #   special_for_garb = to_garb_attr(special)
+  #   # データ取得部
+  #   session_rank = get_session_rank(special)
+  #   if session_rank.total_results == 0
+  #     Rails.logger.info("#{@title} の参照元は非分析対象です")
+  #     render :layout => 'ganalytics', :action => 'show' and return
+  #   end
+  #   session_data = get_session_data(special)
+
+  #   # 計算部
+  #   changed_kwds = change_to_garb_kwds(session_rank,
+  #     special_for_garb)
+
+  #   changed_kwds.each do |kwd|
+  #     Rails.logger.info("#{kwd} のソーシャルバリデートを実施します")
+  #     reduce = reduce_with_kwd(session_data,
+  #       kwd, special_for_garb)
+
+  #     # カスタムデータ置き換え判定
+  #     replace_cv_with_custom(@content, reduce, @cv_txt)
+
+  #     # バリデートデータの準備
+  #     cves = cves_for_validate(reduce, @day_type)
+  #     df = metrics_for_validate(reduce, @day_type, :sessions)
+  #     #CVバリデート
+  #     unless is_not_uniq?(cves)
+  #       validate_cv_msg(@day_type)
+  #       next
+  #     end
+  #     #メトリクスバリデート
+  #     unless is_not_uniq?(df.get_metrics)
+  #        validate_uniq_metrics_msg(:sessions)
+  #        next
+  #     end
+  #     unless cves.zip(df.get_metrics).uniq.size >= 3
+  #       validate_invalid_metrics_multiple_msg(:sessions)
+  #       next
+  #     end
+  #     if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
+  #       validate_too_much_zero_metrics_msg(:sessions)
+  #       next
+  #     end
+
+  #     Rails.logger.info("#{kwd} のソーシャルバリデートに成功しました")
+
+  #     # 相関分析開始
+  #     res_table[kwd] = generate_graph_data(reduce,
+  #         [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
+  #   end
+
+  #   calc_desire_datas(res_table)
+  #   @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
+  #   create_listbox_categories('l')
+
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
+
+  # def referral
+  #   # パラメータ個別設定
+  #   @title = 'その他ウェブサイト'
+  #   @narrow_action = referral_user_path
+  #   @details_partial = 'details'
+  #   gon.div_page_tab = 'referral'
+
+  #   special = :source
+  #   @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+  #   @categories = []
+  #   special_for_garb = to_garb_attr(special)
+  #   # データ取得部
+  #   session_rank = get_session_rank(special)
+  #   if session_rank.total_results == 0
+  #     Rails.logger.info("#{@title} の参照元は非分析対象です")
+  #     render :layout => 'ganalytics', :action => 'show' and return
+  #   end
+  #   session_data = get_session_data(special)
+
+  #   # 計算部
+  #   changed_kwds = change_to_garb_kwds(session_rank,
+  #     special_for_garb)
+
+  #   changed_kwds.each do |kwd|
+  #     Rails.logger.info("#{kwd} の参照バリデートを実施します")
+  #     reduce = reduce_with_kwd(session_data,
+  #       kwd, special_for_garb)
+
+  #     # カスタムデータ置き換え判定
+  #     replace_cv_with_custom(@content, reduce, @cv_txt)
+
+  #     # バリデートデータの準備
+  #     cves = cves_for_validate(reduce, @day_type)
+  #     df = metrics_for_validate(reduce, @day_type, :sessions)
+  #     #CVバリデート
+  #     unless is_not_uniq?(cves)
+  #       validate_cv_msg(@day_type)
+  #       next
+  #     end
+  #     #メトリクスバリデート
+  #     unless is_not_uniq?(df.get_metrics)
+  #        validate_uniq_metrics_msg(:sessions)
+  #        next
+  #     end
+  #     unless cves.zip(df.get_metrics).uniq.size >= 3
+  #       validate_invalid_metrics_multiple_msg(:sessions)
+  #       next
+  #     end
+  #     if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
+  #       validate_too_much_zero_metrics_msg(:sessions)
+  #       next
+  #     end
+
+  #     Rails.logger.info("#{kwd} の参照バリデートに成功しました")
+
+  #     # 相関分析開始
+  #     res_table[kwd] = generate_graph_data(reduce,
+  #         [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
+  #   end
+
+  #   calc_desire_datas(res_table)
+  #   @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
+  #   create_listbox_categories('r')
+
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
+
+  # def direct
+  #   @title = '直接入力/ブックマーク'
+  #   @narrow_action = direct_user_path
+  #   gon.div_page_tab = 'direct'
+  #   @details_partial = 'norender'
+
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
+
+  # def search
+  #   @title = '検索'
+  #   @narrow_action = search_user_path
+  #   gon.div_page_tab = 'search'
+  #   @details_partial = 'norender'
+
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
+
+  # def all
+  #   @title = '全体'
+  #   @narrow_action = all_user_path
+  #   @details_partial = 'norender'   # ページ毎の部分テンプレート
+  #   gon.div_page_tab = 'all'
+
+  #   render :layout => 'ganalytics', :action => 'show'
+  # end
+

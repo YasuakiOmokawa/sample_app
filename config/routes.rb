@@ -3,8 +3,8 @@ SampleApp::Application.routes.draw do
   # resources :users ,:except => [:index] do
   resources :users do
     member do
-      get :search, :direct, :referral, :social, :campaign, :last, :all, :show_detail, :edit_detail, :edit_init_analyze
-      post :show
+      get :show_detail, :edit_detail, :edit_init_analyze, :home_anlyz, :detail_anlyz
+      # post :show
       patch :update_detail, :update_init_analyze
       put :update_detail, :update_init_analyze
     end
@@ -16,11 +16,11 @@ SampleApp::Application.routes.draw do
       get :redirect
     end
   end
-  resources :uplded_anlyz_statuses do
-    member do
-      patch :active, :inactive
-    end
-  end
+  # resources :uplded_anlyz_statuses do
+  #   member do
+  #     patch :active, :inactive
+  #   end
+  # end
   root  'sessions#new'
   # root  'static_pages#home'
   match '/signup',  to: 'users#new', via: 'get'
