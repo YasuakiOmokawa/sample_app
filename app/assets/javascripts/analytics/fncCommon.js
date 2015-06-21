@@ -3,8 +3,11 @@ $(document).bind('keydown', 'esc', function() {
 });
 
 $(document).ready(function() {
+  eventsOnMenu();
   replaceContentParentAttr();
-  EventsOnSettingUI();
+  if ( location.href.match(/contents/) ) {
+    eventsOnSettingUI();
+  }
 
   // Wiselinks 設定
   window.wiselinks = new Wiselinks( $('@data-role'), { //  layouts/_wiselinks.html.erb で更新される場所を指定
@@ -16,24 +19,29 @@ $(document).ready(function() {
   $(document).off('page:loading').on('page:loading', function(event, $target, render, url) {
     console.log("Loading: " + url + " to " + $target.selector + " within '" + render + "'");
     // start loading animation
-    $('#loading').removeClass('hide');
-    $('#spinner').removeClass('hide');
+    if ( location.href.match(/contents/) ) {
+      $('#loading').removeClass('hide');
+      $('#spinner').removeClass('hide');
+    }
   });
 
   $(document).off('page:redirected').on('page:redirected', function(event, $target, render, url) {
     console.log("Redirected to: "+ url);
     // start loading animation
-    $('#loading').removeClass('hide');
-    $('#spinner').removeClass('hide');
+    if ( location.href.match(/contents/) ) {
+      $('#loading').removeClass('hide');
+      $('#spinner').removeClass('hide');
+    }
   });
 
   $(document).off('page:always').on('page:always', function(event, xhr, settings) {
     console.log("Wiselinks page loading completed");
-    // stop loading animation
-    $('#loading').addClass('hide');
-    $('#spinner').addClass('hide');
+    // 必要な関数を読み込む
+    eventsOnMenu();
     replaceContentParentAttr();
-    EventsOnSettingUI();
+    if ( location.href.match(/contents/) ) {
+      eventsOnSettingUI();
+    }
   });
 
   $(document).off('page:done').on('page:done', function(event, $target, status, url, data) {
@@ -53,13 +61,80 @@ $(document).ready(function() {
   });
 });
 
-function EventsOnSettingUI() {
+function eventsOnMenu() {
+
+  // 「戻る」がクリックされたときの処理
+  $("#back").on("click", function() {
+    history.back(-1);
+  });
+
+  var setting_data = sessionStorage.getItem( "setting_key" );
+  var base_anlyz_params = '';
+  if (setting_data) {
+    // メニューの期間、CV表示を変更
+    var setting_obj = JSON.parse(setting_data);
+    // 期間表示
+    $("#replacement-date")
+      .text(setting_obj.from+" - "+setting_obj.to)
+      .removeClass("set")
+      .attr("href", $("#content-link").text());
+    // CV表示
+    $("#replacement-cv_name")
+      .text(setting_obj.cv_name)
+      .removeClass('set')
+      .attr("href", $("#content-link").text());
+    // 分析開始リンク
+    $("#atics").attr('id', "atics_s");
+
+    // ホーム分析用のパラメータ生成
+    jQuery.each(setting_obj, function(key, val) {
+      if ( key.match(/from|to/) ) {
+        val = replaceAll(val, '/', '-');
+      }
+      base_anlyz_params += encodeURIComponent(key)+"="+encodeURIComponent(val) + "&";
+    });
+
+    // カテゴリ付与
+    base_anlyz_params += encodeURIComponent("category")+"="+encodeURIComponent("all");
+  }
+
+  // 「分析開始」がクリックされたときの処理
+  $("#atics_s").on("click", function() {
+    location.hash = base_anlyz_params;
+    // sessionStorage.removeItem("setting_key");
+    // if (!sessionStorage.getItem("setting_key")) {
+    //   console.log("セッションストレージの削除に成功しました");
+    // }
+  });
+
+  // hashchangeハンドラの定義
+  window.onhashchange = locationHashChanged;
+
+}
+
+function replaceAll(expression, org, dest){
+    return expression.split(org).join(dest);
+}
+
+function locationHashChanged() {
+// var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
+console.log("location.hash is " + location.hash);
+// setAnchorParams(params);
+// bubbleCreateAtTabLink();
+}
+
+function eventsOnSettingUI() {
 
   initDatepicker();
   bindDatepickerOperation();
 
+  // 選択してくださいリンクの無効化
+  $("#replacement-date").attr("href", "javascript:void(0)");
+  $("#replacement-cv_name").attr("href", "javascript:void(0)");
+
   // ファイル選択ダイアログの起動判定範囲を広げる
   $("#cv li").last().on("click", 'input', function(evt) {
+    $("input[name='content[date]']").val("dummy"); // 期間設定をダミー選択
     $(evt.target).parent().find("a").click();
   });
 
@@ -82,9 +157,9 @@ function EventsOnSettingUI() {
 
       console.log('cv_data set : '+ cv_data);
 
-      $("input[name='content[cv_num]']").val( cv_data );
+      $("input[name='content[cv_num]']")
+        .val( cv_data ).change();
       highlightSelectedCV( cv_data );
-      setFormViaAjax();
 
       // ファイルダイアログのオープン判定
       if (cv_data === "file") {
@@ -92,11 +167,23 @@ function EventsOnSettingUI() {
       }
     }
   });
+
+  // 期間、CVどちらかの値が設定された場合の処理
+  $("input.parameter").on("change", setFormViaAjax );
 }
 
 function setFormViaAjax() {
+  // 初期化
   $("#submit")
-    .replaceWith('<a id="submit" href="javascript:void(0)" onclick="execFormSubmit()">設定</a>');
+    .replaceWith('<div id="submit">設定</div>');
+
+  var date = $("input[name='content[date]']").val();
+  var cv_num = $("input[name='content[cv_num]']").val();
+  // 期間とCVどちらも設定されていれば有効化
+  if (date.length > 0 && cv_num.length > 0) {
+    $("#submit")
+      .replaceWith('<a id="submit" href="javascript:void(0)" onclick="execFormSubmit()">設定</a>');
+  }
 }
 
 function execFormSubmit() {
@@ -105,8 +192,8 @@ function execFormSubmit() {
       removeUploadError();
     },
     success: function(obj) {
-      removeUploadError();
-      sessionStorage.setItem( obj.storage_key, JSON.stringify(obj) );
+      sessionStorage.setItem( "setting_key", JSON.stringify(obj) );
+      // sessionStorage.setItem( obj.storage_key, JSON.stringify(obj) );
       $("#cancell").click(); // 設定前の画面へ戻る
     },
     error: function(xhr) {
@@ -129,7 +216,7 @@ function displaySelectedFileName() {
   var regex = /\\|\\/, file_name = $('#content_upload_file').val();
   var array = file_name.split(regex);
 
-  // 空ファイルでなければ処理を実行する
+  // 選択されたファイルが空ファイルでなければ処理を実行する
   if (array[array.length - 1].length > 0) {
     $("input#file")
       .val( array[array.length - 1] );
@@ -169,5 +256,8 @@ function highlightSelectedCV(cv_num) {
     $("input#file").val('');
     // file_fieldの値を削除する
     $('#content_upload_file').val('');
+    // 期間データを初期化する
+    $("input[name='content[date]']").val("").change();
+
   }
 }

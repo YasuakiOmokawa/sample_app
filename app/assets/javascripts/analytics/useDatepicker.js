@@ -1,15 +1,3 @@
-$(function() {
-  initDatepicker();
-  bindDatepickerOperation();
-  triggerFileField();
-});
-
-function triggerFileField() {
-  $("#file-field-button").click(function() {
-    $('#content_upload_file').click();
-  });
-}
-
 function initDatepicker() {
   var to = new Date();
   var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 14);
@@ -24,16 +12,21 @@ function initDatepicker() {
       mode: 'range',
       current: new Date(to.getFullYear(), to.getMonth() - 1, 1),
       onChange: function(dates, el) {
-        var text = fmt(dates[0])+' - '+fmt(dates[1]);
-        $('#date-range-field span').text(text); // update the range display
-        $("input[name='content[date]']").val(text); // update the form date
+        // from と to が選択されてから処理を実行する
+        if ( fmt(dates[0]) != fmt(dates[1]) ) {
+          var text = fmt(dates[0])+' - '+fmt(dates[1]);
+          $('#date-range-field span').text(text); // update the range display
+          $("input[name='content[date]']")
+            .val(text)
+            .change(); // update the form date
+        }
       }
     });
   }
 
   // initialize the special date dropdown field
-  $('#date-range-field span').text(init_text);
-  $("input[name='content[date]']").val(init_text);
+  $('#date-range-field span').text("選択してください");
+  // $("input[name='content[date]']").val(init_text);
 }
 
 function bindDatepickerOperation() {
@@ -44,21 +37,21 @@ function bindDatepickerOperation() {
   // bind a click handler to the date display field, which when clicked
   // toggles the date picker calendar, flips the up/down indicator arrow,
   // and keeps the borders looking pretty
-  $('#date-range-field').click(function(){
-    $('#datepicker-calendar').toggle();
-    if($('#date-range-field a').text().charCodeAt(0) == 9660) {
-      // switch to up-arrow
-      $('#date-range-field a').html('&#9650;');
-      $('#date-range-field').css({borderBottomLeftRadius:0, borderBottomRightRadius:0});
-      $('#date-range-field a').css({borderBottomRightRadius:0});
-    } else {
-      // switch to down-arrow
-      $('#date-range-field a').html('&#9660;');
-      $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
-      $('#date-range-field a').css({borderBottomRightRadius:5});
-    }
-    return false;
-  });
+  // $('#date-range-field').click(function(){
+  //   // $('#datepicker-calendar').toggle();
+  //   if($('#date-range-field a').text().charCodeAt(0) == 9660) {
+  //     // switch to up-arrow
+  //     $('#date-range-field a').html('&#9650;');
+  //     $('#date-range-field').css({borderBottomLeftRadius:0, borderBottomRightRadius:0});
+  //     $('#date-range-field a').css({borderBottomRightRadius:0});
+  //   } else {
+  //     // switch to down-arrow
+  //     $('#date-range-field a').html('&#9660;');
+  //     $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
+  //     $('#date-range-field a').css({borderBottomRightRadius:5});
+  //   }
+  //   return false;
+  // });
 
   // global click handler to hide the widget calendar when it's open, and
   // some other part of the document is clicked.  Note that this works best
@@ -66,30 +59,31 @@ function bindDatepickerOperation() {
   // particular example is actually an 'inline' datepicker which is displayed
   // by an external event, unlike a non-inline datepicker which is automatically
   // displayed/hidden by clicks within/without the datepicker element and datepicker respectively
-  $('html').click(function() {
-    if($('#datepicker-calendar').is(":visible")) {
-      $('#datepicker-calendar').hide();
-      $('#date-range-field a').html('&#9660;');
-      $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
-      $('#date-range-field a').css({borderBottomRightRadius:5});
-    }
-  });
+  // $('html').click(function() {
+  //   if($('#datepicker-calendar').is(":visible")) {
+  //     // $('#datepicker-calendar').hide();
+  //     $('#date-range-field a').html('&#9660;');
+  //     $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
+  //     $('#date-range-field a').css({borderBottomRightRadius:5});
+  //   }
+  // });
 
   // stop the click propagation when clicking on the calendar element
   // so that we don't close it
-  $('#date-range-hidden').click(function(event){
+  // $('#date-range-hidden').click(function(event){
+  $('#date-range').click(function(event){
     event.stopPropagation();
   });
 
 }
 
-function isLocationHash() {
-  if (location.hash) {
-    return location.hash;
-  } else {
-    return "#all";
-  }
-}
+// function isLocationHash() {
+//   if (location.hash) {
+//     return location.hash;
+//   } else {
+//     return "#all";
+//   }
+// }
 
 // 日付計算
 var calc = function(datestr, p, day) {
@@ -147,50 +141,50 @@ function addRangeToDatePicker() {
     $('input.tod').datepicker('setDate', t);
 }
 
-// ダイアログ内のdatepicker
-function addDatepicker() {
-  $("input.fromd").datepicker({
-    changeMonth: true,
-    changeYear: true,
-    numberOfMonths: 2,
-    dateFormat:"yy/mm/dd",
-    beforeShow: function(input, inst) {
-      chgPos(input, inst, $(this));
-    },
-    onSelect: function( selectedDate ) {
-      var dte = calc(selectedDate, '+', 31);
-      var opt = fmt(dte);
-      $( "#from" ).val(selectedDate);
-      $( "input.tod" ).datepicker( "option",
-        {
-          minDate: selectedDate,
-          // maxDate: opt
-        }
-      );
-    }
-  });
+// // ダイアログ内のdatepicker
+// function addDatepicker() {
+//   $("input.fromd").datepicker({
+//     changeMonth: true,
+//     changeYear: true,
+//     numberOfMonths: 2,
+//     dateFormat:"yy/mm/dd",
+//     beforeShow: function(input, inst) {
+//       chgPos(input, inst, $(this));
+//     },
+//     onSelect: function( selectedDate ) {
+//       var dte = calc(selectedDate, '+', 31);
+//       var opt = fmt(dte);
+//       $( "#from" ).val(selectedDate);
+//       $( "input.tod" ).datepicker( "option",
+//         {
+//           minDate: selectedDate,
+//           // maxDate: opt
+//         }
+//       );
+//     }
+//   });
 
-  $("input.tod").datepicker({
-    changeMonth: true,
-    changeYear: true,
-    numberOfMonths: 2,
-    dateFormat:"yy/mm/dd",
-    beforeShow: function(input, inst) {
-      chgPos(input, inst, $(this));
-    },
-    onSelect: function( selectedDate ) {
-      var dte = calc(selectedDate, '-', 31);
-      var opt = fmt(dte);
-      $( "#to" ).val(selectedDate);
-      $( "input.fromd" ).datepicker( "option",
-        {
-          // minDate: opt,
-          maxDate: selectedDate
-        }
-      );
-    }
-  });
-}
+//   $("input.tod").datepicker({
+//     changeMonth: true,
+//     changeYear: true,
+//     numberOfMonths: 2,
+//     dateFormat:"yy/mm/dd",
+//     beforeShow: function(input, inst) {
+//       chgPos(input, inst, $(this));
+//     },
+//     onSelect: function( selectedDate ) {
+//       var dte = calc(selectedDate, '-', 31);
+//       var opt = fmt(dte);
+//       $( "#to" ).val(selectedDate);
+//       $( "input.fromd" ).datepicker( "option",
+//         {
+//           // minDate: opt,
+//           maxDate: selectedDate
+//         }
+//       );
+//     }
+//   });
+// }
 
 // $(function() {
 

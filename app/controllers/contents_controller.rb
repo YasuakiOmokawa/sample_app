@@ -39,8 +39,7 @@ class ContentsController < ApplicationController
         from: @content.upload_file.first[0],
         to: @content.upload_file.last[0],
         cv_num: @content.id.to_s,
-        offline_data: @content.upload_file_name.split('.').first,
-        storage_key: @storage_key
+        cv_name: @content.upload_file_name.split('.').first.truncate(10),
       }, status: 200
     else
       render json: {errors: @content.errors.messages},
@@ -93,8 +92,7 @@ class ContentsController < ApplicationController
           from: from,
           to: to,
           cv_num: content_params[:cv_num],
-          offline_data: 'none',
-          storage_key: @storage_key
+          cv_name: @ga_goals.key(content_params[:cv_num]).truncate(10),
         }, status: 200
       elsif upload_file
         @tmp_content[:upload_file_name] = upload_file.original_filename

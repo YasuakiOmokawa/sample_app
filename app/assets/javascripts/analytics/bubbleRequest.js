@@ -587,75 +587,71 @@ function setLoadingMortion(dom, req_opts) {
 
 }
 
-function replaceAll(expression, org, dest){
-    return expression.split(org).join(dest);
-}
-
 // ホーム画面でハッシュを変更させる
-function changeLocationHash(page) {
-  location.hash = encodeURIComponent(page + createHomeURIBaseParams());
-}
+// function changeLocationHash(page) {
+//   location.hash = encodeURIComponent(page + createHomeURIBaseParams());
+// }
 
-function createHomeURIBaseParams() {
-  var params = "";
-  jQuery.each(setHomeURIBaseParams(), function (key, val) {
-    params += '#' + val;
-  });
-  return params;
-}
+// function createHomeURIBaseParams() {
+//   var params = "";
+//   jQuery.each(setHomeURIBaseParams(), function (key, val) {
+//     params += '#' + val;
+//   });
+//   return params;
+// }
 
-function setHomeURIBaseParams() {
-  var params = {}, id = '';
-  params.from = replaceAll($('#from').val(), '/', '-');
-  params.to = replaceAll($('#to').val(), '/', '-');
-  params.cv_num = $('input[name="cv_num"]').val();
-  if ( id = $('input[name="custom_file_id"]').val() ) {
-    params.custom_file_id = id;
-  }
-  return params;
-}
+// function setHomeURIBaseParams() {
+//   var params = {}, id = '';
+//   params.from = replaceAll($('#from').val(), '/', '-');
+//   params.to = replaceAll($('#to').val(), '/', '-');
+//   params.cv_num = $('input[name="cv_num"]').val();
+//   if ( id = $('input[name="custom_file_id"]').val() ) {
+//     params.custom_file_id = id;
+//   }
+//   return params;
+// }
 
 
-function getLocationHashPage() {
-  var params = decodeURIComponent(location.hash).split("#");
-  return params[1];
-}
+// function getLocationHashPage() {
+//   var params = decodeURIComponent(location.hash).split("#");
+//   return params[1];
+// }
 
-function setAnchorParams(params) {
-  $('#from').val(replaceAll(params.from, '-', '/'));
-  $('#to').val(replaceAll(params.to, '-', '/'));
-  $('input[name="cv_num"]').val(params.cv_num);
-  $('select[name="cvselect"]').val(params.cv_num);
-}
+// function setAnchorParams(params) {
+//   $('#from').val(replaceAll(params.from, '-', '/'));
+//   $('#to').val(replaceAll(params.to, '-', '/'));
+//   $('input[name="cv_num"]').val(params.cv_num);
+//   $('select[name="cvselect"]').val(params.cv_num);
+// }
 
 // ホーム画面でハッシュが変更されたときのイベント
-function locationHashChanged() {
-var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
-console.log("location.hash is " + params)
-setAnchorParams(params);
-bubbleCreateAtTabLink(params.category);
-}
+// function locationHashChanged() {
+// var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
+// console.log("location.hash is " + params)
+// setAnchorParams(params);
+// bubbleCreateAtTabLink(params.category);
+// }
 
-function pushLocationHash(d) {
-  var obj = {};
-  obj.category = d[1], obj.from = d[2], obj.to = d[3], obj.cv_num = d[4];
-  if (d[5]) {
-    obj.file_id = d[5];
-  }
-  return obj;
-}
+// function pushLocationHash(d) {
+//   var obj = {};
+//   obj.category = d[1], obj.from = d[2], obj.to = d[3], obj.cv_num = d[4];
+//   if (d[5]) {
+//     obj.file_id = d[5];
+//   }
+//   return obj;
+// }
 
 
-$(document).ready(function() {
+// $(document).ready(function() {
 
   // 分析カテゴリがクリックされたときのイベント
-  var anlyz_category = '#pnt a';
-  $(anlyz_category).click(function() {
-    var page = $(this).attr('class');
-    changeLocationHash(page);
-  });
+  // var anlyz_category = '#pnt a';
+  // $(anlyz_category).click(function() {
+  //   var page = $(this).attr('class');
+  //   changeLocationHash(page);
+  // });
 
   // hashchangeハンドラの定義
-  window.onhashchange = locationHashChanged;
+  // window.onhashchange = locationHashChanged;
 
-});
+// });

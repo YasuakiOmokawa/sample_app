@@ -1,26 +1,30 @@
   <!-- menu_st -->
   <div id="fm_menu">
     <h2 id="tp">解析期間</h2>
-    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set" %></p>
+    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set", id: "replacement-date" %></p>
     <h2>CV設定</h2>
-    <p><%= link_to 'CVを選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set" %></a></p>
+    <p><%= link_to 'CVを選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set", id: "replacement-cv_name" %></a></p>
     <a href="javascript:void(0)" id="atics">分析開始</a>
 
     <ul>
       <li><div>全体</div></li>
-      <li><div>オーガニック検索</div></li>
+      <li><a href="">オーガニック検索</a></li>
       <li><a href="">直接入力/ブックマーク</a></li>
       <li><a href="">その他ウェブサイト</a></li>
       <li><a href="">ソーシャル</a></li>
-      <li class="switch"><a id="back" href="">戻る</a></li>
+      <li class="switch"><a id="back" href="javascript:void(0)">戻る</a></li>
     </ul>
   </div>
   <!-- menu_end -->
 
+  <!-- content-link_start -->
+  <div id="content-link" class="hide"><%= content_path(current_user) %></div>
+  <!-- content-link_end -->
+
   <!-- datepicker_start -->
-  <div id="date-range-hidden">
+<!--   <div id="date-range-hidden">
     <div id="datepicker-calendar"></div>
-  </div>
+  </div> -->
   <!-- datepicker_end-->
 
   <!-- data_st -->

@@ -3,7 +3,8 @@
 // #jrange input{width:200px;text-align:center}
 
 // foxrunsoftware/DatePicker 用の設定
-#date-range-hidden {
+// #date-range-hidden {
+#date-range {
   position:relative;
 }
 #date-range-field {
@@ -47,15 +48,16 @@
 
 #datepicker-calendar {
   position: absolute;
-  top: 104px;
-  left: 338px;
+  // top: 104px;
+  // left: 338px;
+  left: 5%;
   overflow: hidden;
-  width: 497px;
-  height: 153px;
+  // width: 497px;
+  // height: 153px;
   background-color: #F7F7F7;
   border: 1px solid #CCCCCC;
   border-radius: 0 5px 5px 5px;
-  display:none;
+  // display:none;
   padding:10px 0 0 10px;
 }
 

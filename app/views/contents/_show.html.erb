@@ -11,18 +11,15 @@
   <div id="date-range">
     <div id="date-range-field" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
       <span></span>
-      <a href="#" style="border-bottom-right-radius: 5px;">▼</a>
-<!--   <div id="date-range-hidden">
-    <div id="datepicker-calendar"></div>
-  </div> -->
     </div>
+    <div id="datepicker-calendar"></div>
   </div>
 </div>
 <br>
 <div class="setting"><h2>CV設定</h2></div>
 <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
-<input type="text" name="content[date]" class="hide" />
-<input type="text" name="content[cv_num]" class="hide" />
+<input type="text" name="content[date]" class="hide parameter" />
+<input type="text" name="content[cv_num]" class="hide parameter" />
 <ul id="cv">
   <% @ga_goals.each do |name, number| %>
     <li><a href="javascript:void(0)" class=<%= number %>>選択</a><%= name %></li>
@@ -36,7 +33,7 @@
 </ul>
 <div id="btn">
   <div id="submit">設定</div>
-  <%= link_to 'キャンセル', "javascript:void(0)", data: { push: "true" }, id: "cancell" %>
+  <%= link_to 'キャンセル', "javascript:void(0)",data: { push: "true" }, id: "cancell" %>
   <br class="clear">
 </div>
 <% end %>
