@@ -53,7 +53,6 @@ SampleApp::Application.configure do
 
   # memcached の使用
   config.cache_store = :dalli_store
-  # config.cache_store = :dalli_store, {:expires_in => 1.day, :compress => true }
 
   # web console の使用
   config.web_console.whitelisted_ips = '10.0.2.2'

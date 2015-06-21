@@ -1,13 +1,11 @@
 <%= include_gon %>
 <% set_title(full_title("ホーム")) %>
-<!--
-<div id="stay"></div>
-<p id="s_word">データ不足のため、分析できません。<br>（分析には最低3日分のCVデータが必要です）<br><br>解析期間もしくはＣＶ設定を変更し、再度分析をお試しください。</p>
--->
-<div id="term"><p>2015/01/01&nbsp;-&nbsp;2015/12/31</p></div>
+<%= render 'layouts/loading' %>
+
+<div id="term" class="hide"><p>2015/01/01&nbsp;-&nbsp;2015/12/31</p></div>
 <div id="graph">
   <div id="fm_graph">
-    <div id="hvr_l">
+    <div id="hvr_l" class="hide">
       <dl id="tgt"><dt>ページビュー数</dt><dd>1,234<span id="gp">（+123）</span></dd></dl>
       <ul id="bottom">
         <li><dl><dt>流入元</dt><dd>直接入力/ブックマーク</dd></dl></li>
@@ -22,7 +20,7 @@
 
 <ul id="rank">
   <% @tests.each do |test| %>
-    <li><a href=""><%= test %></a></li>
+    <li><a href="javascript:void(0)"><%= test %></a></li>
   <% end %>
   <br class="clear">
 </ul>

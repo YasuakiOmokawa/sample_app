@@ -1,5 +1,7 @@
 <%= include_gon %>
 <% set_title(full_title("設定")) %>
+<%= render 'layouts/loading' %>
+
 <div class="alert alert-danger hide" id="content-active-error-message">
   入力にエラーがあります
   <div id="errors"><ul/></div>
@@ -10,6 +12,9 @@
     <div id="date-range-field" style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
       <span></span>
       <a href="#" style="border-bottom-right-radius: 5px;">▼</a>
+<!--   <div id="date-range-hidden">
+    <div id="datepicker-calendar"></div>
+  </div> -->
     </div>
   </div>
 </div>
@@ -20,18 +25,18 @@
 <input type="text" name="content[cv_num]" class="hide" />
 <ul id="cv">
   <% @ga_goals.each do |name, number| %>
-    <li><a href="javascript:void(0)" data-cv_num=<%= number %>>選択</a><%= name %></li>
+    <li><a href="javascript:void(0)" class=<%= number %>>選択</a><%= name %></li>
   <% end %>
-  <%= f.file_field :upload_file, class: "hide", onchange: "displaySelectedFileName()" %>
+  <%= f.file_field :upload_file, class: "hide" %>
   <li>
-    <a href="javascript:void(0)" data-cv_num="file">選択</a>
+    <a href="javascript:void(0)" class="file">選択</a>
     <input type="text" id="file">
     <input id="file-field-button" type="button" value="参照">
   </li>
 </ul>
 <div id="btn">
-  <a id="submit">設定</a>
-  <%= link_to 'キャンセル', "javascript:history.back(-1);", data: { push: "true" }, id: "cancell" %>
+  <div id="submit">設定</div>
+  <%= link_to 'キャンセル', "javascript:void(0)", data: { push: "true" }, id: "cancell" %>
   <br class="clear">
 </div>
 <% end %>
