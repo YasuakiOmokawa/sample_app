@@ -1,101 +1,100 @@
-// リクエスト完了時に、結果をキャッシュする
+// // リクエスト完了時に、結果をキャッシュする
+// // var cacheResult = function(data, async, type, analyzetype, kwdslen, elm_txt) {
+// var cacheResult = function(data) {
 
-// ajaxリクエスト格納
-var request;
+// // ajaxリクエスト格納
+// // var request;
 
-// バブルチャート用データのリクエスト（非同期）
-var cacheResult = function(data, async, type, analyzetype, kwdslen, elm_txt) {
+//   // 返却データ
+//   var rdata;
 
-  // 返却データ
-  var rdata;
+//   // ページ遷移先の設定
+//   // var userpath = gon.narrow_action;
 
-  // ページ遷移先の設定
-  var userpath = gon.narrow_action;
+//   var params = {
+//     r_obj : JSON.stringify(data),          // バブルチャート用キャッシュ対象データ
+//     // from : $('#from').val(),
+//     // to : $('#to').val(),
+//     // analyze_type : analyzetype             // 全体分析か個別分析か
+//     // day_type : $('input[name="day_type"]:checked').val()
+//   };
 
-  var params = {
-    r_obj : JSON.stringify(data),          // バブルチャート用キャッシュ対象データ
-    from : $('#from').val(),
-    to : $('#to').val(),
-    analyze_type : analyzetype             // 全体分析か個別分析か
-    // day_type : $('input[name="day_type"]:checked').val()
-  };
+//   // if (analyzetype == 'kobetsu') {
 
-  if (analyzetype == 'kobetsu') {
+//   //   var kobetsu_params = {
+//   //     // act : elm_txt,
+//   //     // cv_num : $('input[name="cv_num"]').val(),
+//   //     // kwds_len : kwdslen             // キャッシュ用ユニークキー
+//   //   };
 
-    var kobetsu_params = {
-      act : elm_txt,
-      cv_num : $('input[name="cv_num"]').val(),
-      kwds_len : kwdslen             // キャッシュ用ユニークキー
-    };
+//   //   $.extend(true, params, kobetsu_params);
+//   // }
 
-    $.extend(true, params, kobetsu_params);
-  }
+//   // ajaxリクエストの生成
+//   var request = $.Deferred(function(deferred) {
+//     $.ajax({
+//       url: userpath,
+//       async: true,
+//       type: 'POST',
+//       dataType: "json",
+//       scriptCharset: 'utf-8',
+//       tryCount: 0,
+//       // timeout: 2000, // 単位はミリ秒
+//       retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+//       // バブルチャート用データ取得用のパラメータ
+//       data: params,
+//       error: function(xhr, ajaxOptions, thrownError) {
 
-  // ajaxリクエストの生成
-  request = $.Deferred(function(deferred) {
-    $.ajax({
-      url: userpath,
-      async: async,
-      type: type,
-      dataType: "json",
-      scriptCharset: 'utf-8',
-      tryCount: 0,
-      // timeout: 2000, // 単位はミリ秒
-      retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
-      // バブルチャート用データ取得用のパラメータ
-      data: params,
-      error: function(xhr, ajaxOptions, thrownError) {
+//         // 内部エラーが発生したら表示
+//         if (xhr.status == 500) {
+//           $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
+//           return;
+//         }
 
-        // 内部エラーが発生したら表示
-        if (xhr.status == 500) {
-          $("span#errormsg").html('status 500 : サーバー応答エラーです。時間を置いて再度実行してください。<br>改善されない場合は担当者へお問い合わせ下さい。<p/>');
-          return;
-        }
+//         this.tryCount++;
 
-        this.tryCount++;
+//         if (this.tryCount < this.retryLimit) {
 
-        if (this.tryCount < this.retryLimit) {
+//           console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
 
-          console.log('ajax通信失敗。再試行します : ' + String(this.tryCount) + '回目');
+//           $.ajax(this).done(function(data, textStatus, jqXHR) {
+//             deferred.resolveWith(this, [data, textStatus, jqXHR]);
+//           }).fail(function(jqXHR, textStatus, errorThrown) {
+//             if (this.tryCount >= this.retryLimit) {
 
-          $.ajax(this).done(function(data, textStatus, jqXHR) {
-            deferred.resolveWith(this, [data, textStatus, jqXHR]);
-          }).fail(function(jqXHR, textStatus, errorThrown) {
-            if (this.tryCount >= this.retryLimit) {
+//               console.log('再試行の上限に達しました。エラー処理を実行します。');
 
-              console.log('再試行の上限に達しました。エラー処理を実行します。');
+//               deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
+//             }
+//           });
+//         }
+//       }
+//     }).done(function(data, textStatus, jqXHR) {
+//       deferred.resolveWith(this, [data, textStatus, jqXHR]);
+//     });
+//   }).promise();
 
-              deferred.rejectWith(this, [jqXHR, textStatus, errorThrown]);
-            }
-          });
-        }
-      }
-    }).done(function(data, textStatus, jqXHR) {
-      deferred.resolveWith(this, [data, textStatus, jqXHR]);
-    });
-  }).promise();
+//   request.done(function(data, textStatus, jqXHR) {
 
-  request.done(function(data, textStatus, jqXHR) {
+//     console.log( 'ajaxデータ転送成功!');
 
-    console.log( 'ajaxデータ転送成功!');
+//     // rdata = JSON.parse(data.homearr);
 
-    rdata = JSON.parse(data.homearr);
+//     request = '';
+//   })
 
-    request = '';
-  })
+//   // ajax失敗時の処理
+//   .fail(function(jqXHR, textStatus, errorThrown) {
+//     console.log( 'ajax通信失敗!通信を中断します');
+//     console.log(errorThrown);
 
-  // ajax失敗時の処理
-  .fail(function(jqXHR, textStatus, errorThrown) {
-    console.log( 'ajax通信失敗!通信を中断します');
-    console.log(errorThrown);
+//     if (errorThrown == 'timeout') {
+//       $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
+//     } else {
+//       $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
+//     }
 
-    if (errorThrown == 'timeout') {
-      $("span#errormsg").html('リクエストがタイムアウトしました。時間を置いて再度実行してください。<br>改善されない場合は担当者までお問い合わせください。<p/>');
-    } else {
-      $("span#errormsg").html('エラーが発生しました。 下記のエラーコードをお控えのうえ、担当者までお問い合わせください。<br>エラーコード : '+ String(errorThrown) );
-    }
+//   });
 
-  });
-
- return rdata;
-}
+//  // return rdata;
+// }

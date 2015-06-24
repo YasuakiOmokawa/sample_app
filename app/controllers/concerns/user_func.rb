@@ -469,4 +469,8 @@ module ParamUtils
     t = d.split('/')
     "#{t[0]}/#{t[1].rjust(2, '0')}/#{t[2].rjust(2, '0')}"
   end
+
+  # def create_parameter_with_request_hash(req)
+  #   req
+  # end
 end

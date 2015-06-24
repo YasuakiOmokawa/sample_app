@@ -13,10 +13,10 @@
       <%= javascript_include_tag "upldedanlyz" %>
       <%= javascript_include_tag "usejqplothome" %>
       <%= javascript_include_tag "bubblerequest" %>
-      <%= javascript_include_tag "finbubble" %>
+      <% javascript_include_tag "finbubble" %>
       <%= javascript_include_tag "homefnc" %>
       <%= javascript_include_tag "kickonload" %>
-      <%= javascript_include_tag "usejqplot" %>
+      <% javascript_include_tag "usejqplot" %>
       <%= csrf_meta_tags %>
       <%= wiselinks_meta_tag %>
    </head>
@@ -38,7 +38,8 @@
           @in_table,
           @data_for_graph_display,
           @details_desire_datas,
-          @content
+          @content,
+          @ast_data
           ].each do |t|
     %>
      <%= debug t.inspect %>

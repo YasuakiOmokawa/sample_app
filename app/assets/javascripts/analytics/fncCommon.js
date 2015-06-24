@@ -7,6 +7,8 @@ $(document).ready(function() {
   replaceContentParentAttr();
   if ( location.href.match(/contents/) ) {
     eventsOnSettingUI();
+  } else {
+    plotHomeGraphDummy();
   }
 
   // Wiselinks 設定
@@ -41,6 +43,8 @@ $(document).ready(function() {
     replaceContentParentAttr();
     if ( location.href.match(/contents/) ) {
       eventsOnSettingUI();
+    } else {
+      plotHomeGraphDummy();
     }
   });
 
@@ -69,7 +73,6 @@ function eventsOnMenu() {
   });
 
   var setting_data = sessionStorage.getItem( "setting_key" );
-  var base_anlyz_params = '';
   if (setting_data) {
     // メニューの期間、CV表示を変更
     var setting_obj = JSON.parse(setting_data);
@@ -84,38 +87,58 @@ function eventsOnMenu() {
       .removeClass('set')
       .attr("href", $("#content-link").text());
     // 分析開始リンク
-    $("#atics").attr('id', "atics_s");
-
-    // ホーム分析用のパラメータ生成
-    jQuery.each(setting_obj, function(key, val) {
-      if ( key.match(/from|to/) ) {
-        val = replaceAll(val, '/', '-');
-      }
-      base_anlyz_params += encodeURIComponent(key)+"="+encodeURIComponent(val) + "&";
-    });
-
-    // カテゴリ付与
-    base_anlyz_params += encodeURIComponent("category")+"="+encodeURIComponent("all");
+    $("#atics")
+      .attr('id', "atics_s")
+      .addClass("yes");
   }
 
-  // 「分析開始」がクリックされたときの処理
-  $("#atics_s").on("click", function() {
-    location.hash = base_anlyz_params;
+  // 分析開始リンクがクリックされたときの処理
+  $(".home-anlyz.yes").on("click", function() {
+    locationHashChanged($(this).attr("id"));
   });
 
-  // hashchangeハンドラの定義
-  window.onhashchange = locationHashChanged;
 }
 
 function replaceAll(expression, org, dest){
-    return expression.split(org).join(dest);
+  return expression.split(org).join(dest);
 }
 
-function locationHashChanged() {
-// var params = pushLocationHash(decodeURIComponent(location.hash).split("#"));
-console.log("location.hash is " + location.hash);
-// setAnchorParams(params);
-bubbleCreateAtTabLink();
+function createParameterWithSessionStorage() {
+  var get_param = '', obj = {},
+    setting_obj = JSON.parse(sessionStorage.getItem( "setting_key" ));
+
+  setting_obj.category = "all";
+
+  // getリクエストパラメータの生成
+  jQuery.each(setting_obj, function(key, val) {
+    if ( key.match(/from|to/) ) {
+      val = replaceAll(val, '/', '-');
+    }
+    get_param += encodeURIComponent(key)+"="+encodeURIComponent(val) + "&";
+  });
+
+  obj.for_get_request = get_param.slice(0, -1);
+  obj.for_anlyz = setting_obj;
+  return obj;
+}
+
+function createParameterWithLocationHash(category) {
+  var get_param = location.hash.slice(1).replace(/all/, category),
+    anlyz_param = {}, obj = {};
+    basement = get_param.split("&");
+
+  // 分析パラメータの生成
+  jQuery.each($(basement), function(k, v) {
+    var tmp = v.split("=");
+    if ( tmp[0].match(/from|to/) ) {
+      tmp[1] = replaceAll(tmp[1], '-', '/');
+    }
+    anlyz_param[tmp[0]] = decodeURIComponent(tmp[1]);
+  });
+
+  obj.for_get_request = get_param;
+  obj.for_anlyz = anlyz_param;
+  return obj;
 }
 
 function eventsOnSettingUI() {

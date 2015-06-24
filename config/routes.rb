@@ -4,7 +4,7 @@ SampleApp::Application.routes.draw do
   resources :users do
     member do
       get :show_detail, :edit_detail, :edit_init_analyze, :home_anlyz, :detail_anlyz
-      # post :show
+      post :cache_result_anlyz
       patch :update_detail, :update_init_analyze
       put :update_detail, :update_init_analyze
     end

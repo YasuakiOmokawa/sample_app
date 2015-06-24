@@ -22,11 +22,11 @@ describe ParamUtils do
     let(:user) {create(:multiple_test_user)}
     let(:no_upload_user) {create(:no_upload_user)}
 
-    context "カスタム分析対象の場合" do
+    context "オフラインデータ対象の場合" do
 
       it "ファイルから取得した日付を返却すること" do
         params = {}
-        @content = upldedanlyzstatuseshelper.active_content(user.id)
+        @content = Content.find()
         @content.upload_file.shift unless @content.nil?
         (@from, @to) = paramutils.set_from_to(@content, params)
         expect(@from).to eq(paramutils.set_date_format("2014/11/1"))
@@ -34,7 +34,7 @@ describe ParamUtils do
       end
     end
 
-    context "カスタム分析対象でない場合" do
+    context "オフラインデータ対象でない場合" do
 
       it "現在時刻を返却すること" do
         params = {}
@@ -56,7 +56,7 @@ describe ParamUtils do
     let(:user) {create(:multiple_test_user)}
     let(:no_upload_user) {create(:no_upload_user)}
 
-    context "カスタム分析対象の場合" do
+    context "オフラインデータ対象の場合" do
 
       it "アクティブなContentの id をパラメータに付与できること" do
         @content = upldedanlyzstatuseshelper.active_content(user.id)
@@ -65,7 +65,7 @@ describe ParamUtils do
       end
     end
 
-    context "カスタム分析対象でない場合" do
+    context "オフラインデータ対象でない場合" do
 
       it "入力パラメータと同じデータを返却すること" do
         @content = upldedanlyzstatuseshelper.active_content(no_upload_user.id)

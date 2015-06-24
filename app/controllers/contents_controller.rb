@@ -36,8 +36,8 @@ class ContentsController < ApplicationController
     if @content.save
       @content.upload_file.shift
       render json: {
-        from: @content.upload_file.first[0],
-        to: @content.upload_file.last[0],
+        from: padding_date_format( @content.upload_file.first[0] ),
+        to: padding_date_format( @content.upload_file.last[0] ),
         cv_num: @content.id.to_s,
         cv_name: @content.upload_file_name.split('.').first.truncate(10),
       }, status: 200

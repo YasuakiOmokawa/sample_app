@@ -448,7 +448,8 @@ function plotGraphHome(arr, idxarr) {
     arr_for_replot = $.extend(true, {}, arr);
 
     // グラフ描画対象
-    var graph_position = 'gh';
+    var graph_position = 'graph';
+    // var graph_position = 'display';
 
     // グラフ描画オプション
     var options = {
@@ -501,18 +502,18 @@ function plotGraphHome(arr, idxarr) {
     var ed_target = target + ' li:last';
     var click_target = target + ' li a.data-contents';
 
-    resetHomeRanking(target);
-    addRanking(idxarr, target);
-    paddingRankBox(target);
+    // resetHomeRanking(target);
+    // addRanking(idxarr, target);
+    // paddingRankBox(target);
 
     // 項目の最後へタグ付与
-    $(ed_target).attr('id', 'ed');
+    // $(ed_target).attr('id', 'ed');
 
     // 項目一覧へ改行タグ付与
-    $(target).append('<br>');
+    // $(target).append('<br>');
 
     // 項目一覧データにクリックイベントを追加
-    addClickEvtToInfo(click_target);
+    // addClickEvtToInfo(click_target);
 
     // jqplot描画後に実行する操作（jqplot描画前に書くこと）
     $.jqplot.postDrawHooks.push(function(graph) {
@@ -528,23 +529,25 @@ function plotGraphHome(arr, idxarr) {
 
     var graph = jQuery . jqplot(graph_position, arr, options);
 
-    // ブロック項目をホバーしたらプロットへデータ表示
-    var tooltip_target = '.tooltip';
-    $(click_target).hover(
-      function() {
-        var x = getTooltipXaxisToPixels($(this), graph);
-        var y = getTooltipYaxisToPixels($(this), graph);
+    // graph.replot(arr);
 
-        showTooltip(tooltip_target, x, y, $(this));
-        replotHome($(this));
-      },
-      function() {
-        hideTooltip(tooltip_target);
-        replot_options = {series: []};
-        replot_options.data = arr_for_replot;
-        graph.replot(replot_options);
-      }
-    );
+    // ブロック項目をホバーしたらプロットへデータ表示
+    // var tooltip_target = '.tooltip';
+    // $(click_target).hover(
+    //   function() {
+    //     var x = getTooltipXaxisToPixels($(this), graph);
+    //     var y = getTooltipYaxisToPixels($(this), graph);
+
+    //     showTooltip(tooltip_target, x, y, $(this));
+    //     replotHome($(this));
+    //   },
+    //   function() {
+    //     hideTooltip(tooltip_target);
+    //     replot_options = {series: []};
+    //     replot_options.data = arr_for_replot;
+    //     graph.replot(replot_options);
+    //   }
+    // );
 
     // ホームグラフをリプロットする
     var replotHome = function(target) {

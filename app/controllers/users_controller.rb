@@ -40,7 +40,23 @@ class UsersController < ApplicationController
   before_action :create_home, only: [:home_anlyz]
   prepend_before_action :chk_param, only: [:home_anlyz]
 
+  def cache_result_anlyz
+    if params[:result_obj].present? && params[:cache_key].present?
+
+      logger.info( '分析結果をキャッシュします。')
+      Rails.cache.write(params[:cache_key],
+        params[:result_obj].to_s, expires_in: 1.hour, compress: true)
+    end
+  end
+
   def home_anlyz
+    render json: {
+      :homearr => @json,
+      :page_fltr_wd => @page_fltr_wd,
+      :page_fltr_dev => @page_fltr_dev,
+      :page_fltr_usr => @page_fltr_usr,
+      :page_fltr_kwd => @page_fltr_kwd
+    } if request.xhr?
   end
 
   def detail_anlyz
@@ -57,15 +73,12 @@ class UsersController < ApplicationController
     # 検証用
     @tests = %w(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
 
-    unless request.wiselinks?
-      render json: {
-        :homearr => @json,
-        :page_fltr_wd => @page_fltr_wd,
-        :page_fltr_dev => @page_fltr_dev,
-        :page_fltr_usr => @page_fltr_usr,
-        :page_fltr_kwd => @page_fltr_kwd
-      } and return if request.xhr?
-    end
+    # jqplot用検証グラフデータ
+    # gon.home_graph = [
+    #   [0.5,0.5,10,{color: '#c00000'}],
+    #   [0.5,0.7,10,{color: '#ffc000'}],
+    #   [0.5,0.9,10,{color: '#0070c0'}]
+    # ]
 
     unless request.wiselinks_partial?
       render layout: 'ganalytics'
@@ -202,28 +215,28 @@ class UsersController < ApplicationController
 
     def chk_param
 
-      @content = UpldedAnlyzStatusesController.helpers.active_content(params[:id])
+      @content = Content.find(params[:cv_num])
       @content.upload_file.shift unless @content.nil?
       (@from, @to) = set_from_to(@content, params)
 
       # ajaxリクエストの判定
-      chk_cache
+      # chk_cache
 
       # パラメータ共通設定
       @user = User.find(params[:id])
       get_ga_profiles
      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
-     set_action(params[:action], @cond)
+     set_action(params[:category], @cond)
       gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末
       gon.radio_visitor = set_visitor_type( (params[:visitor].presence || "all"),@cond)                                 # 来訪者
       #　グラフ表示項目
      @graphic_item  = (params[:graphic_item].presence || 'pageviews').to_sym
       #　赤で強調表示項目
-     gon.red_item  = (params[:red_item].presence || '')
+     # gon.red_item  = (params[:red_item].presence || '')
      gon.graphic_item = @graphic_item.to_s
      gon.format_string = check_format_graph(@graphic_item)
      # CV種類
-     gon.cv_num = @cv_num = (params[:cv_num].presence || @user.init_cv_num).to_i
+     gon.cv_num = @cv_num = (@content.nil? ? params[:cv_num] : '1').to_i
       # 絞り込みキーワード
       @narrow_word = params[:narrow_select].presence
       if params[:narrow_select].present?
@@ -240,13 +253,13 @@ class UsersController < ApplicationController
       gon.radio_day = @day_type
 
       # ホーム画面の日付、cv名, hashを保存
-      gon.history_from = params[:history_from].presence
-      gon.history_to = params[:history_to].presence
-      gon.history_cv_num = params[:history_cv_num].presence
-      gon.history_hash = params[:hash].presence
+      # gon.history_from = params[:history_from].presence
+      # gon.history_to = params[:history_to].presence
+      # gon.history_cv_num = params[:history_cv_num].presence
+      # gon.history_hash = params[:hash].presence
 
       # ユーザーがアップロードした分析用ファイル
-      @contents = ContentsController.helpers.get_users_contents(@user.id)
+      # @contents = ContentsController.helpers.get_users_contents(@user.id)
     end
 
     def create_common_table
@@ -362,7 +375,7 @@ class UsersController < ApplicationController
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       cv = @cv_txt
 
-      # ページ項目
+      # 分析カテゴリ
       page = {
         'all' => {},
         'search' => {:medium.matches => 'organic'},
@@ -392,352 +405,176 @@ class UsersController < ApplicationController
         'all' => {}
       }
 
-      # 全体分析の完了したタイムスタンプを保持
-      if params[:analyzeallcomplete].present?
-        User.find(params[:id]).update_attribute(:limitanalyzeall, Time.now + 1.hour)
-        return
+      # リクエストパラメータに応じてカテゴリを決定
+      @page_fltr_wd = wd = params[:category].presence || "all"
+      page.select!{ |k,v| k == wd }
+      # wd = ' '
+      # if params[:category].present?
+      # else
+        # 初期値はall
+       # wd = 'all'
+      # end
+
+      # リクエストパラメータに応じてデバイスを絞る
+      dev = ' '
+      if params[:dev].present? and params[:dev] != 'undefined'
+        dev = params[:dev]
+      else
+        # 初期値はall
+        dev = 'all'
       end
+      @page_fltr_dev = dev
+      dev_opts.select!{ |k,v| k == dev }
 
-      # フラグで処理するか分ける
-      shori = params[:shori].presence || 0
-      if shori.to_i != 0
+      # リクエストパラメータに応じて訪問者を絞る
+      usr = ' '
+      if params[:usr].present? and params[:usr] != 'undefined'
+        usr = params[:usr]
+      else
+        # 初期値はall
+        usr = 'all'
+      end
+      @page_fltr_usr = usr
+      usr_opts.select!{ |k,v| k == usr }
 
-        # リクエストパラメータに応じてpageの項目を絞る
-        wd = ' '
-        if params[:act].present?
-          wd = params[:act]
+      # ページ項目の値に応じて絞り込みキーワードを選定する
+      kwd = ''
+      if params[:kwd].present?
+
+        logger.info('パラメータで渡されたキーワード: ' + kwd)
+        # キーワードがnokwdでない場合
+        if params[:kwd].to_s != 'nokwd'
+
+          kwd = params[:kwd].to_s
+          p = kwd.slice!(0)
+
+          set_narrow_word(kwd, @cond, p)
         else
-          # 初期値はall
-         wd = 'all'
-        end
-        @page_fltr_wd = wd
-        page.select!{ |k,v| k == wd }
-
-        # リクエストパラメータに応じてデバイスを絞る
-        dev = ' '
-        if params[:dev].present? and params[:dev] != 'undefined'
-          dev = params[:dev]
-        else
-          # 初期値はall
-          dev = 'all'
-        end
-        @page_fltr_dev = dev
-        dev_opts.select!{ |k,v| k == dev }
-
-        # リクエストパラメータに応じて訪問者を絞る
-        usr = ' '
-        if params[:usr].present? and params[:usr] != 'undefined'
-          usr = params[:usr]
-        else
-          # 初期値はall
-          usr = 'all'
-        end
-        @page_fltr_usr = usr
-        usr_opts.select!{ |k,v| k == usr }
-
-        # ページ項目の値に応じて絞り込みキーワードを選定する
-        kwd = ''
-        if params[:kwd].present?
-
-          logger.info('パラメータで渡されたキーワード: ' + kwd)
-          # キーワードがnokwdでない場合
-          if params[:kwd].to_s != 'nokwd'
-
-            kwd = params[:kwd].to_s
-            p = kwd.slice!(0)
-
-            set_narrow_word(kwd, @cond, p)
-          else
-            kwd = 'nokwd'
-          end
-
-        elsif kwd.empty?
-
-          # キャッシュ済のデータがあればコントローラを抜ける
-          return if @json.present?
-
-          logger.info( "絞り込み条件が指定されていません。絞り込み条件を取得します")
-          @cond[:filters].merge!(page.values[0])
-          kwds = []
-          case wd
-          when 'referral'
-            special = :source
-            ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
-              [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
-            ref_source.each do |t|
-              kwds.push('r' + t.source)
-            end
-          when 'social'
-            special = :socialNetwork
-            # データ取得部
-            soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
-              [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
-            soc_source.each do |t|
-              kwds.push( 'l' + t.social_network)
-            end
-          end
-          @cond[:filters] = {}
-
-          # キーワード配列を格納
-          @json = kwds.to_json
-
-          # 結果をキャッシュへ格納
-          logger.info( "絞り込み条件を取得しました。キャッシュへ登録します。")
-          Rails.cache.write(@memcache_kwd_key, @json, expires_in: 1.hour, compress: true)
-
-          # コントローラを抜ける
-          return
+          kwd = 'nokwd'
         end
 
-        @page_fltr_kwd = kwd
-        logger.info('設定されたキーワードは ' + kwd)
+      elsif kwd.empty?
 
         # キャッシュ済のデータがあればコントローラを抜ける
         return if @json.present?
 
-        # ページ項目ごとにデータ集計
-        p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-
-        # 絞り込んだページ項目で、処理を開始
-        page.each do |x, z|
-
-          room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
-
-          # フィルタオプション追加（キーワードは追加済み）
-          @cond[:filters].merge!(z)                            # ページ項目
-          @cond[:filters].merge!(dev_opts[dev])       # デバイス
-          @cond[:filters].merge!(usr_opts[usr])        # 訪問者
-
-          # データ指標
-          metrics = Metrics.new()
-          metrics_camel_case_datas = metrics.garb_parameter
-          @metrics_snake_case_datas = metrics.garb_result
-          metrics_for_graph_merge = metrics.jp_caption
-
-          # リトライ時のメッセージを指定
-          exception_cb = Proc.new do |retries|
-            logger.info("API request retry: #{retries}")
+        logger.info( "絞り込み条件が指定されていません。絞り込み条件を取得します")
+        @cond[:filters].merge!(page.values[0])
+        kwds = []
+        case wd
+        when 'referral'
+          special = :source
+          ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
+            [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+          ref_source.each do |t|
+            kwds.push('r' + t.source)
           end
-
-          ### APIデータ取得部
-          cls_name = 'SiteData'
-          # 4回までリトライできます
-          site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-            Ast::Ganalytics::Garbs::Data.create_class(cls_name,
-              metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
-          end
-
-          ### 取得データ加工部
-          @ast_data = site_data.reduce([]) do |acum, item|
-            item.day_type = chk_day(item.date.to_date)
-            item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
-            acum << item
-          end
-
-          # カスタムデータ置き変え判定
-          replace_cv_with_custom(@content, @ast_data, @cv_txt)
-
-          # 分析データのバリデート
-          logger.info("分析データのバリデートを開始します")
-
-          @valid_analyze_day_types = get_day_types
-
-          validate_cv
-          if @valid_analyze_day_types.size == 0
-            logger.info( "分析対象の日付がありません。処理を終了します。" )
-            break
-          end
-
-          # 日付とメトリクスの組み合わせコレクションを作る
-          @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @metrics_snake_case_datas).create
-
-          validate_metrics
-          if @valids.map {|t| t.metricses.size}.sum == 0
-            logger.info( "分析対象の指標データがありません。処理を終了します。" )
-            break
-          end
-
-          logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
-
-          @valids.each do |valid|
-            # バブルチャートに表示するデータを算出
-            bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
-            d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
-            home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
-
-            # ページ項目へ追加
-            day_room = room +  '::' + valid.day_type
-            p_hash[x][day_room] = home_graph_data
-            Rails.logger.info("#{x} #{day_room} のデータセットが完了しました。")
+        when 'social'
+          special = :socialNetwork
+          # データ取得部
+          soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
+            [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+          soc_source.each do |t|
+            kwds.push( 'l' + t.social_network)
           end
         end
+        @cond[:filters] = {}
 
-        # ループ終了。jqplot へデータ渡す
-        if shori != 0
-          @json = p_hash.to_json
+        # キーワード配列を格納
+        @json = kwds.to_json
+
+        logger.info( "絞り込み条件を取得しました。")
+
+        # コントローラを抜ける
+        return
+      end
+
+      @page_fltr_kwd = kwd
+      logger.info('設定されたキーワードは ' + kwd)
+
+      # キャッシュ済のデータがあればコントローラを抜ける
+      return if @json.present?
+
+      # ページ項目ごとにデータ集計
+      p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+
+      # 絞り込んだページ項目で、処理を開始
+      page.each do |x, z|
+
+        room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
+
+        # フィルタオプション追加（キーワードは追加済み）
+        @cond[:filters].merge!(z)                            # ページ項目
+        @cond[:filters].merge!(dev_opts[dev])       # デバイス
+        @cond[:filters].merge!(usr_opts[usr])        # 訪問者
+
+        # データ指標
+        metrics = Metrics.new()
+        metrics_camel_case_datas = metrics.garb_parameter
+        @metrics_snake_case_datas = metrics.garb_result
+        metrics_for_graph_merge = metrics.jp_caption
+
+        # リトライ時のメッセージを指定
+        exception_cb = Proc.new do |retries|
+          logger.info("API request retry: #{retries}")
+        end
+
+        ### APIデータ取得部
+        cls_name = 'SiteData'
+        # 4回までリトライできます
+        site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+          Ast::Ganalytics::Garbs::Data.create_class(cls_name,
+            metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
+        end
+
+        ### 取得データ加工部
+        @ast_data = site_data.reduce([]) do |acum, item|
+          item.day_type = chk_day(item.date.to_date)
+          item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
+          acum << item
+        end
+
+        # カスタムデータ置き変え判定
+        replace_cv_with_custom(@content, @ast_data, @cv_txt)
+
+        Rails.logger.info("CVの現在値は#{@ast_data}")
+
+        # 分析データのバリデート
+        logger.info("分析データのバリデートを開始します")
+
+        @valid_analyze_day_types = get_day_types
+
+        validate_cv
+        if @valid_analyze_day_types.size == 0
+          logger.info( "分析対象の日付がありません。処理を終了します。" )
+          break
+        end
+
+        # 日付とメトリクスの組み合わせコレクションを作る
+        @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @metrics_snake_case_datas).create
+
+        validate_metrics
+        if @valids.map {|t| t.metricses.size}.sum == 0
+          logger.info( "分析対象の指標データがありません。処理を終了します。" )
+          break
+        end
+
+        logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
+
+        @valids.each do |valid|
+          # バブルチャートに表示するデータを算出
+          bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
+          d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
+          home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
+
+          # ページ項目へ追加
+          day_room = room +  '::' + valid.day_type
+          p_hash[x][day_room] = home_graph_data
+          Rails.logger.info("#{x} #{day_room} のデータセットが完了しました。")
         end
       end
+
+      # ループ終了。jqplot へデータ渡す
+      @json = p_hash.to_json
     end
 end
-
-  # def social
-  #   # パラメータ個別設定
-  #   @title = 'ソーシャル'
-  #   @narrow_action = social_user_path
-  #   @details_partial = 'details'
-  #   gon.div_page_tab = 'social'
-
-  #   special = :socialNetwork
-  #   @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-  #   @categories = []
-  #   special_for_garb = to_garb_attr(special)
-  #   # データ取得部
-  #   session_rank = get_session_rank(special)
-  #   if session_rank.total_results == 0
-  #     Rails.logger.info("#{@title} の参照元は非分析対象です")
-  #     render :layout => 'ganalytics', :action => 'show' and return
-  #   end
-  #   session_data = get_session_data(special)
-
-  #   # 計算部
-  #   changed_kwds = change_to_garb_kwds(session_rank,
-  #     special_for_garb)
-
-  #   changed_kwds.each do |kwd|
-  #     Rails.logger.info("#{kwd} のソーシャルバリデートを実施します")
-  #     reduce = reduce_with_kwd(session_data,
-  #       kwd, special_for_garb)
-
-  #     # カスタムデータ置き換え判定
-  #     replace_cv_with_custom(@content, reduce, @cv_txt)
-
-  #     # バリデートデータの準備
-  #     cves = cves_for_validate(reduce, @day_type)
-  #     df = metrics_for_validate(reduce, @day_type, :sessions)
-  #     #CVバリデート
-  #     unless is_not_uniq?(cves)
-  #       validate_cv_msg(@day_type)
-  #       next
-  #     end
-  #     #メトリクスバリデート
-  #     unless is_not_uniq?(df.get_metrics)
-  #        validate_uniq_metrics_msg(:sessions)
-  #        next
-  #     end
-  #     unless cves.zip(df.get_metrics).uniq.size >= 3
-  #       validate_invalid_metrics_multiple_msg(:sessions)
-  #       next
-  #     end
-  #     if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
-  #       validate_too_much_zero_metrics_msg(:sessions)
-  #       next
-  #     end
-
-  #     Rails.logger.info("#{kwd} のソーシャルバリデートに成功しました")
-
-  #     # 相関分析開始
-  #     res_table[kwd] = generate_graph_data(reduce,
-  #         [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
-  #   end
-
-  #   calc_desire_datas(res_table)
-  #   @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
-  #   create_listbox_categories('l')
-
-  #   render :layout => 'ganalytics', :action => 'show'
-  # end
-
-  # def referral
-  #   # パラメータ個別設定
-  #   @title = 'その他ウェブサイト'
-  #   @narrow_action = referral_user_path
-  #   @details_partial = 'details'
-  #   gon.div_page_tab = 'referral'
-
-  #   special = :source
-  #   @in_table = res_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-  #   @categories = []
-  #   special_for_garb = to_garb_attr(special)
-  #   # データ取得部
-  #   session_rank = get_session_rank(special)
-  #   if session_rank.total_results == 0
-  #     Rails.logger.info("#{@title} の参照元は非分析対象です")
-  #     render :layout => 'ganalytics', :action => 'show' and return
-  #   end
-  #   session_data = get_session_data(special)
-
-  #   # 計算部
-  #   changed_kwds = change_to_garb_kwds(session_rank,
-  #     special_for_garb)
-
-  #   changed_kwds.each do |kwd|
-  #     Rails.logger.info("#{kwd} の参照バリデートを実施します")
-  #     reduce = reduce_with_kwd(session_data,
-  #       kwd, special_for_garb)
-
-  #     # カスタムデータ置き換え判定
-  #     replace_cv_with_custom(@content, reduce, @cv_txt)
-
-  #     # バリデートデータの準備
-  #     cves = cves_for_validate(reduce, @day_type)
-  #     df = metrics_for_validate(reduce, @day_type, :sessions)
-  #     #CVバリデート
-  #     unless is_not_uniq?(cves)
-  #       validate_cv_msg(@day_type)
-  #       next
-  #     end
-  #     #メトリクスバリデート
-  #     unless is_not_uniq?(df.get_metrics)
-  #        validate_uniq_metrics_msg(:sessions)
-  #        next
-  #     end
-  #     unless cves.zip(df.get_metrics).uniq.size >= 3
-  #       validate_invalid_metrics_multiple_msg(:sessions)
-  #       next
-  #     end
-  #     if ExcelFunc.excel_upper_quartile(df.get_metrics) == 0
-  #       validate_too_much_zero_metrics_msg(:sessions)
-  #       next
-  #     end
-
-  #     Rails.logger.info("#{kwd} の参照バリデートに成功しました")
-
-  #     # 相関分析開始
-  #     res_table[kwd] = generate_graph_data(reduce,
-  #         [:sessions], @day_type)[komoku_day_type(:sessions, @day_type)]
-  #   end
-
-  #   calc_desire_datas(res_table)
-  #   @in_table = head_special(res_table, 3)     # 相関係数の高い順にソート
-  #   create_listbox_categories('r')
-
-  #   render :layout => 'ganalytics', :action => 'show'
-  # end
-
-  # def direct
-  #   @title = '直接入力/ブックマーク'
-  #   @narrow_action = direct_user_path
-  #   gon.div_page_tab = 'direct'
-  #   @details_partial = 'norender'
-
-  #   render :layout => 'ganalytics', :action => 'show'
-  # end
-
-  # def search
-  #   @title = '検索'
-  #   @narrow_action = search_user_path
-  #   gon.div_page_tab = 'search'
-  #   @details_partial = 'norender'
-
-  #   render :layout => 'ganalytics', :action => 'show'
-  # end
-
-  # def all
-  #   @title = '全体'
-  #   @narrow_action = all_user_path
-  #   @details_partial = 'norender'   # ページ毎の部分テンプレート
-  #   gon.div_page_tab = 'all'
-
-  #   render :layout => 'ganalytics', :action => 'show'
-  # end
-
