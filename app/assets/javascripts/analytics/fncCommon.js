@@ -7,8 +7,6 @@ $(document).ready(function() {
   replaceContentParentAttr();
   if ( location.href.match(/contents/) ) {
     eventsOnSettingUI();
-  } else {
-    plotHomeGraphDummy();
   }
 
   // Wiselinks 設定
@@ -43,8 +41,6 @@ $(document).ready(function() {
     replaceContentParentAttr();
     if ( location.href.match(/contents/) ) {
       eventsOnSettingUI();
-    } else {
-      plotHomeGraphDummy();
     }
   });
 
@@ -251,7 +247,6 @@ function replaceContentParentAttr() {
     console.log("css condition is home");
     $('#fm').attr('id', "replace");
     $('li.switch').addClass('hide');
-    $('#loading').removeClass('hide');
   }
 }
 

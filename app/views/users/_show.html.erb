@@ -1,0 +1,34 @@
+<%= include_gon %>
+<% set_title(full_title("ホーム")) %>
+<%= render 'layouts/loading' %>
+
+<script>
+  // キャッシュされたグラフデータがある場合の処理
+  $(function() {
+    if (typeof gon != "undefined") {
+      if (typeof gon.cached_item != "undefined" && gon.cached_item[0] != 'not_cved') {
+        var plots = [];
+
+        // グラフデータの作成
+        createGraphPlots(gon.cached_item, plots);
+
+        // 作成したグラフデータを使ってグラフ描画を実行
+        plotGraphHome(plots, gon.cached_item);
+
+        // $('#spinner').addClass('hide');
+      } else {
+        // データ不足で分析できない旨を表示
+        $('#loading').removeClass('hide');
+        addWhenNotCved();
+      }
+    }
+  });
+</script>
+
+<div id="term" class=""><p>2015/01/01&nbsp;-&nbsp;2015/12/31</p></div>
+<div id="graph">
+</div>
+
+<ul id="rank">
+  <!-- ranking plot area by javascript -->
+</ul>

@@ -6,7 +6,7 @@ function createGraphPlots(idxarr, arr) {
 
     var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
-    plot_color = setInitialBubbleColor();
+    plot_color = setBubbleColor(x, y);
     tmp_arr[i] = [ x, y, 1, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
   arr.push(tmp_arr);
@@ -43,7 +43,7 @@ function headIdxarr(idxarr, limit) {
 // 項目一覧データにクリックイベントを追加
 function addClickEvtToInfo(target) {
 
-  $(target).click(function(e) {
+  $(target).on('click', 'li a', function(e) {
 
     var target_action = getTargetAction(e);
     var target_action_array = target_action.split('/');
@@ -159,35 +159,17 @@ function addRanking(idxarr, target) {
             'data-usrfltr': value['usr_fltr'],
             'data-kwdfltr': value['kwd_fltr'],
             "name": value['pagelink'],
-            'data-page': value['page'],
+            'data-category': value['category'],
             'class': 'data-contents'
           })
           .text(counter)
       )
     );
-
   });
+
+  // 終端処理
+  $(target).append($('<br class="clear">'));
 }
-
-function paddingRankBox(base_target) {
-  var target = base_target + ' li'
-  var box_size = $(target).length;
-  var padding_number = 15 - box_size;
-
-  // 指定回数処理を行う
-  $.each(new Array(padding_number),function(i){
-    box_size += 1;
-    $(base_target)
-      .append(
-        $('<li>')
-        .append(
-          $('<a>')
-            .text('-')
-        )
-      );
-  });
-}
-
 
 // バブル色の指定
 function setInitialBubbleColor() {
@@ -233,8 +215,8 @@ var setDataidx = function(obj, wd, idxarr) {
 
   var homearr = $.extend(true, {}, obj), // 参照渡しだとバグる。
     fltr_wd = wd,
-    pagenm = 'div#pnt a.' + fltr_wd,   // ページ名（全体、検索、など）を取得
-    pagelink = $(pagenm).attr('path'),   // ページへのリンクを取得
+    // pagenm = 'div#pnt a.' + fltr_wd,   // ページ名（全体、検索、など）を取得
+    // pagelink = $(pagenm).attr('path'),   // ページへのリンクを取得
     tmp_obj = {};
 
   for (var i in homearr[fltr_wd]) {
@@ -264,24 +246,12 @@ var setDataidx = function(obj, wd, idxarr) {
       ar['dev_fltr'] = dev_fltr;
       ar['usr_fltr'] = usr_fltr;
       ar['kwd_fltr'] = kwd_fltr;
-      ar['page'] = fltr_wd;
-      ar['pagelink'] = pagelink;
+      ar['category'] = fltr_wd;
+      // ar['pagelink'] = pagelink;
       idxarr.push(ar);
     }
   }
 }
-
-// $("#mfm ul li a").each(function() {
-//   console.log($(this).data('corr'));
-// })
-
-// $("#mfm ul li a").each(function() {
-//   console.log($(this).data('pri'));
-// })
-
-// $("#mfm ul li a").each(function() {
-//   console.log($(this).data('vari'));
-// })
 
 // 優先順位の降順、
 // 　ページ名と項目名の昇順でソート
@@ -291,8 +261,8 @@ function sortIdxarr(idxarr) {
   var idxarr = idxarr.sort(function(a,b) {
     if (a.pri > b.pri) return  -1;
     if (a.pri < b.pri) return  1;
-    if (a.page > b.page) return  1;
-    if (a.page < b.page) return  -1;
+    if (a.category > b.category) return  1;
+    if (a.category < b.category) return  -1;
     if (a.jp_metrics > b.jp_metrics) return  1;
     if (a.jp_metrics < b.jp_metrics) return  -1;
   });
@@ -394,32 +364,76 @@ function getTooltipYaxisToPixels(a, graph) {
   return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
 }
 
-function showTooltip(target, x, y, contents) {
+function showTooltip(contents) {
 
-  var GRAPH_HEIGHT = 446;
-  var GRAPH_WIDTH = 0;
+  var position = (function() {
+    if (contents.data['vari'] >= 0.5) {
+      return 'hvr_r';
+    } else {
+      return 'hvr_l';
+    }
+  }());
 
-  $(target)
-  .tooltipster({
-    content: $(
-      '<div id="box_r">'
-        + '<ul>'
-        + '<li>' + contents.data('metrics') + '</li>'
-        + '<li>' + contents.data('day-type-jp') + '</li>'
-        + '<li>' + devTnsltENtoJP(contents.data('devfltr')) + '</li>'
-        + '<li>' + usrTnsltENtoJP(contents.data('usrfltr')) + '</li>'
-        + '<li id="keyword">' + kwdTnsltENtoJP(contents.data('kwdfltr')) + '</li>'
-        + '</ul>'
-       + '</div>'
-    ),
-    position: 'top',
-    offsetX: x - GRAPH_WIDTH,
-    offsetY: GRAPH_HEIGHT - y,
-    speed: 0,
-  })
-  .tooltipster('show');
-
-  removeKeywordForPageName();
+  $('#graph')
+  .prepend(
+    $("<div>")
+    .attr("id", "fm_graph")
+    .append(
+      $("<div>")
+      .attr("id", position)
+      .append(
+        $("<dl>")
+        .attr("id", "tgt")
+        .append(
+          $('<dt>')
+          .text( contents.data('metrics') )
+        )
+        .append(
+          $('<dd>')
+          .text("1,234")
+          .append(
+            $('<span>')
+            .attr("id", "gp")
+            .text('(+123)')
+          )
+        )
+      )
+      .append(
+        $('<ul>')
+        .attr("id", "bottom")
+        .append($("<li>").append(
+          $("<dl>")
+            .append($("<dt>").text("流入元"))
+            .append($("<dd>").text( $( document.getElementById(contents.data('category')) ).text() ))
+          )
+        )
+        .append($("<li>").append(
+          $("<dl>")
+            .append($("<dt>").text("曜日"))
+            .append($("<dd>").text( contents.data('day-type-jp') ))
+          )
+        )
+        .append($("<li>").append(
+          $("<dl>")
+            .append($("<dt>").text("デバイス"))
+            .append($("<dd>").text( devTnsltENtoJP(contents.data('devfltr')) ))
+          )
+        )
+        .append($("<li>").append(
+          $("<dl>")
+            .append($("<dt>").text("ユーザー"))
+            .append($("<dd>").text( usrTnsltENtoJP(contents.data('usrfltr')) ))
+          )
+        )
+        .append($("<li>").append(
+          $("<dl>")
+            .append($("<dt>").text("その他条件"))
+            .append($("<dd>").text( kwdTnsltENtoJP(contents.data('kwdfltr')) ))
+          )
+        )
+      )
+    )
+  );
 }
 
 function removeKeywordForPageName() {
@@ -449,7 +463,6 @@ function plotGraphHome(arr, idxarr) {
 
     // グラフ描画対象
     var graph_position = 'graph';
-    // var graph_position = 'display';
 
     // グラフ描画オプション
     var options = {
@@ -498,22 +511,11 @@ function plotGraphHome(arr, idxarr) {
     };
 
     // 項目一覧へ要素を追記
-    var target = 'div#mfm ul';
-    var ed_target = target + ' li:last';
-    var click_target = target + ' li a.data-contents';
+    var rank_target = '#rank';
 
-    // resetHomeRanking(target);
-    // addRanking(idxarr, target);
-    // paddingRankBox(target);
-
-    // 項目の最後へタグ付与
-    // $(ed_target).attr('id', 'ed');
-
-    // 項目一覧へ改行タグ付与
-    // $(target).append('<br>');
-
+    addRanking(idxarr, rank_target);
     // 項目一覧データにクリックイベントを追加
-    // addClickEvtToInfo(click_target);
+    // addClickEvtToInfo(rank_target);
 
     // jqplot描画後に実行する操作（jqplot描画前に書くこと）
     $.jqplot.postDrawHooks.push(function(graph) {
@@ -529,40 +531,45 @@ function plotGraphHome(arr, idxarr) {
 
     var graph = jQuery . jqplot(graph_position, arr, options);
 
-    // graph.replot(arr);
-
     // ブロック項目をホバーしたらプロットへデータ表示
-    // var tooltip_target = '.tooltip';
-    // $(click_target).hover(
-    //   function() {
-    //     var x = getTooltipXaxisToPixels($(this), graph);
-    //     var y = getTooltipYaxisToPixels($(this), graph);
-
-    //     showTooltip(tooltip_target, x, y, $(this));
-    //     replotHome($(this));
-    //   },
-    //   function() {
-    //     hideTooltip(tooltip_target);
-    //     replot_options = {series: []};
-    //     replot_options.data = arr_for_replot;
-    //     graph.replot(replot_options);
-    //   }
-    // );
+    $(rank_target).on({
+        'mouseenter': function() {
+          console.log('hover mouse');
+          replotHome($(this));
+          showTooltip($(this));
+        },
+        'mouseleave': function() {
+          console.log('leave mouse');
+          replot_options = {
+            seriesDefaults: {
+              rendererOptions: {
+                autoscaleMultiplier: 0.1,
+              },
+            },
+            series: []
+          };
+          replot_options.data = arr_for_replot;
+          graph.replot(replot_options);
+        }
+      }, 'a');
 
     // ホームグラフをリプロットする
     var replotHome = function(target) {
 
-      var origin_arr = $.extend(true, {}, arr_for_replot); // 参照渡しだとバグる。
-      var p_color = setBubbleColor(target.data('vari'), target.data('corr'));
-      var addopt = [target.data('vari'), target.data('corr'), 1, p_color];
-      var add_options = {series: []};
+      var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
+        p_color = setBubbleColor(target.data('vari'), target.data('corr')),
+        addopt = [target.data('vari'), target.data('corr'), 1, p_color];
+      var add_options = {
+        seriesDefaults: {
+          rendererOptions: {
+            autoscaleMultiplier: 0.4,
+          },
+        },
+        series: [],
+      };
 
-      origin_arr[0].push(addopt);
+      origin_arr[0] = [addopt];
       add_options.data = origin_arr;
-
-      // ツールチップ枠の色の変更
-      $('.tooltipster-default').css('border-color', p_color.color);
-      $('.tooltipster-default .tooltipster-arrow .tooltipster-arrow-border').css('border-color', p_color.color);
 
       // 再描画を実行
       // jqplot の replot関数は、追加のオプションを設定すると

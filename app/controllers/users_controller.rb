@@ -38,7 +38,40 @@ class UsersController < ApplicationController
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
   # before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
   before_action :create_home, only: [:home_anlyz]
-  prepend_before_action :chk_param, only: [:home_anlyz]
+  prepend_before_action :chk_param, only: [:home_anlyz, :get_filter_keywords]
+
+  def get_filter_keywords
+
+    logger.info( "絞り込み条件用のキーワードを取得します")
+
+    add_category_condition(params[:category])
+
+    @cv_txt = ('goal' + @cv_num.to_s + '_completions')
+    kwds = []
+    case params[:category]
+    when 'referral'
+      special = :source
+      ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
+        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+      ref_source.each do |t|
+        kwds.push('r' + t.source)
+      end
+    when 'social'
+      special = :socialNetwork
+      soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
+        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+      soc_source.each do |t|
+        kwds.push( 'l' + t.social_network)
+      end
+    end
+
+    logger.info( "絞り込み条件用のキーワードを取得しました")
+
+    # キーワード配列を返却
+    render json: {
+      :keywords => kwds.to_json,
+    }
+  end
 
   def cache_result_anlyz
     if params[:result_obj].present? && params[:cache_key].present?
@@ -47,16 +80,17 @@ class UsersController < ApplicationController
       Rails.cache.write(params[:cache_key],
         params[:result_obj].to_s, expires_in: 1.hour, compress: true)
     end
+    render json: { cache_result: "ok"}
   end
 
   def home_anlyz
     render json: {
       :homearr => @json,
-      :page_fltr_wd => @page_fltr_wd,
-      :page_fltr_dev => @page_fltr_dev,
-      :page_fltr_usr => @page_fltr_usr,
-      :page_fltr_kwd => @page_fltr_kwd
-    } if request.xhr?
+      # :category => @category,
+      :device_filter => @device_filter,
+      :user_filter => @user_filter,
+      :keyword_filter => @keyword_filter,
+    }
   end
 
   def detail_anlyz
@@ -68,10 +102,12 @@ class UsersController < ApplicationController
   end
 
   def show
-    @partial = 'first'
+    @partial = 'show'
+    # binding.pry
 
-    # 検証用
-    @tests = %w(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
+    gon.cached_item = JSON.parse(
+      Rails.cache.read(request.query_string)) if request.query_string.present?
+
 
     # jqplot用検証グラフデータ
     # gon.home_graph = [
@@ -215,6 +251,8 @@ class UsersController < ApplicationController
 
     def chk_param
 
+      # binding.pry
+
       @content = Content.find(params[:cv_num])
       @content.upload_file.shift unless @content.nil?
       (@from, @to) = set_from_to(@content, params)
@@ -252,14 +290,6 @@ class UsersController < ApplicationController
       @day_type = params[:day_type].presence || 'all_day'
       gon.radio_day = @day_type
 
-      # ホーム画面の日付、cv名, hashを保存
-      # gon.history_from = params[:history_from].presence
-      # gon.history_to = params[:history_to].presence
-      # gon.history_cv_num = params[:history_cv_num].presence
-      # gon.history_hash = params[:hash].presence
-
-      # ユーザーがアップロードした分析用ファイル
-      # @contents = ContentsController.helpers.get_users_contents(@user.id)
     end
 
     def create_common_table
@@ -375,206 +405,87 @@ class UsersController < ApplicationController
       @cv_txt = ('goal' + @cv_num.to_s + '_completions')
       cv = @cv_txt
 
-      # 分析カテゴリ
-      page = {
-        'all' => {},
-        'search' => {:medium.matches => 'organic'},
-        'direct' => {:medium.matches => '(none)'},
-        'referral' => {:medium.matches => 'referral'},
-        'social' => {:has_social_source_referral.matches => 'Yes'},
-      }
-
-      # デバイス
-      dev_opts = {
-        'pc' => { :device_category.matches => 'desktop' },
-        'sphone' => {
-          :device_category.matches => 'mobile',
-          :mobile_input_selector.matches => 'touchscreen'
-        },
-        'mobile' => {
-         :device_category.matches => 'mobile',
-          :mobile_input_selector.does_not_match => 'touchscreen'
-        },
-        'all' => {}
-      }
-
-      # 訪問者
-      usr_opts = {
-        'new' => {:user_type.matches => 'New Visitor'},
-        'repeat' => { :user_type.matches => 'Returning Visitor' },
-        'all' => {}
-      }
-
       # リクエストパラメータに応じてカテゴリを決定
-      @page_fltr_wd = wd = params[:category].presence || "all"
-      page.select!{ |k,v| k == wd }
-      # wd = ' '
-      # if params[:category].present?
-      # else
-        # 初期値はall
-       # wd = 'all'
-      # end
-
+      @category = add_category_condition(params[:category])
       # リクエストパラメータに応じてデバイスを絞る
-      dev = ' '
-      if params[:dev].present? and params[:dev] != 'undefined'
-        dev = params[:dev]
-      else
-        # 初期値はall
-        dev = 'all'
-      end
-      @page_fltr_dev = dev
-      dev_opts.select!{ |k,v| k == dev }
-
+      @device_filter = add_device_condition(params[:filter][:dev])
       # リクエストパラメータに応じて訪問者を絞る
-      usr = ' '
-      if params[:usr].present? and params[:usr] != 'undefined'
-        usr = params[:usr]
-      else
-        # 初期値はall
-        usr = 'all'
+      @user_filter = add_user_condition(params[:filter][:usr])
+      # キーワードを設定する
+      @keyword_filter = add_keyword_condition(params[:filter][:kwd])
+
+      # データ集計
+      p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+
+      # デバイス::訪問者::キーワード
+      room = @device_filter + '::' + @user_filter + '::' + @keyword_filter
+
+      # データ指標
+      metrics = Metrics.new()
+      metrics_camel_case_datas = metrics.garb_parameter
+      @metrics_snake_case_datas = metrics.garb_result
+      metrics_for_graph_merge = metrics.jp_caption
+
+      # リトライ時のメッセージを指定
+      exception_cb = Proc.new do |retries|
+        logger.info("API request retry: #{retries}")
       end
-      @page_fltr_usr = usr
-      usr_opts.select!{ |k,v| k == usr }
 
-      # ページ項目の値に応じて絞り込みキーワードを選定する
-      kwd = ''
-      if params[:kwd].present?
+      ### APIデータ取得部
+      cls_name = 'SiteData'
+      # 4回までリトライできます
+      site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
+        Ast::Ganalytics::Garbs::Data.create_class(cls_name,
+          metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
+      end
 
-        logger.info('パラメータで渡されたキーワード: ' + kwd)
-        # キーワードがnokwdでない場合
-        if params[:kwd].to_s != 'nokwd'
+      ### 取得データ加工部
+      @ast_data = site_data.reduce([]) do |acum, item|
+        item.day_type = chk_day(item.date.to_date)
+        item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
+        acum << item
+      end
 
-          kwd = params[:kwd].to_s
-          p = kwd.slice!(0)
+      # カスタムデータ置き変え判定
+      replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
-          set_narrow_word(kwd, @cond, p)
-        else
-          kwd = 'nokwd'
-        end
+      Rails.logger.info("CVの現在値は#{@ast_data}")
 
-      elsif kwd.empty?
+      # 分析データのバリデート
+      logger.info("分析データのバリデートを開始します")
 
-        # キャッシュ済のデータがあればコントローラを抜ける
-        return if @json.present?
+      @valid_analyze_day_types = get_day_types
 
-        logger.info( "絞り込み条件が指定されていません。絞り込み条件を取得します")
-        @cond[:filters].merge!(page.values[0])
-        kwds = []
-        case wd
-        when 'referral'
-          special = :source
-          ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
-            [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
-          ref_source.each do |t|
-            kwds.push('r' + t.source)
-          end
-        when 'social'
-          special = :socialNetwork
-          # データ取得部
-          soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
-            [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
-          soc_source.each do |t|
-            kwds.push( 'l' + t.social_network)
-          end
-        end
-        @cond[:filters] = {}
-
-        # キーワード配列を格納
-        @json = kwds.to_json
-
-        logger.info( "絞り込み条件を取得しました。")
-
-        # コントローラを抜ける
+      validate_cv
+      if @valid_analyze_day_types.size == 0
+        logger.info( "分析対象の日付がありません。処理を終了します。" )
         return
       end
 
-      @page_fltr_kwd = kwd
-      logger.info('設定されたキーワードは ' + kwd)
+      # 日付とメトリクスの組み合わせコレクションを作る
+      @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @metrics_snake_case_datas).create
 
-      # キャッシュ済のデータがあればコントローラを抜ける
-      return if @json.present?
-
-      # ページ項目ごとにデータ集計
-      p_hash = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-
-      # 絞り込んだページ項目で、処理を開始
-      page.each do |x, z|
-
-        room = dev + '::' + usr + '::' + kwd           # デバイス::訪問者::キーワード
-
-        # フィルタオプション追加（キーワードは追加済み）
-        @cond[:filters].merge!(z)                            # ページ項目
-        @cond[:filters].merge!(dev_opts[dev])       # デバイス
-        @cond[:filters].merge!(usr_opts[usr])        # 訪問者
-
-        # データ指標
-        metrics = Metrics.new()
-        metrics_camel_case_datas = metrics.garb_parameter
-        @metrics_snake_case_datas = metrics.garb_result
-        metrics_for_graph_merge = metrics.jp_caption
-
-        # リトライ時のメッセージを指定
-        exception_cb = Proc.new do |retries|
-          logger.info("API request retry: #{retries}")
-        end
-
-        ### APIデータ取得部
-        cls_name = 'SiteData'
-        # 4回までリトライできます
-        site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
-          Ast::Ganalytics::Garbs::Data.create_class(cls_name,
-            metrics_camel_case_datas.dup.push([ (@cv_txt.classify + 's').to_sym]), [:date] ).results(@ga_profile, @cond)
-        end
-
-        ### 取得データ加工部
-        @ast_data = site_data.reduce([]) do |acum, item|
-          item.day_type = chk_day(item.date.to_date)
-          item.repeat_rate = item.sessions.to_i > 0 ? (100 - item.percent_new_sessions.to_f).round(1).to_s : "0"
-          acum << item
-        end
-
-        # カスタムデータ置き変え判定
-        replace_cv_with_custom(@content, @ast_data, @cv_txt)
-
-        Rails.logger.info("CVの現在値は#{@ast_data}")
-
-        # 分析データのバリデート
-        logger.info("分析データのバリデートを開始します")
-
-        @valid_analyze_day_types = get_day_types
-
-        validate_cv
-        if @valid_analyze_day_types.size == 0
-          logger.info( "分析対象の日付がありません。処理を終了します。" )
-          break
-        end
-
-        # 日付とメトリクスの組み合わせコレクションを作る
-        @valids = ValidAnalyzeMaterial.new(@valid_analyze_day_types, @metrics_snake_case_datas).create
-
-        validate_metrics
-        if @valids.map {|t| t.metricses.size}.sum == 0
-          logger.info( "分析対象の指標データがありません。処理を終了します。" )
-          break
-        end
-
-        logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
-
-        @valids.each do |valid|
-          # バブルチャートに表示するデータを算出
-          bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
-          d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
-          home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
-
-          # ページ項目へ追加
-          day_room = room +  '::' + valid.day_type
-          p_hash[x][day_room] = home_graph_data
-          Rails.logger.info("#{x} #{day_room} のデータセットが完了しました。")
-        end
+      validate_metrics
+      if @valids.map {|t| t.metricses.size}.sum == 0
+        logger.info( "分析対象の指標データがありません。処理を終了します。" )
+        return
       end
 
-      # ループ終了。jqplot へデータ渡す
+      logger.info("分析データのバリデートがすべて完了しました。分析を開始します")
+
+      @valids.each do |valid|
+        # バブルチャートに表示するデータを算出
+        bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
+        d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
+        home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
+
+        # ページ項目へ追加
+        day_room = room +  '::' + valid.day_type
+        p_hash[@category][day_room] = home_graph_data
+        Rails.logger.info("#{@category} #{day_room} のデータセットが完了しました。")
+      end
+
+      # jqplot へデータ渡す
       @json = p_hash.to_json
     end
 end

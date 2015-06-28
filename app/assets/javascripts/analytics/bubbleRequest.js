@@ -2,6 +2,23 @@
 // 0: 未処理 1: 処理中 2: 処理終了
 var bbl_shori_flg = 0;
 
+// デバイス
+function getDevOpts() {
+  return [
+    'pc',
+    // 'sphone',
+    // 'mobile',
+  ];
+}
+
+// 訪問者
+function getUsrOpts() {
+  return [
+    // 'new',
+    // 'repeat'
+  ];
+}
+
 function locationHashChanged(category) {
   console.log("ホーム分析開始!");
 
@@ -21,7 +38,7 @@ function locationHashChanged(category) {
   (function bubbleCreateAtTabLink() {
 
     if (bbl_shori_flg === 1) {
-      addErrorMessage('現在実行中のリクエストが完了してからもう一度お試しください。');
+      // addErrorMessage('現在実行中のリクエストが完了してからもう一度お試しください。');
       return;
     }
 
@@ -35,35 +52,6 @@ function locationHashChanged(category) {
     req_opts.jp_page_name = $(document
       .getElementById(params.for_anlyz.category)).text();
 
-    // タブ関連処理
-    // TabMark('div#pnt', element);
-
-    // 生成されたパーツを使ってバブルチャートを作成
-    (function createBubbleWithParts() {
-
-      // 返り値データをポーリング
-      var timerID = setInterval( function(){
-        if (Object.keys(shaped_idxarr).length != 0 ) {
-
-          // データがキャッチされた後の処理
-          if (shaped_idxarr[0] != 'not_cved') {
-            var plots = [];
-
-            createGraphPlots(shaped_idxarr, plots);
-            plotGraphHome(plots, shaped_idxarr);
-            // afterCall('div#gh');
-            // setRange();
-          } else {
-            // データ不足で分析できない旨を表示
-            addWhenNotCved();
-          }
-          // ポーリング終了処理
-          clearInterval(timerID);
-          timerID = null;
-        }
-      },100);
-    }());
-
     //  バブルチャートのデータを作成
     (function createBubbleParts() {
       var return_obj = {};
@@ -72,6 +60,8 @@ function locationHashChanged(category) {
       (function requestPartsData() {
 
         console.log( 'バブルチャートリクエストを開始!');
+        console.log( '分析カテゴリ: '
+          + params.for_anlyz.category);
 
         // ページ遷移先の設定
         params.userpath = $("#home_anlyz_user_path").text();
@@ -80,27 +70,22 @@ function locationHashChanged(category) {
           dev, usr, kwd,
           opts_cntr = 0;
 
-        // オプションキーワードを生成
-        // ページ項目に合わせた絞り込みキーワードを取得する
+        // 分析条件に使用するキーワードを取得
         var kwd_opts = (function setKwds() {
 
           // 返り値
           var dt = [];
 
-          // ページ項目に合わせた絞り込みキーワードを取得する
-          // この時点では絞り込みオプションを指定しない
-          console.log( '絞り込み用キーワード取得対象 : '
-            + params.for_anlyz.category);
           console.log( '絞り込み用キーワード取得処理の開始');
 
           $.ajax({
-            url: params.userpath,
-            async: true,
+            url: $("#get_filter_keywords_user_path").text(),
+            async: false,
             dataType: 'json',
-            data: params,
+            data: params.for_anlyz,
           })
           .done(function(data, textStatus, jqXHR) {
-            var d = JSON.parse(data.homearr);
+            var d = JSON.parse(data.keywords);
             console.log( '絞り込み用キーワード取得完了');
             console.log(d);
             $.extend(true, dt, d);
@@ -137,7 +122,7 @@ function locationHashChanged(category) {
 
             var parallel_limit = opts_cntr + 3; // 並列処理数
             while (opts_cntr < parallel_limit) {
-              params.for_anlyz = createFilter( opts[opts_cntr] );
+              params.for_anlyz.filter = createFilter( opts[opts_cntr] );
               requests.push( createAjaxRequest(params) );
               opts_cntr++;
               if (opts_cntr > opts.length - 1) {
@@ -150,9 +135,6 @@ function locationHashChanged(category) {
 
             $.when.apply($, requests).done(function() {
 
-              var page_fltr_wd;
-              console.log( 'グラフデータajax通信成功!');
-
               // グラフ描画用のデータをマージ
               $.each(arguments, function(k, v) {
 
@@ -160,18 +142,17 @@ function locationHashChanged(category) {
                 $.extend(true, tmp_obj, r_obj_tmp);
 
                 // 項目名、フィルタ名の取得
-                page_fltr_wd = v[0].page_fltr_wd;
-                var page_fltr_dev = v[0].page_fltr_dev;
-                var page_fltr_usr = v[0].page_fltr_usr;
-                var page_fltr_kwd = v[0].page_fltr_kwd;
 
-                console.log('デバイス : ' + page_fltr_dev + ' 訪問者 : ' + page_fltr_usr + ' キーワード : ' + page_fltr_kwd );
+                console.log( '下記の条件で、グラフデータのajax通信が成功しました');
+                console.log('デバイス : ' + v[0].device_filter
+                  + ' 訪問者 : ' + v[0].user_filter
+                  + ' キーワード : ' + v[0].keyword_filter );
               });
 
               // フィルタリングオプションの配列が無くなるまでajaxを実行
               if (opts_cntr <= opts.length - 1) {
 
-                console.log('グラフデータajax処理を継続します');
+                console.log('フィルタの組み合わせが残っているため、グラフデータのajax通信を継続します');
                 // ajax処理を再実行
                 callExecuter();
               } else {
@@ -179,7 +160,8 @@ function locationHashChanged(category) {
                 // リクエストを処理終了
                 bbl_shori_flg = 2;
 
-                console.log('分析カテゴリ :' + page_fltr_wd);
+                console.log('分析カテゴリ :'
+                  + params.for_anlyz.category + 'のバブルチャートリクエストが全てが完了しました');
 
                 // ローディング完了テキストを表示
                 // $('#daemon span').text('complete!');
@@ -196,7 +178,7 @@ function locationHashChanged(category) {
             .always(function() {
               // リクエスト処理が終了した場合に実行される
               if (bbl_shori_flg == 2) {
-                console.log( 'ajax通信終了!');
+                console.log( 'ホーム分析終了!');
               }
             });
           }
@@ -211,7 +193,7 @@ function locationHashChanged(category) {
 
           if(Object.keys(return_obj).length != 0){
             // データ項目一覧セット
-            setDataidx(return_obj, element, idxarr);
+            setDataidx(return_obj, params.for_anlyz.category, idxarr);
           } else if (req_opts.cache_get != true) {
             shaped_idxarr.push('not_cved');
           }
@@ -266,6 +248,12 @@ function locationHashChanged(category) {
               request.done(function(data, textStatus, jqXHR) {
                 console.log( 'ajaxデータのキャッシュ成功!');
                 request = '';
+                var $base = $("#link-to-home-after-anlyz"),
+                  basic_path = $base.attr("href").split("?"),
+                  path = basic_path[0]+"?"+params.for_get_request;
+                $base
+                  .attr("href", path)
+                  .trigger('click');
               })
               // ajax失敗時の処理
               .fail(whenAjaxFail());
@@ -277,23 +265,6 @@ function locationHashChanged(category) {
       }, 100);
     }());
   }());
-}
-
-// デバイス
-function getDevOpts() {
-  return [
-    'pc',
-    'sphone',
-    'mobile',
-  ];
-}
-
-// 訪問者
-function getUsrOpts() {
-  return [
-    'new',
-    'repeat'
-  ];
 }
 
 // パラメータの全ての組み合わせを網羅した配列を作る
@@ -343,15 +314,6 @@ function createAjaxRequest(params) {
       retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
       // バブルチャート用データ取得用のパラメータ
       data: params.for_anlyz,
-        // from : params.params.for_anlyz.from,
-        // to : params.params.for_anlyz.to,
-        // cv_num : params.params.for_anlyz.cv_num,
-        // shori : 1,
-        // act : params.params.for_anlyz.category,  // 分析カテゴリ
-        // dev : params.filter.dev,                 // デバイス
-        // usr : params.filter.usr,                   // 訪問者
-        // kwd : params.filter.kwd,                 // キーワード
-      // error: function(xhr, ajaxOptions, thrownError) {
       error: whenAjaxError(deferred)
     }).done(function(data, textStatus, jqXHR) {
       deferred.resolveWith(this, [data, textStatus, jqXHR]);
@@ -412,9 +374,9 @@ function whenAjaxFail() {
 
 function createFilter(v) {
   return {
-    dev: String(v.dev), // undefined の場合はサーバ側でall を指定する
-    usr: String(v.usr), // undefined の場合はサーバ側でall を指定する
-    kwd: String(v.kwd) === "undefined" ? 'nokwd' : String(v.kwd)
+    dev: String(v.dev) === "undefined" ? 'all' : String(v.dev),
+    usr: String(v.usr) === "undefined" ? 'all' : String(v.usr),
+    kwd: String(v.kwd) === "undefined" ? 'nokwd' : String(v.kwd),
   };
 }
 

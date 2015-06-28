@@ -160,6 +160,55 @@ end
 
 module ParamUtils
 
+  def add_category_condition(param)
+    # 分析カテゴリ
+    categories = {
+      all: {},
+      search: {:medium.matches => 'organic'},
+      direct: {:medium.matches => '(none)'},
+      referral: {:medium.matches => 'referral'},
+      social: {:has_social_source_referral.matches => 'Yes'},
+    }
+    @cond[:filters].merge!(categories[param.to_sym])
+    param
+  end
+
+  def add_device_condition(param)
+    # デバイス
+    devices = {
+      pc: { :device_category.matches => 'desktop' },
+      sphone: {
+        :device_category.matches => 'mobile',
+        :mobile_input_selector.matches => 'touchscreen'
+      },
+      mobile: {
+       :device_category.matches => 'mobile',
+        :mobile_input_selector.does_not_match => 'touchscreen'
+      },
+      all: {}
+    }
+    @cond[:filters].merge!(devices[param.to_sym])
+    param
+  end
+
+  def add_user_condition(param)
+    # 訪問者
+    users = {
+      new: {:user_type.matches => 'New Visitor'},
+      repeat: { :user_type.matches => 'Returning Visitor' },
+      all: {},
+    }
+    @cond[:filters].merge!(users[param.to_sym])
+    param
+  end
+
+  def add_keyword_condition(param)
+    unless param == 'nokwd'
+      set_narrow_word(param, @cond, param.slice!(0))
+    end
+    param
+  end
+
   # 日付生成
   def set_date_format(date)
     y, m, d = date.split("/")
