@@ -10,7 +10,7 @@ function zeroSuppressedDateFormatMonthly(data) {
 
 // コントローラから渡されたパラメータをグラフ描画用の配列に加工
 var setArr = function(data) {
-    var arr_metrics = [], arr_cv = [], dts, arr = [];
+    var arr_metrics = [], dts, arr = [];
     for (var i in data) {
       if (i.toString().length == 8) {
         dts = zeroSuppressedDateFormat(i.toString());
@@ -18,11 +18,11 @@ var setArr = function(data) {
         dts = zeroSuppressedDateFormatMonthly(i.toString());
       }
 
-      arr_metrics.push( [ dts, data[i][0], data[i][2]]);
-      arr_cv.push( [ dts, data[i][1], data[i][2]]);
+      arr_metrics.push( [ dts, data[i].data, data[i].day_type ] );
+      // arr_cv.push( [ dts, data[i][1], data[i][2]]);
 
     };
-    arr.push(arr_metrics, arr_cv);
+    arr.push(arr_metrics);
     return arr;
 }
 
@@ -100,7 +100,7 @@ var resetXbgc = function(nm, dt, yval) {
 
   data['line'] = {
     xaxis: 'xaxis',
-    yaxis: 'y2axis',
+    yaxis: 'yaxis',
     start : [d - 0.5, yval],
     stop : [d + 0.5, yval],
     lineWidth: 1000,
@@ -120,91 +120,71 @@ function setYaxisLimit(options, format) {
   return options;
 }
 
-// var graph_data = setArr(gon.data_for_graph_display);
-
-// グラフのオプション
-var options = {
-    seriesColors: ["#e6b422", "#1e50a2"],
-    seriesDefaults: {
-      shadow: false,
-    },
-    axesDefaults: {
-        tickOptions: {
-          fontSize: '9pt',
-          fontFamily: 'ヒラギノ角ゴ Pro W3'
-        },
-    },
-    series:[
-          // １つ目の項目（棒グラフにする）の設定
-        {
-            renderer: jQuery . jqplot . BarRenderer,
-            fillToZero: true,
-            negativeSeriesColors: ["#e6b422"],
-            rendererOptions: {
-            },
-        },
-          // ２つ目の項目（折れ線グラフにする）の設定
-        {
-            xaxis: 'x2axis',
-            yaxis: 'y2axis',
-        }
-    ],
-    axes: {
-        xaxis: {
-            renderer: jQuery . jqplot . CategoryAxisRenderer,
-            tickOptions: {
-              fontSize: '6.5pt',
-              showGridline: false,
-              // 項目の延長線は削除（なんかヒゲみたいで嫌）
-              markSize: 0
-            },
-        },
-        x2axis: {
-            renderer: jQuery . jqplot . CategoryAxisRenderer,
-            tickOptions: {
-              showGridline: false,
-              markSize: 0
-            },
-            borderWidth: 0,
-        },
-        yaxis: {
-            autoscale: true,
-            numberTicks: 11,
-            pad: 1,
-            tickOptions: {
-              // 自作関数でフォーマットする
-              formatter: tickFormatter,
-              showGridline: false,
-            },
-        },
-        y2axis: {
-            autoscale: true,
-            numberTicks: 11,
-            pad: 1,
-            tickOptions: {
-              showGridline: false,
-            },
-        },
-    },
-    // マウスオーバー時の数値表示
-    highlighter: {
-        // show: true,
-        formatString: '<table class="jqplot-highlighter"><tr><td>%s</td><td>日</td></tr><tr><td> </td><td>%s</td></tr></table>'
-    },
-    // 背景色に関する設定
-    grid: {
-      background: "transparent",
-      gridLineColor: "gray",
-      shadow: false,
-      drawBorder: true,
-    },
-};
-
-// グラフのフォーマット設定は自作関数で行う
-options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
 // メイン処理
-jQuery( function() {
+function jqplotDetail() {
+
+  var graph_data = setArr(gon.data_for_graph_display);
+
+  // グラフのオプション
+  var options = {
+      seriesColors: ["#e6b422", "#1e50a2"],
+      seriesDefaults: {
+        shadow: false,
+      },
+      axesDefaults: {
+          tickOptions: {
+            fontSize: '9pt',
+            fontFamily: 'ヒラギノ角ゴ Pro W3'
+          },
+      },
+      series:[
+            // １つ目の項目（棒グラフにする）の設定
+          {
+              renderer: jQuery . jqplot . BarRenderer,
+              fillToZero: true,
+              negativeSeriesColors: ["#e6b422"],
+              rendererOptions: {
+              },
+          },
+      ],
+      axes: {
+          xaxis: {
+              renderer: jQuery . jqplot . CategoryAxisRenderer,
+              tickOptions: {
+                fontSize: '6.5pt',
+                showGridline: false,
+                // 項目の延長線は削除（なんかヒゲみたいで嫌）
+                markSize: 0
+              },
+          },
+          yaxis: {
+              autoscale: true,
+              numberTicks: 11,
+              pad: 1,
+              tickOptions: {
+                // 自作関数でフォーマットする
+                formatter: tickFormatter,
+                showGridline: false,
+              },
+          },
+      },
+      // マウスオーバー時の数値表示
+      highlighter: {
+          // show: true,
+          formatString: '<table class="jqplot-highlighter"><tr><td>%s</td><td>日</td></tr><tr><td> </td><td>%s</td></tr></table>'
+      },
+      // 背景色に関する設定
+      grid: {
+        background: "transparent",
+        gridLineColor: "gray",
+        shadow: false,
+        drawBorder: true,
+      },
+  };
+
+  // グラフのフォーマット設定は自作関数で行う
+  options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
   // 再描画用のオプション
   var tickopt = {
@@ -212,50 +192,49 @@ jQuery( function() {
       show: true,
       objects: [],
       yaxis: {},
-      y2axis: {}
     }
   };
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  $.jqplot.postDrawHooks.push(function() {
-      $('.jqplot-axis.jqplot-x2axis').hide();
+  // $.jqplot.postDrawHooks.push(function() {
+  //     // $('.jqplot-axis.jqplot-x2axis').hide();
 
-      // x軸（日付）の処理
-      var y2max_value = $('.jqplot-y2axis-tick').last().text(); // 土日祝の背景を塗りつぶすときに使う
+  //     // x軸（日付）の処理
+  //     var ymax_value = $('.jqplot-yaxis-tick').last().text(); // 土日祝の背景を塗りつぶすときに使う
 
-      for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
+  //     for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
 
-        var day_type = graph_data[0][i][2];
-        var background_graph_color;
+  //       var day_type = graph_data[i].day_type;
+  //       var background_graph_color;
 
-        // 土曜日の部分背景を青、日祝なら赤に変更
-        if (day_type != 'day_on') {
-          background_graph_color = resetXbgc(day_type, i, y2max_value);
-          tickopt.canvasOverlay.objects.push(background_graph_color);
-        }
+  //       // 土曜日の部分背景を青、日祝なら赤に変更
+  //       if (day_type != 'day_on') {
+  //         background_graph_color = resetXbgc(day_type, i, ymax_value);
+  //         tickopt.canvasOverlay.objects.push(background_graph_color);
+  //       }
 
-        // 土曜日なら文字列を青、日祝なら文字列を赤に変更
-        if (day_type == 'day_sun' || day_type == 'day_hol') {
-          $( $('.jqplot-xaxis-tick')[i] ).css("color", "red");
-        } else if (day_type == 'day_sat') {
-          $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
-        }
+  //       // 土曜日なら文字列を青、日祝なら文字列を赤に変更
+  //       if (day_type == 'day_sun' || day_type == 'day_hol') {
+  //         $( $('.jqplot-xaxis-tick')[i] ).css("color", "red");
+  //       } else if (day_type == 'day_sat') {
+  //         $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
+  //       }
 
-      }
+  //     }
 
-      // グラフの下部マージンを変更
-      $('#square.jqplot-target').css("margin-bottom", "20px");
+  //     // グラフの下部マージンを変更
+  //     // $('#square.jqplot-target').css("margin-bottom", "20px");
 
-      // y軸の罫線を後ろに移動
-      $('.jqplot-overlayCanvas-canvas').css("z-index", -1);
+  //     // y軸の罫線を後ろに移動
+  //     $('.jqplot-overlayCanvas-canvas').css("z-index", -1);
 
-  });
+  // });
 
   // ★jqplot描画
-  var squareBar = jQuery . jqplot( 'gh', graph_data, setYaxisLimit(options, gon.format_string));
+  var squareBar = jQuery . jqplot( 'detail_graph', graph_data, setYaxisLimit(options, gon.format_string));
 
   // グラフのy座標へ水平線を設定
-  var yticks = $('.jqplot-y2axis-tick'), tick, dt;
+  var yticks = $('.jqplot-yaxis-tick'), tick, dt;
 
   for(var i=0; i < yticks.length; i++) {
 
@@ -269,4 +248,4 @@ jQuery( function() {
   }
   // jqplot再描画
   squareBar.replot(tickopt);
-});
+};

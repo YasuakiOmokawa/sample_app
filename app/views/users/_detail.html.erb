@@ -1,0 +1,97 @@
+<%= include_gon %>
+<% set_title(full_title("詳細")) %>
+<%= render 'layouts/loading' %>
+
+<script>
+$(function() {
+
+  // 保持した表示用データを表示する
+  var detail_data = sessionStorage.getItem('data_for_detail');
+  if (detail_data) {
+
+    var detail_obj = JSON.parse(detail_data), $base_elem = $("#condition");
+
+    $base_elem
+    .append($('<ul>')
+      .append($('<li><dl><dt>流入元</dt><dd>'+detail_obj.category+'</dd></dl></li>'))
+      .append($('<li><dl><dt>曜日</dt><dd>'+detail_obj.dayTypeJp+'</dd></dl></li>'))
+      .append($('<li><dl><dt>デバイス</dt><dd>'+detail_obj.devfltr+'</dd></dl></li>'))
+      .append($('<br class="clear">'))
+      .append($('<dl><dt>ユーザー</dt><dd>'+detail_obj.usrfltr+'</dd></dl>'))
+      .append($('<dl id="ed"><dt>その他条件</dt><dd>'+detail_obj.kwdfltr+'</dd></dl>'))
+      .append($('<br class="clear">'))
+    );
+
+    $base_elem
+    .after($('<br class="clear">'))
+    .after($('<div id="data_gap"><dl><dt>GAP - '
+      +detail_obj.metricsJp+'</dt><dd>'+detail_obj.gap+'</dd></dl></div>')
+    )
+    .after($('<div class="data"><dl><dt>目標値</span> - '
+      +detail_obj.metricsJp+'</dt><dd>'+detail_obj.desire+'</dd></dl></div>')
+    )
+    .after($('<div class="data"><dl><dt>現状値<span>（平均値）</span> - '
+      +detail_obj.metricsJp+'</dt><dd>'+detail_obj.metricsAvg+'</dd></dl></div>')
+    );
+  }
+
+  // 保持した分析済み期間を表示する
+  var anlyzed_dates = sessionStorage.getItem('anlyzed_dates');
+  if (anlyzed_dates) {
+    $('#day').html(anlyzed_dates+'&nbsp;');
+  }
+
+  // グラフ描画
+  jqplotDetail();
+});
+</script>
+
+<div id="condition">
+<!-- add sessionStorage data with javascript -->
+</div>
+
+<!-- add dates data from javascript -->
+<div id="day"></div>
+
+<div id="detail_graph"></div>
+
+<table>
+  <tr id="ms">
+    <td class="hl">人気ページ</td><td>現状値</td><td>目標値</td><td id="gap">ＧＡＰ</td>
+  </tr>
+  <% @favorites.each_with_index do |item, idx| %>
+    <tr>
+      <td class="hl"><span><%= "#{idx+1}." %></span><%= truncate(item.page_path, length: 65) %></td>
+      <td><%= item.present %></td>
+      <td><%= item.sessions %></td>
+      <td><%= item.gap %></td>
+    </tr>
+  <% end %>
+<!--   <tr>
+    <td class="hl"><span>2.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>3.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>4.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>5.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>6.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>7.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>8.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>9.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr>
+  <tr>
+    <td class="hl"><span>10.</span>/main/index.html</td><td>1,234</td><td>2,345</td><td>1,111</td>
+  </tr> -->
+</table>

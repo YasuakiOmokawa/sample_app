@@ -36,9 +36,9 @@ class UsersController < ApplicationController
     :update_init_analyze
   ]
   before_action :admin_user,      only: [:destroy, :show_detail, :edit_detail, :update_detail, :new]
-  # before_action :create_common_table, only: [:all, :search, :direct, :referral, :social, :campaign]
+  before_action :create_common_table, only: [:detail]
   before_action :create_home, only: [:home_anlyz]
-  prepend_before_action :chk_param, only: [:home_anlyz, :get_filter_keywords]
+  prepend_before_action :chk_param, only: [:home_anlyz, :get_filter_keywords, :detail]
 
   def get_filter_keywords
 
@@ -76,7 +76,7 @@ class UsersController < ApplicationController
   def cache_result_anlyz
     if params[:result_obj].present? && params[:cache_key].present?
 
-      logger.info( '分析結果をキャッシュします。')
+      logger.info( '分析結果の上位15位をキャッシュします。')
       Rails.cache.write(params[:cache_key],
         params[:result_obj].to_s, expires_in: 1.hour, compress: true)
     end
@@ -86,14 +86,18 @@ class UsersController < ApplicationController
   def home_anlyz
     render json: {
       :homearr => @json,
-      # :category => @category,
       :device_filter => @device_filter,
       :user_filter => @user_filter,
       :keyword_filter => @keyword_filter,
     }
   end
 
-  def detail_anlyz
+  def detail
+    @partial = 'detail'
+
+    unless request.wiselinks_partial?
+      render action: 'show', layout: 'ganalytics'
+    end
   end
 
   def index
@@ -103,18 +107,13 @@ class UsersController < ApplicationController
 
   def show
     @partial = 'show'
-    # binding.pry
 
-    gon.cached_item = JSON.parse(
-      Rails.cache.read(request.query_string)) if request.query_string.present?
-
-
-    # jqplot用検証グラフデータ
-    # gon.home_graph = [
-    #   [0.5,0.5,10,{color: '#c00000'}],
-    #   [0.5,0.7,10,{color: '#ffc000'}],
-    #   [0.5,0.9,10,{color: '#0070c0'}]
-    # ]
+    if request.query_string.present?
+      gon.cached_item = JSON.parse(
+        Rails.cache.read(request.query_string))
+      gon.cached_from = params[:from]
+      gon.cached_to = params[:to]
+    end
 
     unless request.wiselinks_partial?
       render layout: 'ganalytics'
@@ -251,8 +250,6 @@ class UsersController < ApplicationController
 
     def chk_param
 
-      # binding.pry
-
       @content = Content.find(params[:cv_num])
       @content.upload_file.shift unless @content.nil?
       (@from, @to) = set_from_to(@content, params)
@@ -263,33 +260,28 @@ class UsersController < ApplicationController
       # パラメータ共通設定
       @user = User.find(params[:id])
       get_ga_profiles
-     @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
-     set_action(params[:category], @cond)
-      gon.radio_device = set_device_type( (params[:device].presence || "all"),@cond)                               # 使用端末
-      gon.radio_visitor = set_visitor_type( (params[:visitor].presence || "all"),@cond)                                 # 来訪者
+      @cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
+      # 分析カテゴリ
+      set_action(params[:category], @cond)
+      # 使用端末
+      set_device_type(params[:devfltr], @cond)
+      # 来訪者
+      set_visitor_type(params[:usrfltr], @cond)
       #　グラフ表示項目
-     @graphic_item  = (params[:graphic_item].presence || 'pageviews').to_sym
-      #　赤で強調表示項目
-     # gon.red_item  = (params[:red_item].presence || '')
-     gon.graphic_item = @graphic_item.to_s
-     gon.format_string = check_format_graph(@graphic_item)
-     # CV種類
-     gon.cv_num = @cv_num = (@content.nil? ? params[:cv_num] : '1').to_i
-      # 絞り込みキーワード
-      @narrow_word = params[:narrow_select].presence
-      if params[:narrow_select].present?
-        gon.narrow_word = params[:narrow_select].dup
-        @narrow_tag = params[:narrow_select][-1]
-        @narrow_word.slice!(-1)
-        set_narrow_word(@narrow_word, @cond, @narrow_tag) # 絞り込んだキーワード
+      @graphic_item  = (params[:metrics].presence || 'pageviews').to_sym
+      # グラフ表示項目別に、表示フォーマットを指定
+      gon.format_string = check_format_graph(@graphic_item)
+      # CV種類
+      @cv_num = (@content.nil? ? params[:cv_num] : '1').to_i
+      # 絞り込みキーワードの指定
+      if params[:kwdfltr]
+        narrow_tag = params[:kwdfltr][-1]
+        params[:kwdfltr].slice!(-1);
+        set_narrow_word(params[:kwdfltr], @cond, narrow_tag)
       end
-      # 絞り込みセレクトボックス
-      @categories = []
-
       # 日付タイプを設定
-      @day_type = params[:day_type].presence || 'all_day'
-      gon.radio_day = @day_type
-
+      @day_type = params[:dayType].presence || 'all_day'
+      Rails.logger.info("@cond setting is #{@cond}")
     end
 
     def create_common_table
@@ -318,18 +310,10 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      cved_data = Ast::Ganalytics::Garbs::Data.create_class('CvedSession',
-        [:sessions], [:pagePath]).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).cved!.res)
-      fav_gap = fetch_analytics_data('FetchKeywordForPages', @ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res, @cv_txt)
-      fav_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForPages.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).cved!.res)
-
-      # ランディングページ用
-      land_for_skel = Ast::Ganalytics::Garbs::Data::FetchKeywordForLanding.results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:bounceRate).res)
-
-      # 全てのセッション(人気ページGAP値等計算用)
-      ga_result = Ast::Ganalytics::Garbs::Data.create_class('AllSession', [:sessions], []).results(@ga_profile, @cond)
-      tmp_all_session = ga_result.results.first.sessions.to_i if ga_result.total_results > 0
-      all_session = guard_for_zero_division(tmp_all_session)
+      cved_data = anlyz_for_favorite_page(@cond) # CVデータ
+      for_all_cond = @cond.dup
+      for_all_cond[:filters] = {}
+      all_data = anlyz_for_favorite_page(for_all_cond) # 全てのデータ
 
       ### データ計算部
       @ast_data = site_data.reduce([]) do |acum, item|
@@ -341,60 +325,30 @@ class UsersController < ApplicationController
       # カスタムデータ置き変え判定
       replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
-      # グラフデータテーブルへ表示する指標値
-      @desire_caption = metrics_for_graph_merge[@graphic_item][:jp_caption]
-
-      # 指標値テーブルへ表示するデータを算出
-      desire_datas = generate_graph_data(@ast_data, metrics_snake_case_datas, @day_type)
-      desire_datas = create_common_skelton_table(metrics_snake_case_datas) if desire_datas.nil?
-      calc_desire_datas(desire_datas) unless desire_datas.nil? # 目標値の算出
-
-      # 日本語データを追加
-      d_hsh = metrics_day_type_jp_caption(@day_type, metrics_for_graph_merge)
-      @details_desire_datas = concat_data_for_graph(desire_datas, d_hsh) unless desire_datas.nil?
-
       # グラフ表示プログラムへ渡すデータを作成
-      @data_for_graph_display = Hash.new{ |h,k| h[k] = {} }
+      @data_for_graph_display = create_data_for_graph_display(@ast_data, @graphic_item)
 
-      create_data_for_graph_display(@data_for_graph_display, @ast_data, @graphic_item, @cv_num)
-      @data_for_graph_display = create_monthly_summary_data_for_graph_display(
-        @data_for_graph_display, group_by_year_and_month(@ast_data),
-        @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data)) == true
+      # @data_for_graph_display = create_monthly_summary_data_for_graph_display(
+      #   @data_for_graph_display, group_by_year_and_month(@ast_data),
+      #   @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data))
       gon.data_for_graph_display = @data_for_graph_display
 
-      # グラフテーブルへ渡すデータを作成
-      @data_for_graph_table = Hash.new{ |h,k| h[k] = {} }
-      create_data_for_graph_display(@data_for_graph_table, @ast_data, @graphic_item, @cv_num)
-
-      ## フォーマット変更
-
-        # 目標値データへ
-        @details_desire_datas.each do |k, v|
-          change_format_for_desire(@details_desire_datas[k],
-            check_format_graph(k).to_s, v)
-        end unless @details_desire_datas.nil?
-
-        # グラフテーブルへ
-        @data_for_graph_table.each do |k, v|
-          change_format_for_graph_table(@data_for_graph_table[k], check_format_graph(@graphic_item), v[0] )
+      # 人気ページ
+      @favorites = cved_data.reduce([]) do | acum, item |
+        # CVデータ(目標値)に該当するall_sessions データが存在したらgap値計算を実施する
+        all = all_data.results.select { |_all| _all.page_path == item.page_path }
+        unless all.blank?
+          item.present = all[0].sessions.to_i - item.sessions.to_i
+          item.gap = item.sessions.to_i - item.present
+          acum << item
         end
-
-      # 人気ページテーブル
-      @favorite_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-
-      cved_session = cved_data.map{|t| t.sessions.to_f}.sum
-      not_cved_session = all_session - cved_session
-
-      create_skeleton_favorite_table(fav_for_skel, @favorite_table)
-      put_favorite_table_for_skelton(fav_gap, @favorite_table)
-
-      calc_percent_for_favorite_table(cved_session, @favorite_table, :good)
-      calc_percent_for_favorite_table(not_cved_session, @favorite_table, :bad)
-      calc_gap_for_favorite(@favorite_table)
-
-      # ランディングページテーブル
-      @landing_table = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-      put_landing_table(land_for_skel, @landing_table)
+        acum
+      end.
+      # GAP値の上位10位までを抽出
+      sort_by{|item| -(item.gap.abs)}.first(10).reduce([]) do |acum, v|
+        acum << v
+        acum
+      end
     end
 
     def create_home
@@ -476,6 +430,8 @@ class UsersController < ApplicationController
       @valids.each do |valid|
         # バブルチャートに表示するデータを算出
         bubble_datas = generate_graph_data(@ast_data, valid.metricses, valid.day_type)
+        # 目標値の算出
+        calc_desire_datas(bubble_datas)
         d_hsh = metrics_day_type_jp_caption(valid.day_type, metrics_for_graph_merge)
         home_graph_data = concat_data_for_graph(bubble_datas, d_hsh)
 

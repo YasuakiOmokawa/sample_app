@@ -15,18 +15,41 @@
         // 作成したグラフデータを使ってグラフ描画を実行
         plotGraphHome(plots, gon.cached_item);
 
-        // $('#spinner').addClass('hide');
+        // 分析したデータの期間データを表示
+        sessionStorage.setItem('anlyzed_dates',
+          replaceAll(gon.cached_from, '-', '/')
+          +' - '+replaceAll(gon.cached_to, '-', '/') )
+        $("#term").find('p')
+          .text(sessionStorage.getItem('anlyzed_dates'));
+
+        // カテゴリ別の処理
+        // 分析開始リンクの無効化
+        setTimeout(function() {
+          $("#atics_s")
+          .attr('id', "atics")
+          .removeClass("yes");
+        }, 100);
+
+        // all以外の分析を可能にする
+        $("ul li a.home-anlyz").addClass(("yes"));
+
       } else {
         // データ不足で分析できない旨を表示
         $('#loading').removeClass('hide');
         addWhenNotCved();
       }
+    } else {
+      // まだ分析がされてない場合
+      $('#loading').removeClass('hide');
     }
   });
 </script>
 
-<div id="term" class=""><p>2015/01/01&nbsp;-&nbsp;2015/12/31</p></div>
+<div id="term"><p>
+  <!-- analysis date write area by javascript -->
+</p></div>
 <div id="graph">
+  <!-- graph plot area by javascript -->
 </div>
 
 <ul id="rank">

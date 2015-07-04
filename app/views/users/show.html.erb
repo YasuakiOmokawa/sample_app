@@ -12,7 +12,7 @@
       <li><a href="javascript:void(0)" class="home-anlyz"  id="direct">直接入力/ブックマーク</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="referral">その他ウェブサイト</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="social">ソーシャル</a></li>
-      <li class="switch"><a id="back" href="javascript:void(0)">戻る</a></li>
+      <li class="switch"><%= link_to '戻る', "javascript:void(0)",data: { push: "partial", target: "@data-role" }, id: "back" %></li>
     </ul>
   </div>
   <!-- menu_end -->
@@ -20,6 +20,7 @@
   <!-- additional-link_start -->
   <div id="content-link" class="hide"><%= content_path(current_user) %></div>
   <div id="home_anlyz_user_path" class="hide"><%= home_anlyz_user_path %></div>
+  <div id="detail_user_path" class="hide"><%= detail_user_path %></div>
   <div id="cache_result_anlyz_user_path" class="hide"><%= cache_result_anlyz_user_path %></div>
   <div id="get_filter_keywords_user_path" class="hide"><%= get_filter_keywords_user_path %></div>
   <%= link_to 'dummy-to-home', user_path, data: { push: "partial", target: "@data-role" }, class: "hide", id: "link-to-home-after-anlyz" %>

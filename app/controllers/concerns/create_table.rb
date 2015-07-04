@@ -1,5 +1,12 @@
 module CreateTable
 
+  def anlyz_for_favorite_page(cond)
+    Ast::Ganalytics::Garbs::Data.create_class('CvedSession',
+      [:sessions], [:pagePath]).results(
+        @ga_profile, Ast::Ganalytics::Garbs::Cond.new(
+          cond, @cv_txt).limit!(100).sort_desc!(:sessions).res)
+  end
+
   def get_session_rank(special)
     Ast::Ganalytics::Garbs::Data.create_class('SessionRank',
       [ :sessions], [special] ).results(@ga_profile,
@@ -29,16 +36,12 @@ module CreateTable
     end
   end
 
-  def create_data_for_graph_display(hash, table, param, cv_num)
-    table.reduce(hash) do |datas, data|
-      datas[data.date.to_i] = [
-        data.send(param),
-        data.send("goal#{cv_num}_completions".to_sym),
-        data.day_type
-      ]
-      datas
+  Graph = Struct.new(:data, :day_type)
+  def create_data_for_graph_display(datas, param)
+    datas.reduce({}) do |acum, item|
+      acum[item.date.to_i] = Graph.new(item.send(param), item.day_type)
+      acum
     end
-    hash
   end
 
   def create_monthly_summary_data_for_graph_display(data, ym, format)

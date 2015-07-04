@@ -6,16 +6,16 @@ var bbl_shori_flg = 0;
 function getDevOpts() {
   return [
     'pc',
-    // 'sphone',
-    // 'mobile',
+    'sphone',
+    'mobile',
   ];
 }
 
 // 訪問者
 function getUsrOpts() {
   return [
-    // 'new',
-    // 'repeat'
+    'new',
+    'repeat'
   ];
 }
 
@@ -25,12 +25,13 @@ function locationHashChanged(category) {
   // ローディングモーションを表示
   $('#loading').removeClass('hide');
   $('#spinner').removeClass('hide');
+  $('#now-loading').removeClass('hide');
 
   var params = (function() {
     if (category == "atics_s") {
       return createParameterWithSessionStorage();
     } else {
-      return createParameterWithLocationHash(category);
+      return createParameterWithURL(category);
     }
   }());
 
@@ -104,10 +105,6 @@ function locationHashChanged(category) {
         // オプション配列を生成
         setOpts(opts, kwd_opts);
 
-        // キャッシュ用ユニーク文字数を格納
-        var kwd_strgs = createCacheKeyNum(kwd_opts);
-        req_opts.kwd_strgs = kwd_strgs;
-
         // ajax処理中
         bbl_shori_flg = 1;
 
@@ -163,9 +160,6 @@ function locationHashChanged(category) {
                 console.log('分析カテゴリ :'
                   + params.for_anlyz.category + 'のバブルチャートリクエストが全てが完了しました');
 
-                // ローディング完了テキストを表示
-                // $('#daemon span').text('complete!');
-
                 // グラフ描画用のデータを最終マージ
                 $.extend(true, return_obj, tmp_obj);
 
@@ -195,7 +189,7 @@ function locationHashChanged(category) {
             // データ項目一覧セット
             setDataidx(return_obj, params.for_anlyz.category, idxarr);
           } else if (req_opts.cache_get != true) {
-            shaped_idxarr.push('not_cved');
+            idxarr.push('not_cved');
           }
           // ポーリング終了処理
           clearInterval(timerID);

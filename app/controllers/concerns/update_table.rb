@@ -212,17 +212,24 @@ module UpdateTable
     tbl
   end
 
-  def head_special(table, limit)
-    res = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
-    cnt = 0
+  # def headding_gap(limit)
+  #   @favorite_table = []
+  #   @_favorite_table.sort_by{|item| -(item.gap.abs)}.first(10).each do |v|
+  #     @favorite_table << v
+  #   end
+  # end
 
-    table.sort_by { |a, b| [-(b[:corr].to_f) ] }.each do |k, v|
-      res[k.to_s] = table[k]
-      cnt += 1
-      break if cnt >= limit
-    end
-    res
-  end
+  # def head_special(table, limit)
+  #   res = Hash.new { |h,k| h[k] = {} } #多次元ハッシュを作れるように宣言
+  #   cnt = 0
+
+  #   table.sort_by { |a, b| [-(b[:corr].to_f) ] }.each do |k, v|
+  #     res[k.to_s] = table[k]
+  #     cnt += 1
+  #     break if cnt >= limit
+  #   end
+  #   res
+  # end
 
   def replace_cv_with_custom(custom, cv, ident)
 

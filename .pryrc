@@ -59,3 +59,38 @@ load 'insert_table.rb'
 load 'update_table.rb'
 include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
 
+@from = Date.today.prev_month
+@to = Date.today
+@user = User.find(3)
+get_ga_profiles
+@cond = { :start_date => @from, :end_date   => @to, :filters => {}, }                  # アナリティクスAPI 検索条件パラメータ
+
+params = {
+  cv_num: 1,
+  category: "search",
+  devfltr: "pc",
+  usrfltr: "new",
+  kwdfltr: "nokwd",
+  dayType: "day_off",
+}
+
+# 分析カテゴリ
+set_action(params[:category], @cond)
+# 使用端末
+set_device_type(params[:devfltr], @cond)
+# 来訪者
+set_visitor_type(params[:usrfltr], @cond)
+#　グラフ表示項目
+@graphic_item  = (params[:metrics].presence || 'pageviews').to_sym
+
+# CV種類
+@cv_num = (@content.nil? ? params[:cv_num] : '1').to_i
+# 絞り込みキーワードの指定
+if params[:kwdfltr]
+  narrow_tag = params[:kwdfltr][-1]
+  params[:kwdfltr].slice!(-1);
+  set_narrow_word(params[:kwdfltr], @cond, narrow_tag)
+end
+# 日付タイプを設定
+@day_type = params[:dayType].presence || 'all_day'
+Rails.logger.info("@cond setting is #{@cond}")

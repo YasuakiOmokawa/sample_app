@@ -68,6 +68,7 @@ function eventsOnMenu() {
     history.back(-1);
   });
 
+  // 分析設定が実施された場合の処理
   var setting_data = sessionStorage.getItem( "setting_key" );
   if (setting_data) {
     // メニューの期間、CV表示を変更
@@ -82,15 +83,17 @@ function eventsOnMenu() {
       .text(setting_obj.cv_name)
       .removeClass('set')
       .attr("href", $("#content-link").text());
-    // 分析開始リンク
+    // 分析開始リンクの有効化判定
     $("#atics")
       .attr('id', "atics_s")
       .addClass("yes");
   }
 
   // 分析開始リンクがクリックされたときの処理
-  $(".home-anlyz.yes").on("click", function() {
-    locationHashChanged($(this).attr("id"));
+  $(".home-anlyz").on("click", function() {
+    if ($(this).hasClass('yes')) {
+      locationHashChanged($(this).attr("id"));
+    }
   });
 
 }
@@ -118,22 +121,11 @@ function createParameterWithSessionStorage() {
   return obj;
 }
 
-function createParameterWithLocationHash(category) {
-  var get_param = location.hash.slice(1).replace(/all/, category),
-    anlyz_param = {}, obj = {};
-    basement = get_param.split("&");
+function createParameterWithURL(category) {
+  var query = new Query(), obj = {};
 
-  // 分析パラメータの生成
-  jQuery.each($(basement), function(k, v) {
-    var tmp = v.split("=");
-    if ( tmp[0].match(/from|to/) ) {
-      tmp[1] = replaceAll(tmp[1], '-', '/');
-    }
-    anlyz_param[tmp[0]] = decodeURIComponent(tmp[1]);
-  });
-
-  obj.for_get_request = get_param;
-  obj.for_anlyz = anlyz_param;
+  obj.for_get_request = query.replaceCategory(category);
+  obj.for_anlyz = query.createObject();
   return obj;
 }
 
@@ -249,7 +241,6 @@ function replaceContentParentAttr() {
     $('li.switch').addClass('hide');
   }
 }
-
 
 function highlightSelectedCV(cv_num) {
   var $cves = $("#cv li"), finder = "."+cv_num;

@@ -1,3 +1,150 @@
+// バブルチャートの生成(main function)
+function plotGraphHome(arr, idxarr) {
+  // バブル（散布図）チャート相関グラフ
+  // x軸, y軸, 大きさ(radius), 項目名　の順に表示
+
+  // リプロット用にarr をグローバルオブジェクトとして確保
+  arr_for_replot = $.extend(true, {}, arr);
+
+  // グラフ描画対象
+  var graph_position = 'graph';
+
+  // グラフ描画オプション
+  var options = {
+    seriesDefaults: {
+      renderer: jQuery.jqplot.BubbleRenderer,
+      rendererOptions: {
+        showLabels: false,
+        autoscaleBubbles: false, // サイズはグラフデータのradius から算出(単位: pixel)
+        shadow: false,
+      },
+    },
+    // グラフ幅の調整
+    gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
+    series: [],
+    axesDefaults: {
+      numberTicks: 3,
+      tickOptions: {
+        fontSize: '10pt',
+        fontFamily: 'ヒラギノ角ゴ Pro W3',
+        markSize: 0
+      },
+    },
+    axes: {
+      // 見栄えの問題で、max は101, min は -1 で調整
+      xaxis: {
+        // label: '変動係数',
+        min: 0.0,
+        max: 1.0,
+      },
+      yaxis: {
+        // label: '相関係数',
+        min: 0.0,
+        max: 1.0,
+      },
+    },
+    // 背景色に関する設定
+    grid: {
+      background: "transparent",
+      gridLineColor: "#cccccc",
+      shadow: false,
+      drawGridlines: true,
+      drawBorder: false,
+    },
+  };
+
+  var $rank_target = $('#rank');
+
+  // 項目一覧へ要素を追記
+  addRanking(idxarr, $rank_target);
+
+  // jqplot描画後に実行する操作（jqplot描画前に書くこと）
+  $.jqplot.postDrawHooks.push(function(graph) {
+
+    // 目盛り線のみ残して目盛りの値は削除
+    var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
+    for (var i=0; i<selcts.length; i++) {
+      $(selcts[i][0]).text('');
+      $(selcts[i][1]).text('');
+      $(selcts[i][2]).text('');
+    }
+  });
+
+  var graph = jQuery . jqplot(graph_position, arr, options);
+
+  // ブロック項目をホバーしたらプロットへデータ表示
+  $rank_target.on({
+      'mouseenter': function() {
+        replotHome($(this));
+        showTooltip($(this));
+
+        // detail_anlyzへのパスを取得
+        var path = $("#detail_user_path").text();
+
+        // 現在のクエリパラメータから、cv_nameを除く
+        var query = new Query();
+        var detail_base = query.forDetailAnlyz();
+
+        // dataブロックの値から、詳細分析用に絞り込みパラメータを取得
+        //　曜日、デバイス、ユーザー、その他キーワード
+        var datas = $(this).data();
+        var _datas = {};
+        for( i in datas) {
+          if (i.match(/^dayType$|devfltr|usrfltr|kwdfltr|^metrics$/)) {
+            if (i == "kwdfltr" && datas[i] != "nokwd") {
+              switch (datas.category) {
+              case 'referral':
+                datas[i] = datas[i] + 'r';
+                break;
+              case 'social':
+                datas[i] = datas[i] + 'l';
+                break;
+              }
+            }
+            _datas[i] = datas[i];
+          }
+        }
+        // 詳細遷移のためのパスを取得
+        var to_detail = path + "?" + detail_base + "&" + jQuery.param(_datas);
+        console.log("detail path is "+to_detail);
+        $(this).attr("href", to_detail);
+      },
+      'mouseleave': function() {
+        replot_options = {
+          series: []
+        };
+        replot_options.data = arr_for_replot;
+        graph.replot(replot_options);
+      }
+  }, 'a');
+
+  // スピナーの起動
+  $rank_target.on('click', 'a', function() {
+    $('#loading').removeClass('hide');
+    $('#spinner').removeClass('hide');
+  });
+
+  // ホームグラフをリプロットする
+  function replotHome(target) {
+
+    var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
+      p_color = setBubbleColor(target.data('vari'), target.data('corr')),
+      addopt = [target.data('vari'), target.data('corr'), 30, p_color];
+    var add_options = {
+      series: [],
+    };
+
+    // 選択したものは拡大して表示させる
+    origin_arr[0].push(addopt);
+    add_options.data = origin_arr;
+
+    // 再描画を実行
+    // jqplot の replot関数は、追加のオプションを設定すると
+    // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
+    graph.replot(add_options);
+  }
+}
+
 function createGraphPlots(idxarr, arr) {
 
   var plot_color = {}, tmp_arr = [];
@@ -7,7 +154,7 @@ function createGraphPlots(idxarr, arr) {
     var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
     plot_color = setBubbleColor(x, y);
-    tmp_arr[i] = [ x, y, 1, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
+    tmp_arr[i] = [ x, y, 8, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
   arr.push(tmp_arr);
 }
@@ -24,91 +171,38 @@ function isVariationOverLimit(vari) {
 function headIdxarr(idxarr, limit) {
   var headed_obj = [];
 
-  if (idxarr.length < limit) {
-    return idxarr;
-  }
+  for (var idx in idxarr) {
 
-  for (var i=0; i < idxarr.length; i++) {
-
-    headed_obj[i] = idxarr[i];
+    headed_obj[idx] = idxarr[idx];
 
     // 表示件数の上限をlimit 件数へ制限
-    if (i >= limit -1) {
+    if (idx >= limit -1) {
       return headed_obj;
     }
   }
-
+  return headed_obj;
 }
 
-// 項目一覧データにクリックイベントを追加
-function addClickEvtToInfo(target) {
+function setInfoForDetailUI(datas) {
 
-  $(target).on('click', 'li a', function(e) {
+  // 詳細画面で表示するためのデータを保持
+  // カテゴリ、曜日別、デバイス、ユーザー、その他条件、平均値、項目名、目標値、gap(desire - avg)
+  var _datas = {};
 
-    var target_action = getTargetAction(e);
-    var target_action_array = target_action.split('/');
+  // データの抽出
+  _datas.category = $(document.getElementById(datas.category)).text();
+  _datas.dayTypeJp = datas.dayTypeJp;
+  _datas.devfltr = devTnsltENtoJP(datas.devfltr);
+  _datas.usrfltr = usrTnsltENtoJP(datas.usrfltr);
+  _datas.kwdfltr = kwdTnsltENtoJP(datas.kwdfltr);
+  _datas.metricsAvg = datas.metricsAvg;
+  _datas.metricsJp = datas.metricsJp;
+  _datas.desire = datas.desire;
+  _datas.gap = Math.round( (datas.desire - datas.metricsAvg) * 10) / 10;
 
-    // グラフ項目を設定
-    var metrics = $(e.target).data('metrics');
-    addGraphicItem( metrics, $('input[name="graphic_item"]') );
-    console.log('graphic_item : ' + $('input[name="graphic_item"]').val());
-
-    // 絞り込みチェックボックスの値を指定
-    var dp = $(e.target).data('devfltr');
-    var up = $(e.target).data('usrfltr');
-    var dayp = $(e.target).data('day-type');
-    console.log('dp : ' + dp);
-    console.log('up : ' + up);
-    console.log('dayp : ' + dayp);
-
-    $.each([dp,up,dayp], function(i, val) {
-      var type,n,m;
-      type = 'form[name="narrowForm"] input[value=' + val + ']';
-      n = $(type).attr("name");
-      m = 'form[name="narrowForm"] input[name=' + n + ']';
-      $(m).val([val]);
-    });
-
-    // 絞り込みキーワードの値を設定
-    var kwd = $(e.target).data('kwdfltr');
-    console.log('kwd : ' + kwd);
-
-    if (kwd != 'nokwd') {
-      var flg; // どのページのキーワードか判別用
-
-      // 遷移先の最後のアクション名を取得
-      var action_name = target_action_array[3];
-
-      // 遷移先を判別
-      switch (action_name) {
-        case 'referral':
-          flg = 'r';
-          break;
-        case 'social':
-          flg = 'l';
-          break;
-      }
-
-      // 遷移先のキーワードとページ情報を設定
-      var n_wd = kwd + flg;
-      $('#narrow_select')
-        .append($('<option>')
-          .html(" ")
-          .val(n_wd)
-        ).val(n_wd);
-    }
-
-    // 遷移先の強調項目を設定
-    $('input[name="red_item"]').val(metrics);
-
-    // ホーム画面の履歴を保存
-    $('input[name="history_from"]').val($('#from').val());
-    $('input[name="history_to"]').val($('#to').val());
-    $('input[name="history_cv_num"]').val($('input[name="cv_num"]').val());
-
-    // ページ遷移
-    evtsend($(e.target));
-  });
+  // データを格納
+  sessionStorage.setItem( "data_for_detail", JSON.stringify(_datas) );
+  return _datas;
 }
 
 function chkDayType(d) {
@@ -120,7 +214,7 @@ function chkDayType(d) {
 }
 
 // 項目一覧へ要素を追記
-function addRanking(idxarr, target) {
+function addRanking(idxarr, $target) {
 
   // 項目一覧へ表示する項目番号
   var counter = 0;
@@ -136,9 +230,7 @@ function addRanking(idxarr, target) {
 
     counter = counter + 1;
 
-    var day_type_jp = chkDayType(value['day_type_jp']);
-
-    $(target)
+    $target
     .append(
       $('<li>')
       .append(
@@ -149,8 +241,9 @@ function addRanking(idxarr, target) {
             'data-pri': value['pri'],
             'data-corr': value['corr'],
             'data-corr-sign': value['corr_sign'],
-            'data-metrics': value['jp_metrics'],
-            'data-day-type-jp': day_type_jp,
+            'data-metrics': addGraphicItem(value['jp_metrics']),
+            'data-metrics-jp': value['jp_metrics'],
+            'data-day-type-jp': chkDayType(value['day_type_jp']),
             'data-day-type': value['day_type'],
             'data-metrics-avg': value['metrics_avg'],
             'data-metrics-stddev': value['metrics_stddev'],
@@ -160,7 +253,10 @@ function addRanking(idxarr, target) {
             'data-kwdfltr': value['kwd_fltr'],
             "name": value['pagelink'],
             'data-category': value['category'],
-            'class': 'data-contents'
+            'class': 'data-contents',
+            'data-desire': value['desire'],
+            'data-target': "@data-role",
+            'data-push': "partial",
           })
           .text(counter)
       )
@@ -168,7 +264,7 @@ function addRanking(idxarr, target) {
   });
 
   // 終端処理
-  $(target).append($('<br class="clear">'));
+  $target.append($('<br class="clear">'));
 }
 
 // バブル色の指定
@@ -185,15 +281,15 @@ var setBubbleColor = function(x, y) {
 
     if (x >= XREFERENCE && y >= YREFERENCE) {
         label = {color: '#c00000'};
-        console.log('color is red');
+        // console.log('color is red');
     }
     else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
         label = {color: '#ffc000'};
-        console.log('color is yellow');
+        // console.log('color is yellow');
     }
     else if (x <= XREFERENCE && y <= YREFERENCE) {
         label = {color: '#0070c0'};
-        console.log('color is blue');
+        // console.log('color is blue');
     }
     return label;
 }
@@ -215,8 +311,6 @@ var setDataidx = function(obj, wd, idxarr) {
 
   var homearr = $.extend(true, {}, obj), // 参照渡しだとバグる。
     fltr_wd = wd,
-    // pagenm = 'div#pnt a.' + fltr_wd,   // ページ名（全体、検索、など）を取得
-    // pagelink = $(pagenm).attr('path'),   // ページへのリンクを取得
     tmp_obj = {};
 
   for (var i in homearr[fltr_wd]) {
@@ -247,71 +341,63 @@ var setDataidx = function(obj, wd, idxarr) {
       ar['usr_fltr'] = usr_fltr;
       ar['kwd_fltr'] = kwd_fltr;
       ar['category'] = fltr_wd;
-      // ar['pagelink'] = pagelink;
+      ar['desire'] = tmp[j].desire;
       idxarr.push(ar);
     }
   }
 }
 
-// 優先順位の降順、
-// 　ページ名と項目名の昇順でソート
+function isReallyNaN(x) {
+  return x !== x;    // xがNaNであればtrue, それ以外ではfalse
+}
+
+
+// 優先順位の降順でソート
 // > がマイナスリターン。。降順、< がプラスリターンで昇順
 function sortIdxarr(idxarr) {
 
-  var idxarr = idxarr.sort(function(a,b) {
-    if (a.pri > b.pri) return  -1;
-    if (a.pri < b.pri) return  1;
-    if (a.category > b.category) return  1;
-    if (a.category < b.category) return  -1;
-    if (a.jp_metrics > b.jp_metrics) return  1;
-    if (a.jp_metrics < b.jp_metrics) return  -1;
+  for(var i in idxarr) {
+    if (isReallyNaN(parseFloat(idxarr[i].pri))) {
+      delete idxarr[i];
+    }
+  }
+
+  var idxarr = idxarr.sort(function(_a,_b) {
+    var a = parseFloat(_a.pri), b = parseFloat(_b.pri);
+    if (a > b) return  -1;
+    if (a < b) return  1;
   });
+  console.log(idxarr);
   return idxarr;
 }
 
-// 再描画用にデータを集める
-var replotdata = function(allarr, wd) {
-
-  // wd が直接入力ブックマーク の場合、スラッシュを削除
-  if (wd == '直接入力/ブックマーク') {
-    wd = wd.replace(/\//g, '');
-  }
-
-  var a = [];
-  for(i=0; i < allarr[wd].length; i++) {
-    allarr[wd][i][3] = String(wd) + ';;' + allarr[wd][i][3];
-  }
-  a.push( allarr[wd] );
-  return a;
-}
-
-// グラフ項目と人気ページ項目の絞り込みパラメータを設定
-function addGraphicItem(data, graph) {
+// グラフ項目の絞り込みパラメータを設定
+function addGraphicItem(data) {
 
   switch (data) {
     case 'PV数':
-      graph.val('pageviews');
+      return 'pageviews';
       break;
     case '平均PV数':
-      graph.val('pageviews_per_session');
+      return 'pageviews_per_session';
       break;
     case 'セッション':
-      graph.val('sessions');
+      return 'sessions';
       break;
     case '直帰率':
-      graph.val('bounce_rate');
+      return 'bounce_rate';
       break;
     case '新規ユーザー':
-      graph.val('percent_new_sessions');
+      return 'percent_new_sessions';
       break;
     case 'ユーザー':
-      graph.val('users');
+      return 'users';
       break;
     case '平均滞在時間':
-      graph.val('avg_session_duration');
+      return 'avg_session_duration';
       break;
     case 'リピーター':
-      graph.val('repeat_rate');
+      return 'repeat_rate';
       break;
   }
 }
@@ -351,84 +437,89 @@ function kwdTnsltENtoJP(d) {
   if (d === 'nokwd' ) {
     wd = '参照元なし';
   } else {
-    wd = d;
+    wd = '参照元: '+d;
   }
   return wd;
 }
 
-function getTooltipXaxisToPixels(a, graph) {
-  return x = graph.axes.xaxis.u2p(a.attr('data-vari')); // convert x axis unita to pixels
-}
-
-function getTooltipYaxisToPixels(a, graph) {
-  return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
+function signTnsltENtoMark(d) {
+  if (d === 'plus') {
+    return '+';
+  } else {
+    return '-';
+  }
 }
 
 function showTooltip(contents) {
 
+  // data プロパティの取得
+  var datas = contents.data();
+
+  // 詳細表示データの保持
+  var _datas = setInfoForDetailUI(datas);
+
   var position = (function() {
-    if (contents.data['vari'] >= 0.5) {
-      return 'hvr_r';
-    } else {
+    if (datas.vari >= 0.5) {
       return 'hvr_l';
+    } else {
+      return 'hvr_r';
     }
   }());
 
+  var gap = '('+_datas.gap+')';
+
   $('#graph')
   .prepend(
-    $("<div>")
-    .attr("id", "fm_graph")
+    $("<div id='fm_graph'>")
     .append(
-      $("<div>")
-      .attr("id", position)
+      $('<div id="'+position+'"">')
       .append(
-        $("<dl>")
-        .attr("id", "tgt")
+        $('<dl id="tgt">')
         .append(
           $('<dt>')
-          .text( contents.data('metrics') )
+          .text( datas.metricsJp )
         )
         .append(
           $('<dd>')
-          .text("1,234")
+          .text( datas.desire )
+          // .text("1,234")
           .append(
-            $('<span>')
-            .attr("id", "gp")
-            .text('(+123)')
+            $('<span id="gp">')
+            .text(gap)
+            // .text('(+123)')
           )
         )
       )
       .append(
-        $('<ul>')
-        .attr("id", "bottom")
+        $('<ul id="bottom">')
         .append($("<li>").append(
           $("<dl>")
-            .append($("<dt>").text("流入元"))
-            .append($("<dd>").text( $( document.getElementById(contents.data('category')) ).text() ))
+          .append($("<dt>").text("流入元"))
+          .append( $("<dd>").text( _datas.category ) )
           )
         )
         .append($("<li>").append(
           $("<dl>")
-            .append($("<dt>").text("曜日"))
-            .append($("<dd>").text( contents.data('day-type-jp') ))
+          .append($("<dt>").text("曜日"))
+          .append($("<dd>").text( _datas.dayTypeJp ) )
           )
         )
         .append($("<li>").append(
           $("<dl>")
-            .append($("<dt>").text("デバイス"))
-            .append($("<dd>").text( devTnsltENtoJP(contents.data('devfltr')) ))
+          .append($("<dt>").text("デバイス"))
+          .append($("<dd>").text( _datas.devfltr ) )
           )
         )
         .append($("<li>").append(
           $("<dl>")
-            .append($("<dt>").text("ユーザー"))
-            .append($("<dd>").text( usrTnsltENtoJP(contents.data('usrfltr')) ))
+          .append($("<dt>").text("ユーザー"))
+          .append($("<dd>").text( _datas.usrfltr ) )
           )
         )
         .append($("<li>").append(
           $("<dl>")
-            .append($("<dt>").text("その他条件"))
-            .append($("<dd>").text( kwdTnsltENtoJP(contents.data('kwdfltr')) ))
+          .append($("<dt>").text("その他条件"))
+          .append($("<dd>").text( _datas.kwdfltr ) )
           )
         )
       )
@@ -436,145 +527,37 @@ function showTooltip(contents) {
   );
 }
 
-function removeKeywordForPageName() {
-  switch (getAnalyzedPageName()) {
-    case 'all':
-    case 'search':
-    case 'direct':
-      $(".tooltipster-content #box_r ul li#keyword").remove();
-    break;
-  }
-}
+// function getTooltipXaxisToPixels(a, graph) {
+//   return x = graph.axes.xaxis.u2p(a.attr('data-vari')); // convert x axis unita to pixels
+// }
 
-function hideTooltip(target) {
-  $(target)
-  .tooltipster('destroy');
-}
+// function getTooltipYaxisToPixels(a, graph) {
+//   return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
+// }
 
-// バブルチャートの生成(main function)
-function plotGraphHome(arr, idxarr) {
-  jQuery( function() {
 
-    // バブル（散布図）チャート相関グラフ
-    // x軸, y軸, 大きさ(radius), 項目名　の順に表示
+// 再描画用にデータを集める
+// var replotdata = function(allarr, wd) {
 
-    // リプロット用にarr をグローバルオブジェクトとして確保
-    arr_for_replot = $.extend(true, {}, arr);
+//   // wd が直接入力ブックマーク の場合、スラッシュを削除
+//   if (wd == '直接入力/ブックマーク') {
+//     wd = wd.replace(/\//g, '');
+//   }
 
-    // グラフ描画対象
-    var graph_position = 'graph';
+//   var a = [];
+//   for(i=0; i < allarr[wd].length; i++) {
+//     allarr[wd][i][3] = String(wd) + ';;' + allarr[wd][i][3];
+//   }
+//   a.push( allarr[wd] );
+//   return a;
+// }
 
-    // グラフ描画オプション
-    var options = {
-      seriesDefaults: {
-        renderer: jQuery.jqplot.BubbleRenderer,
-        rendererOptions: {
-          // bubbleAlpha: 0.2,
-          // highlightAlpha: 1.0,
-          showLabels: false,
-          autoscaleMultiplier: 0.1,
-          shadow: false,
-        },
-      },
-      // グラフ幅の調整
-      gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
-      series: [],
-      axesDefaults: {
-        numberTicks: 3,
-        tickOptions: {
-          fontSize: '10pt',
-          fontFamily: 'ヒラギノ角ゴ Pro W3',
-          markSize: 0
-        },
-      },
-      axes: {
-        // 見栄えの問題で、max は101, min は -1 で調整
-        xaxis: {
-          // label: '変動係数',
-          min: 0.0,
-          max: 1.0,
-        },
-        yaxis: {
-          // label: '相関係数',
-          min: 0.0,
-          max: 1.0,
-        },
-      },
-      // 背景色に関する設定
-      grid: {
-        background: "transparent",
-        gridLineColor: "#cccccc",
-        shadow: false,
-        drawGridlines: true,
-        drawBorder: false,
-      },
-    };
-
-    // 項目一覧へ要素を追記
-    var rank_target = '#rank';
-
-    addRanking(idxarr, rank_target);
-    // 項目一覧データにクリックイベントを追加
-    // addClickEvtToInfo(rank_target);
-
-    // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-    $.jqplot.postDrawHooks.push(function(graph) {
-
-      // 目盛り線のみ残して目盛りの値は削除
-      var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
-      for (var i=0; i<selcts.length; i++) {
-        $(selcts[i][0]).text('');
-        $(selcts[i][1]).text('');
-        $(selcts[i][2]).text('');
-      }
-    });
-
-    var graph = jQuery . jqplot(graph_position, arr, options);
-
-    // ブロック項目をホバーしたらプロットへデータ表示
-    $(rank_target).on({
-        'mouseenter': function() {
-          console.log('hover mouse');
-          replotHome($(this));
-          showTooltip($(this));
-        },
-        'mouseleave': function() {
-          console.log('leave mouse');
-          replot_options = {
-            seriesDefaults: {
-              rendererOptions: {
-                autoscaleMultiplier: 0.1,
-              },
-            },
-            series: []
-          };
-          replot_options.data = arr_for_replot;
-          graph.replot(replot_options);
-        }
-      }, 'a');
-
-    // ホームグラフをリプロットする
-    var replotHome = function(target) {
-
-      var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
-        p_color = setBubbleColor(target.data('vari'), target.data('corr')),
-        addopt = [target.data('vari'), target.data('corr'), 1, p_color];
-      var add_options = {
-        seriesDefaults: {
-          rendererOptions: {
-            autoscaleMultiplier: 0.4,
-          },
-        },
-        series: [],
-      };
-
-      origin_arr[0] = [addopt];
-      add_options.data = origin_arr;
-
-      // 再描画を実行
-      // jqplot の replot関数は、追加のオプションを設定すると
-      // 追加部分「だけ」変更してくれるので余計な記載をせずに済む。
-      graph.replot(add_options);
-    }
-  });
-}
+// function removeKeywordForPageName() {
+//   switch (getAnalyzedPageName()) {
+//     case 'all':
+//     case 'search':
+//     case 'direct':
+//       $(".tooltipster-content #box_r ul li#keyword").remove();
+//     break;
+//   }
+// }

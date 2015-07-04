@@ -1,3 +1,46 @@
+/**
+* URL クエリパラメータ操作クラス
+*/
+var Query = new function() {
+  var self = function Query() {
+    this._query = location.search.slice(1);
+  };
+
+  self.prototype = {
+    constructor: self
+
+    ,replaceCategory: function replaceCategory(category) {
+
+      function replacer(match, p1, p2, p3, offset, string) {
+        return p1+category;
+      }
+      return this._query.replace(/(category=).*$/, replacer);
+    }
+
+    ,split: function split() {
+      return this._query.split("&");
+    }
+
+    ,createObject: function createObject() {
+      var p = {};
+      jQuery.each($(this.split()), function(k, v) {
+        var tmp = v.split("=");
+        if ( tmp[0].match(/from|to/) ) {
+          tmp[1] = replaceAll(tmp[1], '-', '/');
+        }
+        p[tmp[0]] = decodeURIComponent(tmp[1]);
+      });
+      return p;
+    }
+
+    ,forDetailAnlyz: function forDetailAnlyz() {
+      return this._query.replace(/cv_name=.*&/, "");
+    }
+  };
+
+  return self;
+};
+
 // $(function(){
 //   /**
 //    * Object.createの拡張関数( javascriptクラスの継承に使う)
@@ -15,6 +58,9 @@
 //   }
 //   extend.f = function(){};
 
+
+// location = new LocationUtil(location.href);
+// hoge = location.replaceCategory("search");
 
 //   /**
 //   * Datepicker 操作のスイッチクラス
