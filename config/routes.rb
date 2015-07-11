@@ -3,7 +3,7 @@ SampleApp::Application.routes.draw do
   # resources :users ,:except => [:index] do
   resources :users do
     member do
-      get :show_detail, :edit_detail, :edit_init_analyze, :home_anlyz, :detail, :get_filter_keywords
+      get :show_detail, :edit_detail, :edit_init_analyze, :home_anlyz, :detail, :get_filter_keywords, :chk_cache
       post :cache_result_anlyz
       patch :update_detail, :update_init_analyze
       put :update_detail, :update_init_analyze

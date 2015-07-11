@@ -497,8 +497,8 @@ module ParamUtils
 
   def set_from_to(content, params)
     if content.nil?
-      from = params[:from].present? ? set_date_format(params[:from]) : Date.today.prev_month
-      to = params[:to].present? ? set_date_format(params[:to]) : Date.today
+      from = set_date_format(params[:from].gsub(/-/, '/') )
+      to = set_date_format(params[:to].gsub(/-/, '/') )
     else
       from = set_date_format(content.upload_file.first[0])
       to = set_date_format(content.upload_file.last[0])

@@ -3,6 +3,11 @@
 <%= render 'layouts/loading' %>
 
 <script>
+
+  // カテゴリグレーアウト解除
+  $(".home-anlyz").removeClass('hide');
+  $(".dummy-category").remove();
+
   // キャッシュされたグラフデータがある場合の処理
   $(function() {
     if (typeof gon != "undefined") {
@@ -22,21 +27,16 @@
         $("#term").find('p')
           .text(sessionStorage.getItem('anlyzed_dates'));
 
-        // カテゴリ別の処理
-        // 分析開始リンクの無効化
-        setTimeout(function() {
-          $("#atics_s")
-          .attr('id', "atics")
-          .removeClass("yes");
-        }, 100);
-
-        // all以外の分析を可能にする
-        $("ul li a.home-anlyz").addClass(("yes"));
+        // // 対象のカテゴリをグレーアウト
+        // var $elem = $(document.getElementById(gon.category));
+        // $elem
+        //   .after('<div class="dummy-category">'+$elem.text()+'</div>')
+        //   .addClass("hide");
 
       } else {
         // データ不足で分析できない旨を表示
         $('#loading').removeClass('hide');
-        addWhenNotCved();
+        $("#error_msg").removeClass("hide");
       }
     } else {
       // まだ分析がされてない場合

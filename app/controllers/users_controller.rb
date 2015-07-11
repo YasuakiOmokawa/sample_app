@@ -15,21 +15,11 @@ class UsersController < ApplicationController
     :update,
     :destroy,
     :show,
-    # :all,
-    # :search,
-    # :direct,
-    # :referral,
-    # :social,
     :edit_init_analyze,
     :update_init_analyze
   ]
   before_action :correct_user,   only: [
     :show,
-    # :all,
-    # :search,
-    # :direct,
-    # :referral,
-    # :social,
     :edit,
     :update,
     :edit_init_analyze,
@@ -81,6 +71,14 @@ class UsersController < ApplicationController
         params[:result_obj].to_s, expires_in: 1.hour, compress: true)
     end
     render json: { cache_result: "ok"}
+  end
+
+  def chk_cache
+    if Rails.cache.read(params[:for_get_request])
+      render json: { is_cached: true}
+    else
+      render json: { is_cached: false}
+    end
   end
 
   def home_anlyz
@@ -198,59 +196,9 @@ class UsersController < ApplicationController
       redirect_to(root_path) unless current_user.admin?
     end
 
-    def chk_cache
-      if request.xhr?
-
-        @memcache_kwd_key = set_key_for_data_cache(request.fullpath.to_s, @content)
-
-        logger.info('リクエストパラメータのフルパスは以下です。')
-        logger.info(@memcache_kwd_key)
-
-        cached_item = Rails.cache.read(@memcache_kwd_key)
-        logger.info('キャッシュされたキーワードデータが読み込まれました。') unless cached_item.nil?
-
-        # キャッシュ読み書き(バブル用データ)
-        if params[:analyze_type].present?
-
-          memcache_graph_key = set_key_for_data_cache(
-            create_cache_key(params[:analyze_type].to_s),
-            @content)
-
-          if params[:r_obj].present?
-
-            logger.info( 'グラフ用データをキャッシュします。')
-            caching_graph_data = params[:r_obj].to_s
-
-            Rails.cache.write(memcache_graph_key, caching_graph_data, expires_in: 1.hour, compress: true)
-
-            # 分析完了メールを送信
-            # unless analyze_type == 'kobetsu'
-            #   user = User.find(params[:id])
-            #   UserMailer.send_message_for_complete_analyze(user, @from, @to).deliver if user
-            # end
-
-            return
-          else
-
-            logger.info( 'キャッシュされたグラフデータを読み込みます。')
-            cached_item = Rails.cache.read(memcache_graph_key)
-          end
-        end
-
-        # キャッシュ済のデータがあればキャッシュを返却してコントローラを抜ける
-        if cached_item.present?
-          logger.info( 'キャッシュデータが読み込まれました。')
-          @json = cached_item
-          return
-        else
-          logger.info( 'リクエストされたキーに紐づいているキャッシュデータはありません。')
-        end
-      end
-    end
-
     def chk_param
 
-      @content = Content.find(params[:cv_num])
+      @content = begin Content.find(params[:cv_num]) rescue nil end
       @content.upload_file.shift unless @content.nil?
       (@from, @to) = set_from_to(@content, params)
 
@@ -403,7 +351,7 @@ class UsersController < ApplicationController
       # カスタムデータ置き変え判定
       replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
-      Rails.logger.info("CVの現在値は#{@ast_data}")
+      # Rails.logger.info("CVの現在値は#{@ast_data}")
 
       # 分析データのバリデート
       logger.info("分析データのバリデートを開始します")

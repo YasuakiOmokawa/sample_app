@@ -1,29 +1,30 @@
   <!-- menu_st -->
   <div id="fm_menu">
     <h2 id="tp">解析期間</h2>
-    <p><%= link_to '選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set", id: "replacement-date" %></p>
+    <p><%= link_to '選択してください', 'javascript:void(0)', {class: "set", id: "replacement-date"} %></p>
     <h2>CV設定</h2>
-    <p><%= link_to 'CVを選択してください', content_path(current_user), data: { push: "partial", target: "@data-role" }, class: "set", id: "replacement-cv_name" %></a></p>
-    <a href="javascript:void(0)" id="atics" class="home-anlyz">分析開始</a>
+    <p><%= link_to 'CVを選択してください',  'javascript:void(0)', {class: "set", id: "replacement-cv_name" } %></p>
+    <a href="javascript:void(0)" id="atics" class="base-anlyz">分析開始</a>
 
     <ul>
-      <li><div id="all">全体</div></li>
+      <li><a href="javascript:void(0)" class="home-anlyz" id="all">全体</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz" id="search">オーガニック検索</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="direct">直接入力/ブックマーク</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="referral">その他ウェブサイト</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="social">ソーシャル</a></li>
-      <li class="switch"><%= link_to '戻る', "javascript:void(0)",data: { push: "partial", target: "@data-role" }, id: "back" %></li>
+      <li class="switch"><%= link_to '戻る', "javascript:history.back();",data: { push: "partial", target: "@data-role" }, id: "back" %></li>
     </ul>
   </div>
   <!-- menu_end -->
 
   <!-- additional-link_start -->
-  <div id="content-link" class="hide"><%= content_path(current_user) %></div>
+  <div id="chk-cache-link" class="hide"><%= chk_cache_user_path %></div>
+  <div id="home-link" class="hide"><%= user_url(current_user) %></div>
+  <div id="content-link" class="hide"><%= content_url(current_user) %></div>
   <div id="home_anlyz_user_path" class="hide"><%= home_anlyz_user_path %></div>
   <div id="detail_user_path" class="hide"><%= detail_user_path %></div>
   <div id="cache_result_anlyz_user_path" class="hide"><%= cache_result_anlyz_user_path %></div>
   <div id="get_filter_keywords_user_path" class="hide"><%= get_filter_keywords_user_path %></div>
-  <%= link_to 'dummy-to-home', user_path, data: { push: "partial", target: "@data-role" }, class: "hide", id: "link-to-home-after-anlyz" %>
   <!-- additional-link_end -->
 
   <!-- datepicker_start -->

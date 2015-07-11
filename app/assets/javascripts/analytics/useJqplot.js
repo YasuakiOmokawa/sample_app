@@ -12,6 +12,7 @@ function zeroSuppressedDateFormatMonthly(data) {
 var setArr = function(data) {
     var arr_metrics = [], dts, arr = [];
     for (var i in data) {
+
       if (i.toString().length == 8) {
         dts = zeroSuppressedDateFormat(i.toString());
       } else {
@@ -19,20 +20,16 @@ var setArr = function(data) {
       }
 
       arr_metrics.push( [ dts, data[i].data, data[i].day_type ] );
-      // arr_cv.push( [ dts, data[i][1], data[i][2]]);
-
     };
     arr.push(arr_metrics);
     return arr;
 }
 
 // 表示する値の種類によって、グラフのY軸（左側）のフォーマットを変更
-// ロジック変更が発生したら、update_table.rb chg_time()　もチェックすること
-
 var tickFormatter = function (format, val) {
     switch(format) {
-        case 'percent': return val.toFixed(1) + '%';
-        case 'number': return val.toFixed(1);
+        case 'percent': return RoundValueUnderOne(val) + '%';
+        case 'number': return RoundValueUnderOne(val);
         case 'time': {
 
             // 時間の書式は、 hh:mm:ss
@@ -73,7 +70,7 @@ var resetYtick = function(val) {
 
   data[line] = {
     xaxis: 'xaxis',
-    yaxis: 'y2axis',
+    yaxis: 'yaxis',
     y: tick,
     shadow: false,
     shadowAlpha: 0,
@@ -111,7 +108,6 @@ var resetXbgc = function(nm, dt, yval) {
   return data;
 }
 
-
 function setYaxisLimit(options, format) {
   if (format === 'percent') {
     options.axes.yaxis.min = 0;
@@ -120,6 +116,26 @@ function setYaxisLimit(options, format) {
   return options;
 }
 
+// ツールチップの表示形式
+var getPointInfo = function(current, serie, index, plot) {
+  var item = JSON.parse(sessionStorage.getItem('data_for_detail'));
+  var kv = plot.data[serie][index];
+  var format = '<div>'
+                        + kv[0]
+                      + '</div>'
+                      +'<div>'
+                        + item.metricsJp + ': ' + tickFormatter(gon.format_string, kv[1])
+                      + '</div>';
+
+  return format;
+}
+
+var calcYMax = function(graph_data) {
+  return Math.max.apply(null, graph_data[0].map(function(v) {
+      return Number(v[1]);
+    } )
+  );
+}
 
 // メイン処理
 function jqplotDetail() {
@@ -135,11 +151,13 @@ function jqplotDetail() {
       axesDefaults: {
           tickOptions: {
             fontSize: '9pt',
-            fontFamily: 'ヒラギノ角ゴ Pro W3'
+            fontFamily: 'ヒラギノ角ゴ Pro W3',
           },
       },
+      // グラフ幅の調整
+      gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
       series:[
-            // １つ目の項目（棒グラフにする）の設定
+            // １つ目の項目の設定
           {
               renderer: jQuery . jqplot . BarRenderer,
               fillToZero: true,
@@ -159,20 +177,23 @@ function jqplotDetail() {
               },
           },
           yaxis: {
-              autoscale: true,
-              numberTicks: 11,
+              numberTicks: 3,
+              min: 0.0,
+              max: 0.0,
               pad: 1,
               tickOptions: {
                 // 自作関数でフォーマットする
                 formatter: tickFormatter,
                 showGridline: false,
+                markSize: 0
               },
           },
       },
       // マウスオーバー時の数値表示
       highlighter: {
-          // show: true,
-          formatString: '<table class="jqplot-highlighter"><tr><td>%s</td><td>日</td></tr><tr><td> </td><td>%s</td></tr></table>'
+          show: true,
+          fadeToolTip: false,
+          tooltipContentEditor: getPointInfo,
       },
       // 背景色に関する設定
       grid: {
@@ -186,6 +207,9 @@ function jqplotDetail() {
   // グラフのフォーマット設定は自作関数で行う
   options.axes.yaxis.tickOptions.formatString = gon.format_string;
 
+  // yの最大値をデータより算出
+  options.axes.yaxis.max = calcYMax(graph_data);
+
   // 再描画用のオプション
   var tickopt = {
     canvasOverlay: {
@@ -196,56 +220,55 @@ function jqplotDetail() {
   };
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  // $.jqplot.postDrawHooks.push(function() {
-  //     // $('.jqplot-axis.jqplot-x2axis').hide();
+  $.jqplot.postDrawHooks.push(function() {
 
-  //     // x軸（日付）の処理
-  //     var ymax_value = $('.jqplot-yaxis-tick').last().text(); // 土日祝の背景を塗りつぶすときに使う
+      // x軸（日付）の処理
+      // var ymax_value = $yticks.last().text(); // 土日祝の背景を塗りつぶすときに使う
+      var ymax_value = calcYMax(this.data);
+      var $xtics = $('.jqplot-xaxis-tick');
 
-  //     for ( var i=0; i < $('.jqplot-xaxis-tick').length; i++) {
+      for ( var i=0; i < $xtics.length; i++) {
 
-  //       var day_type = graph_data[i].day_type;
-  //       var background_graph_color;
+        // var day_type = graph_data[i].day_type;
+        var day_type = this.data[0][i][2];
+        var background_graph_color;
 
-  //       // 土曜日の部分背景を青、日祝なら赤に変更
-  //       if (day_type != 'day_on') {
-  //         background_graph_color = resetXbgc(day_type, i, ymax_value);
-  //         tickopt.canvasOverlay.objects.push(background_graph_color);
-  //       }
+        // 土曜日の部分背景を青、日祝なら赤に変更
+        if (day_type != 'day_on') {
+          background_graph_color = resetXbgc(day_type, i, ymax_value);
+          tickopt.canvasOverlay.objects.push(background_graph_color);
+        }
 
-  //       // 土曜日なら文字列を青、日祝なら文字列を赤に変更
-  //       if (day_type == 'day_sun' || day_type == 'day_hol') {
-  //         $( $('.jqplot-xaxis-tick')[i] ).css("color", "red");
-  //       } else if (day_type == 'day_sat') {
-  //         $( $('.jqplot-xaxis-tick')[i] ).css("color", "blue");
-  //       }
+        // 土曜日なら文字列を青、日祝なら文字列を赤に変更
+        if (day_type == 'day_sun' || day_type == 'day_hol') {
+          $( $xtics[i] ).css("color", "red");
+        } else if (day_type == 'day_sat') {
+          $( $xtics[i] ).css("color", "blue");
+        }
 
-  //     }
+      }
 
-  //     // グラフの下部マージンを変更
-  //     // $('#square.jqplot-target').css("margin-bottom", "20px");
+      // グラフのy座標へ水平線を設定
+      // var tick, dt;
+      // var $yticks = $('.jqplot-yaxis-tick');
 
-  //     // y軸の罫線を後ろに移動
-  //     $('.jqplot-overlayCanvas-canvas').css("z-index", -1);
+      // for(var i=0; i < $yticks.length; i++) {
 
-  // });
+      //   // 目盛りの値を変換
+      //   tick = $( $yticks[i] ).text();
+      //   // console.log(tick);
+
+      //   // y軸を再設定
+      //   dt = resetYtick(tick);
+      //   tickopt.canvasOverlay.objects.push(dt);
+      // }
+
+  });
 
   // ★jqplot描画
   var squareBar = jQuery . jqplot( 'detail_graph', graph_data, setYaxisLimit(options, gon.format_string));
 
-  // グラフのy座標へ水平線を設定
-  var yticks = $('.jqplot-yaxis-tick'), tick, dt;
-
-  for(var i=0; i < yticks.length; i++) {
-
-    // 目盛りの値を変換
-    tick = $(yticks[i]).text();
-    // console.log(tick);
-
-    // y軸を再設定
-    dt = resetYtick(tick);
-    tickopt.canvasOverlay.objects.push(dt);
-  }
   // jqplot再描画
   squareBar.replot(tickopt);
+
 };

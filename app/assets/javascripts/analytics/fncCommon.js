@@ -20,6 +20,7 @@ $(document).ready(function() {
     console.log("Loading: " + url + " to " + $target.selector + " within '" + render + "'");
     // start loading animation
     if ( location.href.match(/contents/) ) {
+      $("#error_msg").addClass("hide");
       $('#loading').removeClass('hide');
       $('#spinner').removeClass('hide');
     }
@@ -29,6 +30,7 @@ $(document).ready(function() {
     console.log("Redirected to: "+ url);
     // start loading animation
     if ( location.href.match(/contents/) ) {
+      $("#error_msg").addClass("hide");
       $('#loading').removeClass('hide');
       $('#spinner').removeClass('hide');
     }
@@ -51,10 +53,13 @@ $(document).ready(function() {
   $(document).off('page:fail').on('page:fail', function(event, $target, status, url, error, code) {
     console.log("Wiselinks status: '" + status + "'");
     // code to show error message
+    if (code == 500) {
+      alert('セッションが切れました。再ログインしてください');
+    }
   });
 
   // ajax中に別ページへの通常リクエストが発生したらajax消去
-  $("body").bind("ajaxSend", function(c, xhr) {
+  $("body").off("ajaxSend").on("ajaxSend", function(c, xhr) {
       $( window ).bind( 'beforeunload', function() {
           xhr.abort();
       })
@@ -63,60 +68,142 @@ $(document).ready(function() {
 
 function eventsOnMenu() {
 
-  // 「戻る」がクリックされたときの処理
-  $("#back").on("click", function() {
-    history.back(-1);
-  });
+  var setting_data = sessionStorage.getItem( "setting_key" ),
+    $date = $("#replacement-date"), $cv_name = $("#replacement-cv_name"),
+    content_url = $("#content-link").text();
 
   // 分析設定が実施された場合の処理
-  var setting_data = sessionStorage.getItem( "setting_key" );
   if (setting_data) {
     // メニューの期間、CV表示を変更
     var setting_obj = JSON.parse(setting_data);
     // 期間表示
-    $("#replacement-date")
+    $date
       .text(setting_obj.from+" - "+setting_obj.to)
-      .removeClass("set")
-      .attr("href", $("#content-link").text());
+      .removeClass("set");
     // CV表示
-    $("#replacement-cv_name")
+    $cv_name
       .text(setting_obj.cv_name)
-      .removeClass('set')
-      .attr("href", $("#content-link").text());
+      .removeClass('set');
     // 分析開始リンクの有効化判定
-    $("#atics")
-      .attr('id', "atics_s")
-      .addClass("yes");
+    if (isNewSettings()) {
+      $("#atics")
+        .attr('id', "atics_s")
+        .addClass("yes");
+    } else {
+      $("#atics_s")
+       .attr('id', "atics")
+       .removeClass("yes");
+    }
   }
 
-  // 分析開始リンクがクリックされたときの処理
-  $(".home-anlyz").on("click", function() {
+  // 分析リンクがクリックされたときの処理
+  $(".base-anlyz, .home-anlyz").off('click').on("click", function() {
     if ($(this).hasClass('yes')) {
-      locationHashChanged($(this).attr("id"));
+
+      // ローディングモーションを表示
+      $("#error_msg").addClass("hide");
+      $('#loading').removeClass('hide');
+      $('#spinner').removeClass('hide');
+      $('#now-loading').removeClass('hide');
+
+      console.log( '分析済チェックを開始');
+      var category = $(this).attr("id"),
+        params = createAnlyzParameter(category);
+
+      // 分析結果がキャッシュ済か確認する
+      $.ajax({
+        url: $("#chk-cache-link").text(),
+        dataType: 'json',
+        data: params
+      })
+      .done(function(data, textStatus, jqXHR) {
+        console.log( '分析済チェック完了');
+        // キャッシュ済の場合
+        if (data.is_cached) {
+          // ホーム画面の遷移リクエスト発行
+          console.log( '分析済です');
+          var new_url = $('#home-link').text() + '?' + params.for_get_request;
+          window.wiselinks.page.load(new_url, "@data-role", 'partial');
+        } else {
+          // 分析を開始
+          console.log( '分析結果がありません');
+          startHomeAnlyz(category);
+        }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        addErrorMessage('分析済チェックエラーが発生しました： '
+          + String(errorThrown));
+      });
     }
   });
 
+  // 設定画面へのリンクがクリックされたときの処理
+  $date.off('click').on('click', function() {
+    window.wiselinks.page.load(content_url, "@data-role", 'partial');
+  });
+  $cv_name.off('click').on('click', function() {
+    window.wiselinks.page.load(content_url, "@data-role", 'partial');
+  });
+}
+
+function isNewSettings() {
+  var setting_data = sessionStorage.getItem( "setting_key" );
+  if (location.href.match(/contents/)) {
+    // 設定画面であればfalse
+    return false;
+  } else if (location.search && setting_data) {
+    var query = new Query(),
+      settings = new Settings(JSON.parse(setting_data));
+
+    // 対象のカテゴリをグレーアウト
+    $(".dummy-category").remove();
+    var $elem = $(document.getElementById(
+      query.createObject().category));
+    $elem
+      .after('<div class="dummy-category">'+$elem.text()+'</div>')
+      .addClass("hide");
+
+    // 分析開始以外の分析リンクをクリック可能にする
+    $(".home-anlyz").addClass(("yes"));
+
+    // 分析設定が更新されていればtrue
+    if (query.forSettingsCompare() === settings.forSettingsCompare()) {
+      return false;
+    } else {
+      return true;
+    }
+  } else if (setting_data) {
+    // 分析設定がされていればtrue
+    return true;
+  } else if (!location.search){
+    // まだ分析が実行されていなければfalse
+    return false;
+  } else {
+    return false;
+  }
 }
 
 function replaceAll(expression, org, dest){
   return expression.split(org).join(dest);
 }
 
+function createAnlyzParameter(category) {
+  if (category == "atics_s") {
+    return createParameterWithSessionStorage();
+  } else {
+    return createParameterWithURL(category);
+  }
+}
+
 function createParameterWithSessionStorage() {
-  var get_param = '', obj = {},
+  var obj = {},
     setting_obj = JSON.parse(sessionStorage.getItem( "setting_key" ));
 
-  setting_obj.category = "all";
+  setting_obj.category = 'all';
+  delete setting_obj.cv_name;
+  var settings = new Settings(setting_obj);
 
-  // getリクエストパラメータの生成
-  jQuery.each(setting_obj, function(key, val) {
-    if ( key.match(/from|to/) ) {
-      val = replaceAll(val, '/', '-');
-    }
-    get_param += encodeURIComponent(key)+"="+encodeURIComponent(val) + "&";
-  });
-
-  obj.for_get_request = get_param.slice(0, -1);
+  obj.for_get_request = settings.createQueryParameter();
   obj.for_anlyz = setting_obj;
   return obj;
 }
@@ -126,6 +213,7 @@ function createParameterWithURL(category) {
 
   obj.for_get_request = query.replaceCategory(category);
   obj.for_anlyz = query.createObject();
+  obj.for_anlyz.category = category;
   return obj;
 }
 
@@ -138,14 +226,13 @@ function eventsOnSettingUI() {
   $("#replacement-date").attr("href", "javascript:void(0)");
   $("#replacement-cv_name").attr("href", "javascript:void(0)");
 
-  // ファイル選択ダイアログの起動判定範囲を広げる
+  // CV設定のファイル選択エリアの処理
   $("#cv li").last().on("click", 'input', function(evt) {
-    $("input[name='content[date]']").val("dummy"); // 期間設定をダミー選択
     $(evt.target).parent().find("a").click();
   });
 
   // ファイルが選択されたときの処理
-  $("#content_upload_file").on("change", displaySelectedFileName);
+  $("#content_upload_file").on("change", onFileSelect);
 
   // 「キャンセル」がクリックされたときの処理
   $("#cancell").on("click", function() {
@@ -153,9 +240,9 @@ function eventsOnSettingUI() {
   });
 
   // 「選択」がクリックされたときの処理
-  $("#cv").off('click').on("click", "a", function(evt) {
+  $("#cv").on("click", "a", function(evt) {
 
-    var $target = $(evt.currentTarget);
+    var $target = $(evt.currentTarget), $inputDate = $("input[name='content[date]']");
 
     // 選択済みであれば何も処理しない
     if (! $target.hasClass("selected") ) {
@@ -163,19 +250,39 @@ function eventsOnSettingUI() {
 
       console.log('cv_data set : '+ cv_data);
 
-      $("input[name='content[cv_num]']")
-        .val( cv_data ).change();
       highlightSelectedCV( cv_data );
 
-      // ファイルダイアログのオープン判定
-      if (cv_data === "file") {
+      // 選択されたのがオンラインデータであれば以下の処理を行う
+      if (cv_data != "file") {
+        // 日付選択カレンダーを表示させる
+        $("#date-range").removeClass('hide');
+        // ファイル名の表示を削除する
+        $("#file").val('');
+        // file_fieldの値を削除する
+        $('#content_upload_file').val('');
+        // 期間データがdummyであれば初期化する
+        if ($inputDate.val() == "dummy") {
+          $inputDate.val('');
+        }
+      } else {
+        // オフラインデータであればファイルダイアログをオープン
+        // 期間設定にはダミー値を設定
+        $inputDate.val("dummy");
         $('#content_upload_file').click();
       }
+
+      // 設定リンク有効判断を実行
+      $("input[name='content[cv_num]']")
+        .val( cv_data )
+        .change();
     }
   });
 
   // 期間、CVどちらかの値が設定された場合の処理
-  $("input.parameter").on("change", setFormViaAjax );
+  $("input.parameter").on("change", function(e) {
+    e.stopPropagation();
+    setFormViaAjax();
+  });
 }
 
 function setFormViaAjax() {
@@ -202,12 +309,16 @@ function execFormSubmit() {
       $("#cancell").click(); // 設定前の画面へ戻る
     },
     error: function(xhr) {
-      $("#content-active-error-message").removeClass('hide');
-      var errors = JSON.parse(xhr.responseText).errors;
-      $.each(errors, (function(k, v) {
-        $("#errors ul").append("<li>" + '*' + k + v + "</li>");
-        $("content" + '_' + k).closest(".form-group").addClass("has-error");
-      }));
+      if (xhr.status == 500) {
+        alert("セッションが切れました。再ログインしてください");
+      } else {
+        $("#content-active-error-message").removeClass('hide');
+        var errors = JSON.parse(xhr.responseText).errors;
+        $.each(errors, (function(k, v) {
+          $("#errors ul").append("<li>" + '*' + k + v + "</li>");
+          $("content" + '_' + k).closest(".form-group").addClass("has-error");
+        }));
+      }
     }
   });
 }
@@ -217,14 +328,13 @@ function removeUploadError() {
   $("#errors ul").empty();
 }
 
-function displaySelectedFileName() {
+function onFileSelect() {
   var regex = /\\|\\/, file_name = $('#content_upload_file').val();
   var array = file_name.split(regex);
 
   // 選択されたファイルが空ファイルでなければ処理を実行する
   if (array[array.length - 1].length > 0) {
-    $("input#file")
-      .val( array[array.length - 1] );
+    $("#file").val( array[array.length - 1] );
     // 日付選択カレンダーを非表示にする
     $("#date-range").addClass('hide');
   }
@@ -250,17 +360,10 @@ function highlightSelectedCV(cv_num) {
 
   // 「選択」リンクの色を変更
   $cves.find(finder).addClass('selected');
-
-  // 選択されたのがオンラインデータであれば以下の処理を行う
-  if (cv_num != "file") {
-    // 日付選択カレンダーを表示させる
-    $("#date-range").removeClass('hide');
-    // ファイル名の表示を削除する
-    $("input#file").val('');
-    // file_fieldの値を削除する
-    $('#content_upload_file').val('');
-    // 期間データを初期化する
-    $("input[name='content[date]']").val("").change();
-
-  }
 }
+
+// 小数点一位以下四捨五入
+function RoundValueUnderOne(val) {
+  return Math.round( Number(val) * 10) / 10;
+}
+

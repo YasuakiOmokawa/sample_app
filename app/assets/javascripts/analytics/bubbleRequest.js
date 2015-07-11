@@ -19,21 +19,10 @@ function getUsrOpts() {
   ];
 }
 
-function locationHashChanged(category) {
+function startHomeAnlyz(category) {
   console.log("ホーム分析開始!");
 
-  // ローディングモーションを表示
-  $('#loading').removeClass('hide');
-  $('#spinner').removeClass('hide');
-  $('#now-loading').removeClass('hide');
-
-  var params = (function() {
-    if (category == "atics_s") {
-      return createParameterWithSessionStorage();
-    } else {
-      return createParameterWithURL(category);
-    }
-  }());
+  var params = createAnlyzParameter(category);
 
   // バブル作成用にページ下部のタブリンクに埋め込む関数
   (function bubbleCreateAtTabLink() {
@@ -188,8 +177,8 @@ function locationHashChanged(category) {
           if(Object.keys(return_obj).length != 0){
             // データ項目一覧セット
             setDataidx(return_obj, params.for_anlyz.category, idxarr);
-          } else if (req_opts.cache_get != true) {
-            idxarr.push('not_cved');
+          } else {
+            shaped_idxarr.push('not_cved');
           }
           // ポーリング終了処理
           clearInterval(timerID);
@@ -213,46 +202,39 @@ function locationHashChanged(category) {
     (function cacheShapedBubbleParts() {
       var timerID = setInterval( function() {
         if (Object.keys(shaped_idxarr).length != 0) {
-          if (req_opts.cache_get != true) {
+          // リクエスト完了時に、結果をキャッシュする
+          (function cacheResult() {
 
-            // リクエスト完了時に、結果をキャッシュする
-            (function cacheResult() {
+            // ajaxリクエストの生成
+            var request = $.Deferred(function(deferred) {
+              $.ajax({
+                url: $("#cache_result_anlyz_user_path").text(),
+                async: true,
+                type: 'POST',
+                dataType: "json",
+                scriptCharset: 'utf-8',
+                tryCount: 0,
+                // timeout: 2000, // 単位はミリ秒
+                retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
+                data: {
+                  result_obj : JSON.stringify(shaped_idxarr), // バブルチャート用キャッシュ対象データ
+                  cache_key: params.for_get_request,
+                },
+                error: whenAjaxError(deferred)
+              }).done(function(data, textStatus, jqXHR) {
+                deferred.resolveWith(this, [data, textStatus, jqXHR]);
+              });
+            }).promise();
 
-              // ajaxリクエストの生成
-              var request = $.Deferred(function(deferred) {
-                $.ajax({
-                  url: $("#cache_result_anlyz_user_path").text(),
-                  async: true,
-                  type: 'POST',
-                  dataType: "json",
-                  scriptCharset: 'utf-8',
-                  tryCount: 0,
-                  // timeout: 2000, // 単位はミリ秒
-                  retryLimit: 3, // 2回までリトライできる（最初の実施も含むため）
-                  data: {
-                    result_obj : JSON.stringify(shaped_idxarr), // バブルチャート用キャッシュ対象データ
-                    cache_key: params.for_get_request,
-                  },
-                  error: whenAjaxError(deferred)
-                }).done(function(data, textStatus, jqXHR) {
-                  deferred.resolveWith(this, [data, textStatus, jqXHR]);
-                });
-              }).promise();
-
-              request.done(function(data, textStatus, jqXHR) {
-                console.log( 'ajaxデータのキャッシュ成功!');
-                request = '';
-                var $base = $("#link-to-home-after-anlyz"),
-                  basic_path = $base.attr("href").split("?"),
-                  path = basic_path[0]+"?"+params.for_get_request;
-                $base
-                  .attr("href", path)
-                  .trigger('click');
-              })
-              // ajax失敗時の処理
-              .fail(whenAjaxFail());
-            }());
-          }
+            request.done(function(data, textStatus, jqXHR) {
+              console.log( 'ajaxデータのキャッシュ成功!');
+              request = '';
+              var base = $('#home-link').text();
+              var new_url = base + '?' + params.for_get_request;
+              window.wiselinks.page.load(new_url, "@data-role", 'partial');
+            })
+            .fail(whenAjaxFail());
+          }());
           clearInterval(timerID);
           timerID = null;
         }
@@ -356,7 +338,7 @@ function whenAjaxFail() {
     if (errorThrown == 'timeout') {
       addErrorMessage('リクエストがタイムアウトしました。時間を置いて再度実行してください。');
     } else {
-      addErrorMessage('エラーが発生しました。再ログインしてください。'
+      addErrorMessage('エラーが発生しました。再ログインし、分析条件を設定し直してください。'
         +'<br>解消されない場合、下記のエラーコードをお控えのうえ、担当'
         +'者までお問い合わせください。<br>エラーコード : '+ errorThrown);
     }
@@ -393,9 +375,4 @@ function addErrorMessage(text) {
   $("#add_error_msg")
     .removeClass("hide")
     .html(text);
-}
-
-// データ不足で分析できないときのエラー文言を表示
-function addWhenNotCved() {
-  $("#error_msg").removeClass("hide");
 }

@@ -77,37 +77,6 @@ function plotGraphHome(arr, idxarr) {
       'mouseenter': function() {
         replotHome($(this));
         showTooltip($(this));
-
-        // detail_anlyzへのパスを取得
-        var path = $("#detail_user_path").text();
-
-        // 現在のクエリパラメータから、cv_nameを除く
-        var query = new Query();
-        var detail_base = query.forDetailAnlyz();
-
-        // dataブロックの値から、詳細分析用に絞り込みパラメータを取得
-        //　曜日、デバイス、ユーザー、その他キーワード
-        var datas = $(this).data();
-        var _datas = {};
-        for( i in datas) {
-          if (i.match(/^dayType$|devfltr|usrfltr|kwdfltr|^metrics$/)) {
-            if (i == "kwdfltr" && datas[i] != "nokwd") {
-              switch (datas.category) {
-              case 'referral':
-                datas[i] = datas[i] + 'r';
-                break;
-              case 'social':
-                datas[i] = datas[i] + 'l';
-                break;
-              }
-            }
-            _datas[i] = datas[i];
-          }
-        }
-        // 詳細遷移のためのパスを取得
-        var to_detail = path + "?" + detail_base + "&" + jQuery.param(_datas);
-        console.log("detail path is "+to_detail);
-        $(this).attr("href", to_detail);
       },
       'mouseleave': function() {
         replot_options = {
@@ -117,6 +86,38 @@ function plotGraphHome(arr, idxarr) {
         graph.replot(replot_options);
       }
   }, 'a');
+
+  // ブロックをクリックしたら詳細へ遷移する
+  $rank_target.on('click', 'a', function() {
+    // detail_anlyzへのパスを取得
+    var path = $("#detail_user_path").text();
+    var query = new Query();
+
+    // dataブロックの値から、詳細分析用に絞り込みパラメータを取得
+    //　曜日、デバイス、ユーザー、その他キーワード
+    var datas = $(this).data();
+    var _datas = {};
+    for( i in datas) {
+      if (i.match(/^dayType$|devfltr|usrfltr|kwdfltr|^metrics$/)) {
+        if (i == "kwdfltr" && datas[i] != "nokwd") {
+          switch (datas.category) {
+          case 'referral':
+            datas[i] = datas[i] + 'r';
+            break;
+          case 'social':
+            datas[i] = datas[i] + 'l';
+            break;
+          }
+        }
+        _datas[i] = datas[i];
+      }
+    }
+    // 詳細遷移のためのパスを取得
+    var to_detail = path + "?" + query.getQuery() + "&" + jQuery.param(_datas);
+    var detail_url = location.origin+to_detail;
+    // console.log("detail  is "+detail_url);
+    window.wiselinks.page.load(detail_url, "@data-role", 'partial');
+  });
 
   // スピナーの起動
   $rank_target.on('click', 'a', function() {
@@ -198,7 +199,7 @@ function setInfoForDetailUI(datas) {
   _datas.metricsAvg = datas.metricsAvg;
   _datas.metricsJp = datas.metricsJp;
   _datas.desire = datas.desire;
-  _datas.gap = Math.round( (datas.desire - datas.metricsAvg) * 10) / 10;
+  _datas.gap = RoundValueUnderOne(datas.desire - datas.metricsAvg);
 
   // データを格納
   sessionStorage.setItem( "data_for_detail", JSON.stringify(_datas) );

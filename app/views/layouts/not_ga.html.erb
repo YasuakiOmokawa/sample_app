@@ -4,10 +4,10 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta http-equiv="content-style-type" content="text/css">
     <title><%= full_title(yield(:title)) %></title>
-    <%= javascript_include_tag "application" %>
     <%= stylesheet_link_tag "login", media: "all" %>
+    <%= stylesheet_link_tag "analytics/opt", media: "all" %>
+    <%= javascript_include_tag "application" %>
     <%= csrf_meta_tags %>
-    <%= render 'layouts/shim' %>
   </head>
   <body>
     <% flash.each do |key, value| %>

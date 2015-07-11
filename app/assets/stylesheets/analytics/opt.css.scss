@@ -71,21 +71,8 @@ margin: 15px 0 0 -145px;
     margin: 0 0 0 20px;
 }
 
-// カスタム分析ダイアログ
-
-// フォーム位置
-form.model-dialog-form {
-  text-align: center;
-}
-
-// エラーメッセージ
-div.model-dialog div.alert-danger {
-  color: red;
-  font-weight: bold;
-}
-
 // Safari 5.1 for Windows では、 input type=file に
-// display:none を指定すると動かない
+// display:none を指定すると動かないため、下記の設定を行う
 .hide {
     position: absolute !important;
     width: 1px !important;
@@ -104,4 +91,22 @@ div.model-dialog div.alert-danger {
 
 #fm_graph {
   z-index: 99999;
+}
+
+#detail_graph {
+  z-index: 2;
+}
+
+// 詳細グラフのツールチップ
+.jqplot-highlighter-tooltip {
+  z-index: 1;
+}
+
+// グラフの上書き背景（曜日別の背景色など）
+.jqplot-overlayCanvas-canvas {
+  z-index: -1;
+}
+
+.jqplot-xaxis {
+    display: none;
 }

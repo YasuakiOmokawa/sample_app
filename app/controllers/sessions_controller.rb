@@ -13,7 +13,9 @@ class SessionsController < ApplicationController
       Content.where(user_id: current_user.id).delete_all
       # 管理者なら一覧画面へ
       redirect_to users_url and return if current_user.admin?
-      redirect_back_or user
+      # ログインしたら強制でホーム画面へ遷移
+      # redirect_back_or user
+      redirect_to root_url
     else
       flash.now[:error] = 'IDかパスワードが間違っています'
       render 'new', :layout => 'not_ga'

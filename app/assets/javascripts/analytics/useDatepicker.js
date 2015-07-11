@@ -7,7 +7,6 @@ function initDatepicker() {
   if ( $('#datepicker-calendar').children().length == 0 ) {
     $('#datepicker-calendar').DatePicker({
       inline: true,
-      date: [from, to],
       calendars: 3,
       mode: 'range',
       current: new Date(to.getFullYear(), to.getMonth() - 1, 1),
@@ -26,7 +25,6 @@ function initDatepicker() {
 
   // initialize the special date dropdown field
   $('#date-range-field span').text("選択してください");
-  // $("input[name='content[date]']").val(init_text);
 }
 
 function bindDatepickerOperation() {
