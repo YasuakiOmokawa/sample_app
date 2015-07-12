@@ -6,7 +6,10 @@
     <title><%= full_title(yield(:title)) %></title>
     <%= stylesheet_link_tag "login", media: "all" %>
     <%= stylesheet_link_tag "analytics/opt", media: "all" %>
-    <%= javascript_include_tag "application" %>
+    <% if yield(:title) == "パスワード変更" %>
+      <%= javascript_include_tag "https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" %>
+      <%= javascript_include_tag "edit" %>
+    <% end %>
     <%= csrf_meta_tags %>
   </head>
   <body>

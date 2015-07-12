@@ -10,5 +10,5 @@ Rails.application.config.assets.precompile += %w[
   fnccommon.js
   homefnc.js
   upldedanlyz.js
-  setselect.js
+  edit.js
 ]

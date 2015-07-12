@@ -1,21 +1,13 @@
-<%provide(:title, 'パスワード編集') %>
+<%provide(:title, 'パスワード変更') %>
 <%= render partial: 'shared/error_messages', locals: {error_contents: @user } %>
-<div id="login">
+<div id="fm_log">
   <h1>パスワードを再設定</h1>
-  <p>新しいパスワードを入力してください。</p>
-  <p>パスワードを再設定後、ホーム画面に戻ります。</p>
-  <table>
-  <%= form_for(@user, :url =>{:action => 'update'}, html: {:name => 'editForm'}) do |f| %>
-    <tr>
-      <td>新しいパスワード：</td><td><%= f.password_field :password %></td>
-    </tr>
-    <tr>
-      <td>確認のため再入力：</td><td><%= f.password_field :password_confirmation %></td>
-    </tr>
-    <tr>
-      <td></td><td><%= link_to "キャンセル",  {:controller => "users", :action => "show"}, {:id => 'cancel'} %></td>
-      <td><a id='submit' href="javascript:void(0)" onclick="document.editForm.submit();return false;">変更を保存</a></td>
-    </tr>
-
-  <% end %>
-  </table>
+  <p id="explan">新しいパスワードを入力してください。</p>
+  <%= form_for(@user, url: {action: 'update'}, html: {:name => 'editForm'}) do |f| %>
+  <dl><dt>新パスワード&nbsp;：</dt><dd><%= f.password_field :password, :class => 'txt' %></dd></dl>
+  <dl><dt>確認入力&nbsp;：</dt><dd><%= f.password_field :password_confirmation, :class => 'txt' %></dd></dl>
+  <a href="javascript:void(0)" onclick="document.editForm.submit();return false;" class="hide" id="change">変更を保存</a>
+  <%= link_to 'キャンセル', "javascript:history.back();", {id: "cancel"}%>
+   <% end %>
+  <p id="copy"><%= get_gafooter_text %></p>
+</div>

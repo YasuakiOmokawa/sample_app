@@ -147,7 +147,6 @@ class UsersController < ApplicationController
 
   def update
       if @user.update_attributes(user_params)
-        flash[:success] = "Profile updated"
         redirect_to @user
       else
         render 'edit', :layout => 'not_ga'
