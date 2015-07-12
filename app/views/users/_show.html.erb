@@ -27,12 +27,6 @@
         $("#term").find('p')
           .text(sessionStorage.getItem('anlyzed_dates'));
 
-        // // 対象のカテゴリをグレーアウト
-        // var $elem = $(document.getElementById(gon.category));
-        // $elem
-        //   .after('<div class="dummy-category">'+$elem.text()+'</div>')
-        //   .addClass("hide");
-
       } else {
         // データ不足で分析できない旨を表示
         $('#loading').removeClass('hide');

@@ -123,6 +123,7 @@ function plotGraphHome(arr, idxarr) {
   $rank_target.on('click', 'a', function() {
     $('#loading').removeClass('hide');
     $('#spinner').removeClass('hide');
+    $('#now-loading').removeClass('hide');
   });
 
   // ホームグラフをリプロットする
@@ -473,7 +474,7 @@ function showTooltip(contents) {
   .prepend(
     $("<div id='fm_graph'>")
     .append(
-      $('<div id="'+position+'"">')
+      $('<div id="'+position+'">')
       .append(
         $('<dl id="tgt">')
         .append(

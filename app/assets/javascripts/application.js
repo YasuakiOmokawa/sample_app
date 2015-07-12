@@ -16,7 +16,7 @@
 // ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
 //= require bootstrap
 //= require ./datepicker/datepicker
-//= require jquery-ui/dialog
+// require jquery-ui/dialog
 //= require jquery_ujs
 //= require ./jqplot/jquery.jqplot
 //= require ./jqplot/plugins/barRenderer
@@ -25,8 +25,5 @@
 //= require ./jqplot/plugins/pointLabels
 //= require ./jqplot/plugins/bubbleRenderer
 //= require ./jqplot/plugins/canvasOverlay
-//= require jquery.spin
-//= require ./plainoverlay/jquery.plainoverlay
-//= require jquery.tooltipster.min.js
 //= require jquery-hotkeys
 //= require ./jquery_form/jquery.form.min
