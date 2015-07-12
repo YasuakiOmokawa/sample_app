@@ -32,7 +32,8 @@
   </li>
 </ul>
 <div id="btn">
-  <div id="submit">設定</div>
+  <div id="submit" class="dummy-submit">設定</div>
+  <a id="submit" class="real-submit hide" href="javascript:void(0)" onclick="execFormSubmit()">設定</a>
   <%= link_to 'キャンセル', "javascript:void(0)",data: { push: "partial", target: "@data-role" }, id: "cancell" %>
   <br class="clear">
 </div>

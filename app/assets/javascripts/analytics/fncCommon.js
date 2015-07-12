@@ -260,9 +260,15 @@ function eventsOnSettingUI() {
         $("#file").val('');
         // file_fieldの値を削除する
         $('#content_upload_file').val('');
-        // 期間データがdummyであれば初期化する
-        if ($inputDate.val() == "dummy") {
+
+        // if 期間データの入力値が不正な値である場合
+        if ( $inputDate.val() && $("#date-range-field span").text() === "選択してください" ) {
+          // データをリセット
           $inputDate.val('');
+        // 期間データが有効な値である場合
+        } else if ($("#date-range-field span").text() != "選択してください") {
+          // 期間データをセット
+          $inputDate.val($("#date-range-field span").text());
         }
       } else {
         // オフラインデータであればファイルダイアログをオープン
@@ -271,32 +277,22 @@ function eventsOnSettingUI() {
         $('#content_upload_file').click();
       }
 
-      // 設定リンク有効判断を実行
-      $("input[name='content[cv_num]']")
-        .val( cv_data )
-        .change();
+      // CV値を設定
+      $("input[name='content[cv_num]']").val( cv_data );
     }
   });
 
-  // 期間、CVどちらかの値が設定された場合の処理
-  $("input.parameter").on("change", function(e) {
-    e.stopPropagation();
-    setFormViaAjax();
-  });
-}
-
-function setFormViaAjax() {
-  // 初期化
-  $("#submit")
-    .replaceWith('<div id="submit">設定</div>');
-
-  var date = $("input[name='content[date]']").val();
-  var cv_num = $("input[name='content[cv_num]']").val();
-  // 期間とCVどちらも設定されていれば有効化
-  if (date.length > 0 && cv_num.length > 0) {
-    $("#submit")
-      .replaceWith('<a id="submit" href="javascript:void(0)" onclick="execFormSubmit()">設定</a>');
-  }
+  // 設定画面のフォーム値を監視
+  setInterval(function() {
+    // 期間とCVどちらも設定されていれば有効化
+    if ($("input[name='content[date]']").val() && $("input[name='content[cv_num]']").val()) {
+      $(".dummy-submit").addClass("hide");
+      $(".real-submit").removeClass("hide");
+    } else {
+      $(".dummy-submit").removeClass("hide");
+      $(".real-submit").addClass("hide");
+    }
+  }, 100);
 }
 
 function execFormSubmit() {
