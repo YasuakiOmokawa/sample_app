@@ -137,6 +137,28 @@ var calcYMax = function(graph_data) {
   );
 }
 
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/math/dot-line-length [rev. #1]
+
+dotLineLength = function(x, y, x0, y0, x1, y1, o){
+    function lineLength(x, y, x0, y0){
+        return Math.sqrt((x -= x0) * x + (y -= y0) * y);
+    }
+    if(o && !(o = function(x, y, x0, y0, x1, y1){
+        if(!(x1 - x0)) return {x: x0, y: y};
+        else if(!(y1 - y0)) return {x: x, y: y0};
+        var left, tg = -1 / ((y1 - y0) / (x1 - x0));
+        return {x: left = (x1 * (x * tg - y + y0) + x0 * (x * - tg + y - y1)) / (tg * (x1 - x0) + y0 - y1), y: tg * left - tg * x + y};
+    }(x, y, x0, y0, x1, y1), o.x >= Math.min(x0, x1) && o.x <= Math.max(x0, x1) && o.y >= Math.min(y0, y1) && o.y <= Math.max(y0, y1))){
+        var l1 = lineLength(x, y, x0, y0), l2 = lineLength(x, y, x1, y1);
+        return l1 > l2 ? l2 : l1;
+    }
+    else {
+        var a = y0 - y1, b = x1 - x0, c = x0 * y1 - y0 * x1;
+        return Math.abs(a * x + b * y + c) / Math.sqrt(a * a + b * b);
+    }
+};
+
 // メイン処理
 function jqplotDetail() {
 
@@ -155,14 +177,18 @@ function jqplotDetail() {
           },
       },
       // グラフ幅の調整
-      gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
+      // gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
+      gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
       series:[
             // １つ目の項目の設定
           {
-              renderer: jQuery . jqplot . BarRenderer,
+              // renderer: jQuery . jqplot . BarRenderer,
               fillToZero: true,
               negativeSeriesColors: ["#e6b422"],
               rendererOptions: {
+                lineWidth: 1,
+                // barPadding: 0,
+                // barMargin: 5
               },
           },
       ],
@@ -177,15 +203,15 @@ function jqplotDetail() {
               },
           },
           yaxis: {
-              numberTicks: 3,
+              numberTicks: 0,
               min: 0.0,
-              max: 0.0,
-              pad: 1,
+              // max: 0.0,
+              // pad: 1,
               tickOptions: {
                 // 自作関数でフォーマットする
                 formatter: tickFormatter,
-                showGridline: false,
-                markSize: 0
+                showGridline: true,
+                markSize: 0,
               },
           },
       },
@@ -248,6 +274,7 @@ function jqplotDetail() {
 
       }
 
+
       // グラフのy座標へ水平線を設定
       // var tick, dt;
       // var $yticks = $('.jqplot-yaxis-tick');
@@ -271,4 +298,17 @@ function jqplotDetail() {
   // jqplot再描画
   squareBar.replot(tickopt);
 
+  // ウインドウリサイズが発生したらイベントを発生
+  var timer = false;
+  $(window).on('resize', function() {
+    if (timer !== false) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+        console.log('resized');
+        // pass in resetAxes: true option to get rid of old ticks and axis properties
+        // which should be recomputed based on new plot size.
+        squareBar.replot();
+    }, 50);
+  });
 };

@@ -46,7 +46,7 @@ div.alert-notice {
     color: #ffffff
 }
 
-// バブルチャートのツールチップ
+// バブルチャートのツールチップをグラフより前方へ配置
 #fm_graph {
   z-index: 1;
   position: relative;
@@ -58,11 +58,18 @@ div.alert-notice {
 }
 
 // 詳細グラフのツールチップ
+// ※デフォルト指定を上書きする
 .jqplot-highlighter-tooltip {
   z-index: 1;
+  font-size: 16px;
+  background-color: white;
+  font-family: inherit;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  white-space: nowrap;
 }
 
-// グラフの上書き背景（曜日別の背景色など）
+// 詳細グラフの背景（曜日別の背景色など）
 .jqplot-overlayCanvas-canvas {
   z-index: -1;
 }
@@ -72,9 +79,6 @@ div.alert-notice {
 }
 
 // ローディング画面の表示順を調整
-#stay {
-  z-index: 100;
-}
-#s_word {
+#stay, #s_word{
   z-index: 100;
 }
