@@ -248,7 +248,7 @@ function jqplotDetail() {
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   $.jqplot.postDrawHooks.push(function() {
 
-      // x軸（日付）の処理
+      // // x軸（日付）の処理
       // var ymax_value = $yticks.last().text(); // 土日祝の背景を塗りつぶすときに使う
       var ymax_value = calcYMax(this.data);
       var $xtics = $('.jqplot-xaxis-tick');

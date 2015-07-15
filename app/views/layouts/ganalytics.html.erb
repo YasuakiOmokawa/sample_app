@@ -25,24 +25,5 @@
       <% end %>
       <%= yield %>
     </div>
-    <%
-      if Rails.env.production? then
-        [
-          params,
-          @cond,
-          @categories,
-          @narrow_word,
-          @in_table,
-          @data_for_graph_display,
-          @details_desire_datas,
-          @content,
-          @ast_data
-          ].each do |t|
-    %>
-     <%= debug t.inspect %>
-    <%
-          end
-      end
-    %>
   </body>
 </html>
