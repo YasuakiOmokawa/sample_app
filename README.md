@@ -1,19 +1,17 @@
-Web API 情報抽出プログラム
+Web解析支援サービス SiteGoal
 ======================
-APIから抽出した情報を加工、再表示する。
-抽出した情報はDBへ保存せず、ハッシュに加工してそのままhtmlレンダリングする。
- 
+Google Analytics の情報を分析し、優先的に対応すべき条件を抽出するツール。
+
 作者
 ------
-面川泰明 [Qiita](http://qiita.com/omokawa_yasu)
+面川泰明( Yasuaki Omokawa ) [Qiita](http://qiita.com/omokawa_yasu)
      
-関連情報
+デモアカウント
 --------
-### 利用技術
-1. [Google Analytics Core Reporting API v3](https://developers.google.com/analytics/devguides/reporting/core/v3/)
-2. [Ruby on Rails](http://rubyonrails.org/)
-  
+id: senk_sample@senk-inc.co.jp
+pass: senksample
+
 ライセンス
 ----------
-Copyright &copy; 2013 senk Inc. All Rights Reserved.
+Copyright &copy; 2015 senk Inc. All Rights Reserved.
  
