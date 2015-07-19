@@ -143,16 +143,16 @@ module UserFunc
   end
 
   # グラフフォーマットを判別する
-  def check_format_graph(item)
-    if /(bounce_rate|repeat_rate|percent_new_sessions)/ =~ item then
-      p = "percent"
-    elsif /avg_session_duration/ =~ item then
-      p = "time"
-    else
-      p = "number"
-    end
-    p
-  end
+  # def check_format_graph(item)
+  #   if /(bounce_rate|repeat_rate|percent_new_sessions)/ =~ item then
+  #     p = "percent"
+  #   elsif /avg_session_duration/ =~ item then
+  #     p = "time"
+  #   else
+  #     p = "number"
+  #   end
+  #   p
+  # end
 
   private
 

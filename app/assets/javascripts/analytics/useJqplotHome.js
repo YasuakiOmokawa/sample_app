@@ -59,7 +59,8 @@ function plotGraphHome(arr, idxarr) {
   addRanking(idxarr, $rank_target);
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  $.jqplot.postDrawHooks.push(function(graph) {
+  resetPostDrawHooks();
+  $.jqplot.postDrawHooks.push(function homePostDraw(graph) {
 
     // 目盛り線のみ残して目盛りの値は削除
     var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
@@ -201,6 +202,7 @@ function setInfoForDetailUI(datas) {
   _datas.metricsJp = datas.metricsJp;
   _datas.desire = datas.desire;
   _datas.gap = RoundValueUnderOne(datas.desire - datas.metricsAvg);
+  _datas.metricsFormat = datas.metricsFormat;
 
   // データを格納
   sessionStorage.setItem( "data_for_detail", JSON.stringify(_datas) );
@@ -232,6 +234,9 @@ function addRanking(idxarr, $target) {
 
     counter = counter + 1;
 
+    var metrics = addGraphicItem(value['jp_metrics']);
+    var metrics_format = metricsFormat(metrics);
+
     $target
     .append(
       $('<li>')
@@ -243,7 +248,8 @@ function addRanking(idxarr, $target) {
             'data-pri': value['pri'],
             'data-corr': value['corr'],
             'data-corr-sign': value['corr_sign'],
-            'data-metrics': addGraphicItem(value['jp_metrics']),
+            'data-metrics': metrics,
+            'data-metrics-format': metrics_format,
             'data-metrics-jp': value['jp_metrics'],
             'data-day-type-jp': chkDayType(value['day_type_jp']),
             'data-day-type': value['day_type'],
@@ -404,6 +410,22 @@ function addGraphicItem(data) {
   }
 }
 
+function metricsFormat(value) {
+  switch(value) {
+    case 'bounce_rate':
+    case 'repeat_rate':
+    case 'percent_new_sessions':
+      return 'percent';
+      break;
+    case 'avg_session_duration':
+      return 'time';
+      break;
+    default:
+      return 'number';
+      break;
+  }
+}
+
 // 項目一覧に表示する流入元データを日本語へ変換(デバイス)
 function devTnsltENtoJP(d) {
 
@@ -468,7 +490,15 @@ function showTooltip(contents) {
     }
   }());
 
-  var gap = '('+_datas.gap+')';
+  var prefix = (function() {
+    if (_datas.gap >= 0) {
+      return '+';
+    } else {
+      return '';
+    }
+  }());
+
+  var gap = '('+prefix+_datas.gap+')';
 
   $('#graph')
   .prepend(
@@ -483,7 +513,7 @@ function showTooltip(contents) {
         )
         .append(
           $('<dd>')
-          .text( datas.desire )
+          .text( tickFormatter(datas.metricsFormat, datas.desire) )
           // .text("1,234")
           .append(
             $('<span id="gp">')
