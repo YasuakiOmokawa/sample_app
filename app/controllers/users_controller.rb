@@ -216,8 +216,6 @@ class UsersController < ApplicationController
       set_visitor_type(params[:usrfltr], @cond)
       #　グラフ表示項目
       @graphic_item  = (params[:metrics].presence || 'pageviews').to_sym
-      # グラフ表示項目別に、表示フォーマットを指定
-      gon.format_string = check_format_graph(@graphic_item)
       # CV種類
       @cv_num = (@content.nil? ? params[:cv_num] : '1').to_i
       # 絞り込みキーワードの指定

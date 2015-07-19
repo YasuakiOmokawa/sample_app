@@ -26,13 +26,13 @@ $(function() {
     $base_elem
     .after($('<br class="clear">'))
     .after($('<div id="data_gap"><dl><dt>GAP - '
-      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(gon.format_string, detail_obj.gap)+'</dd></dl></div>')
+      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(detail_obj.metricsFormat, detail_obj.gap)+'</dd></dl></div>')
     )
     .after($('<div class="data"><dl><dt>目標値</span> - '
-      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(gon.format_string, detail_obj.desire)+'</dd></dl></div>')
+      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(detail_obj.metricsFormat, detail_obj.desire)+'</dd></dl></div>')
     )
     .after($('<div class="data"><dl><dt>現状値<span>（平均値）</span> - '
-      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(gon.format_string, detail_obj.metricsAvg)+'</dd></dl></div>')
+      +detail_obj.metricsJp+'</dt><dd>'+tickFormatter(detail_obj.metricsFormat, detail_obj.metricsAvg)+'</dd></dl></div>')
     );
   }
 
@@ -43,7 +43,7 @@ $(function() {
   }
 
   // グラフ描画
-  jqplotDetail();
+  jqplotDetail(detail_obj.metricsFormat);
 
 });
 </script>
