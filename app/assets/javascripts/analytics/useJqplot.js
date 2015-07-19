@@ -29,7 +29,7 @@ var setArr = function(data) {
 var tickFormatter = function (format, val) {
     switch(format) {
         case 'percent': return RoundValueUnderOne(val) + '%';
-        case 'number': return RoundValueUnderOne(val);
+        case 'number': return String(RoundValueUnderOne(val)).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
         case 'time': {
 
             // 時間の書式は、 hh:mm:ss
@@ -52,7 +52,8 @@ var tickFormatter = function (format, val) {
             }
             return s;
         }
-        default: return val;
+        default:
+          return val;
     }
 }
 
@@ -100,10 +101,10 @@ var resetXbgc = function(nm, dt, yval) {
     yaxis: 'yaxis',
     start : [d - 0.5, yval],
     stop : [d + 0.5, yval],
-    lineWidth: 1000,
+    lineWidth: 100000,
     color: bgc,
     shadow: false,
-    lineCap : 'butt'
+    lineCap : 'butt',
   };
   return data;
 }
@@ -124,7 +125,7 @@ var getPointInfo = function(current, serie, index, plot) {
                         + kv[0]
                       + '</div>'
                       +'<div>'
-                        + item.metricsJp + ': ' + tickFormatter(gon.format_string, kv[1])
+                        + item.metricsJp + ': ' + tickFormatter(item.metricsFormat, kv[1])
                       + '</div>';
 
   return format;
@@ -137,38 +138,20 @@ var calcYMax = function(graph_data) {
   );
 }
 
-//+ Jonas Raoni Soares Silva
-//@ http://jsfromhell.com/math/dot-line-length [rev. #1]
-
-dotLineLength = function(x, y, x0, y0, x1, y1, o){
-    function lineLength(x, y, x0, y0){
-        return Math.sqrt((x -= x0) * x + (y -= y0) * y);
-    }
-    if(o && !(o = function(x, y, x0, y0, x1, y1){
-        if(!(x1 - x0)) return {x: x0, y: y};
-        else if(!(y1 - y0)) return {x: x, y: y0};
-        var left, tg = -1 / ((y1 - y0) / (x1 - x0));
-        return {x: left = (x1 * (x * tg - y + y0) + x0 * (x * - tg + y - y1)) / (tg * (x1 - x0) + y0 - y1), y: tg * left - tg * x + y};
-    }(x, y, x0, y0, x1, y1), o.x >= Math.min(x0, x1) && o.x <= Math.max(x0, x1) && o.y >= Math.min(y0, y1) && o.y <= Math.max(y0, y1))){
-        var l1 = lineLength(x, y, x0, y0), l2 = lineLength(x, y, x1, y1);
-        return l1 > l2 ? l2 : l1;
-    }
-    else {
-        var a = y0 - y1, b = x1 - x0, c = x0 * y1 - y0 * x1;
-        return Math.abs(a * x + b * y + c) / Math.sqrt(a * a + b * b);
-    }
-};
-
 // メイン処理
-function jqplotDetail() {
+function jqplotDetail(format) {
 
   var graph_data = setArr(gon.data_for_graph_display);
 
   // グラフのオプション
   var options = {
-      seriesColors: ["#e6b422", "#1e50a2"],
+      seriesColors: ["#e6b422"],
       seriesDefaults: {
         shadow: false,
+        markerOptions: {
+          show: true,
+          shadow: false,
+        },
       },
       axesDefaults: {
           tickOptions: {
@@ -177,24 +160,22 @@ function jqplotDetail() {
           },
       },
       // グラフ幅の調整
-      // gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
-      gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
+      gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
+      // gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
       series:[
             // １つ目の項目の設定
           {
-              // renderer: jQuery . jqplot . BarRenderer,
               fillToZero: true,
               negativeSeriesColors: ["#e6b422"],
               rendererOptions: {
                 lineWidth: 1,
-                // barPadding: 0,
-                // barMargin: 5
               },
           },
       ],
       axes: {
           xaxis: {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
+              // numberTicks: 6,
               tickOptions: {
                 fontSize: '6.5pt',
                 showGridline: false,
@@ -203,7 +184,7 @@ function jqplotDetail() {
               },
           },
           yaxis: {
-              numberTicks: 0,
+              numberTicks: 3,
               min: 0.0,
               // max: 0.0,
               // pad: 1,
@@ -231,7 +212,7 @@ function jqplotDetail() {
   };
 
   // グラフのフォーマット設定は自作関数で行う
-  options.axes.yaxis.tickOptions.formatString = gon.format_string;
+  options.axes.yaxis.tickOptions.formatString = format;
 
   // yの最大値をデータより算出
   options.axes.yaxis.max = calcYMax(graph_data);
@@ -246,34 +227,44 @@ function jqplotDetail() {
   };
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
-  $.jqplot.postDrawHooks.push(function() {
+  resetPostDrawHooks();
+  $.jqplot.postDrawHooks.push(function detailPostDraw() {
 
-      // // x軸（日付）の処理
-      // var ymax_value = $yticks.last().text(); // 土日祝の背景を塗りつぶすときに使う
-      var ymax_value = calcYMax(this.data);
-      var $xtics = $('.jqplot-xaxis-tick');
+      var ymax_value = calcYMax(this.data),
+        $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1,
+        enablemark = Math.floor(xlength / 4), counter = 1;
 
-      for ( var i=0; i < $xtics.length; i++) {
+      for ( var i=0; i < graph_data[0].length; i++) {
 
-        // var day_type = graph_data[i].day_type;
         var day_type = this.data[0][i][2];
         var background_graph_color;
 
-        // 土曜日の部分背景を青、日祝なら赤に変更
+        // 土日祝日の部分背景を変更
         if (day_type != 'day_on') {
           background_graph_color = resetXbgc(day_type, i, ymax_value);
           tickopt.canvasOverlay.objects.push(background_graph_color);
         }
 
-        // 土曜日なら文字列を青、日祝なら文字列を赤に変更
-        if (day_type == 'day_sun' || day_type == 'day_hol') {
-          $( $xtics[i] ).css("color", "red");
-        } else if (day_type == 'day_sat') {
-          $( $xtics[i] ).css("color", "blue");
-        }
+        // 日付表示数の最適化
+        if (xlength > 30) {
 
+          if (i === (enablemark * counter) ) {
+            counter += 1;
+          } else {
+            $( $xticks[i] ).text('');
+          }
+        }
       }
 
+
+
+
+      // var $yticks = $('.jqplot-yaxis-tick');
+
+      // for(var i=0; i < $yticks.length; i++) {
+
+      //   // 目盛りの値を変換
+      //   tick = $( $yticks[i] ).text();
 
       // グラフのy座標へ水平線を設定
       // var tick, dt;
@@ -293,7 +284,7 @@ function jqplotDetail() {
   });
 
   // ★jqplot描画
-  var squareBar = jQuery . jqplot( 'detail_graph', graph_data, setYaxisLimit(options, gon.format_string));
+  var squareBar = jQuery . jqplot( 'detail_graph', graph_data, setYaxisLimit(options, format));
 
   // jqplot再描画
   squareBar.replot(tickopt);

@@ -74,8 +74,8 @@ div.alert-notice {
   z-index: -1;
 }
 
-.jqplot-xaxis, .jqplot-yaxis {
-    display: none;
+.jqplot-xaxis {
+  // display: none;
 }
 
 // ローディング画面の表示順を調整

@@ -19,21 +19,21 @@ $(document).ready(function() {
   $(document).off('page:loading').on('page:loading', function(event, $target, render, url) {
     console.log("Loading: " + url + " to " + $target.selector + " within '" + render + "'");
     // start loading animation
-    if ( location.href.match(/contents/) ) {
+    // if ( location.href.match(/contents/) ) {
       $("#error_msg").addClass("hide");
       $('#loading').removeClass('hide');
       $('#spinner').removeClass('hide');
-    }
+    // }
   });
 
   $(document).off('page:redirected').on('page:redirected', function(event, $target, render, url) {
     console.log("Redirected to: "+ url);
     // start loading animation
-    if ( location.href.match(/contents/) ) {
+    // if ( location.href.match(/contents/) ) {
       $("#error_msg").addClass("hide");
       $('#loading').removeClass('hide');
       $('#spinner').removeClass('hide');
-    }
+    // }
   });
 
   $(document).off('page:always').on('page:always', function(event, xhr, settings) {
@@ -363,3 +363,17 @@ function RoundValueUnderOne(val) {
   return Math.round( Number(val) * 10) / 10;
 }
 
+getFunctionName = function(f){
+    return 'name' in f
+        ? f.name
+        : (''+f).replace(/^\s*function\s*([^\(]*)[\S\s]+$/im, '$1');
+};
+
+resetPostDrawHooks = function(){
+  var len = $.jqplot.postDrawHooks.length - 1;
+  for(var i = len; i >= 0; i--){
+    if( getFunctionName($.jqplot.postDrawHooks[i]) ){
+      $.jqplot.postDrawHooks.splice(i,1);
+    }
+  }
+}
