@@ -228,7 +228,11 @@ function jqplotDetail(format) {
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   resetPostDrawHooks();
+<<<<<<< HEAD
   $.jqplot.postDrawHooks.push(function detailPostDraw() {
+=======
+  var detailPostDraw = function detailPostDraw() {
+>>>>>>> origin/master
 
       var ymax_value = calcYMax(this.data),
         $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1,
@@ -277,8 +281,8 @@ function jqplotDetail(format) {
       //   dt = resetYtick(tick);
       //   tickopt.canvasOverlay.objects.push(dt);
       // }
-
-  });
+  }
+  $.jqplot.postDrawHooks.push(detailPostDraw);
 
   // ★jqplot描画
   var squareBar = jQuery . jqplot( 'detail_graph', graph_data, setYaxisLimit(options, format));

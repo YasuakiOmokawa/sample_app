@@ -60,8 +60,12 @@ function plotGraphHome(arr, idxarr) {
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   resetPostDrawHooks();
+<<<<<<< HEAD
   $.jqplot.postDrawHooks.push(function homePostDraw(graph) {
+=======
+>>>>>>> origin/master
 
+  var homePostDraw = function homePostDraw(graph) {
     // 目盛り線のみ残して目盛りの値は削除
     var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
     for (var i=0; i<selcts.length; i++) {
@@ -69,8 +73,13 @@ function plotGraphHome(arr, idxarr) {
       $(selcts[i][1]).text('');
       $(selcts[i][2]).text('');
     }
+<<<<<<< HEAD
 
   });
+=======
+  }
+  $.jqplot.postDrawHooks.push(homePostDraw);
+>>>>>>> origin/master
 
   var graph = jQuery . jqplot(graph_position, arr, options);
 
