@@ -370,10 +370,13 @@ getFunctionName = function(f){
 };
 
 resetPostDrawHooks = function(){
-  var len = $.jqplot.postDrawHooks.length - 1;
-  for(var i = len; i >= 0; i--){
-    if( getFunctionName($.jqplot.postDrawHooks[i]) ){
-      $.jqplot.postDrawHooks.splice(i,1);
-    }
+  var len = $.jqplot.postDrawHooks.length;
+  if (len === 3) {
+    $.jqplot.postDrawHooks.pop();
   }
+  // for(var i = len; i >= 0; i--){
+  //   if( getFunctionName($.jqplot.postDrawHooks[i]) ){
+  //     $.jqplot.postDrawHooks.splice(i,1);
+  //   }
+  // }
 }
