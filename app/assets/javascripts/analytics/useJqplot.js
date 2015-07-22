@@ -228,60 +228,55 @@ function jqplotDetail(format) {
 
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   resetPostDrawHooks();
-<<<<<<< HEAD
-  $.jqplot.postDrawHooks.push(function detailPostDraw() {
-=======
   var detailPostDraw = function detailPostDraw() {
->>>>>>> origin/master
+    var ymax_value = calcYMax(this.data),
+      $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1,
+      enablemark = Math.floor(xlength / 4), counter = 1;
 
-      var ymax_value = calcYMax(this.data),
-        $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1,
-        enablemark = Math.floor(xlength / 4), counter = 1;
+    for ( var i=0; i < graph_data[0].length; i++) {
 
-      for ( var i=0; i < graph_data[0].length; i++) {
+      var day_type = this.data[0][i][2];
+      var background_graph_color;
 
-        var day_type = this.data[0][i][2];
-        var background_graph_color;
-
-        // 土日祝日の部分背景を変更
-        if (day_type != 'day_on') {
-          background_graph_color = resetXbgc(day_type, i, ymax_value);
-          tickopt.canvasOverlay.objects.push(background_graph_color);
-        }
-
-        // 日付表示数の最適化
-        if (xlength > 30) {
-
-          if (i === (enablemark * counter) ) {
-            counter += 1;
-          } else {
-            $( $xticks[i] ).text('');
-          }
-        }
+      // 土日祝日の部分背景を変更
+      if (day_type != 'day_on') {
+        background_graph_color = resetXbgc(day_type, i, ymax_value);
+        tickopt.canvasOverlay.objects.push(background_graph_color);
       }
 
-      // var $yticks = $('.jqplot-yaxis-tick');
+      // 日付表示数の最適化
+      if (xlength > 30) {
 
-      // for(var i=0; i < $yticks.length; i++) {
+        if (i === (enablemark * counter) ) {
+          counter += 1;
+        } else {
+          $( $xticks[i] ).text('');
+        }
+      }
+    }
 
-      //   // 目盛りの値を変換
-      //   tick = $( $yticks[i] ).text();
+    // var $yticks = $('.jqplot-yaxis-tick');
 
-      // グラフのy座標へ水平線を設定
-      // var tick, dt;
-      // var $yticks = $('.jqplot-yaxis-tick');
+    // for(var i=0; i < $yticks.length; i++) {
 
-      // for(var i=0; i < $yticks.length; i++) {
+    //   // 目盛りの値を変換
+    //   tick = $( $yticks[i] ).text();
 
-      //   // 目盛りの値を変換
-      //   tick = $( $yticks[i] ).text();
-      //   // console.log(tick);
+    // グラフのy座標へ水平線を設定
+    // var tick, dt;
+    // var $yticks = $('.jqplot-yaxis-tick');
 
-      //   // y軸を再設定
-      //   dt = resetYtick(tick);
-      //   tickopt.canvasOverlay.objects.push(dt);
-      // }
-  }
+    // for(var i=0; i < $yticks.length; i++) {
+
+    //   // 目盛りの値を変換
+    //   tick = $( $yticks[i] ).text();
+    //   // console.log(tick);
+
+    //   // y軸を再設定
+    //   dt = resetYtick(tick);
+    //   tickopt.canvasOverlay.objects.push(dt);
+    // }
+  };
   $.jqplot.postDrawHooks.push(detailPostDraw);
 
   // ★jqplot描画
@@ -303,4 +298,4 @@ function jqplotDetail(format) {
         squareBar.replot();
     }, 50);
   });
-};
+}
