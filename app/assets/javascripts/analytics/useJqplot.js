@@ -256,9 +256,6 @@ function jqplotDetail(format) {
         }
       }
 
-
-
-
       // var $yticks = $('.jqplot-yaxis-tick');
 
       // for(var i=0; i < $yticks.length; i++) {

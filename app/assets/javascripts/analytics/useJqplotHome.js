@@ -69,6 +69,7 @@ function plotGraphHome(arr, idxarr) {
       $(selcts[i][1]).text('');
       $(selcts[i][2]).text('');
     }
+
   });
 
   var graph = jQuery . jqplot(graph_position, arr, options);
