@@ -383,9 +383,14 @@ function sortIdxarr(idxarr) {
   }
 
   var idxarr = idxarr.sort(function(_a,_b) {
-    var a = parseFloat(_a.pri), b = parseFloat(_b.pri);
+    var a = parseFloat(_a.corr), b = parseFloat(_b.corr);
     if (a > b) return  -1;
     if (a < b) return  1;
+    if (a == b) {
+      var a = parseFloat(_a.vari), b = parseFloat(_b.vari);
+        if (a >= b) return  -1;
+        if (a < b) return  1;
+    }
   });
   console.log(idxarr);
   return idxarr;
