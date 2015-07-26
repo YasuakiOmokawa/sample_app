@@ -7,26 +7,26 @@ module CreateTable
           cond, @cv_txt).limit!(100).sort_desc!(:sessions).res)
   end
 
-  def get_session_rank(special)
-    Ast::Ganalytics::Garbs::Data.create_class('SessionRank',
-      [ :sessions], [special] ).results(@ga_profile,
-      Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
-  end
+  # def get_session_rank(special)
+  #   Ast::Ganalytics::Garbs::Data.create_class('SessionRank',
+  #     [ :sessions], [special] ).results(@ga_profile,
+  #     Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
+  # end
 
-  def get_session_data(special)
-    Ast::Ganalytics::Garbs::Data.create_class('SessionData',
-      [ :sessions, (@cv_txt.classify + 's').to_sym], [special, :date] ).results(@ga_profile, @cond)
-  end
+  # def get_session_data(special)
+  #   Ast::Ganalytics::Garbs::Data.create_class('SessionData',
+  #     [ :sessions, (@cv_txt.classify + 's').to_sym], [special, :date] ).results(@ga_profile, @cond)
+  # end
 
-  def create_listbox_categories(param)
-    cnt = 1
-    @categories = @in_table.reduce([]) do |acum, item|
-      cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
-      acum << [cap, item[0] + param] unless item[1][:corr] == "-"
-      cnt += 1
-      acum
-    end
-  end
+  # def create_listbox_categories(param)
+  #   cnt = 1
+  #   @categories = @in_table.reduce([]) do |acum, item|
+  #     cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
+  #     acum << [cap, item[0] + param] unless item[1][:corr] == "-"
+  #     cnt += 1
+  #     acum
+  #   end
+  # end
 
   def chk_monthly?(ym)
     if ym.to_a.size >= 2

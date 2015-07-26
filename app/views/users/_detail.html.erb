@@ -64,9 +64,9 @@ $(function() {
   <% @favorites.each_with_index do |item, idx| %>
     <tr>
       <td class="hl"><span><%= "#{idx+1}." %></span><%= truncate(item.page_path, length: 60) %></td>
-      <td><%= item.present %></td>
-      <td><%= item.sessions %></td>
-      <td><%= item.gap %></td>
+      <td><%= number_with_delimiter(item.present) %></td>
+      <td><%= number_with_delimiter(item.sessions) %></td>
+      <td><%= number_with_delimiter(item.gap) %></td>
     </tr>
   <% end %>
 </table>

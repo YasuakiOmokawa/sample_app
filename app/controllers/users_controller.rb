@@ -42,14 +42,14 @@ class UsersController < ApplicationController
     when 'referral'
       special = :source
       ref_source = Ast::Ganalytics::Garbs::Data.create_class('Ref',
-        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res)
       ref_source.each do |t|
         kwds.push('r' + t.source)
       end
     when 'social'
       special = :socialNetwork
       soc_source = Ast::Ganalytics::Garbs::Data.create_class('Soc',
-        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(3).sort_desc!(:sessions).res)
+        [ :sessions], [special] ).results(@ga_profile, Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(5).sort_desc!(:sessions).res)
       soc_source.each do |t|
         kwds.push( 'l' + t.social_network)
       end
@@ -255,9 +255,10 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      cved_data = anlyz_for_favorite_page(@cond) # CVデータ
+      cved_data = anlyz_for_favorite_page(@cond) # CVしたデータ
       for_all_cond = @cond.dup
       for_all_cond[:filters] = {}
+      Rails.logger.info("for_all_cond is #{for_all_cond}")
       all_data = anlyz_for_favorite_page(for_all_cond) # 全てのデータ
 
       ### データ計算部
@@ -271,12 +272,7 @@ class UsersController < ApplicationController
       replace_cv_with_custom(@content, @ast_data, @cv_txt)
 
       # グラフ表示プログラムへ渡すデータを作成
-      @data_for_graph_display = create_data_for_graph_display(@ast_data, @graphic_item)
-
-      # @data_for_graph_display = create_monthly_summary_data_for_graph_display(
-      #   @data_for_graph_display, group_by_year_and_month(@ast_data),
-      #   @graphic_item) if chk_monthly?(group_by_year_and_month(@ast_data))
-      gon.data_for_graph_display = @data_for_graph_display
+      gon.data_for_graph_display = create_data_for_graph_display(@ast_data, @graphic_item)
 
       # 人気ページ
       @favorites = cved_data.reduce([]) do | acum, item |
@@ -288,12 +284,12 @@ class UsersController < ApplicationController
           acum << item
         end
         acum
-      end.
-      # GAP値の上位10位までを抽出
-      sort_by{|item| -(item.gap.abs)}.first(10).reduce([]) do |acum, v|
-        acum << v
-        acum
-      end
+      end.sort_by{|item| -(item.gap.abs)}.first(10).reduce([]) do |acum, v|
+        # GAP値の上位10位までを抽出
+          acum << v
+          acum
+        end
+        Rails.logger.info("result @favorite data is #{@favorites}")
     end
 
     def create_home

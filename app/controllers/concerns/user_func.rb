@@ -317,25 +317,6 @@ module ParamUtils
     uniq
   end
 
-  # データ指標の取得
-  def get_metricses
-    {
-      :pageviews => 'PV数',
-      :pageviewsPerSession => '平均PV数',
-      :sessions => 'セッション',
-      :avgSessionDuration => '平均滞在時間',
-      :bounceRate => '直帰率',
-      :percentNewSessions => '新規ユーザー',
-      :users => 'ユーザー',
-    }
-  end
-
-  def get_metrics_not_ga
-    {
-      :repeat_rate => 'リピーター',
-    }
-  end
-
   def get_day_types
     %w(
       all_day

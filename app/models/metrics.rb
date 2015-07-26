@@ -2,8 +2,8 @@ class Metrics < ActiveRecord::Base
 
   def initialize
     @ga = {
-      :pageviews => 'PV数',
-      :pageviewsPerSession => '平均PV数',
+      :pageviews => 'ページビュー数',
+      :pageviewsPerSession => '平均ページビュー数',
       :sessions => 'セッション',
       :avgSessionDuration => '平均滞在時間',
       :bounceRate => '直帰率',

@@ -125,7 +125,8 @@ var getPointInfo = function(current, serie, index, plot) {
                         + kv[0]
                       + '</div>'
                       +'<div>'
-                        + item.metricsJp + ': ' + tickFormatter(item.metricsFormat, kv[1])
+                        // + item.metricsJp + ': ' + tickFormatter(item.metricsFormat, kv[1])
+                        + tickFormatter(item.metricsFormat, kv[1])
                       + '</div>';
 
   return format;
@@ -287,15 +288,15 @@ function jqplotDetail(format) {
 
   // ウインドウリサイズが発生したらイベントを発生
   var timer = false;
-  $(window).on('resize', function() {
+  $(window).off('resize').on('resize', function() {
     if (timer !== false) {
       clearTimeout(timer);
     }
     timer = setTimeout(function() {
-        console.log('resized');
-        // pass in resetAxes: true option to get rid of old ticks and axis properties
-        // which should be recomputed based on new plot size.
-        squareBar.replot();
-    }, 50);
+      console.log('detail resized');
+      // pass in resetAxes: true option to get rid of old ticks and axis properties
+      // which should be recomputed based on new plot size.
+      squareBar.replot();
+    }, 200);
   });
 }

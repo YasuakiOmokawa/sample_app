@@ -73,6 +73,18 @@ function plotGraphHome(arr, idxarr) {
 
   var graph = jQuery . jqplot(graph_position, arr, options);
 
+  // ウインドウリサイズが発生したらイベントを発生
+  var timer = false;
+  $(window).off('resize').on('resize', function() {
+    if (timer !== false) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+      console.log('home graph resized');
+      graph.replot();
+    }, 200);
+  });
+
   // ブロック項目をホバーしたらプロットへデータ表示
   $rank_target.on({
       'mouseenter': function() {
@@ -124,7 +136,7 @@ function plotGraphHome(arr, idxarr) {
   $rank_target.on('click', 'a', function() {
     $('#loading').removeClass('hide');
     $('#spinner').removeClass('hide');
-    $('#now-loading').removeClass('hide');
+    $('#now-loading-dummy').removeClass('hide');
   });
 
   // ホームグラフをリプロットする
@@ -383,10 +395,10 @@ function sortIdxarr(idxarr) {
 function addGraphicItem(data) {
 
   switch (data) {
-    case 'PV数':
+    case 'ページビュー数':
       return 'pageviews';
       break;
-    case '平均PV数':
+    case '平均ページビュー数':
       return 'pageviews_per_session';
       break;
     case 'セッション':
@@ -498,7 +510,7 @@ function showTooltip(contents) {
     }
   }());
 
-  var gap = '('+prefix+_datas.gap+')';
+  var gap = '（'+prefix+_datas.gap+'）';
 
   $('#graph')
   .prepend(
