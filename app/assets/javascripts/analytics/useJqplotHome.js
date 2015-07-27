@@ -7,7 +7,7 @@ function plotGraphHome(arr, idxarr) {
   arr_for_replot = $.extend(true, {}, arr);
 
   // グラフ描画対象
-  var graph_position = 'graph';
+  var graph_position = 'fm_graph';
 
   // グラフ描画オプション
   var options = {
@@ -526,63 +526,63 @@ function showTooltip(contents) {
     return '（'+prefix+tmp_gp+'）';
   });
 
-  $('#graph')
-  .prepend(
-    $("<div id='fm_graph'>")
-    .append(
-      $('<div id="'+position+'">')
-      .append(
-        $('<dl id="tgt">')
-        .append(
-          $('<dt>')
-          .text( datas.metricsJp )
-        )
-        .append(
-          $('<dd>')
-          .text( tickFormatter(datas.metricsFormat, datas.desire) )
-          // .text("1,234")
-          .append(
-            $('<span id="gp">')
-            .text(gap)
-            // .text('(+123)')
-          )
-        )
-      )
-      .append(
-        $('<ul id="bottom">')
-        .append($("<li>").append(
-          $("<dl>")
-          .append($("<dt>").text("流入元"))
-          .append( $("<dd>").text( _datas.category ) )
-          )
-        )
-        .append($("<li>").append(
-          $("<dl>")
-          .append($("<dt>").text("曜日"))
-          .append($("<dd>").text( _datas.dayTypeJp ) )
-          )
-        )
-        .append($("<li>").append(
-          $("<dl>")
-          .append($("<dt>").text("デバイス"))
-          .append($("<dd>").text( _datas.devfltr ) )
-          )
-        )
-        .append($("<li>").append(
-          $("<dl>")
-          .append($("<dt>").text("ユーザー"))
-          .append($("<dd>").text( _datas.usrfltr ) )
-          )
-        )
-        .append($("<li>").append(
-          $("<dl>")
-          .append($("<dt>").text("その他条件"))
-          .append($("<dd>").text( _datas.kwdfltr ) )
-          )
-        )
-      )
-    )
-  );
+  // $('#fm_graph')
+  // .prepend(
+  //   // $("<div id='fm_graph'>")
+  //   .append(
+  //     $('<div id="'+position+'">')
+  //     .append(
+  //       $('<dl id="tgt">')
+  //       .append(
+  //         $('<dt>')
+  //         .text( datas.metricsJp )
+  //       )
+  //       .append(
+  //         $('<dd>')
+  //         .text( tickFormatter(datas.metricsFormat, datas.desire) )
+  //         // .text("1,234")
+  //         .append(
+  //           $('<span id="gp">')
+  //           .text(gap)
+  //           // .text('(+123)')
+  //         )
+  //       )
+  //     )
+  //     .append(
+  //       $('<ul id="bottom">')
+  //       .append($("<li>").append(
+  //         $("<dl>")
+  //         .append($("<dt>").text("流入元"))
+  //         .append( $("<dd>").text( _datas.category ) )
+  //         )
+  //       )
+  //       .append($("<li>").append(
+  //         $("<dl>")
+  //         .append($("<dt>").text("曜日"))
+  //         .append($("<dd>").text( _datas.dayTypeJp ) )
+  //         )
+  //       )
+  //       .append($("<li>").append(
+  //         $("<dl>")
+  //         .append($("<dt>").text("デバイス"))
+  //         .append($("<dd>").text( _datas.devfltr ) )
+  //         )
+  //       )
+  //       .append($("<li>").append(
+  //         $("<dl>")
+  //         .append($("<dt>").text("ユーザー"))
+  //         .append($("<dd>").text( _datas.usrfltr ) )
+  //         )
+  //       )
+  //       .append($("<li>").append(
+  //         $("<dl>")
+  //         .append($("<dt>").text("その他条件"))
+  //         .append($("<dd>").text( _datas.kwdfltr ) )
+  //         )
+  //       )
+  //     )
+  //   // )
+  // );
 }
 
 // function getTooltipXaxisToPixels(a, graph) {

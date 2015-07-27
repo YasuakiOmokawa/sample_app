@@ -91,9 +91,9 @@ var resetXbgc = function(nm, dt, yval) {
   var data = {}, bgc, d = dt + 1;
 
   if ( (nm == 'day_sun') || (nm == 'day_hol') )  {
-    bgc = "#FFEEFF";
+    bgc = "#fa8072";
   } else if (nm == 'day_sat') {
-    bgc = "#EEFFFF";
+    bgc = "#b0c4de";
   }
 
   data['line'] = {
@@ -146,7 +146,7 @@ function jqplotDetail(format) {
 
   // グラフのオプション
   var options = {
-      seriesColors: ["#e6b422"],
+      seriesColors: ["#5383c3"],
       seriesDefaults: {
         shadow: false,
         markerOptions: {
@@ -178,7 +178,7 @@ function jqplotDetail(format) {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
               // numberTicks: 6,
               tickOptions: {
-                fontSize: '8.5pt',
+                fontSize: '9pt',
                 showGridline: false,
                 // 項目の延長線は削除（なんかヒゲみたいで嫌）
                 markSize: 0
