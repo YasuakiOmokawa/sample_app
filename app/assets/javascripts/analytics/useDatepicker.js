@@ -23,65 +23,13 @@ function initDatepicker() {
     });
   }
 
-  // initialize the special date dropdown field
-  // $('#date-range-field span').text("選択してください");
 }
 
 function bindDatepickerOperation() {
-
-  // initialize the special date dropdown field
-  // $('#date-range-field span').text("選択してください");
-
-  // bind a click handler to the date display field, which when clicked
-  // toggles the date picker calendar, flips the up/down indicator arrow,
-  // and keeps the borders looking pretty
-  // $('#date-range-field').click(function(){
-  //   // $('#datepicker-calendar').toggle();
-  //   if($('#date-range-field a').text().charCodeAt(0) == 9660) {
-  //     // switch to up-arrow
-  //     $('#date-range-field a').html('&#9650;');
-  //     $('#date-range-field').css({borderBottomLeftRadius:0, borderBottomRightRadius:0});
-  //     $('#date-range-field a').css({borderBottomRightRadius:0});
-  //   } else {
-  //     // switch to down-arrow
-  //     $('#date-range-field a').html('&#9660;');
-  //     $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
-  //     $('#date-range-field a').css({borderBottomRightRadius:5});
-  //   }
-  //   return false;
-  // });
-
-  // global click handler to hide the widget calendar when it's open, and
-  // some other part of the document is clicked.  Note that this works best
-  // defined out here rather than built in to the datepicker core because this
-  // particular example is actually an 'inline' datepicker which is displayed
-  // by an external event, unlike a non-inline datepicker which is automatically
-  // displayed/hidden by clicks within/without the datepicker element and datepicker respectively
-  // $('html').click(function() {
-  //   if($('#datepicker-calendar').is(":visible")) {
-  //     // $('#datepicker-calendar').hide();
-  //     $('#date-range-field a').html('&#9660;');
-  //     $('#date-range-field').css({borderBottomLeftRadius:5, borderBottomRightRadius:5});
-  //     $('#date-range-field a').css({borderBottomRightRadius:5});
-  //   }
-  // });
-
-  // stop the click propagation when clicking on the calendar element
-  // so that we don't close it
-  // $('#date-range-hidden').click(function(event){
   $('#date-range').click(function(event){
     event.stopPropagation();
   });
-
 }
-
-// function isLocationHash() {
-//   if (location.hash) {
-//     return location.hash;
-//   } else {
-//     return "#all";
-//   }
-// }
 
 // 日付計算
 var calc = function(datestr, p, day) {
@@ -138,111 +86,4 @@ function addRangeToDatePicker() {
     $('input.fromd').datepicker('setDate', f);
     $('input.tod').datepicker('setDate', t);
 }
-
-// // ダイアログ内のdatepicker
-// function addDatepicker() {
-//   $("input.fromd").datepicker({
-//     changeMonth: true,
-//     changeYear: true,
-//     numberOfMonths: 2,
-//     dateFormat:"yy/mm/dd",
-//     beforeShow: function(input, inst) {
-//       chgPos(input, inst, $(this));
-//     },
-//     onSelect: function( selectedDate ) {
-//       var dte = calc(selectedDate, '+', 31);
-//       var opt = fmt(dte);
-//       $( "#from" ).val(selectedDate);
-//       $( "input.tod" ).datepicker( "option",
-//         {
-//           minDate: selectedDate,
-//           // maxDate: opt
-//         }
-//       );
-//     }
-//   });
-
-//   $("input.tod").datepicker({
-//     changeMonth: true,
-//     changeYear: true,
-//     numberOfMonths: 2,
-//     dateFormat:"yy/mm/dd",
-//     beforeShow: function(input, inst) {
-//       chgPos(input, inst, $(this));
-//     },
-//     onSelect: function( selectedDate ) {
-//       var dte = calc(selectedDate, '-', 31);
-//       var opt = fmt(dte);
-//       $( "#to" ).val(selectedDate);
-//       $( "input.fromd" ).datepicker( "option",
-//         {
-//           // minDate: opt,
-//           maxDate: selectedDate
-//         }
-//       );
-//     }
-//   });
-// }
-
-// $(function() {
-
-//   // 期間設定ダイアログ
-//   $('#dialog-form').dialog({
-//     autoOpen: false,
-//     draggable: false,
-//     dialogClass: 'jquery-ui-dialog-form',
-//     open:function(event, ui){
-
-//       // datepickerを設定
-//       addDatepicker();
-
-//       // 日付リンクから、期間設定をダイアログの入力ボックスへ転記
-//       addRangeToDatePicker();
-
-//       // datepicker を表示させるため、初期focus を行う。
-//       $("div.jquery-ui-dialog-form").focus();
-
-//     },
-//     width: 400,
-//     height: 200,
-//     title: '期間設定',
-//     modal: true,
-//     position: {
-//       my: "left top",
-//       at: "left top",
-//       of: 'a#jrange'
-//     },
-//     buttons: {
-//         "設定": function(){
-
-//           // 入力ボックスの値を#from, #to へ格納
-//           $("#from").val( $("input.fromd").val() );
-//           $("#to").val( $("input.tod").val() );
-
-//           $(this).dialog('close');
-
-//           // 入力値を期間設定のhidden inputへ設定
-//           setRange();
-
-//           // datepicker の削除
-//           $("input.fromd").datepicker("destroy");
-//           $("input.tod").datepicker("destroy");
-
-//           if (isTitleHome()) {
-//             changeLocationHash(getLocationHashPage());
-//           } else {
-//             $('a#set').trigger('click');
-//           }
-//       },
-//       "キャンセル": function(){
-//         $(this).dialog('close');
-
-//         // datepickerを削除
-//         $("input.fromd").datepicker("destroy");
-//         $("input.tod").datepicker("destroy");
-//       }
-//     }
-//   });
-// });
-
 

@@ -328,19 +328,17 @@ function onFileSelect() {
   if (array[array.length - 1].length > 0) {
     $("#file").val( array[array.length - 1] );
     // 日付選択カレンダーを非表示にする
-    $("#date-range").addClass('hide');
+    // $("#date-range").addClass('hide');
   }
 }
 
 function replaceContentParentAttr() {
   if ( location.href.match(/contents|detail/) ) {
     console.log("css condition is not home");
-    $('#replace').attr('id', "fm");
-    $('li.switch').removeClass('hide');
+    $('#back').removeClass('hide');
   } else {
     console.log("css condition is home");
-    $('#fm').attr('id', "replace");
-    $('li.switch').addClass('hide');
+    $('#back').addClass('hide');
   }
 }
 

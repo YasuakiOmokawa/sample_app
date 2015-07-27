@@ -3,12 +3,12 @@ class Metrics < ActiveRecord::Base
   def initialize
     @ga = {
       :pageviews => 'ページビュー数',
-      :pageviewsPerSession => '平均ページビュー数',
+      :pageviewsPerSession => 'ページ/セッション',
       :sessions => 'セッション',
-      :avgSessionDuration => '平均滞在時間',
       :bounceRate => '直帰率',
-      :percentNewSessions => '新規ユーザー',
+      :percentNewSessions => '新規セッション率',
       :users => 'ユーザー',
+      :avgSessionDuration => '平均セッション時間',
     }
 
     @not_ga = {

@@ -6,11 +6,7 @@
     <% if content_for?(:title) %>
       <title><%= yield(:title) %></title>
     <% end %>
-    <% if content_for?(:title) && yield(:title).match(/設定/) %>
-      <%= stylesheet_link_tag "analytics_content", media: "all" %>
-    <% else %>
       <%= stylesheet_link_tag "analytics", media: "all" %>
-    <% end %>
       <%= javascript_include_tag "application" %>
       <%= javascript_include_tag "usedatepicker" %>
       <%= javascript_include_tag "fnccommon" %>
@@ -22,7 +18,7 @@
       <%= wiselinks_meta_tag %>
    </head>
   <body>
-    <div id="replace">
+    <div id="fm">
       <%= render 'layouts/gaheader' %>
       <% flash.each do |key, value| %>
         <%= content_tag(:div, value, class: "alert alert-#{key}") %>

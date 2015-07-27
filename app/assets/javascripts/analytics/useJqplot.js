@@ -29,7 +29,7 @@ var setArr = function(data) {
 var tickFormatter = function (format, val) {
     switch(format) {
         case 'percent': return RoundValueUnderOne(val) + '%';
-        case 'number': return String(RoundValueUnderOne(val)).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+        case 'number': return String( parseInt(val, 10) ).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
         case 'time': {
 
             // 時間の書式は、 hh:mm:ss
@@ -60,26 +60,25 @@ var tickFormatter = function (format, val) {
 // Y軸の目盛りを再設定
 var resetYtick = function(val) {
 
-  var line, tick, data = {};
+  var color, tick, data = {};
 
   tick = val;
   if (val == 0) {
-    line = 'horizontalLine';
+    color = 'black';
   } else {
-    line = 'dashedHorizontalLine';
+    color = '#dcdcdc';
   }
 
-  data[line] = {
+  data['horizontalLine'] = {
     xaxis: 'xaxis',
     yaxis: 'yaxis',
     y: tick,
     shadow: false,
     shadowAlpha: 0,
     shadowAngle: 0,
-    color: 'gray',
-    dashPattern: [4,4],
+    color: color,
     lineCap: 'square',
-    lineWidth: 0.3
+    lineWidth: 1,
   };
 
   return data;
@@ -161,8 +160,7 @@ function jqplotDetail(format) {
           },
       },
       // グラフ幅の調整
-      gridPadding: { top: 0, bottom: 10, left: 30, right: 0 },
-      // gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
+      gridPadding: { top: 0, bottom: 10, left: 0, right: 0 },
       series:[
             // １つ目の項目の設定
           {
@@ -192,7 +190,8 @@ function jqplotDetail(format) {
               tickOptions: {
                 // 自作関数でフォーマットする
                 formatter: tickFormatter,
-                showGridline: true,
+                showGridline: false,
+                // gridLineColor: "#f5f5f5",
                 markSize: 0,
               },
           },
@@ -206,11 +205,10 @@ function jqplotDetail(format) {
       // 背景色に関する設定
       grid: {
         background: "transparent",
-        gridLineColor: "gray",
+        // gridLineColor: "gray",
         shadow: false,
-        drawBorder: true,
-        borderColor: 'white',
-        // drawGridlines: false,
+        drawBorder: false,
+        drawGridlines: false,
       },
   };
 
@@ -248,37 +246,37 @@ function jqplotDetail(format) {
       }
 
       // 日付表示数の最適化
-      if (xlength > 30) {
-
-        if (i === (enablemark * counter) ) {
-          counter += 1;
-        } else {
-          $( $xticks[i] ).text('');
-        }
+      if (day_type != 'day_sun') {
+        $( $xticks[i] ).text('');
       }
     }
 
-    // var $yticks = $('.jqplot-yaxis-tick');
+    var $yticks = $('.jqplot-yaxis-tick');
 
-    // for(var i=0; i < $yticks.length; i++) {
+    for(var i=0; i < $yticks.length; i++) {
 
-    //   // 目盛りの値を変換
-    //   tick = $( $yticks[i] ).text();
+      // 目盛りの値を変換
+      tick = $( $yticks[i] ).text();
 
-    // グラフのy座標へ水平線を設定
-    // var tick, dt;
-    // var $yticks = $('.jqplot-yaxis-tick');
+      // グラフのy座標へ水平線を設定
+      var tick, dt;
+      var $yticks = $('.jqplot-yaxis-tick');
 
-    // for(var i=0; i < $yticks.length; i++) {
+      for(var i=0; i < $yticks.length; i++) {
 
-    //   // 目盛りの値を変換
-    //   tick = $( $yticks[i] ).text();
-    //   // console.log(tick);
+        // 目盛りの値を変換
+        tick = $( $yticks[i] ).text();
+        // console.log(tick);
 
-    //   // y軸を再設定
-    //   dt = resetYtick(tick);
-    //   tickopt.canvasOverlay.objects.push(dt);
-    // }
+        // y軸を再設定
+        dt = resetYtick(tick);
+        console.log("replot yticks data is "+dt);
+        tickopt.canvasOverlay.objects.push(dt);
+      }
+    }
+    // Y軸のゼロ値は非表示
+    $( $yticks[0] ).text('');
+
   };
   $.jqplot.postDrawHooks.push(detailPostDraw);
 

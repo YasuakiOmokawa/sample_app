@@ -83,10 +83,18 @@ div.alert-notice {
 // 詳細グラフの背景（曜日別の背景色など）
 .jqplot-overlayCanvas-canvas {
   z-index: -1;
+  opacity: 0.6;
 }
 
-.jqplot-xaxis {
-  // display: none;
+// 詳細グラフのY軸
+.jqplot-yaxis {
+  left: 6px !important;
+  top: 10px !important;
+  z-index: 2;
+}
+
+.jqplot-yaxis-tick {
+  background-color: white;
 }
 
 // ローディング画面の表示順を調整

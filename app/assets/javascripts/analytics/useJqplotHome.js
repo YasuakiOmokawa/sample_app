@@ -403,7 +403,7 @@ function addGraphicItem(data) {
     case 'ページビュー数':
       return 'pageviews';
       break;
-    case '平均ページビュー数':
+    case 'ページ/セッション':
       return 'pageviews_per_session';
       break;
     case 'セッション':
@@ -412,13 +412,13 @@ function addGraphicItem(data) {
     case '直帰率':
       return 'bounce_rate';
       break;
-    case '新規ユーザー':
+    case '新規セッション率':
       return 'percent_new_sessions';
       break;
     case 'ユーザー':
       return 'users';
       break;
-    case '平均滞在時間':
+    case '平均セッション時間':
       return 'avg_session_duration';
       break;
     case 'リピーター':
@@ -511,19 +511,20 @@ function showTooltip(contents) {
     if (_datas.gap >= 0) {
       return '+';
     } else {
-      return '';
+      return ' - ';
     }
   }());
 
-  var gap = (function() {
-    // ギャップ値の時間表示を秒数でなくMM:TT形式へ変更
-    if (_datas.metricsFormat === 'time') {
-      var tmp_gp = tickFormatter(_datas.metricsFormat, _datas.gap);
-    } else {
-      var tmp_gp = _datas.gap;
-    }
-    return '（'+prefix+tmp_gp+'）';
-  });
+  // var gap = (function() {
+  //   // ギャップ値の時間表示を秒数でなくMM:TT形式へ変更
+  //   if (_datas.metricsFormat === 'time') {
+  //     var tmp_gp = tickFormatter(_datas.metricsFormat, _datas.gap);
+  //   } else {
+  //     var tmp_gp = _datas.gap;
+  //   }
+  //   return '（'+prefix+tmp_gp+'）';
+  // });
+  var gap = '（'+prefix+tickFormatter(_datas.metricsFormat, Math.abs(_datas.gap) )+'）';
 
   $('#fm_graph')
   .prepend(
@@ -580,38 +581,3 @@ function showTooltip(contents) {
     )
   );
 }
-
-// function getTooltipXaxisToPixels(a, graph) {
-//   return x = graph.axes.xaxis.u2p(a.attr('data-vari')); // convert x axis unita to pixels
-// }
-
-// function getTooltipYaxisToPixels(a, graph) {
-//   return y = graph.axes.yaxis.u2p(a.attr('data-corr')); // convert y axis unita to pixels
-// }
-
-
-// 再描画用にデータを集める
-// var replotdata = function(allarr, wd) {
-
-//   // wd が直接入力ブックマーク の場合、スラッシュを削除
-//   if (wd == '直接入力/ブックマーク') {
-//     wd = wd.replace(/\//g, '');
-//   }
-
-//   var a = [];
-//   for(i=0; i < allarr[wd].length; i++) {
-//     allarr[wd][i][3] = String(wd) + ';;' + allarr[wd][i][3];
-//   }
-//   a.push( allarr[wd] );
-//   return a;
-// }
-
-// function removeKeywordForPageName() {
-//   switch (getAnalyzedPageName()) {
-//     case 'all':
-//     case 'search':
-//     case 'direct':
-//       $(".tooltipster-content #box_r ul li#keyword").remove();
-//     break;
-//   }
-// }

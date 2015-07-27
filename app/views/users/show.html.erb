@@ -12,7 +12,9 @@
       <li><a href="javascript:void(0)" class="home-anlyz"  id="direct">直接入力/ブックマーク</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="referral">その他ウェブサイト</a></li>
       <li><a href="javascript:void(0)" class="home-anlyz"  id="social">ソーシャル</a></li>
-      <li class="switch"><%= link_to '戻る', "javascript:history.back();",data: { push: "partial", target: "@data-role" }, id: "back" %></li>
+      <li class="switch">
+        <%= link_to '戻る', "javascript:history.back();",data: { push: "partial", target: "@data-role" }, id: "back" %>
+      </li>
     </ul>
   </div>
   <!-- menu_end -->

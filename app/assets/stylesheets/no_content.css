@@ -8,13 +8,6 @@
  * You're free to add application-wide styles to this file and they'll appear at the top of the
  * compiled file, but it's generally better to create a new file per style scope.
  *
- * require jquery-ui/datepicker
- * require jquery-ui/dialog
- *= require ./datepicker/base
- *= require ./datepicker/clean
- *= require_tree ./jqplot
- *= require ./analytics/box.css.scss
- *= require ./analytics/date.css.scss
- *= require ./analytics/content_style.css.scss
+ *= require ./analytics/style.css.scss
  *= require ./analytics/opt.css.scss
 */
