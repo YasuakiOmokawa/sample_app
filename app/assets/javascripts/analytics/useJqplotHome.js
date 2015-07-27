@@ -515,7 +515,16 @@ function showTooltip(contents) {
     }
   }());
 
-  var gap = '（'+prefix+_datas.gap+'）';
+  // var gap = '（'+prefix+_datas.gap+'）';
+  var gap = (function() {
+    // ギャップ値の時間表示を秒数でなくMM:TT形式へ変更
+    if (_datas.metricsFormat === 'time') {
+      var tmp_gp = tickFormatter(_datas.metricsFormat, _datas.gap);
+    } else {
+      var tmp_gp = _datas.gap;
+    }
+    return '（'+prefix+tmp_gp+'）';
+  });
 
   $('#graph')
   .prepend(

@@ -161,7 +161,7 @@ function jqplotDetail(format) {
           },
       },
       // グラフ幅の調整
-      gridPadding: { top: 1, bottom: 1, left: 30, right: 1 },
+      gridPadding: { top: 0, bottom: 10, left: 30, right: 0 },
       // gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
       series:[
             // １つ目の項目の設定
@@ -178,7 +178,7 @@ function jqplotDetail(format) {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
               // numberTicks: 6,
               tickOptions: {
-                fontSize: '6.5pt',
+                fontSize: '8.5pt',
                 showGridline: false,
                 // 項目の延長線は削除（なんかヒゲみたいで嫌）
                 markSize: 0
@@ -209,6 +209,8 @@ function jqplotDetail(format) {
         gridLineColor: "gray",
         shadow: false,
         drawBorder: true,
+        borderColor: 'white',
+        // drawGridlines: false,
       },
   };
 
