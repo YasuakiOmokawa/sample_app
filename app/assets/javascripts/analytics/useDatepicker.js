@@ -24,7 +24,7 @@ function initDatepicker() {
   }
 
   // initialize the special date dropdown field
-  $('#date-range-field span').text("選択してください");
+  // $('#date-range-field span').text("選択してください");
 }
 
 function bindDatepickerOperation() {
