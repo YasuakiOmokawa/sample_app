@@ -169,10 +169,12 @@ body {
 }
 
 #hd {
+    position:fixed;
     width: 100%;
     min-width: 1200px;
     background-color: #000000;
     color: #ffffff;
+    z-index:5;
 }
 
 #hd h1 {
@@ -215,6 +217,7 @@ body {
 }
 
 #fm_menu {
+    padding:40px 0 0 0;
     width: 22%;
     min-width: 22%;
     min-height: 100%;
@@ -326,6 +329,7 @@ body {
 }
 
 #fm_data {
+    margin:40px 0 0 0;
     width: 78%;
     min-width: 78%;
     float: left;
@@ -333,11 +337,11 @@ body {
 }
 
 #fm_data #stay {
+    top:40px;
     width: 100%;
     min-width: 100%;
-    min-height: 120%;
+    height: 100%;
     position: fixed;
-    top: -40px;
     opacity: 0.6;
     text-align: center;
     background-color: #000000;
@@ -615,7 +619,7 @@ body {
 #fm_data table {
     width: 94%;
     margin: 20px 0 20px 2%;
-    padding: 0 0 0 10px;
+    padding: 20px 0 0 10px;
     border-top: solid 1px #c7c7c7;
     border-right: solid 1px #c7c7c7;
 }
