@@ -52,6 +52,17 @@ div.alert-notice {
   position: relative;
 }
 
+#fm_graph > #hvr_l {
+  z-index: 1;
+  position: relative;
+}
+
+#fm_graph > #hvr_r {
+  z-index: 1;
+  position: relative;
+}
+
+
 // 詳細グラフ
 #detail_graph {
   z-index: 2;

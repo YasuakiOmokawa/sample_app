@@ -2,10 +2,6 @@
 <% set_title(full_title("設定")) %>
 <%= render 'layouts/loading' %>
 
-<div class="alert alert-danger hide" id="content-active-error-message">
-  入力にエラーがあります
-  <div id="errors"><ul/></div>
-</div>
 <div class="setting"><h2>期間設定</h2></div>
 <div id="calender">
   <div id="date-range">
@@ -18,6 +14,9 @@
 </div>
 <br>
 <div class="setting"><h2>CV設定</h2></div>
+<div class="alert alert-danger hide" id="content-active-error-message">
+  <div id="errors"><ul/></div>
+</div>
 <%= form_for(@content, :url =>{:controller => 'contents', :action => 'create'}, html: {:name => 'uploadForm'}) do |f| %>
 <input type="text" name="content[date]" class="hide parameter" />
 <input type="text" name="content[cv_num]" class="hide parameter" />
