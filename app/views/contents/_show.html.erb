@@ -35,6 +35,7 @@
 <div id="btn">
   <div id="submit" class="dummy-submit">設定</div>
   <a id="submit" class="real-submit hide" href="javascript:void(0)" onclick="execFormSubmit()">設定</a>
+  <%= link_to '設定', "javascript:history.back();",{id: 'submit', class: 'cancel-submit hide', data: { push: "partial", target: "@data-role" } }%>
   <%= link_to 'キャンセル', "javascript:void(0)",data: { push: "partial", target: "@data-role" }, id: "cancell" %>
   <br class="clear">
 </div>

@@ -160,21 +160,18 @@ function jqplotDetail(format) {
           },
       },
       // グラフ幅の調整
-      gridPadding: { top: 0, bottom: 10, left: 0, right: 0 },
+      gridPadding: { top: 0, bottom: 0, left: 0, right: 0 },
       series:[
             // １つ目の項目の設定
           {
-              fillToZero: true,
-              negativeSeriesColors: ["#e6b422"],
-              rendererOptions: {
-                lineWidth: 1,
-              },
+            rendererOptions: {
+              lineWidth: 1,
+            },
           },
       ],
       axes: {
           xaxis: {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
-              // numberTicks: 6,
               tickOptions: {
                 fontSize: '9pt',
                 showGridline: false,
@@ -185,13 +182,8 @@ function jqplotDetail(format) {
           yaxis: {
               numberTicks: 3,
               min: 0.0,
-              // max: 0.0,
-              // pad: 1,
               tickOptions: {
-                // 自作関数でフォーマットする
-                formatter: tickFormatter,
                 showGridline: false,
-                // gridLineColor: "#f5f5f5",
                 markSize: 0,
               },
           },
@@ -205,15 +197,12 @@ function jqplotDetail(format) {
       // 背景色に関する設定
       grid: {
         background: "transparent",
-        // gridLineColor: "gray",
+        gridLineColor: "transparent",
         shadow: false,
         drawBorder: false,
         drawGridlines: false,
       },
   };
-
-  // グラフのフォーマット設定は自作関数で行う
-  options.axes.yaxis.tickOptions.formatString = format;
 
   // yの最大値をデータより算出
   options.axes.yaxis.max = calcYMax(graph_data);
@@ -231,8 +220,7 @@ function jqplotDetail(format) {
   resetPostDrawHooks();
   var detailPostDraw = function detailPostDraw() {
     var ymax_value = calcYMax(this.data),
-      $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1,
-      enablemark = Math.floor(xlength / 4), counter = 1;
+      $xticks = $('.jqplot-xaxis-tick'), xlength = graph_data[0].length - 1;
 
     for ( var i=0; i < graph_data[0].length; i++) {
 
@@ -251,32 +239,25 @@ function jqplotDetail(format) {
       }
     }
 
+    var item = JSON.parse(sessionStorage.getItem('data_for_detail'));
     var $yticks = $('.jqplot-yaxis-tick');
 
     for(var i=0; i < $yticks.length; i++) {
 
       // 目盛りの値を変換
+      var tick, dt;
       tick = $( $yticks[i] ).text();
 
       // グラフのy座標へ水平線を設定
-      var tick, dt;
-      var $yticks = $('.jqplot-yaxis-tick');
+      // y軸を再設定
+      dt = resetYtick(tick);
+      tickopt.canvasOverlay.objects.push(dt);
 
-      for(var i=0; i < $yticks.length; i++) {
-
-        // 目盛りの値を変換
-        tick = $( $yticks[i] ).text();
-        // console.log(tick);
-
-        // y軸を再設定
-        dt = resetYtick(tick);
-        console.log("replot yticks data is "+dt);
-        tickopt.canvasOverlay.objects.push(dt);
-      }
+      // Y軸の目盛りの値を変換
+      $( $yticks[i] ).text( tickFormatter(item.metricsFormat, tick) );
     }
     // Y軸のゼロ値は非表示
     $( $yticks[0] ).text('');
-
   };
   $.jqplot.postDrawHooks.push(detailPostDraw);
 

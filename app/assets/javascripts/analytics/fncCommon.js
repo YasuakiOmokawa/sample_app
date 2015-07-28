@@ -215,6 +215,7 @@ function createParameterWithURL(category) {
 
 function eventsOnSettingUI() {
 
+  var $inputDate = $("input[name='content[date]']");
   initDatepicker();
   bindDatepickerOperation();
 
@@ -238,7 +239,7 @@ function eventsOnSettingUI() {
   // 「選択」がクリックされたときの処理
   $("#cv").on("click", "a", function(evt) {
 
-    var $target = $(evt.currentTarget), $inputDate = $("input[name='content[date]']");
+    var $target = $(evt.currentTarget);
 
     // 選択済みであれば何も処理しない
     if (! $target.hasClass("selected") ) {
@@ -250,8 +251,6 @@ function eventsOnSettingUI() {
 
       // 選択されたのがオンラインデータであれば以下の処理を行う
       if (cv_data != "file") {
-        // 日付選択カレンダーを表示させる
-        $("#date-range").removeClass('hide');
         // ファイル名の表示を削除する
         $("#file").val('');
         // file_fieldの値を削除する
@@ -280,15 +279,45 @@ function eventsOnSettingUI() {
 
   // 設定画面のフォーム値を監視
   setInterval(function() {
+    // ファイル選択が既にされていた場合は、何もしない
+    if ($("input[name='content[cv_num]']").val() === 'dummy') {
+      return;
+    }
     // 期間とCVどちらも設定されていれば有効化
-    if ($("input[name='content[date]']").val() && $("input[name='content[cv_num]']").val()) {
+    if ($("input[name='content[date]']").val() && $("input[name='content[cv_num]']").val() ) {
+      $(".cancel-submit").addClass('hide');
       $(".dummy-submit").addClass("hide");
       $(".real-submit").removeClass("hide");
     } else {
+      $(".cancel-submit").addClass('hide');
       $(".dummy-submit").removeClass("hide");
       $(".real-submit").addClass("hide");
     }
   }, 100);
+
+  // 遷移時点で設定済みの値があれば反映させる
+  if ( !$("#replacement-date").hasClass('set') ) {
+    var settedDate = $("#replacement-date").text();
+    $("#date-range-field span").text(settedDate);
+    $inputDate.val(settedDate);
+  }
+  if ( !$("#replacement-cv_name").hasClass('set') ) {
+    var settedCV = $("#replacement-cv_name").text();
+    var $selectedTarget = $( $("#cv").find("li:contains('"+settedCV+"')").find('a') );
+
+    if ($selectedTarget.length >= 1) {
+      $("input[name='content[cv_num]']").val( $selectedTarget.attr('class') );
+      highlightSelectedCV( $selectedTarget.attr('class') );
+    } else {
+      // ファイル選択の場合は、設定リンクをキャンセルリンクへイミテーションさせて対応する
+      $("input[name='content[cv_num]']").val('dummy');
+      highlightSelectedCV('file');
+      $("#file").val(settedCV);
+      $(".dummy-submit").addClass("hide");
+      $(".cancel-submit").removeClass('hide');
+    }
+  }
+
 }
 
 function execFormSubmit() {
@@ -327,8 +356,6 @@ function onFileSelect() {
   // 選択されたファイルが空ファイルでなければ処理を実行する
   if (array[array.length - 1].length > 0) {
     $("#file").val( array[array.length - 1] );
-    // 日付選択カレンダーを非表示にする
-    // $("#date-range").addClass('hide');
   }
 }
 
