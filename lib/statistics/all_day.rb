@@ -56,5 +56,19 @@ module Statistics
         'minus'
       end
     end
+
+    def sum_per_page
+      @data.reduce(Hash.new(0)) { |h, pr| h[pr.page_path] += pr.send(@komoku).to_i; h }
+    end
+
+    def get_metrics_per_page
+      sum_per_page.reduce([]) do |acum, (key, val)|
+        spp = OpenStruct.new
+        spp.page_path = key
+        spp.sessions = val
+        acum << spp
+        acum
+      end
+    end
   end
 end

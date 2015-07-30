@@ -1,32 +1,18 @@
 module CreateTable
 
-  def anlyz_for_favorite_page(cond)
-    Ast::Ganalytics::Garbs::Data.create_class('CvedSession',
-      [:sessions], [:pagePath]).results(
+  def anlyz_sessions_per_page_and_date(cond)
+    Ast::Ganalytics::Garbs::Data.create_class('CVSession',
+      [:sessions], [:pagePath, :date]).results(
         @ga_profile, Ast::Ganalytics::Garbs::Cond.new(
           cond, @cv_txt).limit!(100).sort_desc!(:sessions).res)
   end
 
-  # def get_session_rank(special)
-  #   Ast::Ganalytics::Garbs::Data.create_class('SessionRank',
-  #     [ :sessions], [special] ).results(@ga_profile,
-  #     Ast::Ganalytics::Garbs::Cond.new(@cond, @cv_txt).limit!(10).sort_desc!(:sessions).res)
-  # end
-
-  # def get_session_data(special)
-  #   Ast::Ganalytics::Garbs::Data.create_class('SessionData',
-  #     [ :sessions, (@cv_txt.classify + 's').to_sym], [special, :date] ).results(@ga_profile, @cond)
-  # end
-
-  # def create_listbox_categories(param)
-  #   cnt = 1
-  #   @categories = @in_table.reduce([]) do |acum, item|
-  #     cap = '参照元' + chk_num_charactor(cnt) + '　セッション'
-  #     acum << [cap, item[0] + param] unless item[1][:corr] == "-"
-  #     cnt += 1
-  #     acum
-  #   end
-  # end
+  def anlyz_sessions_per_page(cond)
+    Ast::Ganalytics::Garbs::Data.create_class('AllSession',
+      [:sessions], [:pagePath]).results(
+        @ga_profile, Ast::Ganalytics::Garbs::Cond.new(
+          cond, @cv_txt).limit!(100).sort_desc!(:sessions).res)
+  end
 
   def chk_monthly?(ym)
     if ym.to_a.size >= 2
@@ -55,9 +41,6 @@ module CreateTable
     end
     tmp
   end
-
-# select_metrics(@data_for_graph_display, "201411")
-# select_cves(@data_for_graph_display, "201411")
 
   def select_metrics(data, t)
     data.select{|k, v| /#{t}/ =~ k.to_s}.map{|k, v| v[0].to_f}
@@ -162,44 +145,6 @@ module CreateTable
     [0, 0, 0, date_type, 0]
   end
 
-  # 曜日別の値を出すテーブルを作成
-  # パーセンテージ、平均PV数、平均滞在時間、だったら平均値。それ以外は総数（にしないと値がへんになる）
-  def create_table_by_days(table, data, item)
-    cntr_on = cntr_off = 0
-    [:day_on, :day_off].each do |t|
-      [:good, :bad, :gap].each do |u|
-        table[t][u] = 0
-      end
-    end
-    data.each do |k, v|
-      if v[item][3] == 'day_on' then
-        cntr_on = cntr_on + 1
-        table[:day_on][:good] += v[item][0].to_i
-        table[:day_on][:bad] += v[item][1].to_i
-        table[:day_on][:gap] += v[item][2].to_i
-      else
-        cntr_off = cntr_off + 1
-        table[:day_off][:good] += v[item][0].to_i
-        table[:day_off][:bad] += v[item][1].to_i
-        table[:day_off][:gap] += v[item][2].to_i
-      end
-    end
-    if item =~ /(rate|percent|avg_|_per_)/ then
-      puts "calc average because of item is #{item}"
-      {:day_on => cntr_on , :day_off => cntr_off }.each do |k, v|
-        [:good, :bad, :gap].each do |u|
-          if v == 0 then
-            v = 1
-          end
-          avg = table[k][u].to_i / v
-          table[k][u] = avg
-          puts "calc avg ok! cntr_info is #{k}, cntr_value is #{v}, avg value is #{avg}"
-        end
-      end
-    end
-    return table
-  end
-
   # 人気ページテーブルを生成
   def create_skeleton_favorite_table(data, table)
     cnt = 0
@@ -212,33 +157,6 @@ module CreateTable
       end
     end
     table
-  end
-
-  # ランディングページテーブルを作成
-  def create_skeleton_landing_table(data, table)
-    cnt = 0
-    data.each do |k|
-      cnt += 1
-      key = k.page_title + ";;" + k.landing_page_path
-      table[key][:index] = cnt
-      [:good, :bad, :gap].each do |s|
-        table[key][s] = 0
-      end
-    end
-    table
-  end
-
-  # referral, social, campaign 個別テーブルを生成
-  def create_skeleton_for_rsc(data, key)
-    result_hash = Hash.new{ |h, k| h[k] = {} }
-    if data.total_results != 0 then
-      data.each do|t|
-        [:good, :bad, :gap].each do |s|
-          result_hash[t.send(key)][s] = 0
-        end
-      end
-    end
-    return result_hash
   end
 
 end

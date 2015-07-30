@@ -246,7 +246,7 @@ class UsersController < ApplicationController
         logger.info("API request retry: #{retries}")
       end
 
-      ### APIデータ取得部
+      ### APIデータ取得部（詳細グラフ用）
       cls_name = 'SiteData'
       # 4回までリトライできます
       site_data = Retryable.retryable(:tries => 5, :sleep => lambda { |n| 4**n }, :on => Garb::InsufficientPermissionsError, :matching => /Quota Error:/, :exception_cb => exception_cb ) do
@@ -255,11 +255,11 @@ class UsersController < ApplicationController
       end
 
       # 人気ページ用
-      cved_data = anlyz_for_favorite_page(@cond) # CVしたデータ
+      cved_data = anlyz_sessions_per_page_and_date(@cond)
       for_all_cond = @cond.dup
       for_all_cond[:filters] = {}
       Rails.logger.info("for_all_cond is #{for_all_cond}")
-      all_data = anlyz_for_favorite_page(for_all_cond) # 全てのデータ
+      all_data = anlyz_sessions_per_page(for_all_cond)
 
       ### データ計算部
       @ast_data = site_data.reduce([]) do |acum, item|
@@ -275,12 +275,19 @@ class UsersController < ApplicationController
       gon.data_for_graph_display = create_data_for_graph_display(@ast_data, @graphic_item)
 
       # 人気ページ
-      @favorites = cved_data.reduce([]) do | acum, item |
+      # 日付種別の追加
+      favorites = cved_data.reduce([]) do | acum, item |
+        item.day_type = chk_day(item.date.to_date)
+        acum << item
+      end
+
+      @favorites = metrics_for_validate(
+        favorites, @day_type, :sessions).get_metrics_per_page.reduce([]) do | acum, item |
         # CVデータ(目標値)に該当するall_sessions データが存在したらgap値計算を実施する
-        all = all_data.results.select { |_all| _all.page_path == item.page_path }
+        all = all_data.results.select { | _all | _all.page_path == item.page_path }
         unless all.blank?
-          item.present = all[0].sessions.to_i - item.sessions.to_i
-          item.gap = item.sessions.to_i - item.present
+          item.present = all[0].sessions.to_i - item.sessions
+          item.gap = item.sessions - item.present
           acum << item
         end
         acum
@@ -289,7 +296,17 @@ class UsersController < ApplicationController
           acum << v
           acum
         end
-        Rails.logger.info("result @favorite data is #{@favorites}")
+      # 上位10位に満たない場合は空欄を埋める
+      (10 - @favorites.size).times {
+        os = OpenStruct.new
+        os.page_path = '-'
+        os.present = '-'
+        os.sessions = '-'
+        os.gap = '-'
+        @favorites << os
+      }
+      Rails.logger.info("result @favorite data is #{@favorites}")
+
     end
 
     def create_home
