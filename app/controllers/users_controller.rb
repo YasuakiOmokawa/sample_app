@@ -201,9 +201,6 @@ class UsersController < ApplicationController
       @content.upload_file.shift unless @content.nil?
       (@from, @to) = set_from_to(@content, params)
 
-      # ajaxリクエストの判定
-      # chk_cache
-
       # パラメータ共通設定
       @user = User.find(params[:id])
       get_ga_profiles

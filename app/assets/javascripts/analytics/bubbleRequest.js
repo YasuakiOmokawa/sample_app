@@ -178,7 +178,10 @@ function startHomeAnlyz(category) {
             // データ項目一覧セット
             setDataidx(return_obj, params.for_anlyz.category, idxarr);
           } else {
-            shaped_idxarr.push('not_cved');
+            // データ不足で分析できない旨を表示
+            $('#spinner').addClass('hide');
+            $('#now-loading').addClass('hide');
+            $("#error_msg").removeClass("hide");
           }
           // ポーリング終了処理
           clearInterval(timerID);

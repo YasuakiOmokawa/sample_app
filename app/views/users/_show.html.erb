@@ -12,7 +12,7 @@
   // キャッシュされたグラフデータがある場合の処理
   $(function() {
     if (typeof gon != "undefined") {
-      if (typeof gon.cached_item != "undefined" && gon.cached_item[0] != 'not_cved') {
+      if (typeof gon.cached_item != "undefined") {
         var plots = [];
 
         // グラフデータの作成
@@ -28,11 +28,6 @@
         $("#term").find('p')
           .text(sessionStorage.getItem('anlyzed_dates'));
 
-      } else {
-        // データ不足で分析できない旨を表示
-        plotGraphHome([ [0,0,1,{color: '#FFFFFF'}] ], []);
-        $('#loading').removeClass('hide');
-        $("#error_msg").removeClass("hide");
       }
     } else {
       // まだ分析がされてない場合

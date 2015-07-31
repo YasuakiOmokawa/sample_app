@@ -61,9 +61,12 @@ $(function() {
   <tr id="ms">
     <td class="hl">人気ページ</td><td>現状値</td><td>目標値</td><td id="gap">ＧＡＰ</td>
   </tr>
-  <% @favorites.each_with_index do |item, idx| %>
+  <%
+    website_url = @ga_profile.website_url
+    website_url.slice!(-1)
+    @favorites.each_with_index do |item, idx| %>
     <tr>
-      <td class="hl"><span><%= "#{idx+1}." %></span><%= truncate(item.page_path, length: 60) %></td>
+      <td class="hl"><span><%= "#{idx+1}." %></span><%= link_to truncate(item.page_path, length: 60), "#{website_url}#{item.page_path}", target: "_blank"%></td>
       <td><%= number_with_delimiter(item.present) %></td>
       <td><%= number_with_delimiter(item.sessions) %></td>
       <td><%= number_with_delimiter(item.gap) %></td>

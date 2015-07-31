@@ -64,9 +64,9 @@ var resetYtick = function(val) {
 
   tick = val;
   if (val == 0) {
-    color = 'black';
+    color = '#000000';
   } else {
-    color = '#dcdcdc';
+    color = '#c0c0c0';
   }
 
   data['horizontalLine'] = {
@@ -78,7 +78,7 @@ var resetYtick = function(val) {
     shadowAngle: 0,
     color: color,
     lineCap: 'square',
-    lineWidth: 1,
+    lineWidth: 0.5,
   };
 
   return data;
@@ -193,6 +193,7 @@ function jqplotDetail(format) {
           show: true,
           fadeToolTip: false,
           tooltipContentEditor: getPointInfo,
+          // tooltipLocation: 'e',
       },
       // 背景色に関する設定
       grid: {
