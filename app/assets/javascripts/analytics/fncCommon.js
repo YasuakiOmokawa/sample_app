@@ -68,7 +68,7 @@ function eventsOnMenu() {
     $date = $("#replacement-date"), $cv_name = $("#replacement-cv_name"),
     content_url = $("#content-link").text();
 
-  // 分析設定が実施された場合の処理
+  // 分析条件が設定された場合の処理
   if (setting_data) {
     // メニューの期間、CV表示を変更
     var setting_obj = JSON.parse(setting_data);
@@ -135,10 +135,10 @@ function eventsOnMenu() {
 
   // 設定画面へのリンクがクリックされたときの処理
   $date.off('click').on('click', function() {
-    window.wiselinks.page.load(content_url, "@data-role", 'partial');
+    location.href = content_url
   });
   $cv_name.off('click').on('click', function() {
-    window.wiselinks.page.load(content_url, "@data-role", 'partial');
+    location.href = content_url
   });
 }
 
