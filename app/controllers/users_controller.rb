@@ -67,14 +67,14 @@ class UsersController < ApplicationController
     if params[:result_obj].present? && params[:cache_key].present?
 
       logger.info( '分析結果の上位15位をキャッシュします。')
-      Rails.cache.write(params[:cache_key],
+      Rails.cache.write(create_uniq_cache_key(params[:cache_key]),
         params[:result_obj].to_s, expires_in: 1.hour, compress: true)
     end
     render json: { cache_result: "ok"}
   end
 
   def chk_cache
-    if Rails.cache.read(params[:for_get_request])
+    if Rails.cache.read(create_uniq_cache_key(params[:for_get_request]) )
       render json: { is_cached: true}
     else
       render json: { is_cached: false}
@@ -108,7 +108,7 @@ class UsersController < ApplicationController
 
     if request.query_string.present?
       gon.cached_item = JSON.parse(
-        Rails.cache.read(request.query_string))
+        Rails.cache.read(create_uniq_cache_key(request.query_string)))
       gon.cached_from = params[:from]
       gon.cached_to = params[:to]
     end
@@ -188,6 +188,10 @@ class UsersController < ApplicationController
       params.require(:user).permit(:name, :email, :password,
                                    :password_confirmation, :gaproperty_id,
                                    :gaprofile_id, :gaproject_id, :init_cv_num)
+    end
+
+    def create_uniq_cache_key(key)
+      "#{params[:id]}#{key}"
     end
 
     # Before actions
