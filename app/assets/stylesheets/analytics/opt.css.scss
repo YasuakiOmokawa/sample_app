@@ -75,7 +75,7 @@ div.alert-notice {
   font-size: 16px;
   background-color: white;
   font-family: inherit;
-  padding: 5px;
+  padding: 10px;
   border: 1px solid #cccccc;
   white-space: nowrap;
 }
@@ -90,11 +90,12 @@ div.alert-notice {
 .jqplot-yaxis {
   left: 6px !important;
   top: 10px !important;
-  z-index: 2;
 }
 
+// Y軸の目盛り
 .jqplot-yaxis-tick {
   background-color: white;
+  z-index: 1;
 }
 
 // ローディング画面の表示順を調整

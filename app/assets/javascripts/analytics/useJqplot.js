@@ -66,7 +66,7 @@ var resetYtick = function(val) {
   if (val == 0) {
     color = '#000000';
   } else {
-    color = '#c0c0c0';
+    color = '#a9a9a9';
   }
 
   data['horizontalLine'] = {
