@@ -62,9 +62,17 @@ $(function() {
   </tr>
   <%
     website_url = @ga_profile.website_url.gsub(/(\/+$)/, '')
-    @favorites.each_with_index do |item, idx| %>
+    @favorites.each_with_index do |item, idx|
+      display_page = truncate(item.page_path, length: 60)
+  %>
     <tr>
-      <td class="hl"><span><%= "#{idx+1}." %></span><%= link_to truncate(item.page_path, length: 60), "#{website_url}#{item.page_path}", target: "_blank"%></td>
+      <td class="hl"><span><%= "#{idx+1}." %></span>
+      <% if item.page_path == '-' %>
+        <%= display_page %>
+      <% else %>
+        <%= link_to display_page, "#{website_url}#{item.page_path}", target: "_blank" %>
+      <% end %>
+      </td>
       <td><%= number_with_delimiter(item.present) %></td>
       <td><%= number_with_delimiter(item.sessions) %></td>
       <td><%= number_with_delimiter(item.gap) %></td>

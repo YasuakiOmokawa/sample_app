@@ -20,12 +20,13 @@ ja:
               user_not_working_for: "ユーザが所属していない会社です"
     models:
       user: ユーザー
-      # company: 会社
+      contents: コンテンツ
     attributes:
       user:
         name: 名前
         email: メールアドレス
         password: パスワード
         password_confirmation: 再入力したパスワード
-      # company:
-      #   name: 会社名
+      contents:
+        upload_file: アップロードファイル
+        upload_file_name: ファイル名

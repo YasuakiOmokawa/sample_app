@@ -28,7 +28,6 @@ function startHomeAnlyz(category) {
   (function bubbleCreateAtTabLink() {
 
     if (bbl_shori_flg === 1) {
-      // addErrorMessage('現在実行中のリクエストが完了してからもう一度お試しください。');
       return;
     }
 
@@ -284,9 +283,7 @@ function createAjaxRequest(params) {
 
   var request = $.Deferred(function(deferred) {
     $.ajax({
-      // url: '/hoge/fuga',
       url: params.userpath,
-      // timeout: 2,
       type:'GET',
       dataType: "json",
       tryCount: 0,

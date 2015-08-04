@@ -60,6 +60,11 @@ $(document).ready(function() {
           xhr.abort();
       })
   });
+
+  // ie10用プロパティ補修
+  if (!window.location.origin) {
+    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+  }
 });
 
 function eventsOnMenu() {
@@ -228,9 +233,6 @@ function eventsOnSettingUI() {
     $(evt.target).parent().find("a").click();
   });
 
-  // ファイルが選択されたときの処理
-  $("#content_upload_file").on("change", onFileSelect);
-
   // 「キャンセル」がクリックされたときの処理
   $("#cancell").on("click", function() {
     history.back(-1);
@@ -254,7 +256,7 @@ function eventsOnSettingUI() {
         // ファイル名の表示を削除する
         $("#file").val('');
         // file_fieldの値を削除する
-        $('#content_upload_file').val('');
+        clearFileContent('wrap_file');
 
         // if 期間データの入力値が不正な値である場合
         if ( $inputDate.val() && $("#date-range-field span").text() === "選択してください" ) {
@@ -395,4 +397,10 @@ resetPostDrawHooks = function(){
   if (len === 3) {
     $.jqplot.postDrawHooks.pop();
   }
+}
+
+function clearFileContent(id) {
+  var area = document.getElementById(id);
+  var temp = area.innerHTML;
+  area.innerHTML = temp;
 }

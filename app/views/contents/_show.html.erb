@@ -23,7 +23,9 @@
   <% @ga_goals.each do |name, number| %>
     <li><a href="javascript:void(0)" class=<%= number %>>選択</a><%= name %></li>
   <% end %>
-  <%= f.file_field :upload_file, class: "hide" %>
+  <span id='wrap_file'>
+    <%= f.file_field :upload_file, {class: "hide", onchange: 'onFileSelect()'} %>
+  </span>
   <li>
     <a href="javascript:void(0)" class="file">選択</a>
     <input type="text" id="file">
