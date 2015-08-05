@@ -155,7 +155,7 @@ function jqplotDetail(format) {
       },
       axesDefaults: {
           tickOptions: {
-            fontSize: '9pt',
+            fontSize: '11pt',
             fontFamily: 'ヒラギノ角ゴ Pro W3',
           },
       },
@@ -173,7 +173,7 @@ function jqplotDetail(format) {
           xaxis: {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
               tickOptions: {
-                fontSize: '9pt',
+                fontSize: '11pt',
                 showGridline: false,
                 // 項目の延長線は削除（なんかヒゲみたいで嫌）
                 markSize: 0
