@@ -90,9 +90,11 @@ var resetXbgc = function(nm, dt, yval) {
   var data = {}, bgc, d = dt + 1;
 
   if ( (nm == 'day_sun') || (nm == 'day_hol') )  {
-    bgc = "#fa8072";
+    // bgc = "#fa8072";
+    bgc = 'rgba(250, 128, 114, 0.1)'
   } else if (nm == 'day_sat') {
-    bgc = "#b0c4de";
+    // bgc = "#b0c4de";
+    bgc = 'rgba(176, 196, 222, 0.1)'
   }
 
   data['line'] = {
