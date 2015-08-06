@@ -37,7 +37,7 @@ gem 'jquery-hotkeys-rails' # ブラウザショートカットキーの操作用
 # gem 'historyjs-rails' # ブラウザの履歴情報を保持する フルajax化対応用
 gem 'wiselinks' # RailsでPjaxライクな処理を実装する
 gem 'role-rails' # wiselinks で使う
-gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
+# gem "heroku_backup_task", :git => "git://github.com/mataki/heroku_backup_task.git" # AWS S3 へDBバックアップをコピー
 gem 'airbrake' # Errbit通知用
 gem 'therubyracer', :platforms => :ruby # javascriptランタイム
 gem 'unicorn'
