@@ -173,7 +173,7 @@ function jqplotDetail(format) {
           xaxis: {
               renderer: jQuery . jqplot . CategoryAxisRenderer,
               tickOptions: {
-                fontSize: '11pt',
+                // fontSize: '11pt',
                 showGridline: false,
                 // 項目の延長線は削除（なんかヒゲみたいで嫌）
                 markSize: 0
@@ -184,7 +184,7 @@ function jqplotDetail(format) {
               min: 0.0,
               tickOptions: {
                 showGridline: false,
-                markSize: 0,
+                // markSize: 4,
               },
           },
       },
