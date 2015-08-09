@@ -16,11 +16,6 @@ SampleApp::Application.routes.draw do
       get :redirect
     end
   end
-  # resources :uplded_anlyz_statuses do
-  #   member do
-  #     patch :active, :inactive
-  #   end
-  # end
   root  'sessions#new'
   # root  'static_pages#home'
   match '/signup',  to: 'users#new', via: 'get'

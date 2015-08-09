@@ -301,7 +301,7 @@ function eventsOnSettingUI() {
       // ファイル選択の場合は、アップロードリンクをキャンセルボタンへ紐付ける
       $("input[name='content[cv_num]']").val('dummy');
       highlightSelectedCV('file');
-      $("#file").val(settedCV);
+      $("#file").val($("#replacement-cv_name").text());
       $(".dummy-submit").addClass("hide");
       $(".cancel-submit").removeClass('hide');
     }
