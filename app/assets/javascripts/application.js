@@ -13,13 +13,10 @@
 //= require jquery
 //= require jquery.role
 //= require wiselinks
-// ↓bootstrap が jquery-ui より上に来るようにする（ダイアログボタンが表示されない対策）
-//= require bootstrap
 //= require ./datepicker/datepicker
 // require jquery-ui/dialog
 //= require jquery_ujs
 //= require ./jqplot/jquery.jqplot
-//= require ./jqplot/plugins/barRenderer
 //= require ./jqplot/plugins/categoryAxisRenderer
 //= require ./jqplot/plugins/highlighter
 //= require ./jqplot/plugins/pointLabels

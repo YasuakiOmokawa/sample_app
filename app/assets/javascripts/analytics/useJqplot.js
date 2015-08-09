@@ -38,14 +38,12 @@ var tickFormatter = function (format, val) {
             var h =""+(val/36000|0)+(val/3600%10|0);
             var m =""+(val%3600/600|0)+(val%3600/60%10|0);
             var s =""+(val%60/10|0)+(val%60%10);
-            // s = h +':' + m + ':' + s; // 20140901 mm:ss 形式へ変更（分は3桁以上を許容）
             m = parseInt(m) + parseInt(h) * 60;
             m = "" + m;
             if (m.length < 2) {
               m = "0" + m;
             }
             s = m + ':' + s;
-            // console.log('converted time is ' + s);
 
             if(val_org - 0 < 0) {
                 s = "-" + s;

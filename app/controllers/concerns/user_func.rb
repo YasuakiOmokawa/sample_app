@@ -93,69 +93,6 @@ module UserFunc
       komoku
     end
   end
-
-  # 理想値、現状値を取得
-  def fetch_analytics_data(name, prof, opt, cv, filter = {}, metrics = nil, dimensions = nil)
-
-    hash = {}
-    o = opt.dup
-    o[:filters] = o[:filters].merge( filter )
-    {'good' => :gte, 'bad' => :lt}.each do |k, v|
-
-      # API同時接続制限対処のため、sleep 指定
-      # sleep(1)
-
-      c = o.dup
-      c[:filters] = o[:filters].merge( { cv.to_sym.send(v) => 1 } )
-
-      if metrics.nil?
-        hash[k] = Ast::Ganalytics::Garbs::Data.const_get(name).results(prof, c)
-      elsif metrics == [:repeat_rate] then
-
-        # クラス名を一意にするため、乱数を算出
-        rndm = SecureRandom.hex(4)
-        name = name + rndm.to_s
-
-        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
-          [ :sessions, :percent_new_sessions ],
-          [:date]).results(prof, c)
-      elsif dimensions.nil?
-
-        # クラス名を一意にするため、乱数を算出
-        rndm = SecureRandom.hex(4)
-        name = name + rndm.to_s
-
-        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
-          [ metrics ],
-          [:date]).results(prof, c)
-      else
-
-        # クラス名を一意にするため、乱数を算出
-        rndm = SecureRandom.hex(4)
-        name = name + rndm.to_s
-
-        hash[k] = Ast::Ganalytics::Garbs::Data.create_class(name,
-          [ metrics ],
-          [ dimensions ]).results(prof, c)
-      end
-    end
-    return hash
-  end
-
-  # グラフフォーマットを判別する
-  # def check_format_graph(item)
-  #   if /(bounce_rate|repeat_rate|percent_new_sessions)/ =~ item then
-  #     p = "percent"
-  #   elsif /avg_session_duration/ =~ item then
-  #     p = "time"
-  #   else
-  #     p = "number"
-  #   end
-  #   p
-  # end
-
-  private
-
 end
 
 module ParamUtils
@@ -271,66 +208,12 @@ module ParamUtils
     end
   end
 
-  def chk_num_charactor(cnt)
-    if cnt == 1
-      '①'
-    elsif cnt == 2
-      '②'
-    elsif cnt == 3
-      '③'
-    end
-  end
-
-  # セレクトボックスの生成
-  def set_select_box(data, tag)
-    tg = tag.to_s
-    arr = []
-    cntr = 0
-    case tg
-    when 'r'
-      cntr += 1
-      data.each do |k, w|
-        arr.push([ w[:cap], w[:value].to_s + tg ])
-        if cntr >= 3 then break end
-      end
-    when 'l'
-      cntr += 1
-      data.each do |w|
-        arr.push([ w.social_network, w.social_network.to_s + tg ])
-        if cntr >= 3 then break end
-      end
-    end
-    arr
-  end
-
-  # ユニークキーを取得する
-  def create_cache_key(analyze_type)
-
-    # ユーザ単位で一意にするため指定
-    usrid = params[:id].to_s
-
-    uniq = usrid + params[:from].to_s + params[:to].to_s + analyze_type
-
-    if analyze_type == 'kobetsu'
-      uniq += params[:cv_num].to_s + params[:act].to_s + params[:kwds_len].to_s
-    end
-    uniq
-  end
-
   def get_day_types
     %w(
       all_day
       day_on
       day_off
     )
-  end
-
-  def group_by_year_and_month(data)
-    data.group_by{|item| item.date[0..5]}.map{|k, v| k}
-  end
-
-  def is_not_uniq?(data)
-    return true if Array(data).uniq.size > 1
   end
 
   def validate_cv
@@ -346,49 +229,8 @@ module ParamUtils
     Rails.logger.info( "CVバリデート完了。")
   end
 
-  def validate_cv_msg(day_type)
-    Rails.logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
-  end
-
-  def cves_for_validate(data, day_type)
-    Statistics::DayFactory.new(data, :sessions, day_type, @cv_num).data.get_cves
-  end
-
   def metrics_for_validate(data, day_type, metrics)
     Statistics::DayFactory.new(data, metrics, day_type, @cv_num).data
-  end
-
-  def delete_uniq_metrics(data, metrics, metricses)
-    unless is_not_uniq?(data)
-      validate_uniq_metrics_msg(metrics)
-      metricses.delete(metrics)
-    end
-  end
-
-  def validate_uniq_metrics_msg(metrics)
-    Rails.logger.info( "指標#{metrics}は一意なので分析対象から外します。")
-  end
-
-  def delete_too_much_zero_metrics(data, metrics, metricses)
-    if ExcelFunc.excel_upper_quartile(data) == 0
-      validate_too_much_zero_metrics_msg(metrics)
-      metricses.delete(metrics)
-    end
-  end
-
-  def validate_too_much_zero_metrics_msg(metrics)
-    Rails.logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
-  end
-
-  def delete_invalid_metrics_multiple(data, metrics, metricses, cves)
-    unless cves.zip(data).uniq.size >= 3
-      validate_invalid_metrics_multiple_msg(metrics)
-      metricses.delete(metrics)
-    end
-  end
-
-  def validate_invalid_metrics_multiple_msg(metrics)
-    Rails.logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
   end
 
   def validate_metrics
@@ -404,12 +246,6 @@ module ParamUtils
       Rails.logger.info( "#{valid.day_type}の指標バリデートOK。")
     end
     Rails.logger.info( "指標バリデート完了。")
-  end
-
-  def reset_filter_option
-    logger.info( "filters option reset start. now is #{@cond}")
-    @cond[:filters] = {}
-    logger.info( "filters option reset end. now is #{@cond}")
   end
 
   class ValidAnalyzeMaterial
@@ -487,20 +323,55 @@ module ParamUtils
     [from, to]
   end
 
-  def set_key_for_data_cache(item, option)
-    if option.try(:id)
-      "#{item}&custom_id=#{option.id}"
-    else
-      item
-    end
-  end
-
   def padding_date_format(d)
     t = d.split('/')
     "#{t[0]}/#{t[1].rjust(2, '0')}/#{t[2].rjust(2, '0')}"
   end
 
-  # def create_parameter_with_request_hash(req)
-  #   req
-  # end
+  private
+
+    def is_not_uniq?(data)
+      return true if Array(data).uniq.size > 1
+    end
+
+    def validate_cv_msg(day_type)
+      Rails.logger.info( "CVが一意なので分析できません。#{day_type}は分析対象から外します。")
+    end
+
+    def cves_for_validate(data, day_type)
+      Statistics::DayFactory.new(data, :sessions, day_type, @cv_num).data.get_cves
+    end
+
+    def delete_uniq_metrics(data, metrics, metricses)
+      unless is_not_uniq?(data)
+        validate_uniq_metrics_msg(metrics)
+        metricses.delete(metrics)
+      end
+    end
+
+    def validate_uniq_metrics_msg(metrics)
+      Rails.logger.info( "指標#{metrics}は一意なので分析対象から外します。")
+    end
+
+    def delete_too_much_zero_metrics(data, metrics, metricses)
+      if ExcelFunc.excel_upper_quartile(data) == 0
+        validate_too_much_zero_metrics_msg(metrics)
+        metricses.delete(metrics)
+      end
+    end
+
+    def validate_too_much_zero_metrics_msg(metrics)
+      Rails.logger.info( "指標#{metrics}はゼロが多すぎるので分析対象から外します。")
+    end
+
+    def delete_invalid_metrics_multiple(data, metrics, metricses, cves)
+      unless cves.zip(data).uniq.size >= 3
+        validate_invalid_metrics_multiple_msg(metrics)
+        metricses.delete(metrics)
+      end
+    end
+
+    def validate_invalid_metrics_multiple_msg(metrics)
+      Rails.logger.info( "指標#{metrics}はCVデータとの一意な組み合わせが少ないので分析対象から外します。")
+    end
 end

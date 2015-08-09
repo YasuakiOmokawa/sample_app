@@ -3,11 +3,10 @@ class UsersController < ApplicationController
   require 'holiday_japan'
   require 'user_func'
   require 'create_table'
-  require 'insert_table'
   require 'update_table'
   require 'securerandom'
   require "retryable"
-  include UserFunc, CreateTable, InsertTable, UpdateTable, ParamUtils, ExcelFunc
+  include UserFunc, CreateTable, UpdateTable, ParamUtils, ExcelFunc
 
   before_action :signed_in_user, only: [
     :index,

@@ -22,7 +22,6 @@ function initDatepicker() {
       }
     });
   }
-
 }
 
 function bindDatepickerOperation() {
@@ -76,14 +75,14 @@ var chgPos = function(input, inst, elm) {
 
 // 日付リンクの期間設定を入力ダイアログへ反映させる
 function addRangeToDatePicker() {
-    var v = $("a#jrange").text(), d, f, t;
+  var v = $("a#jrange").text(), d, f, t;
 
-    d = v.split('-');
+  d = v.split('-');
 
-     f = '20' + d[0];
-     t = '20' + d[1];
+   f = '20' + d[0];
+   t = '20' + d[1];
 
-    $('input.fromd').datepicker('setDate', f);
-    $('input.tod').datepicker('setDate', t);
+  $('input.fromd').datepicker('setDate', f);
+  $('input.tod').datepicker('setDate', t);
 }
 

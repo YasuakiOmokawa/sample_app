@@ -1,7 +1,3 @@
-$(document).bind('keydown', 'esc', function() {
-  return false;
-});
-
 $(document).ready(function() {
   eventsOnMenu();
   replaceContentParentAttr();
@@ -84,6 +80,7 @@ function eventsOnMenu() {
     // CV表示
     $cv_name
       .text(setting_obj.cv_name)
+      .attr('data-cv', setting_obj.cv_num)
       .removeClass('set');
     // 分析開始リンクの有効化判定
     if (isNewSettings()) {
@@ -139,24 +136,22 @@ function eventsOnMenu() {
   });
 
   // 設定画面へのリンクがクリックされたときの処理
-  $date.off('click').on('click', function() {
-    location.href = content_url
-  });
-  $cv_name.off('click').on('click', function() {
+  $("#replacement-date, #replacement-cv_name").off('click').on('click', function() {
     location.href = content_url
   });
 }
 
+// 分析開始リンクをオレンジにするかどうかの判定
 function isNewSettings() {
   var setting_data = sessionStorage.getItem( "setting_key" );
   if (location.href.match(/contents/)) {
-    // 設定画面であればfalse
+    // 設定画面で分析は実施しないため、操作の対象外
     return false;
   } else if (location.search && setting_data) {
     var query = new Query(),
       settings = new Settings(JSON.parse(setting_data));
 
-    // 対象のカテゴリをグレーアウト
+    // 対象の分析カテゴリをグレーアウト
     $(".dummy-category").remove();
     var $elem = $(document.getElementById(
       query.createObject().category));
@@ -167,17 +162,16 @@ function isNewSettings() {
     // 分析開始以外の分析リンクをクリック可能にする
     $(".home-anlyz").addClass(("yes"));
 
-    // 分析設定が更新されていればtrue
     if (query.forSettingsCompare() === settings.forSettingsCompare()) {
       return false;
     } else {
+      // 分析設定が更新されていればオレンジ
       return true;
     }
   } else if (setting_data) {
-    // 分析設定がされていればtrue
+    // 初回の分析設定であればオレンジ
     return true;
   } else if (!location.search){
-    // まだ分析が実行されていなければfalse
     return false;
   } else {
     return false;
@@ -225,8 +219,9 @@ function eventsOnSettingUI() {
   bindDatepickerOperation();
 
   // 選択してくださいリンクの無効化
-  $("#replacement-date").attr("href", "javascript:void(0)");
-  $("#replacement-cv_name").attr("href", "javascript:void(0)");
+  setTimeout(function() {
+    $("#replacement-date, #replacement-cv_name").off('click');
+  }, 100);
 
   // CV設定のファイル選択エリアの処理
   $("#cv li").last().on("click", 'input', function(evt) {
@@ -251,22 +246,14 @@ function eventsOnSettingUI() {
 
       highlightSelectedCV( cv_data );
 
-      // 選択されたのがオンラインデータであれば以下の処理を行う
+      // オンラインデータ選択時の処理
       if (cv_data != "file") {
         // ファイル名の表示を削除する
         $("#file").val('');
         // file_fieldの値を削除する
         clearFileContent('wrap_file');
-
-        // if 期間データの入力値が不正な値である場合
-        if ( $inputDate.val() && $("#date-range-field span").text() === "選択してください" ) {
-          // データをリセット
-          $inputDate.val('');
-        // 期間データが有効な値である場合
-        } else if ($("#date-range-field span").text() != "選択してください") {
-          // 期間データをセット
-          $inputDate.val($("#date-range-field span").text());
-        }
+        // 期間データをセット
+        $inputDate.val($("#date-range-field span").text());
       } else {
         // オフラインデータであればファイルダイアログをオープン
         // 期間設定にはダミー値を設定
@@ -304,14 +291,14 @@ function eventsOnSettingUI() {
     $inputDate.val(settedDate);
   }
   if ( !$("#replacement-cv_name").hasClass('set') ) {
-    var settedCV = $("#replacement-cv_name").text();
-    var $selectedTarget = $( $("#cv").find("li:contains('"+settedCV+"')").find('a') );
+    var settedCV = $("#replacement-cv_name").data('cv');
+    var $selectedTarget = $("a[class='"+settedCV+"']");
 
     if ($selectedTarget.length >= 1) {
       $("input[name='content[cv_num]']").val( $selectedTarget.attr('class') );
       highlightSelectedCV( $selectedTarget.attr('class') );
     } else {
-      // ファイル選択の場合は、設定リンクをキャンセルリンクへイミテーションさせて対応する
+      // ファイル選択の場合は、アップロードリンクをキャンセルボタンへ紐付ける
       $("input[name='content[cv_num]']").val('dummy');
       highlightSelectedCV('file');
       $("#file").val(settedCV);

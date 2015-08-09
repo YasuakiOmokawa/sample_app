@@ -11,4 +11,5 @@ Rails.application.config.assets.precompile += %w[
   fnccommon.js
   upldedanlyz.js
   edit.js
+  bootstrap.js
 ]

@@ -383,10 +383,12 @@ function sortIdxarr(idxarr) {
   }
 
   var idxarr = idxarr.sort(function(_a,_b) {
+    // 第一ソートキーは相関係数
     var a = parseFloat(_a.corr), b = parseFloat(_b.corr);
     if (a > b) return  -1;
     if (a < b) return  1;
     if (a == b) {
+      // 第二ソートキーは変動係数
       var a = parseFloat(_a.vari), b = parseFloat(_b.vari);
         if (a >= b) return  -1;
         if (a < b) return  1;
@@ -515,15 +517,6 @@ function showTooltip(contents) {
     }
   }());
 
-  // var gap = (function() {
-  //   // ギャップ値の時間表示を秒数でなくMM:TT形式へ変更
-  //   if (_datas.metricsFormat === 'time') {
-  //     var tmp_gp = tickFormatter(_datas.metricsFormat, _datas.gap);
-  //   } else {
-  //     var tmp_gp = _datas.gap;
-  //   }
-  //   return '（'+prefix+tmp_gp+'）';
-  // });
   var gap = '（'+prefix+tickFormatter(_datas.metricsFormat, Math.abs(_datas.gap) )+'）';
 
   $('#fm_graph')
