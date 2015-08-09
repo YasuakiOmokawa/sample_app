@@ -320,9 +320,9 @@ function calcCorrPri(data) {
 
 function calcPriorityData(obj) {
   if (obj.corr >= 0.5 && obj.vari >= 0.5) {
-    return 1;
+    return true;
   } else {
-    return 0;
+    return false;
   }
 }
 

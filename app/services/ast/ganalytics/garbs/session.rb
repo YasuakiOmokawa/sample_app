@@ -36,7 +36,7 @@ module Ast
 
           goal.reduce({}) do |acum, item|
             j = JSON.load(item.to_json)
-            acum[j['entry']['name']] = j['entry']['id']
+            acum[j['entry']['name']] = j['entry']['id'] if item.active
             acum
           end
         end

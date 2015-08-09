@@ -218,6 +218,10 @@ function eventsOnSettingUI() {
   initDatepicker();
   bindDatepickerOperation();
 
+  // エラーメッセージ表示位置の調整
+  var top_length = 361 + (gon.ga_goals * 43);
+  $("#errors").css('top', top_length);
+
   // 選択してくださいリンクの無効化
   setTimeout(function() {
     $("#replacement-date, #replacement-cv_name").off('click');

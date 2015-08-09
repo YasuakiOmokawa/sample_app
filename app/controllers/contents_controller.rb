@@ -71,6 +71,7 @@ class ContentsController < ApplicationController
       @ga_goals = Rails.cache.fetch("oauthed_user_id_#{current_user.id}", expires_in: 1.hour) do
         gaservice.get_goal       # アナリティクスに設定されているCV一覧
       end
+      gon.ga_goals = @ga_goals.size
     end
 
     def chk_file
