@@ -31,15 +31,16 @@ function plotGraphHome(arr, idxarr) {
     },
     axes: {
       xaxis: {
+        numberTicks: 2,
         // label: '変動係数',
         min: 0.0,
         max: 1.0,
         tickOptions: {
-          showGridline: false,
+          // showGridline: false,
         },
       },
       yaxis: {
-        numberTicks: 5,
+        numberTicks: 4,
         // label: '相関係数',
         min: 0.0,
         max: 1.0,
@@ -64,12 +65,14 @@ function plotGraphHome(arr, idxarr) {
   resetPostDrawHooks();
   var homePostDraw = function homePostDraw(graph) {
     // 目盛り線のみ残して目盛りの値は削除
-    var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
-    for (var i=0; i<selcts.length; i++) {
-      $(selcts[i][0]).text('');
-      $(selcts[i][1]).text('');
-      $(selcts[i][2]).text('');
-    }
+    // var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
+    // for (var i=0; i<selcts.length; i++) {
+    //   $(selcts[i][0]).text('');
+    //   $(selcts[i][1]).text('');
+    //   $(selcts[i][2]).text('');
+    // }
+    $('.jqplot-xaxis-tick').addClass('hide');
+    $('.jqplot-yaxis-tick').addClass('hide');
   };
   $.jqplot.postDrawHooks.push(homePostDraw);
 
@@ -145,7 +148,7 @@ function plotGraphHome(arr, idxarr) {
   function replotHome(target) {
 
     var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
-      p_color = setBubbleColor(target.data('vari'), target.data('corr')),
+      p_color = setBubbleColor(target.data('corr')),
       addopt = [target.data('vari'), target.data('corr'), 30, p_color];
     var add_options = {
       series: [],
@@ -170,7 +173,7 @@ function createGraphPlots(idxarr, arr) {
 
     var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
-    plot_color = setBubbleColor(x, y);
+    plot_color = setBubbleColor(y);
     tmp_arr[i] = [ x, y, 8, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
   arr.push(tmp_arr);
@@ -294,24 +297,39 @@ function setInitialBubbleColor() {
   return {color: '#7f7f7f'};
 }
 
-var setBubbleColor = function(x, y) {
+var setBubbleColor =function(y) {
     var label;
-    var x = Number(x);
+    // var x = Number(x);
     var y = Number(y);
-    var YREFERENCE = 0.5
-    var XREFERENCE = 0.5
+    // var YREFERENCE1 = 0.3
+    // var YREFERENCE2 = 0.6
+    // var YREFERENCE3 = 1.0
+    // var XREFERENCE = 0.5
 
-    if (x >= XREFERENCE && y >= YREFERENCE) {
+    // if (x >= XREFERENCE && y >= YREFERENCE) {
+    //     label = {color: '#c00000'};
+    //     // console.log('color is red');
+    // }
+    // else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
+    //     label = {color: '#ffc000'};
+    //     // console.log('color is yellow');
+    // }
+    // else if (x <= XREFERENCE && y <= YREFERENCE) {
+    //     label = {color: '#0070c0'};
+    //     // console.log('color is blue');
+    // }
+
+    if (y > 0.6 && y <= 1.0) {
         label = {color: '#c00000'};
-        // console.log('color is red');
+        console.log('color is red');
     }
-    else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
+    else if (y > 0.3 && y <= 0.6) {
         label = {color: '#ffc000'};
-        // console.log('color is yellow');
+        console.log('color is yellow');
     }
-    else if (x <= XREFERENCE && y <= YREFERENCE) {
+    else if (y >= 0 && y <= 0.3) {
         label = {color: '#0070c0'};
-        // console.log('color is blue');
+        console.log('color is blue');
     }
     return label;
 }
