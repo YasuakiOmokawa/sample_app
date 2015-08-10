@@ -293,15 +293,15 @@ var setBubbleColor =function(y) {
     var label;
     var y = Number(y);
 
-    if (y > 0.7) {
+    if (y > 0.6) {
         label = {color: '#c00000'};
         console.log('color is red');
     }
-    else if (y >= 0.4 && y <= 0.7) {
+    else if (y > 0.3 && y <= 0.6) {
         label = {color: '#ffc000'};
         console.log('color is yellow');
     }
-    else if (y < 0.4) {
+    else if (y <= 0.3) {
         label = {color: '#0070c0'};
         console.log('color is blue');
     }
