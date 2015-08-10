@@ -68,7 +68,7 @@ class ContentsController < ApplicationController
     def get_ga_goal
       oauth2 = Ast::Ganalytics::Garbs::GoogleOauth2InstalledCustom.new(current_user.gaproject)
       gaservice = Ast::Ganalytics::Garbs::Session.new(Oauths.new(oauth2, current_user))
-      @ga_goals = Rails.cache.fetch("oauthed_user_id_#{current_user.id}", expires_in: 1.hour) do
+      @ga_goals = Rails.cache.fetch("oauthed_user_id_#{current_user.id}", expires_in: 30.minutes) do
         gaservice.get_goal       # アナリティクスに設定されているCV一覧
       end
       gon.ga_goals = @ga_goals.size
