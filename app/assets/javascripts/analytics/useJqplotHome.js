@@ -36,7 +36,6 @@ function plotGraphHome(arr, idxarr) {
         min: 0.0,
         max: 1.0,
         tickOptions: {
-          // showGridline: false,
         },
       },
       yaxis: {
@@ -64,14 +63,7 @@ function plotGraphHome(arr, idxarr) {
   // jqplot描画後に実行する操作（jqplot描画前に書くこと）
   resetPostDrawHooks();
   var homePostDraw = function homePostDraw(graph) {
-    // 目盛り線のみ残して目盛りの値は削除
-    // var selcts = [ $('.jqplot-xaxis-tick'), $('.jqplot-yaxis-tick') ];
-    // for (var i=0; i<selcts.length; i++) {
-    //   $(selcts[i][0]).text('');
-    //   $(selcts[i][1]).text('');
-    //   $(selcts[i][2]).text('');
-    // }
-    $('.jqplot-xaxis-tick').addClass('hide');
+   $('.jqplot-xaxis-tick').addClass('hide');
     $('.jqplot-yaxis-tick').addClass('hide');
   };
   $.jqplot.postDrawHooks.push(homePostDraw);
@@ -299,35 +291,17 @@ function setInitialBubbleColor() {
 
 var setBubbleColor =function(y) {
     var label;
-    // var x = Number(x);
     var y = Number(y);
-    // var YREFERENCE1 = 0.3
-    // var YREFERENCE2 = 0.6
-    // var YREFERENCE3 = 1.0
-    // var XREFERENCE = 0.5
 
-    // if (x >= XREFERENCE && y >= YREFERENCE) {
-    //     label = {color: '#c00000'};
-    //     // console.log('color is red');
-    // }
-    // else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
-    //     label = {color: '#ffc000'};
-    //     // console.log('color is yellow');
-    // }
-    // else if (x <= XREFERENCE && y <= YREFERENCE) {
-    //     label = {color: '#0070c0'};
-    //     // console.log('color is blue');
-    // }
-
-    if (y > 0.6 && y <= 1.0) {
+    if (y > 0.7) {
         label = {color: '#c00000'};
         console.log('color is red');
     }
-    else if (y > 0.3 && y <= 0.6) {
+    else if (y >= 0.4 && y <= 0.7) {
         label = {color: '#ffc000'};
         console.log('color is yellow');
     }
-    else if (y >= 0 && y <= 0.3) {
+    else if (y < 0.4) {
         label = {color: '#0070c0'};
         console.log('color is blue');
     }
