@@ -23,7 +23,6 @@ function plotGraphHome(arr, idxarr) {
     gridPadding: { top: 1, bottom: 1, left: 1, right: 1 },
     series: [],
     axesDefaults: {
-      numberTicks: 3,
       tickOptions: {
         fontSize: '10pt',
         fontFamily: 'ヒラギノ角ゴ Pro W3',
@@ -31,13 +30,16 @@ function plotGraphHome(arr, idxarr) {
       },
     },
     axes: {
-      // 見栄えの問題で、max は101, min は -1 で調整
       xaxis: {
         // label: '変動係数',
         min: 0.0,
         max: 1.0,
+        tickOptions: {
+          showGridline: false,
+        },
       },
       yaxis: {
+        numberTicks: 5,
         // label: '相関係数',
         min: 0.0,
         max: 1.0,
