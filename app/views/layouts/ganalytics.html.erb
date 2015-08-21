@@ -17,8 +17,10 @@
       <title><%= yield(:title) %></title>
       <% if yield(:title).match(/設定/) %>
         <%= stylesheet_link_tag "content", media: "all" %>
+      <% elsif yield(:title).match(/詳細/) %>
+        <%= stylesheet_link_tag "detail", media: "all" %>
       <% else %>
-        <%= stylesheet_link_tag "no_content", media: "all" %>
+        <%= stylesheet_link_tag "home", media: "all" %>
       <% end %>
     <% end %>
    </head>
