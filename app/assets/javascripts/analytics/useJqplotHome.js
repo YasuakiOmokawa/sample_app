@@ -125,15 +125,8 @@ function plotGraphHome(arr, idxarr) {
     // 詳細遷移のためのパスを取得
     var to_detail = path + "?" + query.getQuery() + "&" + jQuery.param(_datas);
     var detail_url = location.origin+to_detail;
-    // console.log("detail  is "+detail_url);
-    window.wiselinks.page.load(detail_url, "@data-role", 'partial');
-  });
-
-  // スピナーの起動
-  $rank_target.on('click', 'a', function() {
-    $('#loading').removeClass('hide');
-    $('#spinner').removeClass('hide');
-    $('#now-loading-dummy').removeClass('hide');
+    console.log("detail  is "+detail_url);
+    location.href = detail_url;
   });
 
   // ホームグラフをリプロットする

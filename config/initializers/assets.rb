@@ -1,7 +1,8 @@
 Rails.application.config.assets.precompile += %w[
   analytics.css
   content.css
-  no_content.css
+  home.css
+  detail.css
   opt.css
   login.css
   usejqplot.js
