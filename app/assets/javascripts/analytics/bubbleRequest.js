@@ -193,6 +193,9 @@ function startHomeAnlyz(category) {
     (function shapeBubbleParts() {
       var timerID = setInterval( function(){
         if (Object.keys(idxarr).length != 0) {
+
+          // var _shaped_idxarr = headIdxarr(sortIdxarr(idxarr), 15);
+
           $.extend(true, shaped_idxarr, headIdxarr(sortIdxarr(idxarr), 15));
           clearInterval(timerID);
           timerID = null;
