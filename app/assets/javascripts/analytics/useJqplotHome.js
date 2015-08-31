@@ -31,8 +31,8 @@ function plotGraphHome(arr, idxarr) {
     },
     axes: {
       xaxis: {
-        numberTicks: 3,
         // label: '変動係数',
+        numberTicks: 3,
         min: 0.0,
         max: 1.0,
         tickOptions: {
@@ -133,7 +133,7 @@ function plotGraphHome(arr, idxarr) {
   function replotHome(target) {
 
     var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
-      p_color = setBubbleColor(target.data('corr')),
+      p_color = setBubbleColor(target.data('vari'), target.data('corr')),
       addopt = [target.data('vari'), target.data('corr'), 30, p_color];
     var add_options = {
       series: [],
@@ -150,6 +150,7 @@ function plotGraphHome(arr, idxarr) {
   }
 }
 
+// 優先度順に選別したデータからグラフへ表示するデータを作成
 function createGraphPlots(idxarr, arr) {
 
   var plot_color = {}, tmp_arr = [];
@@ -158,7 +159,7 @@ function createGraphPlots(idxarr, arr) {
 
     var x = idxarr[i]['vari'];
     var y = idxarr[i]['corr'];
-    plot_color = setBubbleColor(y);
+    plot_color = setBubbleColor(x, y);
     tmp_arr[i] = [ x, y, 8, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
   arr.push(tmp_arr);
@@ -282,19 +283,22 @@ function setInitialBubbleColor() {
   return {color: '#7f7f7f'};
 }
 
-var setBubbleColor =function(y) {
+var setBubbleColor =function(x, y) {
     var label;
+    var x = Number(x);
     var y = Number(y);
+    var YREFERENCE = 0.5;
+    var XREFERENCE = 0.5;
 
-    if (y > 0.7) {
+    if (x >= XREFERENCE && y >= YREFERENCE) {
         label = {color: '#c00000'};
         console.log('color is red');
     }
-    else if (y >= 0.4 && y <= 0.7) {
+    else if ( (x >= XREFERENCE && y < YREFERENCE) || (x < XREFERENCE && y >= YREFERENCE) ) {
         label = {color: '#ffc000'};
         console.log('color is yellow');
     }
-    else if (y < 0.4) {
+    else if (x < XREFERENCE && y < YREFERENCE) {
         label = {color: '#0070c0'};
         console.log('color is blue');
     }

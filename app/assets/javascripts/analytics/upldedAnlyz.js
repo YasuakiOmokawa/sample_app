@@ -1,4 +1,48 @@
 /**
+* バブルチャートデータの操作クラス
+*/
+var BubbleData = new function() {
+  var self = function BubbleData(data) {
+    this._data = data;
+    this._obj = {
+      _xref: 0.5,
+      _yref: 0.5
+    };
+  };
+
+  self.prototype = {
+    constructor: self
+
+    ,extractFirstPlace: function extractFirstPlace() {
+        return this._data.filter(function(element) {
+          return (Number(element.corr) >= this._xref && Number(element.vari) >= this._yref);
+        }, this._obj);
+    }
+
+    ,extractSecondPlace: function extractSecondPlace() {
+        return this._data.filter(function(element) {
+          return (Number(element.corr) >= this._xref && Number(element.vari) < this._yref);
+        }, this._obj);
+    }
+
+    ,extractThirdPlace: function extractThirdPlace() {
+        return this._data.filter(function(element) {
+          return (Number(element.corr) < this._xref && Number(element.vari) >= this._yref);
+        }, this._obj);
+    }
+
+    ,extractFourthPlace: function extractFourthPlace() {
+        return this._data.filter(function(element) {
+          return (Number(element.corr) < this._xref && Number(element.vari) < this._yref);
+        }, this._obj);
+    }
+
+  };
+  return self;
+};
+
+
+/**
 * URL クエリパラメータ操作クラス
 */
 var Query = new function() {
