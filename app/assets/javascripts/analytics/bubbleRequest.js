@@ -194,9 +194,21 @@ function startHomeAnlyz(category) {
       var timerID = setInterval( function(){
         if (Object.keys(idxarr).length != 0) {
 
-          // var _shaped_idxarr = headIdxarr(sortIdxarr(idxarr), 15);
+          var RANKINGS = 15;
+          var tmp_ranking = [];
+          var bd = new BubbleData(idxarr);
+          var func_arr = [
+            bd.extractFirstPlace(),
+            bd.extractSecondPlace(),
+            bd.extractThirdPlace(),
+            bd.extractFourthPlace()
+          ];
 
-          $.extend(true, shaped_idxarr, headIdxarr(sortIdxarr(idxarr), 15));
+          for (var i=0; i < func_arr.length; i++) {
+            Array.prototype.push.apply(tmp_ranking, sortIdxarr(func_arr[i]) );
+          }
+          $.extend(true, shaped_idxarr, headIdxarr(tmp_ranking, RANKINGS));
+
           clearInterval(timerID);
           timerID = null;
         }

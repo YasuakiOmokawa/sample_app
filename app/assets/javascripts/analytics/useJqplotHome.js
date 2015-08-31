@@ -31,8 +31,8 @@ function plotGraphHome(arr, idxarr) {
     },
     axes: {
       xaxis: {
+        // label: '変動係数',
         numberTicks: 3,
-        // label: '相関係数',
         min: 0.0,
         max: 1.0,
         tickOptions: {
@@ -40,7 +40,7 @@ function plotGraphHome(arr, idxarr) {
       },
       yaxis: {
         numberTicks: 3,
-        // label: '変動係数',
+        // label: '相関係数',
         min: 0.0,
         max: 1.0,
       },
@@ -133,8 +133,8 @@ function plotGraphHome(arr, idxarr) {
   function replotHome(target) {
 
     var origin_arr = $.extend(true, {}, arr_for_replot), // 参照渡しだとバグる。
-      p_color = setBubbleColor(target.data('corr'), target.data('vari')),
-      addopt = [target.data('corr'), target.data('vari'), 30, p_color];
+      p_color = setBubbleColor(target.data('vari'), target.data('corr')),
+      addopt = [target.data('vari'), target.data('corr'), 30, p_color];
     var add_options = {
       series: [],
     };
@@ -157,8 +157,8 @@ function createGraphPlots(idxarr, arr) {
 
   for (i=0; i < idxarr.length; i++) {
 
-    var x = idxarr[i]['corr'];
-    var y = idxarr[i]['vari'];
+    var x = idxarr[i]['vari'];
+    var y = idxarr[i]['corr'];
     plot_color = setBubbleColor(x, y);
     tmp_arr[i] = [ x, y, 8, plot_color];       // グラフx軸, グラフy軸, バブルの大きさ, バブルの色　で指定
   }
@@ -294,11 +294,11 @@ var setBubbleColor =function(x, y) {
         label = {color: '#c00000'};
         console.log('color is red');
     }
-    else if ( (x >= XREFERENCE && y <= YREFERENCE) || (x <= XREFERENCE && y >= YREFERENCE) ) {
+    else if ( (x >= XREFERENCE && y < YREFERENCE) || (x < XREFERENCE && y >= YREFERENCE) ) {
         label = {color: '#ffc000'};
         console.log('color is yellow');
     }
-    else if (x <= XREFERENCE && y <= YREFERENCE) {
+    else if (x < XREFERENCE && y < YREFERENCE) {
         label = {color: '#0070c0'};
         console.log('color is blue');
     }
@@ -493,7 +493,7 @@ function showTooltip(contents) {
   var _datas = setInfoForDetailUI(datas);
 
   var position = (function() {
-    if (datas.corr >= 0.5) {
+    if (datas.vari >= 0.5) {
       return 'hvr_l';
     } else {
       return 'hvr_r';
