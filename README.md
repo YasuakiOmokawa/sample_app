@@ -12,6 +12,10 @@ id: senk_sample@senk-inc.co.jp
 
 pass: senksample
 
+https://ast-app.herokuapp.com/
+
+※現在、Googleサービス連携不具合のためログインまでしか動作せず。
+
 ライセンス
 ----------
 Copyright &copy; 2015 senk Inc. All Rights Reserved.
