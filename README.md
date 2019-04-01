@@ -8,11 +8,10 @@ Google Analytics の情報を分析し、優先的に対応すべき条件を抽
      
 デモアカウント
 --------
-id: senk_sample@senk-inc.co.jp
-
-pass: senksample
-
 https://ast-app.herokuapp.com/
+
+id   : senk_sample@senk-inc.co.jp
+pass : senksample
 
 ※現在、Googleサービス連携不具合のためログインまでしか動作せず。
 
